@@ -31,7 +31,11 @@ analytics. Progress goes in `localStorage` (wrap every access in try/catch). Ext
 only to Google Fonts. Exception, at the family's request: `get-ready/` calls free, keyless services,
 and only after the user asks for them: weather by ZIP code (zippopotam.us for the ZIP, the National
 Weather Service's latest station observation for current conditions, Open-Meteo for high/low/rain),
-place search (Photon, OpenStreetMap) and drive time (OSRM). The page says so next to the ZIP box. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
+place search (Photon, OpenStreetMap) and drive time (OSRM). The page says so next to the ZIP box. Second exception, at the family's request: `renzi/` (Character Book) holds a new day's story every morning
+(`renzi/content/`: character lists, titles and story pictures only, never a parent's marks or notes) and, on a
+device a parent has set up once with a private link, posts which characters James wrote or tapped to the family's
+own Google Sheet (an Apps Script web app). The URL and token are never in this repository; they live in that
+device's `localStorage`. See `renzi/SETUP.md`. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
 Audio API, started only from a button press.
 
 ## Adding or updating a game
@@ -74,6 +78,14 @@ Audio API, started only from a button press.
 - A game folder may have its own `CLAUDE.md`, `PLAN.md`, `DECISIONS.md` and `KNOWN-BUGS.md`
   (Blow Up does). Read them before working on that game. They, not chat history or memory, are the
   handoff between sessions.
+
+## Character Book (`renzi/`): daily content
+
+- The 7:20am Chinese-story routine adds `renzi/content/dayNN/` (story.json plus p1–p6.jpg), prepends the day to
+  `content/days.json`, refreshes `content/known.json`, and bumps `v` when `strokes.json` changes. It only commits
+  files under `renzi/content/` (and `strokes.json` when new characters need stroke data). App changes follow the
+  normal version rules above.
+- Everything under `renzi/content/` is public. No names beyond "James", no marks, no notes.
 
 ## Follow and support links
 

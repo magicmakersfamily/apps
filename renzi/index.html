@@ -44,10 +44,11 @@ a { color: inherit; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
 /* the whole screen is the app: header, one view, tab bar */
-.app { height: 100vh; height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+.app { height: 100vh; height: -webkit-fill-available; height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
   padding-top: env(safe-area-inset-top, 0px); }
+.app > main { min-height: 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr); overflow: hidden; }
 .top { display: flex; align-items: center; gap: 10px; padding: 8px 14px; min-height: 56px; }
-.top .home { text-decoration: none; font-size: 14px; color: var(--ink-2); padding: 10px 8px; border-radius: 10px; white-space: nowrap; }
+.top .home { text-decoration: none; font-size: 14px; color: var(--ink-2); padding: 0 8px; min-height: 44px; display: inline-flex; align-items: center; border-radius: 10px; white-space: nowrap; }
 .top h1 { margin: 0; font-family: var(--han); font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: .04em; }
 .top .day { margin-left: auto; font-size: 15px; color: var(--ink-2); text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top .day b { font-family: var(--han); font-size: 20px; color: var(--ink); }
@@ -57,35 +58,35 @@ a { color: inherit; }
 .sync.on { background: var(--yes); }
 
 .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--card); }
-.tabs button { border: 2px solid var(--line); background: var(--paper); border-radius: 16px; min-height: 60px; display: grid; place-items: center; align-content: center; gap: 0; }
+.tabs button { min-width: 0; border: 2px solid var(--line); background: var(--paper); border-radius: 16px; min-height: 60px; display: grid; place-items: center; align-content: center; gap: 0; }
 .tabs b { font-family: var(--han); font-size: 24px; line-height: 1.1; }
-.tabs span { font-size: 12px; color: var(--ink-2); letter-spacing: .04em; }
+.tabs span { font-size: 12px; white-space: nowrap; color: var(--ink-2); letter-spacing: .04em; }
 .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .tabs button[aria-selected="true"] span { color: var(--accent-ink); opacity: .85; }
 
-.view { min-height: 0; height: 100%; }
+.view { min-height: 0; min-width: 0; height: 100%; }
 
 /* ---------- story ---------- */
-.story { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: 0 14px 10px; }
+.story { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: 0 14px 12px; overflow-y: auto; }
 .days { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
 .days::-webkit-scrollbar { display: none; }
-.days button { flex: none; border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 14px; font-size: 14px; }
+.days button { flex: none; min-height: 44px; border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 0 16px; font-size: 14px; }
 .days button b { font-family: var(--han); font-size: 16px; margin-left: 4px; }
 .days button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.book { position: relative; min-height: 0; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); place-items: center; overflow: hidden; }
+.book { min-height: 0; min-width: 0; display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; grid-template-rows: minmax(0, 1fr); align-items: center; gap: 8px; }
+.book .pg { min-height: 0; min-width: 0; height: 100%; display: grid; place-items: center; overflow: hidden; }
 .book img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 12px; background: #fff;
   box-shadow: 0 1px 2px rgba(20,32,42,.12), 0 8px 24px rgba(20,32,42,.10); user-select: none; -webkit-user-drag: none; touch-action: pan-y; }
-.turn { position: absolute; top: 50%; translate: 0 -50%; width: 64px; height: 88px; border-radius: 18px; border: 0; background: rgba(20,32,42,.55); color: #fff; display: grid; place-items: center; }
+.turn { width: 56px; height: 96px; border-radius: 18px; border: 0; background: var(--ink); color: var(--paper); display: grid; place-items: center; padding: 0; }
 .turn svg { width: 30px; height: 30px; }
-.turn.prev { left: 6px; } .turn.next { right: 6px; }
 .turn:disabled { opacity: .25; }
-.dots { display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 28px; }
-.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); display: block; }
+.dots { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; min-height: 44px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); display: block; flex: none; }
 .dots i.on { background: var(--accent); transform: scale(1.25); }
-.dots .go { margin-left: 12px; border: 0; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 8px 18px; font-weight: 700; font-family: var(--han); font-size: 18px; }
+.dots .go { margin-left: 12px; border: 0; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 0 20px; min-height: 48px; font-weight: 700; font-family: var(--han); font-size: 18px; }
 
 /* ---------- write ---------- */
-.write { display: grid; gap: 14px; padding: 4px 14px 10px; height: 100%; }
+.write { display: grid; gap: 14px; padding: 4px 14px 24px; height: 100%; }
 .stage { position: relative; aspect-ratio: 1 / 1; background: var(--pad); border: 3px solid var(--grid); border-radius: 8px; overflow: hidden;
   touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; justify-self: center; }
 .stage .g { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -111,33 +112,41 @@ a { color: inherit; }
 .now .meta b { color: var(--ink); }
 .order { display: flex; align-items: center; gap: 10px; }
 .order > span { font-family: var(--han); font-size: 18px; font-weight: 700; flex: none; }
-.strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: none; flex: 1; min-width: 0; }
-.strip::-webkit-scrollbar { display: none; }
-.th { flex: none; width: 66px; display: grid; gap: 2px; justify-items: center; }
+.goal { margin: 0; font-size: 14px; color: var(--ink-2); }
+.strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: thin; scrollbar-color: var(--ink-3) transparent; scroll-snap-type: x proximity; flex: 1; min-width: 0; -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); padding-right: 28px; }
+.strip.end { -webkit-mask-image: none; mask-image: none; }
+.th { flex: none; width: 66px; display: grid; gap: 2px; justify-items: center; scroll-snap-align: center; }
 .th svg { width: 66px; height: 66px; background: var(--pad); border: 2px solid var(--line); border-radius: 8px; display: block; }
 .th small { font-size: 13px; color: var(--ink-3); font-weight: 700; }
 .th.done svg { border-color: var(--yes); }
 .th.done small { color: var(--yes); }
+.th.done small::before { content: '✓ '; }
 .th.cur svg { border-color: var(--accent); border-width: 3px; }
 .th.cur small { color: var(--accent); }
 .ctl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .seg { display: inline-flex; border: 2px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); }
-.seg button { border: 0; background: transparent; padding: 0 16px; min-height: 48px; font-family: var(--han); font-size: 20px; font-weight: 700; }
+.seg button { border: 0; background: transparent; padding: 0 16px; min-height: 52px; font-family: var(--han); font-size: 20px; font-weight: 700; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .btn { min-width: 52px; min-height: 52px; padding: 0 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--card); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font-family: var(--han); font-size: 20px; font-weight: 700; }
 .btn svg { width: 22px; height: 22px; }
 .btn.on { border-color: var(--accent); color: var(--accent); }
 .btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); margin-left: auto; padding: 0 22px; }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.btn.main[aria-pressed] { color: var(--accent-ink); }
 .btn.main.nudge { animation: nudge 1.2s ease-in-out 3; }
 @keyframes nudge { 50% { transform: translateX(6px); } }
 .msg { margin: 0; min-height: 22px; font-size: 15px; color: var(--ink-2); }
-.pick { overflow-y: auto; flex: 1; min-height: 0; display: grid; gap: 10px; align-content: start; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.pick { overflow-y: auto; flex: 1; min-height: 0; display: grid; gap: 10px; align-content: start; padding-bottom: 16px; -webkit-overflow-scrolling: touch; }
 .pick h3 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: var(--ink-2); letter-spacing: .04em; }
 .pick h3 span { font-family: var(--han); font-size: 18px; color: var(--ink); margin-right: 6px; }
 .chars { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; }
 .c { position: relative; aspect-ratio: 1; border-radius: 12px; border: 2px solid var(--line); background: var(--card); font-family: var(--han); font-size: 32px; padding: 0; display: grid; place-items: center; }
+.c { min-height: 56px; }
 .c .n { position: absolute; right: 5px; bottom: 2px; font: 700 12px var(--body); color: var(--gold); }
+.c.did { border-color: var(--yes); background: var(--yes-bg); }
+.c.did .n { color: var(--yes); }
 .c[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
 
 @media (min-aspect-ratio: 11/10) {
@@ -155,36 +164,56 @@ a { color: inherit; }
   .pick { overflow: visible; flex: none; }
   .side { padding-top: 6px; }
   .stage { width: 100%; }
+  .seg { flex: 1 1 100%; } .seg button { flex: 1; }
+  .ctl .btn { flex: 1 1 0; }
+  .ctl .btn.main { flex: 2 1 0; margin-left: 0; }
+  .th, .th svg { width: 56px; } .th svg { height: 56px; }
+}
+/* phones in portrait: arrows go in a row under the picture, and the whole story is centered as one group */
+@media (max-width: 600px) and (max-aspect-ratio: 1/1) {
+  .story { grid-template-rows: auto auto auto; align-content: center; gap: 10px; }
+  .book { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 10px; }
+  .book .pg { grid-column: 1 / -1; height: auto; }
+  .book img { width: 100%; }
+  .turn { width: 100%; max-width: 160px; height: 56px; }
+  .turn.prev { grid-column: 1; grid-row: 2; justify-self: start; } .turn.next { grid-column: 2; grid-row: 2; justify-self: end; }
 }
 @media (max-height: 560px) { .top { min-height: 46px; padding-block: 4px; } .tabs button { min-height: 48px; } .tabs span { display: none; } }
 
 /* ---------- words ---------- */
-.words { overflow-y: auto; padding: 4px 14px 14px; display: grid; gap: 16px; align-content: start; -webkit-overflow-scrolling: touch; }
-.words .lead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.words { overflow-y: auto; padding: 4px 14px 28px; display: grid; gap: 16px; align-content: start; -webkit-overflow-scrolling: touch; }
+.words .lead { display: flex; align-items: center; gap: 4px 12px; flex-wrap: wrap; }
 .words .lead p { margin: 0; font-size: 20px; font-weight: 700; font-family: var(--display); }
 .words .lead .count { margin-left: auto; font-size: 20px; color: var(--gold); font-weight: 700; }
+.words .goal { flex: 1 1 100%; }
 .wg h3 { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); letter-spacing: .04em; }
 .wg h3 span { font-family: var(--han); font-size: 20px; color: var(--ink); margin-right: 6px; }
 .wgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
-.w { position: relative; aspect-ratio: 1; border-radius: 18px; border: 3px solid var(--line); background: var(--card); font-family: var(--han); font-size: 52px; padding: 0 0 36px; display: grid; place-items: center; }
-.w[aria-pressed="true"] { border-color: var(--yes); background: var(--yes-bg); }
-.w .star { position: absolute; top: 6px; right: 10px; font-size: 24px; color: var(--gold); opacity: 0; transform: scale(.4); transition: .18s; }
+.wc { position: relative; display: grid; grid-template-rows: 1fr auto; border-radius: 18px; border: 3px solid var(--line); background: var(--card); overflow: hidden; }
+.wc:has(.w[aria-pressed="true"]) { border-color: var(--yes); background: var(--yes-bg); }
+.w { position: relative; border: 0; background: transparent; font-family: var(--han); font-size: 52px; min-height: 88px; padding: 6px 0 0; display: grid; place-items: center; border-radius: 0; }
+.w .star { position: absolute; top: 4px; right: 8px; font-size: 24px; color: var(--gold); opacity: 0; transform: scale(.4); transition: .18s; }
 .w[aria-pressed="true"] .star { opacity: 1; transform: none; }
-.w .wr { position: absolute; left: 50%; translate: -50% 0; bottom: 6px; width: 40px; height: 32px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); display: grid; place-items: center; color: var(--ink-2); }
-.w .wr svg { width: 18px; height: 18px; }
+.wr { border: 0; border-top: 1.5px solid var(--line); background: transparent; min-height: 44px; display: grid; place-items: center; color: var(--ink-2); padding: 0; }
+.wr svg { width: 20px; height: 20px; }
+.wr:focus-visible, .w:focus-visible { outline-offset: -4px; }
 
 /* ---------- grown-ups panel ---------- */
-.panel { position: fixed; inset: 0; background: rgba(14,21,27,.55); display: grid; place-items: center; padding: 16px; z-index: 10; }
-.sheet { background: var(--card); color: var(--ink); border-radius: 20px; max-width: 520px; width: 100%; max-height: 88dvh; overflow-y: auto; padding: 20px; display: grid; gap: 12px; }
+.panel { position: fixed; inset: 0; background: rgba(14,21,27,.55); display: grid; place-items: center; padding: max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px)); z-index: 10; }
+.sheet { background: var(--card); color: var(--ink); border-radius: 20px; max-width: 520px; width: 100%; max-height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.sheet .body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 20px 8px; display: grid; gap: 12px; min-height: 0; }
+.sheet .foot { flex: none; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--card); }
 .sheet h2 { margin: 0; font-family: var(--display); font-size: 22px; }
 .sheet p { margin: 0; color: var(--ink-2); font-size: 15px; }
-.sheet .row { display: flex; gap: 8px; flex-wrap: wrap; }
-.sheet .pbtn { min-height: 46px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--line); background: var(--paper); font-weight: 700; }
+.sheet p b { color: var(--ink); }
+.sheet .pbtn { min-height: 48px; min-width: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--line); background: var(--paper); font-weight: 700; }
 .sheet .pbtn.danger { border-color: #B3402C; color: #B3402C; }
 .sheet .pbtn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sheet .foot #pClose { margin-left: auto; }
+.sheet a { display: inline-block; padding: 10px 2px; }
 .sheet small { color: var(--ink-3); font-size: 13px; }
 .sheet .stat { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); }
-.toast { position: fixed; left: 50%; bottom: 96px; translate: -50% 0; background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 700; z-index: 12; max-width: 90vw; text-align: center; }
+.toast { position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); translate: -50% 0; background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 700; z-index: 12; max-width: 90vw; text-align: center; }
 .empty { color: var(--ink-2); padding: 24px; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .ring, .btn.main.nudge, .cheer.go b, .cheer.go .st { animation: none; } .cheer.go b { opacity: 1; } .cheer .st { display: none; } }
 </style>
@@ -196,21 +225,21 @@ a { color: inherit; }
     <h1>認字簿</h1>
     <span class="day" id="dayLabel"></span>
     <span class="sync" id="syncDot" title="" hidden></span>
-    <button class="iconbtn" id="infoBtn" type="button" aria-label="For grown-ups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
+    <button class="iconbtn" id="infoBtn" type="button" aria-label="For grown-ups" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
   </header>
 
   <main>
-    <section class="view story" id="vStory" aria-label="Story">
+    <section class="view story" id="vStory" role="tabpanel" aria-labelledby="tStory">
       <nav class="days" id="days" aria-label="Stories"></nav>
       <div class="book" id="book">
-        <img id="page" alt="" draggable="false">
-        <button class="turn prev" id="prev" type="button" aria-label="Back one page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <button class="turn next" id="next" type="button" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button class="turn prev" id="prev" type="button" aria-label="Previous story page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="pg"><img id="page" alt="" draggable="false"></div>
+        <button class="turn next" id="next" type="button" aria-label="Next story page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
       <div class="dots" id="dots" aria-live="polite"></div>
     </section>
 
-    <section class="view write" id="vWrite" aria-label="Write" hidden>
+    <section class="view write" id="vWrite" role="tabpanel" aria-labelledby="tWrite" hidden>
       <div class="stage" id="stage">
         <svg class="g" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="0" x2="50" y2="100"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg>
         <div id="hw"></div>
@@ -218,16 +247,17 @@ a { color: inherit; }
         <div class="cheer" id="cheer" aria-hidden="true"><b>好！</b></div>
       </div>
       <div class="side">
-        <div class="now"><span class="big" id="nowCh">字</span><span class="meta" id="nowMeta"></span></div>
-        <div class="order"><span>筆順</span><div class="strip" id="strip" aria-label="Stroke order"></div></div>
+        <div class="now"><span class="big" id="nowCh" lang="zh-TW">字</span><span class="meta" id="nowMeta" aria-live="polite"></span></div>
+        <p class="goal">Writing practice: the stroke order, then the whole character from memory. It is fine to recognize a character before you can write it.</p>
+        <div class="order"><span lang="zh-TW">筆順</span><div class="strip" id="strip" role="group" aria-label="Stroke order, scroll sideways to see every stroke" tabindex="0"></div></div>
         <div class="ctl">
           <div class="seg" role="group" aria-label="How to write">
-            <button type="button" id="mTrace" aria-pressed="true">描</button>
-            <button type="button" id="mOwn" aria-pressed="false">自己寫</button>
+            <button type="button" id="mTrace" aria-pressed="true" aria-label="Trace mode: follow the guide"><span lang="zh-TW">描</span></button>
+            <button type="button" id="mOwn" aria-pressed="false" aria-label="Freehand mode: write from memory"><span lang="zh-TW">自己寫</span></button>
           </div>
-          <button class="btn" id="bGuide" type="button" aria-pressed="true" aria-label="Show stroke numbers and arrows">1→</button>
-          <button class="btn" id="bWatch" type="button" aria-label="Watch the strokes"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4 L16 10 L6 16 Z" fill="currentColor"/></svg>看</button>
-          <button class="btn" id="bAgain" type="button" aria-label="Write it again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 8 A6 6 0 1 0 16 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16.5 3.5 L16.2 8.6 L11.2 7.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="btn" id="bGuide" type="button" aria-pressed="true" aria-label="Show stroke guide: numbers and arrows">1→</button>
+          <button class="btn" id="bWatch" type="button" aria-label="Watch strokes"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4 L16 10 L6 16 Z" fill="currentColor"/></svg><span lang="zh-TW">看</span></button>
+          <button class="btn" id="bAgain" type="button" aria-label="Write again"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 8 A6 6 0 1 0 16 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M16.5 3.5 L16.2 8.6 L11.2 7.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <button class="btn main" id="bNext" type="button" aria-label="Next character"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10 H15 M10.5 5 L15.5 10 L10.5 15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
         <p class="msg" id="msg" aria-live="polite">Loading…</p>
@@ -235,32 +265,34 @@ a { color: inherit; }
       </div>
     </section>
 
-    <section class="view words" id="vWords" aria-label="Words I know" hidden></section>
+    <section class="view words" id="vWords" role="tabpanel" aria-labelledby="tWords" hidden></section>
   </main>
 
-  <nav class="tabs" role="tablist" aria-label="Pages">
-    <button type="button" role="tab" id="tStory" aria-selected="true"><b>故事</b><span>Story</span></button>
-    <button type="button" role="tab" id="tWrite" aria-selected="false"><b>寫字</b><span>Write</span></button>
-    <button type="button" role="tab" id="tWords" aria-selected="false"><b>認字</b><span>Words I know</span></button>
+  <nav class="tabs" role="tablist" aria-label="Pages" id="tabs">
+    <button type="button" role="tab" id="tStory" aria-selected="true" aria-controls="vStory" aria-label="Story"><b lang="zh-TW">故事</b><span>Story</span></button>
+    <button type="button" role="tab" id="tWrite" aria-selected="false" aria-controls="vWrite" aria-label="Write characters"><b lang="zh-TW">寫字</b><span>Write</span></button>
+    <button type="button" role="tab" id="tWords" aria-selected="false" aria-controls="vWords" aria-label="Characters I recognize"><b lang="zh-TW">認字</b><span>Recognize</span></button>
   </nav>
 </div>
 
 <div class="panel" id="panel" hidden>
-  <div class="sheet" role="dialog" aria-labelledby="pTitle">
-    <h2 id="pTitle">For grown-ups</h2>
-    <p>A new story and its characters arrive here each morning. James reads the story, writes the characters with the stroke order shown, and taps the words he knows.</p>
-    <div class="stat"><span class="sync" id="pDot"></span><span id="pStatus">This device keeps everything to itself.</span></div>
-    <p id="pDetail"></p>
-    <div class="row">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <div class="body">
+      <h2 id="pTitle">For grown-ups</h2>
+      <p>A new story and its characters arrive here each morning. There are two separate kinds of practice. <b>認字 Recognize</b> is for reading: tapping a character means “I know this one when I see it.” It does not mean James can say it, explain it or write it. <b>寫字 Write</b> is for making the character: the stroke order, then writing it from memory. Recognizing a character before writing it is the normal order.</p>
+      <div class="stat"><span class="sync" id="pDot"></span><span id="pStatus">Nothing leaves this device.</span></div>
+      <p id="pDetail"></p>
+      <p><b>What leaves this device.</b> By default, nothing. Stories are only downloaded, and your taps and writing stay in this browser. If a parent has set this device up with a private link, it also sends the family’s own private log just these events: which characters were tapped as recognized, which were written, how many mistakes, and which story pages were finished. It sends no other browsing, personal or device information.</p>
+      <small>To set up a device once, use the setup link from your family log (see renzi/SETUP.md in the shelf repository). Until then nothing is sent.</small>
+      <p><b>Version 1.1</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The Game Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
+      <p>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+      <p>Stroke order data: Hanzi Writer (MIT) with Make Me a Hanzi (Arphic Public License). Know someone who might like this? <button class="pbtn" id="pTell" type="button">Tell a friend</button></p>
+    </div>
+    <div class="foot">
       <button class="pbtn primary" id="pSend" type="button" hidden>Send now</button>
       <button class="pbtn danger" id="pForget" type="button" hidden>Hold to stop sending from this device</button>
       <button class="pbtn" id="pClose" type="button">Close</button>
     </div>
-    <small>Set up a device once with the setup link from your family log (see renzi/SETUP.md in the shelf repository). Until then nothing leaves this page.</small>
-    <p><b>Version 1.0</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The Game Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
-    <p>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
-    <p>These games don’t collect any information. Saved progress stays in your own browser. The one exception: on a device a parent has set up, this page sends which characters were written or tapped to the family’s own private log, and nowhere else.</p>
-    <p>Stroke order data: Hanzi Writer (MIT) with Make Me a Hanzi (Arphic Public License). Know someone who might like this? <button class="pbtn" id="pTell" type="button" style="min-height:36px">Tell a friend</button></p>
   </div>
 </div>
 
@@ -392,7 +424,7 @@ a { color: inherit; }
   function showTab(t) {
     S.tab = t;
     [['story', 'vStory', 'tStory'], ['write', 'vWrite', 'tWrite'], ['words', 'vWords', 'tWords']].forEach(([k, v, b]) => {
-      $(v).hidden = k !== t; $(b).setAttribute('aria-selected', String(k === t));
+      $(v).hidden = k !== t; $(b).setAttribute('aria-selected', String(k === t)); $(b).tabIndex = k === t ? 0 : -1;
     });
     LS.set('renzi.tab', t);
     if (t === 'write') startWrite();
@@ -400,6 +432,11 @@ a { color: inherit; }
   $('tStory').addEventListener('click', () => showTab('story'));
   $('tWrite').addEventListener('click', () => showTab('write'));
   $('tWords').addEventListener('click', () => showTab('words'));
+  $('tabs').addEventListener('keydown', (e) => {
+    const ids = ['tStory', 'tWrite', 'tWords'], i = ids.indexOf(document.activeElement && document.activeElement.id);
+    if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+    e.preventDefault(); const n = ids[(i + (e.key === 'ArrowRight' ? 1 : 2)) % 3]; $(n).focus(); $(n).click();
+  });
 
   /* ================= words I know ================= */
   const knowKey = () => 'renzi.know.' + (S.content ? S.content.day : 0);
@@ -407,17 +444,20 @@ a { color: inherit; }
     const host = $('vWords'); const c = S.content; if (!c) { host.innerHTML = '<p class="empty">No story yet.</p>'; return; }
     const know = LS.get(knowKey(), {});
     const n = Object.values(know).filter(Boolean).length;
-    let h = '<div class="lead"><p>Tap the words you know!</p><span class="count" id="kc">' + (n ? '★ ' + n : '') + '</span></div>';
+    let h = '<div class="lead"><p>Tap the characters you recognize!</p><span class="count" id="kc" role="status" aria-label="Characters recognized today">' + (n ? '★ ' + n : '') + '</span>' +
+      '<p class="goal">This page is for reading: you see it and know it. Practice making it on the 寫字 page.</p></div>';
     c.groups.forEach((g) => {
       if (!g.chars.length) return;
-      h += '<div class="wg"><h3><span>' + esc(g.zh) + '</span></h3><div class="wgrid">' + g.chars.map((ch) =>
-        '<button class="w" type="button" data-c="' + esc(ch) + '" aria-pressed="' + (know[ch] ? 'true' : 'false') + '" aria-label="' + esc(ch) + '">' +
-        esc(ch) + '<span class="star">★</span><span class="wr" data-w="' + esc(ch) + '" role="button" aria-label="Write ' + esc(ch) + '"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l1-4 9-9 3 3-9 9z"/></svg></span></button>').join('') + '</div></div>';
+      h += '<div class="wg"><h3><span lang="zh-TW">' + esc(g.zh) + '</span></h3><div class="wgrid">' + g.chars.map((ch) => {
+        const on = !!know[ch];
+        return '<div class="wc"><button class="w" type="button" lang="zh-TW" data-c="' + esc(ch) + '" aria-pressed="' + on + '" aria-label="' + esc(ch) + ': I recognize this character">' +
+          esc(ch) + '<span class="star" aria-hidden="true">★</span></button>' +
+          '<button class="wr" type="button" data-w="' + esc(ch) + '" aria-label="Practice writing ' + esc(ch) + '"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l1-4 9-9 3 3-9 9z"/></svg></button></div>';
+      }).join('') + '</div></div>';
     });
     host.innerHTML = h;
-    host.querySelectorAll('.w').forEach((b) => b.addEventListener('click', (e) => {
-      const wr = e.target.closest('.wr');
-      if (wr) { e.stopPropagation(); S.ch = wr.dataset.w; showTab('write'); return; }
+    host.querySelectorAll('.wr').forEach((b) => b.addEventListener('click', () => { S.ch = b.dataset.w; showTab('write'); }));
+    host.querySelectorAll('.w').forEach((b) => b.addEventListener('click', () => {
       const ch = b.dataset.c, k = LS.get(knowKey(), {}); k[ch] = k[ch] ? 0 : 1; LS.set(knowKey(), k);
       b.setAttribute('aria-pressed', String(!!k[ch]));
       const cnt = Object.values(k).filter(Boolean).length; $('kc').textContent = cnt ? '★ ' + cnt : '';
@@ -445,8 +485,8 @@ a { color: inherit; }
       d.innerHTML = '<h3><span>' + esc(g.zh) + '</span></h3><div class="chars"></div>';
       const grid = d.querySelector('.chars');
       g.chars.forEach((ch) => {
-        const b = document.createElement('button'); b.type = 'button'; b.className = 'c'; b.dataset.c = ch; b.setAttribute('aria-label', 'Write ' + ch);
-        b.innerHTML = esc(ch) + '<span class="n"></span>'; b.addEventListener('click', () => makeChar(ch)); grid.appendChild(b);
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'c'; b.dataset.c = ch; b.lang = 'zh-TW'; b.setAttribute('aria-label', 'Write ' + ch);
+        b.innerHTML = esc(ch) + '<span class="n" aria-hidden="true"></span>'; b.addEventListener('click', () => makeChar(ch)); grid.appendChild(b);
       });
       host.appendChild(d);
     });
@@ -454,7 +494,11 @@ a { color: inherit; }
   }
   function paintCounts() {
     const c = counts();
-    document.querySelectorAll('#pick .c').forEach((b) => { const n = c[b.dataset.c] || 0; b.querySelector('.n').textContent = n ? '★' + n : ''; b.setAttribute('aria-current', String(b.dataset.c === S.ch)); });
+    document.querySelectorAll('#pick .c').forEach((b) => {
+      const n = c[b.dataset.c] || 0; b.querySelector('.n').textContent = n ? '✓' + n : ''; b.classList.toggle('did', n > 0);
+      b.setAttribute('aria-label', 'Write ' + b.dataset.c + (n ? ', written ' + n + (n > 1 ? ' times' : ' time') + ' today' : ''));
+      if (b.dataset.c === S.ch) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    });
   }
   function startWrite() {
     if (!S.strokes) return;
@@ -497,12 +541,15 @@ a { color: inherit; }
         const fill = j < k ? css('--ink') : j === k ? css('--accent') : css('--outline'), op = j > k ? .5 : 1;
         p += '<path d="' + d.strokes[j] + '" fill="' + fill + '" opacity="' + op + '"/>';
       }
-      const t = document.createElement('div'); t.className = 'th' + (S.complete || k < S.done ? ' done' : k === S.done ? ' cur' : '');
+      const t = document.createElement('div'); t.className = 'th' + (S.complete || k < S.done ? ' done' : k === S.done ? ' cur' : ''); t.setAttribute('role', 'img'); t.setAttribute('aria-label', 'Stroke ' + (k + 1) + (S.complete || k < S.done ? ', done' : k === S.done ? ', next' : ''));
       t.innerHTML = '<svg viewBox="0 0 1024 1024" aria-hidden="true"><g transform="translate(0,900) scale(1,-1)">' + p + '</g></svg><small>' + (k + 1) + '</small>';
       host.appendChild(t);
     }
-    const cur = host.querySelector('.cur'); if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    const cur = host.querySelector('.cur'); if (cur) { const hr = host.getBoundingClientRect(), cr = cur.getBoundingClientRect(); host.scrollTo({ left: Math.max(0, host.scrollLeft + cr.left - hr.left - (hr.width - cr.width) / 2), behavior: 'smooth' }); }
+    fade();
   }
+  function fade() { const h = $('strip'); h.classList.toggle('end', h.scrollWidth - h.clientWidth - h.scrollLeft < 8); }
+  $('strip').addEventListener('scroll', fade, { passive: true });
   function cheer() {
     const box = $('cheer'); box.querySelectorAll('.st').forEach((s) => s.remove());
     for (let i = 0; i < 8; i++) {
@@ -577,17 +624,19 @@ a { color: inherit; }
   function openPanel() {
     const c = cfg(), q = queue.length, last = LS.get('renzi.lastSent', null);
     $('pDot').classList.toggle('on', !!c);
-    $('pStatus').textContent = c ? 'This device sends James’s practice to the family log.' : 'This device keeps everything to itself.';
+    $('pStatus').textContent = c ? 'Set up: sends learning events to the family’s private log.' : 'Nothing leaves this device.';
     $('pDetail').textContent = c ? (q ? q + ' item' + (q > 1 ? 's' : '') + ' waiting to send. ' : 'Nothing waiting. ') + (last ? 'Last sent ' + new Date(last).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '.' : 'Nothing sent yet.') : '';
-    $('pSend').hidden = !c; $('pForget').hidden = !c; $('panel').hidden = false;
+    $('pSend').hidden = !c; $('pForget').hidden = !c; $('panel').hidden = false; $('pClose').focus();
   }
+  function closePanel() { $('panel').hidden = true; $('infoBtn').focus(); }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('panel').hidden) closePanel(); });
   $('infoBtn').addEventListener('click', openPanel);
-  $('pClose').addEventListener('click', () => { $('panel').hidden = true; });
-  $('panel').addEventListener('click', (e) => { if (e.target === $('panel')) $('panel').hidden = true; });
+  $('pClose').addEventListener('click', closePanel);
+  $('panel').addEventListener('click', (e) => { if (e.target === $('panel')) closePanel(); });
   $('pSend').addEventListener('click', () => { flush(); toast('Sending…'); setTimeout(openPanel, 1500); });
   (function hold() {
     const b = $('pForget'); let t = null;
-    const start = () => { b.textContent = 'Keep holding…'; t = setTimeout(() => { LS.del('renzi.cfg'); LS.del('renzi.queue'); queue = []; paintSync(); $('panel').hidden = true; toast('This device no longer sends anything.'); }, 1500); };
+    const start = () => { b.textContent = 'Keep holding…'; t = setTimeout(() => { LS.del('renzi.cfg'); LS.del('renzi.queue'); queue = []; paintSync(); closePanel(); toast('This device no longer sends anything.'); }, 1500); };
     const stop = () => { clearTimeout(t); b.textContent = 'Hold to stop sending from this device'; };
     b.addEventListener('pointerdown', start); ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => b.addEventListener(ev, stop));
   })();

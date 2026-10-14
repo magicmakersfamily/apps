@@ -42,7 +42,7 @@ toothbrush/         Brush Buddy (beta; called Toothbrush Coach in 2.1–2.3, Too
   lines.json        every spoken line (re-record with tools/render-voice.py)
   voice/            recorded lines (Kokoro-82M, af_heart)
   cover.png         1200×744 card image
-renzi/              Character Book 認字簿 (beta): a daily Chinese story, a stroke-order writing pad, words I know
+renzi/              Character Book 認字簿 (beta): a daily Chinese story, a stroke-order writing pad, characters I recognize
   index.html        the whole app (full-screen, iPad first)
   hanzi-writer.min.js  Hanzi Writer 3.7.2 (MIT), vendored so nothing loads from a CDN
   strokes.json      stroke outlines and centre lines for the characters in the stories (Make Me a Hanzi data)
@@ -64,7 +64,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Spellicious | `spellicious/` | 4.40 | 2026-09-30 |
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
-| Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
+| Character Book 認字簿 (beta) | `renzi/` | 1.1 | 2026-10-12 |
 
 Past versions stay playable at https://magicmakersfamily.github.io/games/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).

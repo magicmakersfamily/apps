@@ -134,6 +134,7 @@ Audio API, started only from a button press.
 - Mark Chinese text `lang="zh-TW"`; use the fonts "Noto Serif TC", "Songti TC", "PMingLiU".
 - For spoken words use `speechSynthesis` with `lang = 'zh-TW'`, preferring a zh-TW voice, then
   zh-CN — never zh-HK or yue (that is Cantonese).
+- Exception, at the family's request: `renzi/` reads characters aloud in Cantonese by default (zh-HK / yue voice) with a switch to Mandarin (zh-TW, then zh-CN) and one to turn sound off. It only speaks after a tap.
 - Exception, at the family's request: `mid-autumn/` speaks Cantonese by default (zh-HK / yue voice,
   Jyutping over the characters) with a button to switch to Mandarin and pinyin. Other games stay Mandarin
   unless the user asks otherwise.

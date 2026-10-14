@@ -74,7 +74,7 @@ a { color: inherit; }
 .days button b { font-family: var(--han); font-size: 16px; margin-left: 4px; }
 .days button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .book { min-height: 0; min-width: 0; display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; grid-template-rows: minmax(0, 1fr); align-items: center; gap: 8px; }
-.book .pg { min-height: 0; min-width: 0; height: 100%; display: grid; place-items: center; overflow: hidden; }
+.book .pg { min-height: 0; min-width: 0; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); place-items: center; overflow: hidden; }
 .book img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; border-radius: 12px; background: #fff;
   box-shadow: 0 1px 2px rgba(20,32,42,.12), 0 8px 24px rgba(20,32,42,.10); user-select: none; -webkit-user-drag: none; touch-action: pan-y; }
 .turn { width: 56px; height: 96px; border-radius: 18px; border: 0; background: var(--ink); color: var(--paper); display: grid; place-items: center; padding: 0; }
@@ -84,6 +84,32 @@ a { color: inherit; }
 .dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); display: block; flex: none; }
 .dots i.on { background: var(--accent); transform: scale(1.25); }
 .dots .go { margin-left: 12px; border: 0; background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 0 20px; min-height: 48px; font-weight: 700; font-family: var(--han); font-size: 18px; }
+
+/* full screen story */
+.sbar { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.sbar .days { flex: 1; min-width: 0; }
+.fsbtn { flex: none; min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.fsbtn svg { width: 20px; height: 20px; }
+@media (max-width: 480px) { .fsbtn span { display: none; } .fsbtn { padding: 0; } }
+body.fs .top, body.fs .tabs, body.fs .days { display: none; }
+body.fs .app { grid-template-rows: minmax(0, 1fr); padding-top: 0; }
+body.fs .story { padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+body.fs .dots { min-height: 40px; }
+@media (orientation: landscape) {
+  body.fs .story { grid-template-rows: minmax(0, 1fr) auto; }
+  body.fs .sbar { position: absolute; z-index: 3; top: max(6px, env(safe-area-inset-top)); right: max(6px, env(safe-area-inset-right)); }
+  body.fs .fsbtn span { display: none; }
+  body.fs .fsbtn { background: var(--ink); color: var(--paper); border-color: var(--ink); padding: 0; width: 44px; }
+}
+@media (orientation: portrait) { body.fs .sbar { justify-content: flex-end; } }
+
+/* read aloud */
+.voice { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.voice .vl { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-2); font-weight: 700; }
+.voice .vl svg { width: 20px; height: 20px; }
+.voice .seg button { min-width: 52px; padding: 0 12px; }
+.voice .seg button svg { width: 22px; height: 22px; }
+.words .voice { flex: 1 1 100%; }
 
 /* ---------- write ---------- */
 .write { display: grid; gap: 14px; padding: 4px 14px 24px; height: 100%; }
@@ -158,6 +184,15 @@ a { color: inherit; }
   .stage { width: min(100%, 54dvh, 54vh); }
   .now .big { font-size: 38px; }
 }
+@media (max-aspect-ratio: 11/10) {
+  .write { overflow-y: auto; grid-template-rows: none; align-content: start; -webkit-overflow-scrolling: touch; }
+  .pick { overflow: visible; flex: none; }
+}
+@media (min-aspect-ratio: 11/10) and (max-height: 620px) {
+  .write { overflow-y: auto; align-content: start; -webkit-overflow-scrolling: touch; }
+  .pick { overflow: visible; flex: none; }
+  .stage { height: auto; max-height: none; width: max(220px, calc(100dvh - 130px)); }
+}
 @media (max-width: 600px) {
   .top { gap: 6px; padding-inline: 8px; } .top h1 { font-size: 22px; white-space: nowrap; } .top .home { padding-inline: 4px; font-size: 13px; }
   .write { overflow-y: auto; grid-template-rows: none; align-content: start; -webkit-overflow-scrolling: touch; }
@@ -173,7 +208,7 @@ a { color: inherit; }
 @media (max-width: 600px) and (max-aspect-ratio: 1/1) {
   .story { grid-template-rows: auto auto auto; align-content: center; gap: 10px; }
   .book { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 10px; }
-  .book .pg { grid-column: 1 / -1; height: auto; }
+  .book .pg { grid-column: 1 / -1; height: auto; grid-template-rows: auto; }
   .book img { width: 100%; }
   .turn { width: 100%; max-width: 160px; height: 56px; }
   .turn.prev { grid-column: 1; grid-row: 2; justify-self: start; } .turn.next { grid-column: 2; grid-row: 2; justify-self: end; }
@@ -230,7 +265,10 @@ a { color: inherit; }
 
   <main>
     <section class="view story" id="vStory" role="tabpanel" aria-labelledby="tStory">
-      <nav class="days" id="days" aria-label="Stories"></nav>
+      <div class="sbar">
+        <nav class="days" id="days" aria-label="Stories"></nav>
+        <button class="fsbtn" id="fsBtn" type="button" aria-pressed="false" aria-label="Full screen story"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>Full screen</span></button>
+      </div>
       <div class="book" id="book">
         <button class="turn prev" id="prev" type="button" aria-label="Previous story page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="pg"><img id="page" alt="" draggable="false"></div>
@@ -250,6 +288,7 @@ a { color: inherit; }
         <div class="now"><span class="big" id="nowCh" lang="zh-TW">字</span><span class="meta" id="nowMeta" aria-live="polite"></span></div>
         <p class="goal">Writing practice: the stroke order, then the whole character from memory. It is fine to recognize a character before you can write it.</p>
         <div class="order"><span lang="zh-TW">筆順</span><div class="strip" id="strip" role="group" aria-label="Stroke order, scroll sideways to see every stroke" tabindex="0"></div></div>
+        <div class="voice" data-voicebox="write"></div>
         <div class="ctl">
           <div class="seg" role="group" aria-label="How to write">
             <button type="button" id="mTrace" aria-pressed="true" aria-label="Trace mode: follow the guide"><span lang="zh-TW">描</span></button>
@@ -282,9 +321,9 @@ a { color: inherit; }
       <p>A new story and its characters arrive here each morning. There are two separate kinds of practice. <b>認字 Recognize</b> is for reading: tapping a character means “I know this one when I see it.” It does not mean James can say it, explain it or write it. <b>寫字 Write</b> is for making the character: the stroke order, then writing it from memory. Recognizing a character before writing it is the normal order.</p>
       <div class="stat"><span class="sync" id="pDot"></span><span id="pStatus">Nothing leaves this device.</span></div>
       <p id="pDetail"></p>
-      <p><b>What leaves this device.</b> By default, nothing. Stories are only downloaded, and your taps and writing stay in this browser. If a parent has set this device up with a private link, it also sends the family’s own private log just these events: which characters were tapped as recognized, which were written, how many mistakes, and which story pages were finished. It sends no other browsing, personal or device information.</p>
+      <p><b>What leaves this device.</b> By default, nothing. Stories are only downloaded, and your taps and writing stay in this browser. Reading aloud uses the voices already on this device, so no audio is downloaded or recorded. If a parent has set this device up with a private link, it also sends the family’s own private log just these events: which characters were tapped as recognized, which were written, how many mistakes, and which story pages were finished. It sends no other browsing, personal or device information.</p>
       <small>To set up a device once, use the setup link from your family log (see renzi/SETUP.md in the shelf repository). Until then nothing is sent.</small>
-      <p><b>Version 1.1</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The Game Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
+      <p><b>Version 1.2</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The Game Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.2">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.2&amp;kind=bug">Report a bug</a></p>
       <p>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
       <p>Stroke order data: Hanzi Writer (MIT) with Make Me a Hanzi (Arphic Public License). Know someone who might like this? <button class="pbtn" id="pTell" type="button">Tell a friend</button></p>
     </div>
@@ -362,6 +401,54 @@ a { color: inherit; }
     el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 4200);
   }
 
+  /* ================= read aloud (Cantonese or Mandarin) ================= */
+  const SPK = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let voices = [], warned = false;
+  S.voice = ['yue', 'cmn', 'off'].includes(LS.get('renzi.voice', 'yue')) ? LS.get('renzi.voice', 'yue') : 'yue';
+  const loadVoices = () => { try { voices = speechSynthesis.getVoices(); } catch (e) { voices = []; } };
+  if (SPK) { loadVoices(); try { speechSynthesis.addEventListener('voiceschanged', loadVoices); } catch (e) {} }
+  const vlang = (v) => String(v.lang || '').replace('_', '-').toLowerCase();
+  function pickVoice(kind) {
+    if (kind === 'yue') return voices.find((v) => vlang(v) === 'zh-hk' || vlang(v).startsWith('yue'));
+    return voices.find((v) => vlang(v) === 'zh-tw') || voices.find((v) => vlang(v) === 'zh-cn');
+  }
+  function say(ch) {
+    if (!SPK || S.voice === 'off' || !ch) return;
+    const v = pickVoice(S.voice), u = new SpeechSynthesisUtterance(ch);
+    u.lang = S.voice === 'yue' ? 'zh-HK' : 'zh-TW'; if (v) { u.voice = v; u.lang = v.lang; }
+    u.rate = 0.8;
+    if (!v && S.voice === 'yue' && voices.length && !warned) { warned = true; toast('No Cantonese voice on this device. Try 普, or add one in Settings > Accessibility > Spoken Content.'); }
+    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+  }
+  const ICON_SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+  const ICON_MUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+  function voiceHTML(withSpeak) {
+    const b = (v, label, inner) => '<button type="button" data-v="' + v + '" aria-pressed="' + (S.voice === v) + '" aria-label="' + label + '">' + inner + '</button>';
+    return '<span class="vl">' + ICON_SPK + '<span>Read aloud</span></span><div class="seg" role="group" aria-label="Read the character aloud in">' +
+      b('yue', 'Read aloud in Cantonese', '<span lang="zh-HK">粵</span>') + b('cmn', 'Read aloud in Mandarin', '<span lang="zh-TW">普</span>') + b('off', 'Sound off', ICON_MUTE) + '</div>' +
+      (withSpeak ? '<button class="btn" type="button" data-speak aria-label="Hear this character again">' + ICON_SPK + '</button>' : '');
+  }
+  function fillVoice() { document.querySelectorAll('[data-voicebox]').forEach((el) => { el.innerHTML = voiceHTML(el.dataset.voicebox === 'write'); }); }
+  document.addEventListener('click', (e) => {
+    const vb = e.target.closest('[data-v]'), sp = e.target.closest('[data-speak]');
+    if (vb) { S.voice = vb.dataset.v; LS.set('renzi.voice', S.voice); document.querySelectorAll('[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === S.voice))); if (S.tab === 'write') say(S.ch); }
+    else if (sp) say(S.ch);
+  });
+
+  /* ================= full screen story ================= */
+  function setFs(on) {
+    document.body.classList.toggle('fs', on); $('fsBtn').setAttribute('aria-pressed', String(on));
+    $('fsBtn').setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen story');
+    const root = document.documentElement;
+    try {
+      if (on && !document.fullscreenElement) { const f = root.requestFullscreen || root.webkitRequestFullscreen; if (f) { const r = f.call(root); if (r && r.catch) r.catch(() => {}); } }
+      else if (!on && (document.fullscreenElement || document.webkitFullscreenElement)) { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const r = x.call(document); if (r && r.catch) r.catch(() => {}); } }
+    } catch (e) {}
+  }
+  $('fsBtn').addEventListener('click', () => setFs(!document.body.classList.contains('fs')));
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach((ev) => document.addEventListener(ev, () => { if (!document.fullscreenElement && !document.webkitFullscreenElement && document.body.classList.contains('fs')) setFs(false); }));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('fs')) setFs(false); });
+
   /* ================= content ================= */
   async function getJSON(url) { const r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); }
   async function boot() {
@@ -411,6 +498,10 @@ a { color: inherit; }
   }
   $('prev').addEventListener('click', () => { S.page--; showPage(); });
   $('next').addEventListener('click', () => { S.page++; showPage(); });
+  document.addEventListener('keydown', (e) => {
+    if (S.tab !== 'story' || !$('panel').hidden || /^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || '')) return;
+    if (e.key === 'ArrowRight') { S.page++; showPage(); } else if (e.key === 'ArrowLeft') { S.page--; showPage(); }
+  });
   (function swipe() {
     const el = $('book'); let x0 = null, y0 = 0;
     el.addEventListener('pointerdown', (e) => { x0 = e.clientX; y0 = e.clientY; });
@@ -422,6 +513,7 @@ a { color: inherit; }
 
   /* ================= tabs ================= */
   function showTab(t) {
+    if (t !== 'story' && document.body.classList.contains('fs')) setFs(false);
     S.tab = t;
     [['story', 'vStory', 'tStory'], ['write', 'vWrite', 'tWrite'], ['words', 'vWords', 'tWords']].forEach(([k, v, b]) => {
       $(v).hidden = k !== t; $(b).setAttribute('aria-selected', String(k === t)); $(b).tabIndex = k === t ? 0 : -1;
@@ -445,7 +537,7 @@ a { color: inherit; }
     const know = LS.get(knowKey(), {});
     const n = Object.values(know).filter(Boolean).length;
     let h = '<div class="lead"><p>Tap the characters you recognize!</p><span class="count" id="kc" role="status" aria-label="Characters recognized today">' + (n ? '★ ' + n : '') + '</span>' +
-      '<p class="goal">This page is for reading: you see it and know it. Practice making it on the 寫字 page.</p></div>';
+      '<p class="goal">This page is for reading: you see it and know it. Practice making it on the 寫字 page.</p><div class="voice" data-voicebox="words"></div></div>';
     c.groups.forEach((g) => {
       if (!g.chars.length) return;
       h += '<div class="wg"><h3><span lang="zh-TW">' + esc(g.zh) + '</span></h3><div class="wgrid">' + g.chars.map((ch) => {
@@ -455,11 +547,11 @@ a { color: inherit; }
           '<button class="wr" type="button" data-w="' + esc(ch) + '" aria-label="Practice writing ' + esc(ch) + '"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l1-4 9-9 3 3-9 9z"/></svg></button></div>';
       }).join('') + '</div></div>';
     });
-    host.innerHTML = h;
-    host.querySelectorAll('.wr').forEach((b) => b.addEventListener('click', () => { S.ch = b.dataset.w; showTab('write'); }));
+    host.innerHTML = h; fillVoice();
+    host.querySelectorAll('.wr').forEach((b) => b.addEventListener('click', () => { S.ch = b.dataset.w; S.sayNext = true; showTab('write'); }));
     host.querySelectorAll('.w').forEach((b) => b.addEventListener('click', () => {
       const ch = b.dataset.c, k = LS.get(knowKey(), {}); k[ch] = k[ch] ? 0 : 1; LS.set(knowKey(), k);
-      b.setAttribute('aria-pressed', String(!!k[ch]));
+      b.setAttribute('aria-pressed', String(!!k[ch])); if (k[ch]) say(ch);
       const cnt = Object.values(k).filter(Boolean).length; $('kc').textContent = cnt ? '★ ' + cnt : '';
       track({ k: 'know', c: ch, v: k[ch] });
     }));
@@ -486,7 +578,7 @@ a { color: inherit; }
       const grid = d.querySelector('.chars');
       g.chars.forEach((ch) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'c'; b.dataset.c = ch; b.lang = 'zh-TW'; b.setAttribute('aria-label', 'Write ' + ch);
-        b.innerHTML = esc(ch) + '<span class="n" aria-hidden="true"></span>'; b.addEventListener('click', () => makeChar(ch)); grid.appendChild(b);
+        b.innerHTML = esc(ch) + '<span class="n" aria-hidden="true"></span>'; b.addEventListener('click', () => makeChar(ch, true)); grid.appendChild(b);
       });
       host.appendChild(d);
     });
@@ -504,7 +596,8 @@ a { color: inherit; }
     if (!S.strokes) return;
     if (!S.ch || !S.strokes[S.ch]) S.ch = LS.get('renzi.ch', null);
     if (!S.ch || !S.strokes[S.ch]) S.ch = S.list[0] || '大';
-    requestAnimationFrame(() => makeChar(S.ch));
+    const sayIt = S.sayNext; S.sayNext = false;
+    requestAnimationFrame(() => makeChar(S.ch, sayIt));
   }
   function medianPath(m) { return m.map((p, i) => (i ? 'L' : 'M') + Math.round(p[0]) + ' ' + Math.round(900 - p[1])).join(' '); }
 
@@ -561,8 +654,9 @@ a { color: inherit; }
     box.classList.remove('go'); void box.offsetWidth; box.classList.add('go');
   }
 
-  function makeChar(c) {
+  function makeChar(c, speak) {
     if (!S.strokes || !S.strokes[c]) { $('msg').textContent = 'No stroke data for ' + c + ' yet.'; return; }
+    if (speak) say(c);
     S.ch = c; LS.set('renzi.ch', c); S.done = 0; S.complete = false;
     if (S.guide === null) S.guide = S.mode === 'trace';
     $('bGuide').setAttribute('aria-pressed', String(S.guide)); $('bGuide').classList.toggle('on', S.guide);
@@ -606,8 +700,8 @@ a { color: inherit; }
     S.writer.animateCharacter({ onComplete: () => { S.writer.hideCharacter(); if (S.mode !== 'trace') S.writer.hideOutline(); quiz(n); } });
   }
   $('bWatch').addEventListener('click', watch);
-  $('bAgain').addEventListener('click', () => S.ch && makeChar(S.ch));
-  $('bNext').addEventListener('click', () => { if (!S.list.length) return; makeChar(S.list[(S.list.indexOf(S.ch) + 1) % S.list.length]); });
+  $('bAgain').addEventListener('click', () => S.ch && makeChar(S.ch, true));
+  $('bNext').addEventListener('click', () => { if (!S.list.length) return; makeChar(S.list[(S.list.indexOf(S.ch) + 1) % S.list.length], true); });
   $('bGuide').addEventListener('click', () => { S.guide = !S.guide; $('bGuide').setAttribute('aria-pressed', String(S.guide)); $('bGuide').classList.toggle('on', S.guide); drawGuide(); });
   function setMode(m) { S.mode = m; LS.set('renzi.mode', m); S.guide = m === 'trace'; $('mTrace').setAttribute('aria-pressed', String(m === 'trace')); $('mOwn').setAttribute('aria-pressed', String(m === 'own')); if (S.ch) makeChar(S.ch); }
   $('mTrace').addEventListener('click', () => setMode('trace'));
@@ -646,6 +740,7 @@ a { color: inherit; }
     try { await navigator.clipboard.writeText(url); toast('Link copied.'); } catch (e) { toast(url); }
   });
 
+  fillVoice();
   const t0 = LS.get('renzi.tab', 'story'); if (t0 === 'write' || t0 === 'words') S.tab = t0;
   showTab(S.tab);
   boot();

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Back Space · Photo &amp; video backup for iPhone (Mac)</title>
+<meta name="description" content="Back Space is a Mac utility that copies photos and videos from your iPhone to your Mac, checks each copy, and then frees up space on the phone.">
+<style>
+  :root { --ink:#14202A; --ink-2:#4E5E6B; --accent:#2C5E86; --paper:#ECF0F2; --card:#FFFFFF; --line:#D5DDE3; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family: system-ui, -apple-system, "Helvetica Neue", sans-serif; line-height:1.55; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 64px; display:grid; gap:28px; }
+  .tag { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); }
+  h1 { margin:0; font-size: clamp(30px, 5vw, 44px); line-height:1.1; }
+  h2 { margin:0 0 8px; font-size: 22px; }
+  p, li { color: var(--ink-2); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:22px 24px; }
+  .btn { display:inline-block; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; padding:12px 22px; border-radius:12px; }
+  ol { padding-left: 22px; margin: 0; display:grid; gap:8px; }
+  .note { font-size: 14px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="tag">Mac utility · macOS only</div>
+    <h1>Back Space</h1>
+    <p>Back Space copies photos and videos from your iPhone to your Mac, checks that each copy matches the original, and then frees up space on the phone. Nothing is removed from the iPhone until the copy is saved and checked, and you confirm.</p>
+  </header>
+
+  <section class="card">
+    <h2>Download</h2>
+    <p><a class="btn" href="https://github.com/magicmakersfamily/apps/releases/latest/download/Back-Space-Installer.zip">Download Back Space (.zip)</a></p>
+    <p class="note">Version 1.0. Requires a Mac, a USB cable, and Python 3 (most Macs have it).</p>
+  </section>
+
+  <section class="card">
+    <h2>How to install</h2>
+    <ol>
+      <li>Unzip the download. You'll get a folder called “Back Space Installer”.</li>
+      <li>Double-click <b>Install Back Space.command</b>. The first time, macOS may say it can't be opened. Right-click the file, choose <b>Open</b>, then click <b>Open</b> again.</li>
+      <li>Choose the folder where your backups should go. Pictures is the default.</li>
+      <li>Wait about a minute while the phone tools are set up.</li>
+      <li>Open <b>Back Space</b> from Applications.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Using it</h2>
+    <ol>
+      <li>Plug in your iPhone, unlock it, and tap <b>Trust</b> if asked.</li>
+      <li>Open Back Space and enter how much space you want to free up, in GB.</li>
+      <li>Back Space saves the oldest photos and videos to your Mac and checks each one.</li>
+      <li>Review the summary, then press <b>Free Up</b> to remove the checked items from your iPhone.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Good to know</h2>
+    <ul>
+      <li>Your backups stay on your Mac, in the folder you chose. Each iPhone gets its own folder inside it.</li>
+      <li>Back Space checks for updates once a day and tells you when one is available. It never installs anything without you.</li>
+      <li>Files that can't be read are logged and skipped, so the backup can carry on.</li>
+      <li>To uninstall, drag Back Space from Applications to the Trash. Your backups are not touched.</li>
+    </ul>
+  </section>
+
+  <p class="note"><a href="../../">← Back to the App Shelf</a></p>
+</main>
+</body>
+</html>

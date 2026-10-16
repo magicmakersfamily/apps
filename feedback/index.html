@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Share your thoughts · The Game Shelf</title>
+<title>Share your thoughts · The App Shelf</title>
 <meta name="description" content="Tell Magic Makers what you think of our games, suggest an idea, or report a bug.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Share your thoughts · The Game Shelf">
+<meta property="og:title" content="Share your thoughts · The App Shelf">
 <meta property="og:description" content="Tell us what you think of our games, suggest an idea, or report a bug.">
-<meta property="og:image" content="https://magicmakersfamily.github.io/games/mid-autumn/cover.png">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/mid-autumn/cover.png">
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232C5E86'/%3E%3Cpath d='M14 18h36v22H30l-10 8v-8h-6z' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -73,7 +73,7 @@ footer a { color: var(--ink-2); }
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="../">← All games</a>
+  <a class="back" href="../">← All apps</a>
   <header>
     <h1>Share your thoughts<span lang="zh-TW">意見</span></h1>
     <p class="lede">Loved a game, have an idea for a new one, or found something broken? Tell us. We read every message.</p>
@@ -139,12 +139,12 @@ footer a { color: var(--ink-2); }
   <div class="done" id="done" hidden>
     <h2>Thank you! 多謝！</h2>
     <p>Your message is on its way to us.</p>
-    <p><a href="../">Back to the games</a></p>
+    <p><a href="../">Back to the apps</a></p>
   </div>
 
   <footer>
-    <span>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
-    <span>Our games don’t collect any information. This page sends only what you type, and only when you press Send.</span>
+    <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
+    <span>Our apps don’t collect any information. This page sends only what you type, and only when you press Send.</span>
   </footer>
 </div>
 <script>
@@ -160,7 +160,7 @@ if (from) { const r = document.querySelector(`input[name="game"][value="${from}"
 const version = (params.get('v') || '').replace(/[^0-9.]/g, '').slice(0, 8);
 const kind = params.get('kind');
 if (kind === 'bug') document.querySelector('input[name="kind"][value="Something is broken"]').checked = true;
-const techText = `${from || 'Game Shelf'}${version ? ' v' + version : ''} · ${navigator.userAgent}`;
+const techText = `${from || 'App Shelf'}${version ? ' v' + version : ''} · ${navigator.userAgent}`;
 $('#techText').textContent = techText;
 let rating = 0;
 $('#stars').addEventListener('click', e => {
@@ -185,8 +185,8 @@ $('#fb').addEventListener('submit', async e => {
   const email = $('#email').value.trim();
   const data = {
     access_key: WEB3FORMS_KEY,
-    subject: `Game Shelf: ${kindV} (${game})`,
-    from_name: 'The Game Shelf',
+    subject: `App Shelf: ${kindV} (${game})`,
+    from_name: 'The App Shelf',
     game, kind: kindV, rating: rating ? `${rating} / 5` : 'No rating',
     message: msg, name: $('#name').value.trim() || '(not given)',
     details: $('#tech').checked ? techText : '(not included)',

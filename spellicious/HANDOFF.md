@@ -61,7 +61,7 @@
 ## Release
 
 - Current page: spellicious/index.html
-- Current URL: https://magicmakersfamily.github.io/games/spellicious/
+- Current URL: https://magicmakersfamily.github.io/apps/spellicious/
 - Compatibility redirect: speller/index.html → ../spellicious/
 - Current version: 4.24
 - Launch date: 2026-09-30

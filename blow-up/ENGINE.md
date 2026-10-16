@@ -3,7 +3,7 @@
 ## Stack decision
 
 The brief asks to match the existing family games when they exist, and they do: the Game Shelf
-(`magicmakersfamily.github.io/games`) is static HTML, CSS and JavaScript with no build step, no
+(`magicmakersfamily.github.io/apps`) is static HTML, CSS and JavaScript with no build step, no
 dependencies and no tracking (see the repo's `CLAUDE.md`). So Blow Up follows the Aquarium and
 Mid-Autumn Mayhem layout instead of Vite + React:
 

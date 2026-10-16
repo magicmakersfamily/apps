@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<title>The Game Shelf</title>
-<meta name="description" content="Learning games for curious kids. They run in your browser, with nothing to install.">
+<title>The App Shelf</title>
+<meta name="description" content="Learning games and small family tools. The games run in your browser, with nothing to install.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The Game Shelf">
-<meta property="og:description" content="Learning games for curious kids. They run in your browser, with nothing to install.">
-<meta property="og:image" content="https://magicmakersfamily.github.io/games/aquarium/cover.png">
+<meta property="og:title" content="The App Shelf">
+<meta property="og:description" content="Learning games and small family tools. The games run in your browser, with nothing to install.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/aquarium/cover.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232C5E86'/%3E%3Cpath d='M16 46h32M20 46V22h8v24M30 46V16h8v30M40 46V26h6v20' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,11 +32,14 @@ html, body { background: var(--paper); }
 body { margin: 0; color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 64px; display: grid; gap: 36px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 64px; display: grid; gap: 48px; }
 header { display: grid; gap: 8px; }
 .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(36px, 6vw, 60px); line-height: 1; letter-spacing: -.02em; }
 .lede { margin: 4px 0 0; color: var(--ink-2); font-size: 18px; max-width: 56ch; text-wrap: pretty; }
+.sections { display: grid; gap: 48px; }
+.section { display: grid; gap: 20px; }
+.section > h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -.01em; }
 .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 .game { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
 .game:only-child { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-rows: auto; }
@@ -58,6 +61,9 @@ h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(
 .play { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; font-size: 17px; padding: 12px 22px; border-radius: 12px; }
 .play:hover { filter: brightness(1.08); }
 .play svg { width: 18px; height: 18px; }
+.util { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px 24px; display: grid; gap: 12px; max-width: 720px; }
+.util h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.1; }
+.util p { margin: 0; color: var(--ink-2); }
 .grownups { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; justify-content: space-between; }
 .grownups h2 { margin: 0 0 4px; font-family: var(--display); font-weight: 800; font-size: 22px; }
 .grownups p { margin: 0; color: var(--ink-2); max-width: 60ch; }
@@ -73,12 +79,15 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-
 <body>
 <div class="wrap">
   <header>
-    <span class="eyebrow">Learning games</span>
-    <h1>The Game Shelf</h1>
-    <p class="lede">Games for curious kids about how the world works. Each one runs in your web browser, on a computer, tablet or phone, with nothing to install.</p>
+    <span class="eyebrow">Learning games and family tools</span>
+    <h1>The App Shelf</h1>
+    <p class="lede">Learning games for curious kids, and small tools for families. The games run in your web browser, on a computer, tablet or phone, with nothing to install.</p>
   </header>
 
-  <main class="games">
+  <main class="sections">
+    <section class="section" aria-labelledby="games-heading">
+      <h2 id="games-heading">Games</h2>
+      <div class="games">
     <article class="game">
       <a class="cover" href="aquarium/" aria-label="Play James’s Nature Aquarium"><img src="aquarium/cover.png" alt="A planted aquarium with driftwood, grey stones, green and red plants, blue-and-red tetras and red shrimp" width="1200" height="744"></a>
       <div class="info">
@@ -96,6 +105,25 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-
         <a class="play" href="aquarium/">Play
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
         </a>
+    <article class="game">
+      <a class="cover" href="renzi/" aria-label="Open 認字簿"><img src="renzi/cover.png?v=1.0" alt="A big Chinese character on a grid with a numbered stroke guide and arrows showing where to start and which way to go" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Character Book<span lang="zh-TW">認字簿</span></h2>
+        <p class="version"><b>Version 1.0</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-10-12">October 12, 2026</time></p>
+        <p>A new picture story in Traditional Chinese every morning, made for a five-year-old who is learning to read. Read it page by page, then write the day’s characters on a grid that shows the stroke order: numbered starts, arrows for the direction, and a little 筆順 strip that builds each character one stroke at a time. Trace it, or try it on your own. Tap the words you know. It works best on a tablet in full screen (Add to Home Screen). This game is in beta: we’re still testing it with kids and improving it.</p>
+        <ul class="tags">
+          <li>Chinese reading</li><li>Writing</li><li>Stroke order</li><li>Daily story</li><li>Beta</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 4 and up (a grown-up helps at first)</li>
+          <li><b>Progress</b> saved on your device</li>
+          <li><b>Sound</b> none</li>
+        </ul>
+        <a class="play" href="renzi/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
       </div>
     </article>
     <article class="game">
@@ -193,44 +221,40 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-
         </a>
       </div>
     </article>
-    <article class="game">
-      <a class="cover" href="renzi/" aria-label="Open 認字簿"><img src="renzi/cover.png?v=1.0" alt="A big Chinese character on a grid with a numbered stroke guide and arrows showing where to start and which way to go" width="1200" height="744"></a>
-      <div class="info">
-        <h2>Character Book<span lang="zh-TW">認字簿</span></h2>
-        <p class="version"><b>Version 1.0</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-10-12">October 12, 2026</time></p>
-        <p>A new picture story in Traditional Chinese every morning, made for a five-year-old who is learning to read. Read it page by page, then write the day’s characters on a grid that shows the stroke order: numbered starts, arrows for the direction, and a little 筆順 strip that builds each character one stroke at a time. Trace it, or try it on your own. Tap the words you know. It works best on a tablet in full screen (Add to Home Screen). This game is in beta: we’re still testing it with kids and improving it.</p>
-        <ul class="tags">
-          <li>Chinese reading</li><li>Writing</li><li>Stroke order</li><li>Daily story</li><li>Beta</li>
-        </ul>
-        <ul class="meta">
-          <li><b>Ages</b> 4 and up (a grown-up helps at first)</li>
-          <li><b>Progress</b> saved on your device</li>
-          <li><b>Sound</b> none</li>
-        </ul>
-        <a class="play" href="renzi/">Play
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
-        </a>
       </div>
-    </article>
+    </section>
+
+    <section class="section" aria-labelledby="utilities-heading">
+      <h2 id="utilities-heading">Utilities</h2>
+      <article class="util">
+        <h3>Back Space</h3>
+        <p>For Macs. Copies photos and videos from an iPhone to a folder on your Mac, checks that each copy matches the original, and then frees up space on the phone. Nothing is removed from the iPhone until the copy is saved and checked, and you confirm.</p>
+        <ul class="meta">
+          <li><b>Version</b> 1.0</li>
+          <li><b>Needs</b> a Mac and a USB cable</li>
+        </ul>
+        <a class="play" href="tools/backspace/">Get Back Space</a>
+      </article>
+    </section>
   </main>
 
   <aside class="grownups" aria-label="For grown-ups">
     <div>
       <h2>For grown-ups</h2>
-      <p>We’re a family making little games about the things we’re learning and curious about. New ones come out whenever we get curious about something new.</p>
+      <p>We’re a family making little apps about the things we’re learning and curious about. New ones come out whenever we get curious about something new.</p>
     </div>
     <div class="grownups-links">
-      <a class="play" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Follow for new games</a>
-      <a class="support" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">♥ Support the next game</a>
+      <a class="play" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Follow for new apps</a>
+      <a class="support" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">♥ Support the next app</a>
       <a class="support" href="feedback/">Share your thoughts</a>
-      <button class="support" type="button" data-tell="https://magicmakersfamily.github.io/games/" data-text="Free learning games for curious kids, made by a family: The Game Shelf">Tell a friend</button>
+      <button class="support" type="button" data-tell="https://magicmakersfamily.github.io/apps/" data-text="Free learning games and family tools, made by a family: The App Shelf">Tell a friend</button>
     </div>
   </aside>
 
   <footer>
-    <span>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
-    <span>These games don’t collect any information. Saved progress stays in your own browser.</span>
-    <span>Found a bug or have an idea? <a href="feedback/">Share your thoughts</a>. Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/games/" data-text="Free learning games for curious kids: The Game Shelf">Tell a friend</button></span>
+    <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
+    <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
+    <span>Found a bug or have an idea? <a href="feedback/">Share your thoughts</a>. Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/" data-text="Free learning games and family tools: The App Shelf">Tell a friend</button></span>
   </footer>
 </div>
 <script>

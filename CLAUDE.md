@@ -1,7 +1,7 @@
-# The Game Shelf — notes for Claude
+# The App Shelf — notes for Claude
 
 This repository is the family's public site of learning games for kids:
-**https://magicmakersfamily.github.io/games/** (GitHub Pages, served from `main`, root folder).
+**https://magicmakersfamily.github.io/apps/** (GitHub Pages, served from `main`, root folder).
 Everything here is public, so never commit secrets, tokens, personal emails or private notes.
 
 ## Who it's for
@@ -45,9 +45,9 @@ Audio API, started only from a button press.
 2. **Make it standalone.** Artifact pages lack a document shell. Each game page needs
    `<!doctype html>`, `<html lang="en">`, `<head>` with charset, viewport (`viewport-fit=cover`),
    description, `og:title` / `og:description` / `og:image` (absolute URL under
-   `https://magicmakersfamily.github.io/games/<game>/cover.png`), an inline SVG favicon, and a small
+   `https://magicmakersfamily.github.io/apps/<game>/cover.png`), an inline SVG favicon, and a small
    base style: `body { margin: 0 }`, `[hidden] { display: none !important }`, `img { max-width: 100% }`.
-   Add an `<a href="../">← All games</a>` link at the top.
+   Add an `<a href="../">← All apps</a>` link at the top.
 3. **Cover image.** Render the game in a good-looking state with headless Chrome at 1200×744:
    `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1200,744 --virtual-time-budget=4000 --screenshot=cover.png <file>`
 4. **Version and launch date.** Every game shows `Version X.Y · Launched <Month D, YYYY>` under
@@ -61,7 +61,7 @@ Audio API, started only from a button press.
    cover link, title (with the game's Chinese name in a `lang="zh-TW"` span), version line,
    2–3 sentence description, topic tags, meta (ages, progress saved, sound), Play button.
 6. **Commit and push** (see Git below), then verify the live site before reporting done:
-   poll `https://magicmakersfamily.github.io/games/<game>/` until it returns 200 and contains the
+   poll `https://magicmakersfamily.github.io/apps/<game>/` until it returns 200 and contains the
    new version string (usually 30–60 seconds after the push).
 
 ## Versions: every release stays playable
@@ -92,9 +92,9 @@ Audio API, started only from a button press.
 - The family's Ko-fi page is **https://ko-fi.com/magicmakers**. It is for grown-ups: plain links only (never the Ko-fi
   widget or any script, which would load third-party code and cookies), no pop-ups during play, and never
   an email box that kids could type into.
-- Every game ends with the shelf footer ("Made by Magic Makers. More games are on the way. Like this? Buy us
-  a mooncake: Ko-fi" / "These games don’t collect any information…") under its version line, and shows the
-  Ko-fi links on its end screen, together with a "More from the Game Shelf" card for the other games. The shelf has a
+- Every game ends with the shelf footer ("Made by Magic Makers. More apps are on the way. Like this? Buy us
+  a mooncake: Ko-fi" / "These apps don’t collect any information…") under its version line, and shows the
+  Ko-fi links on its end screen, together with a "More from the App Shelf" card for the other games. The shelf has a
   "For grown-ups" strip above the footer.
 - Every game also has "Know someone who might like this? Tell a friend" (Web Share API with the game
   link, falling back to copying it), in its footer and end screen, and the shelf has one too. Games with

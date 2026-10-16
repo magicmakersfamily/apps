@@ -2,7 +2,7 @@
 
 ## How to run it
 
-- **Play:** open `index.html` in a browser (or https://magicmakersfamily.github.io/games/blow-up/ once
+- **Play:** open `index.html` in a browser (or https://magicmakersfamily.github.io/apps/blow-up/ once
   published). No install, no build. It needs `content.js`, `sim.js`, `css/game.css` and `js/*.js`
   next to it, so serve the folder (`python3 -m http.server`) rather than double-clicking if your
   browser blocks local scripts. Since PLAN B1, the game's own code that used to be inline in

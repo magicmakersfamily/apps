@@ -1,7 +1,7 @@
-# The Game Shelf
+# The App Shelf
 
 Learning games for curious kids, published with GitHub Pages:
-**https://magicmakersfamily.github.io/games/**
+**https://magicmakersfamily.github.io/apps/**
 
 Every game is a self-contained static web page (HTML, CSS and JavaScript). There is no
 server, no build step and no tracking. Progress is saved in each player's own browser
@@ -66,13 +66,13 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 
-Past versions stay playable at https://magicmakersfamily.github.io/games/versions/ (for
+Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).
 
 ## Adding a game
 
 1. Put it in its own folder, with an `index.html` and a `cover.png` (1200×744).
-2. Add a link back to the shelf (`<a href="../">← All games</a>`).
+2. Add a link back to the shelf (`<a href="../">← All apps</a>`).
 3. Add an `<article class="game">` card to the root `index.html`, with a version line:
    `<p class="version"><b>Version 1.0</b> · Launched <time datetime="YYYY-MM-DD">Month D, YYYY</time></p>`.
    The launch date never changes; bump the version on each release (on the card and at the

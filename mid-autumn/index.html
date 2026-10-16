@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Mid-Autumn Mayhem">
 <meta property="og:description" content="A cause-and-effect festival game: build the biggest Mid-Autumn party without setting the city on fire.">
-<meta property="og:image" content="https://magicmakersfamily.github.io/games/mid-autumn/cover.png">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/mid-autumn/cover.png">
 <meta name="theme-color" content="#0B1230">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1230'/%3E%3Ccircle cx='36' cy='26' r='14' fill='%23F4C24F'/%3E%3Cellipse cx='20' cy='44' rx='6' ry='8' fill='%23E3493A'/%3E%3Crect x='17' y='34' width='6' height='2' fill='%23F4C24F'/%3E%3C/svg%3E">
 <style>
@@ -244,7 +244,7 @@ html.text-both .book .close .t-zh, html.text-both .book .tale-tabs button[aria-s
 </head>
 <body>
 <div class="app" id="app">
-  <a class="shelf-back" href="../">← All games</a>
+  <a class="shelf-back" href="../">← All apps</a>
   <div class="top">
     <h1><span class="t-en">Mid-Autumn Mayhem</span> <span data-zh="title"></span></h1>
     <div class="stats">
@@ -314,9 +314,9 @@ html.text-both .book .close .t-zh, html.text-both .book .tale-tabs button[aria-s
     </section>
   </div>
 
-  <p class="about">Version 1.7 · Launched <time datetime="2026-09-25">September 25, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/games/">The Game Shelf</a> · <a href="../feedback/?game=mid-autumn&amp;v=1.7"><span class="t-en">Share your thoughts</span><span class="t-zh" lang="zh-TW">分享意見</span></a> · <a href="../feedback/?game=mid-autumn&amp;v=1.7&amp;kind=bug"><span class="t-en">Report a bug</span><span class="t-zh" lang="zh-TW">報告問題</span></a> · <button class="linkish" id="tellBtn" type="button"><span class="t-en">Know someone who might like this? Tell a friend</span><span class="t-zh" lang="zh-TW">認識會喜歡的人？告訴朋友</span></button> <span id="tellStatus"></span></p>
-  <p class="about tb"><span class="t-en">Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span><span class="t-zh" lang="zh-TW">由 Magic Makers 製作。更多遊戲陸續推出。喜歡嗎？請我們食個月餅：<a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span></p>
-  <p class="about tb"><span class="t-en">These games don’t collect any information. Saved progress stays in your own browser.</span><span class="t-zh" lang="zh-TW">這些遊戲不會收集任何資料。儲存的進度只會留在你自己的瀏覽器。</span></p>
+  <p class="about">Version 1.7 · Launched <time datetime="2026-09-25">September 25, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=mid-autumn&amp;v=1.7"><span class="t-en">Share your thoughts</span><span class="t-zh" lang="zh-TW">分享意見</span></a> · <a href="../feedback/?game=mid-autumn&amp;v=1.7&amp;kind=bug"><span class="t-en">Report a bug</span><span class="t-zh" lang="zh-TW">報告問題</span></a> · <button class="linkish" id="tellBtn" type="button"><span class="t-en">Know someone who might like this? Tell a friend</span><span class="t-zh" lang="zh-TW">認識會喜歡的人？告訴朋友</span></button> <span id="tellStatus"></span></p>
+  <p class="about tb"><span class="t-en">Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span><span class="t-zh" lang="zh-TW">由 Magic Makers 製作。更多遊戲陸續推出。喜歡嗎？請我們食個月餅：<a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span></p>
+  <p class="about tb"><span class="t-en">These apps don’t collect any information. Saved progress stays in your own browser.</span><span class="t-zh" lang="zh-TW">這些遊戲不會收集任何資料。儲存的進度只會留在你自己的瀏覽器。</span></p>
 </div>
 
 <div class="endmodal" id="riddleOv" hidden>
@@ -2720,7 +2720,7 @@ let wasPausedJ = false;
 function closeJournal() { $('#journal').hidden = true; paused = wasPausedJ; syncPause(); }
 
 // Share: a picture of your city with your score, for the share sheet (phones) or saved as a file.
-const GAME_URL = 'https://magicmakersfamily.github.io/games/mid-autumn/';
+const GAME_URL = 'https://magicmakersfamily.github.io/apps/mid-autumn/';
 async function makeShareImage() {
   const c = document.createElement('canvas'); c.width = 1200; c.height = 672;
   const g = c.getContext('2d');
@@ -2733,7 +2733,7 @@ async function makeShareImage() {
   g.fillStyle = '#F6ECD6'; g.font = `400 34px ${FDISP}`; g.fillText(`${GE[gr]} · ${Math.round(S.score).toLocaleString('en')} Reunion points`, 48, 612);
   const r = rank(); g.font = `700 22px ${FBODY}`; g.fillStyle = '#C9C0AA'; g.fillText(`Rank: ${r.en} ${r.zh} · ★ ${r.stars}`, 48, 646);
   g.textAlign = 'right'; g.fillStyle = '#F6ECD6'; g.font = `400 30px ${FDISP}`; g.fillText('Mid-Autumn Mayhem', 1152, 600); g.fillStyle = '#F4C24F'; g.font = `900 28px ${FZH}`; g.fillText('中秋大混亂', 1152, 636);
-  g.fillStyle = '#928EA8'; g.font = `700 18px ${FBODY}`; g.fillText('Play free: magicmakersfamily.github.io/games', 1152, 662);
+  g.fillStyle = '#928EA8'; g.font = `700 18px ${FBODY}`; g.fillText('Play free: magicmakersfamily.github.io/apps', 1152, 662);
   return new Promise(res => c.toBlob(b => res(b), 'image/png'));
 }
 function shareText() { return `I scored ${Math.round(S.score).toLocaleString('en')} Reunion points in Mid-Autumn Mayhem 中秋大混亂! Can you beat me? 🌕`; }
@@ -3324,7 +3324,7 @@ function endNight(legend) {
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="go" id="againBtn" type="button">${T('Play again', '再玩一次')}</button><button class="tool" id="endTales" type="button">${T('Read the Moon Tales', '看月亮故事')}</button><button class="tool" id="endJournal" type="button">${T('Journal', '收集冊')}</button></div>
     <div class="share-row"><button class="tool" id="shareBtn" type="button">${T('Share my night', '分享我的晚會')}</button><button class="tool" id="endTell" type="button">${T('Tell a friend', '告訴朋友')}</button><p class="share-status" id="shareStatus"></p></div>
     <div class="more">
-      <h3>${T('More from the Game Shelf', '遊戲架上的其他遊戲')}</h3>
+      <h3>${T('More from the App Shelf', '遊戲架上的其他遊戲')}</h3>
       <a class="more-game" href="../aquarium/"><img src="../aquarium/cover.png" alt="" onerror="this.remove()"><span><b>${T('James’s Nature Aquarium', '水草缸')}</b><small class="tb">${T('Build a planted aquarium and keep a tiny ecosystem in balance.', '建立一個水草缸，讓小小的生態系統保持平衡。')}</small></span></a>
       <p class="more-fb">${T('Tell us what you think:', '話我哋知你覺得點：')} <a href="../feedback/?game=mid-autumn&amp;v=1.7">${T('Share your thoughts', '分享意見')}</a> · <a href="../feedback/?game=mid-autumn&amp;v=1.7&amp;kind=bug">${T('Report a bug', '報告問題')}</a></p>
       <p class="grownups tb">${T(`<b>For grown-ups:</b> we’re a family making little games about the things we’re curious about, and the next one is already brewing. <a href="${'https://ko-fi.com/magicmakers'}" target="_blank" rel="noopener">Follow us on Ko-fi</a> to hear when it’s out, or <a href="${'https://ko-fi.com/magicmakers'}" target="_blank" rel="noopener">♥ support the next game</a>.`, `<b>給大人：</b>我們是一家人，把好奇的事做成小遊戲，下一個已在製作中。<a href="${'https://ko-fi.com/magicmakers'}" target="_blank" rel="noopener">在 Ko-fi 關注我們</a>，新遊戲推出時就會知道，或者<a href="${'https://ko-fi.com/magicmakers'}" target="_blank" rel="noopener">♥ 支持下一個遊戲</a>。`)}</p>

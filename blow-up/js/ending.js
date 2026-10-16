@@ -69,7 +69,7 @@
     openModal(`<div class="row">${hearBtn}<h2>🌙 Goodnight, Pip</h2></div><p>The day is done. Here’s the day log.</p>${receiptHTML(day)}
       <div class="row"><button class="go quiet" type="button" id="rPng">Save picture</button><button class="go quiet" type="button" id="rCompare">Compare days</button><button class="go quiet" type="button" id="rTell">Tell a friend</button><span id="rStatus" class="note"></span></div>
       <div class="row"><button class="go quiet" type="button" id="rAgain">Play another day</button></div>
-      <div class="more"><h3>More from the Game Shelf</h3><p><a href="../aquarium/">James’s Nature Aquarium</a> · <a href="../mid-autumn/">Mid-Autumn Mayhem</a> · <a href="../">All games</a></p>
+      <div class="more"><h3>More from the App Shelf</h3><p><a href="../aquarium/">James’s Nature Aquarium</a> · <a href="../mid-autumn/">Mid-Autumn Mayhem</a> · <a href="../">All apps</a></p>
       <p>Tell us what you think: <a href="../feedback/?game=blow-up&amp;v=${VERSION}">Share your thoughts</a> · <a href="../feedback/?game=blow-up&amp;v=${VERSION}&amp;kind=bug">Report a bug</a></p>
       <p><b>For grown-ups:</b> we’re a family making little games about the things we’re curious about, and the next one is already brewing. <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Follow us on Ko-fi</a> to hear when it’s out, or <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">♥ support the next game</a>.</p>
       <p class="note">${CT.STR.disclaimer}</p></div>`, null);
@@ -109,7 +109,7 @@
     y += 6; x.fillText('', 0, 0);
     row('TOTAL PRESSURE', sign(day.total), true); row('BLOW-UPS', String(day.blowups), true); row('MARBLES EARNED', String(day.marbles), true); row('TOOLS THAT HELPED', String(day.usedCount), true); row('PRACTISED WHILE CALM', String(day.skills), true);
     if (day.cookie) { center('It wasn’t really about the cookie.', y, 15); y += 30; }
-    center('Blow Up · The Game Shelf', H - 50, 14);
+    center('Blow Up · The App Shelf', H - 50, 14);
     return c;
   }
   async function sharePng(day, status) {

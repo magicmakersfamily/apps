@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="認字簿 · Character Book">
 <meta property="og:description" content="A daily picture story in Traditional Chinese, and a writing pad with numbered strokes and arrows.">
-<meta property="og:image" content="https://magicmakersfamily.github.io/games/renzi/cover.png">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/renzi/cover.png">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232C5E86'/%3E%3Ctext x='32' y='46' font-size='38' text-anchor='middle' fill='%23fff' font-family='serif'%3E字%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -192,7 +192,7 @@ a { color: inherit; }
 <body>
 <div class="app" id="app">
   <header class="top">
-    <a class="home" href="../">← All games</a>
+    <a class="home" href="../">← All apps</a>
     <h1>認字簿</h1>
     <span class="day" id="dayLabel"></span>
     <span class="sync" id="syncDot" title="" hidden></span>
@@ -257,9 +257,9 @@ a { color: inherit; }
       <button class="pbtn" id="pClose" type="button">Close</button>
     </div>
     <small>Set up a device once with the setup link from your family log (see renzi/SETUP.md in the shelf repository). Until then nothing leaves this page.</small>
-    <p><b>Version 1.0</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The Game Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
-    <p>Made by Magic Makers. More games are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
-    <p>These games don’t collect any information. Saved progress stays in your own browser. The one exception: on a device a parent has set up, this page sends which characters were written or tapped to the family’s own private log, and nowhere else.</p>
+    <p><b>Version 1.0</b> (beta) · Launched <time datetime="2026-10-12">October 12, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=renzi&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=renzi&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
+    <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+    <p>These apps don’t collect any information. Saved progress stays in your own browser. The one exception: on a device a parent has set up, this page sends which characters were written or tapped to the family’s own private log, and nowhere else.</p>
     <p>Stroke order data: Hanzi Writer (MIT) with Make Me a Hanzi (Arphic Public License). Know someone who might like this? <button class="pbtn" id="pTell" type="button" style="min-height:36px">Tell a friend</button></p>
   </div>
 </div>
@@ -592,7 +592,7 @@ a { color: inherit; }
     b.addEventListener('pointerdown', start); ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => b.addEventListener(ev, stop));
   })();
   $('pTell').addEventListener('click', async () => {
-    const url = 'https://magicmakersfamily.github.io/games/renzi/', text = 'A daily picture story in Traditional Chinese with a writing pad that shows the stroke order: 認字簿';
+    const url = 'https://magicmakersfamily.github.io/apps/renzi/', text = 'A daily picture story in Traditional Chinese with a writing pad that shows the stroke order: 認字簿';
     try { if (navigator.share) { await navigator.share({ title: '認字簿', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     try { await navigator.clipboard.writeText(url); toast('Link copied.'); } catch (e) { toast(url); }
   });

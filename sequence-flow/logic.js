@@ -13,8 +13,44 @@
     return Math.max(0, Math.floor((t - nowD) / 1000));
   }
 
+  // Block kinds: timer, tap (untimed, optional target), checklist (optional timer), pacer (paced breathing).
+  // Blocks saved before kinds existed are a timer when the timer toggle was on, otherwise a tap.
+  function blockKind(b) {
+    return b.kind || (b.timerEnabled ? 'timer' : 'tap');
+  }
+  const PHASES = ['inhale', 'hold1', 'exhale', 'hold2'];
+  function pacerPattern(b) {
+    const p = b.pattern || {};
+    return { inhale: p.inhale === undefined ? 4 : p.inhale, hold1: p.hold1 === undefined ? 4 : p.hold1,
+             exhale: p.exhale === undefined ? 4 : p.exhale, hold2: p.hold2 === undefined ? 4 : p.hold2 };
+  }
+  function pacerCycleSecs(b) {
+    const p = pacerPattern(b);
+    return PHASES.reduce((a, k) => a + (Number(p[k]) || 0), 0);
+  }
+  function pacerSeconds(b) {
+    return Math.max(1, Math.floor(b.cycles) || 12) * pacerCycleSecs(b);
+  }
+  // Which breathing phase is it, `elapsedMs` into the exercise? Zero-length phases are skipped.
+  function pacerPhase(pattern, elapsedMs) {
+    const live = PHASES.map((k, i) => ({ k, i, len: Math.max(0, Number(pattern[k]) || 0) })).filter(x => x.len > 0);
+    const cycleMs = live.reduce((a, x) => a + x.len * 1000, 0);
+    if (!cycleMs) return null;
+    const e = Math.max(0, elapsedMs);
+    let t = e % cycleMs;
+    for (const x of live) {
+      if (t < x.len * 1000) {
+        return { phase: x.k, phaseIndex: x.i, phaseLenSecs: x.len, leftSecs: Math.ceil((x.len * 1000 - t) / 1000),
+                 progress: t / (x.len * 1000), cycle: Math.floor(e / cycleMs) + 1 };
+      }
+      t -= x.len * 1000;
+    }
+    return null;
+  }
+
   // Starting length of a block in seconds (0 for untimed blocks).
   function blockSeconds(b, now) {
+    if (b.kind === 'pacer') return pacerSeconds(b);
     if (!b.timerEnabled) return 0;
     if (b.timerType === 'endtime') return secondsToTarget(b.targetEndTime, now === undefined ? Date.now() : now);
     const v = Number(b.durationValue) || 0;
@@ -38,9 +74,13 @@
       const sets = Math.max(1, Math.min(99, Math.floor(b.sets) || 1));
       const rest = Math.max(0, Number(b.restBetween) || 0);
       for (let s = 1; s <= sets; s++) {
-        steps.push(Object.assign({}, b, {
+        const step = Object.assign({}, b, {
           sectionName: section, currentSet: round, totalSets: rounds, setIndex: s, setCount: sets
-        }));
+        });
+        if (b.kind === 'pacer') {   // a pacer is a timer whose length comes from its breathing pattern
+          step.timerEnabled = true; step.timerType = 'duration'; step.durationUnit = 'secs'; step.durationValue = pacerSeconds(b);
+        }
+        steps.push(step);
         if (s < sets && rest > 0) {
           steps.push({
             id: b.id + '__rest' + s, isSection: false, type: 'gap', title: 'Rest',
@@ -104,7 +144,7 @@
     return text;
   }
 
-  const api = { secondsToTarget, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural };
+  const api = { blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

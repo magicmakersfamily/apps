@@ -61,3 +61,33 @@ test('clock target rolls to tomorrow when already past', () => {
   assert.strictEqual(L.secondsToTarget('08:30', now), 23.5 * 3600);
   assert.strictEqual(L.secondsToTarget('09:30', now), 1800);
 });
+
+test('v14 blocks get the kind they already behaved as', () => {
+  assert.strictEqual(L.blockKind({ timerEnabled: true }), 'timer');
+  assert.strictEqual(L.blockKind({ timerEnabled: false }), 'tap');
+  assert.strictEqual(L.blockKind({ kind: 'checklist', timerEnabled: false }), 'checklist');
+});
+
+test('box breathing 4-4-4-4 x 12 is 192s and cycles through the four phases', () => {
+  const b = { kind: 'pacer', pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, cycles: 12 };
+  assert.strictEqual(L.blockSeconds(b, 0), 192);
+  const names = [0, 4000, 8000, 12000, 16000].map(ms => L.pacerPhase(b.pattern, ms).phase);
+  assert.deepStrictEqual(names, ['inhale', 'hold1', 'exhale', 'hold2', 'inhale']);
+  const mid = L.pacerPhase(b.pattern, 6500);
+  assert.strictEqual(mid.phase, 'hold1');
+  assert.strictEqual(mid.leftSecs, 2);
+  assert.strictEqual(L.pacerPhase(b.pattern, 191999).cycle, 12);
+});
+
+test('zero-length holds are skipped (4-0-6-0 breathing)', () => {
+  const p = { inhale: 4, hold1: 0, exhale: 6, hold2: 0 };
+  assert.strictEqual(L.pacerPhase(p, 3999).phase, 'inhale');
+  assert.strictEqual(L.pacerPhase(p, 4000).phase, 'exhale');
+  assert.strictEqual(L.pacerPhase(p, 10000).phase, 'inhale');
+});
+
+test('a pacer step expands to a timed step and counts in totals', () => {
+  const steps = L.expandRoutine({ items: [{ id: 'p', kind: 'pacer', pattern: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, cycles: 12, timerEnabled: false }] });
+  assert.strictEqual(steps[0].timerEnabled, true);
+  assert.strictEqual(L.totals(steps.map(s => Object.assign({}, s, { status: 'pending' })), 0).secs, 192);
+});

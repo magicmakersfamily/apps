@@ -34,6 +34,7 @@ get-ready/          Ready To Go! (departure countdown with spoken steps)
   PLAN.md           handoff: where development stands and what is next (Apple Maps)
   index.html        page, timer, steps, destination ETA
   cover.png         1200×744 card image
+sequence-flow/      Sequence Flow (beta utility: routine builder and step timer)
 toothbrush/         Brush Buddy (beta; called Toothbrush Coach in 2.1–2.3, Toothbrush Timer before)
   PLAN.md           handoff: status, what is next, and the family's product notes
   lesson.js         the lesson model: cues, sugar bugs, brush pose, timeline
@@ -65,6 +66,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
+| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.0 | 2026-10-16 |
 
 Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).

@@ -118,12 +118,12 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
 
         <div id="hotspots-container" class="absolute inset-0 pointer-events-none z-10"></div>
 
-        <div id="mascot-box" class="absolute bottom-2 sm:bottom-6 left-2 right-2 sm:right-auto sm:left-8 z-20 flex items-end gap-2 sm:gap-3 sm:max-w-md pointer-events-auto transition-all duration-300">
-            <button id="mascot-avatar" type="button" class="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-600/90 border-2 border-amber-300 shadow-xl flex items-center justify-center text-3xl sm:text-4xl animate-float shrink-0 relative cursor-pointer p-0" title="Tap Cosmo to hear him again" aria-label="Hear Cosmo again">
+        <div id="mascot-box" class="absolute bottom-2 sm:bottom-6 left-2 right-2 sm:right-auto sm:left-8 z-20 flex items-end gap-2 sm:gap-3 sm:max-w-md pointer-events-none transition-all duration-300">
+            <button id="mascot-avatar" type="button" class="pointer-events-auto w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-600/90 border-2 border-amber-300 shadow-xl flex items-center justify-center text-3xl sm:text-4xl animate-float shrink-0 relative cursor-pointer p-0" title="Tap Cosmo to hear him again" aria-label="Hear Cosmo again">
                 🐱
                 <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full border border-white uppercase tracking-wider leading-none">Cosmo</span>
             </button>
-            <div class="glass-panel p-3 sm:p-4 rounded-2xl rounded-bl-none text-slate-100 text-xs sm:text-sm shadow-2xl relative border border-indigo-400/30 w-full min-w-0">
+            <div id="mascot-bubble" class="pointer-events-auto glass-panel p-3 sm:p-4 rounded-2xl rounded-bl-none text-slate-100 text-xs sm:text-sm shadow-2xl relative border border-indigo-400/30 w-full min-w-0">
                 <p id="mascot-speech" class="leading-snug sm:leading-relaxed font-medium text-slate-100 m-0 max-h-[5.5rem] sm:max-h-none overflow-y-auto" aria-live="polite">
                     Touch the glowing core in the center of pure dark space to unleash the Big Bang!
                 </p>
@@ -143,7 +143,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
         <div id="minigame-container" class="absolute top-2 sm:top-4 right-2 sm:right-4 left-2 sm:left-auto z-20 glass-panel p-2.5 sm:p-4 rounded-2xl sm:max-w-sm border border-amber-400/30 shadow-2xl transition-all duration-300"></div>
 
         <!-- POP-UP INFO MODAL -->
-        <div id="toast" class="hidden absolute bottom-28 left-1/2 -translate-x-1/2 z-50 w-max max-w-[92%] text-center px-4 py-2 rounded-2xl bg-amber-400 text-slate-950 font-extrabold text-sm shadow-xl" role="status"></div>
+        <div id="toast" class="hidden pointer-events-none absolute bottom-28 left-1/2 -translate-x-1/2 z-50 w-max max-w-[92%] text-center px-4 py-2 rounded-2xl bg-amber-400 text-slate-950 font-extrabold text-sm shadow-xl" role="status"></div>
 
         <!-- STICKER BOOK -->
         <div id="sticker-modal" class="hidden absolute z-40 inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="sticker-title">
@@ -226,11 +226,11 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
             </div>
         </div>
         <p class="text-[11px] text-slate-400 text-center mt-2 mb-0 leading-snug">
-            <b class="text-slate-200">Version 2.1 (beta)</b> · Launched <time datetime="2026-10-17">October 17, 2026</time> ·
+            <b class="text-slate-200">Version 2.2 (beta)</b> · Launched <time datetime="2026-10-17">October 17, 2026</time> ·
             <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> ·
             <button class="linkish" type="button" id="btn-about">About</button> ·
-            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.1">Share your thoughts</a> ·
-            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.1&amp;kind=bug">Report a bug</a> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.2">Share your thoughts</a> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.2&amp;kind=bug">Report a bug</a> ·
             <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/big-bang/" data-text="Travel from the Big Bang to today with a talking cosmic cat: Cosmic Journey">Tell a friend</button>
         </p>
         <p class="hidden sm:block text-[11px] text-slate-500 text-center m-0 leading-snug">Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a> · These apps don’t collect any information. Saved progress stays in your own browser. Music: Vivaldi, “Spring”, played by John Harrison (<a href="https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga" target="_blank" rel="noopener">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).</p>
@@ -704,9 +704,9 @@ const Narrator = (() => {
         const a = new Audio('voice/' + key + '.mp3');
         audio = a;
         const done = () => { if (my === token && after) after(); };
-        const fallback = () => { if (my !== token) return; log.fellBack++; audio = null; Voice.speak(text); if (after) setTimeout(done, 9000); };
+        const fallback = () => { if (my !== token) return; log.fellBack++; audio = null; Voice.speak(text); mascotFoldSoon(12000); if (after) setTimeout(done, 9000); };
         a.onplaying = () => { if (my === token) { log.played++; wave(true); } };
-        a.onended = () => { if (my === token) { log.ended++; wave(false); setTimeout(done, 700); } };
+        a.onended = () => { if (my === token) { log.ended++; wave(false); setTimeout(done, 700); mascotFoldSoon(2500); } };
         a.onerror = fallback;
         const p = a.play();
         if (p && p.catch) p.catch(err => { if (my !== token) return; if (err && err.name === 'NotAllowedError') { wave(false); voiceStatus.textContent = 'Tap “Hear Cosmo” to turn on his voice.'; if (after) setTimeout(done, 3500); } else fallback(); });
@@ -714,8 +714,17 @@ const Narrator = (() => {
     return { say, stop };
 })();
 let mascotKey = 'c0';
-function setMascot(key, text) { mascotKey = key; mascotSpeech.textContent = text; }
-function sayMascot() { Narrator.say(mascotKey, mascotSpeech.textContent); }
+/* Cosmo's speech box folds down to just his face once he has finished talking (and a little while after, if the voice
+   is off), so it never sits on top of the things you need to tap. Tap his face to open it again. */
+const mascotBubble = $('mascot-bubble');
+let mascotTimer = null;
+function mascotShow() { mascotBubble.classList.remove('hidden'); clearTimeout(mascotTimer); }
+function mascotFoldSoon(ms) {
+    clearTimeout(mascotTimer);
+    mascotTimer = setTimeout(() => { if (gameLive() && infoModal.classList.contains('hidden') && aboutModal.classList.contains('hidden')) mascotBubble.classList.add('hidden'); }, ms);
+}
+function setMascot(key, text) { mascotKey = key; mascotSpeech.textContent = text; mascotShow(); if (!speechEnabled) mascotFoldSoon(10000); }
+function sayMascot() { mascotShow(); Narrator.say(mascotKey, mascotSpeech.textContent); }
 
 /* ---------- sound effects (Web Audio, only after a tap) ---------- */
 function unlockAudioEngine() {
@@ -806,6 +815,8 @@ function sizeCanvas() {
     particles.forEach(p => { p.x = Math.min(p.x, W); p.y = Math.min(p.y, H); });
 }
 window.addEventListener('resize', sizeCanvas);
+// the stage changes size without a window resize (fonts load, the footer wraps): keep the canvas exactly the size you can see
+if ('ResizeObserver' in window) new ResizeObserver(() => { if (canvas.clientWidth !== W || canvas.clientHeight !== H) sizeCanvas(); }).observe(canvas);
 
 const ENTITY = [['hydrogen', '🔴', 'Hydrogen'], ['spaceRock', '🪨', 'Space rock'], ['microbeFood', '🧪', 'Nutrient'], ['swimmer', '🐠', 'Sea creature'], ['asteroid', '☄️', 'Asteroid'], ['energyOrb', '⚡', 'Energy orb']];
 
@@ -840,6 +851,41 @@ function initChapterScene() {
     renderMinigameUI();
     renderHotspots();
     updateUI();
+}
+
+/* Rectangles (in canvas pixels) that the boxes on top of the stage cover right now. */
+function keepOutZones() {
+    const c = canvas.getBoundingClientRect(), out = [];
+    [$('mascot-avatar'), mascotBubble, minigameContainer].forEach(el => {
+        if (!el || el.hidden || el.classList.contains('hidden')) return;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) return;
+        out.push({ l: r.left - c.left - 14, t: r.top - c.top - 14, r: r.right - c.left + 14, b: r.bottom - c.top + 14 });
+    });
+    // the glowing fact circles and their name tags
+    hotspotsContainer.querySelectorAll('button').forEach(b => {
+        let l = 1e9, t = 1e9, r = -1e9, bt = -1e9;
+        b.querySelectorAll('span').forEach(sp => { const q = sp.getBoundingClientRect(); if (q.width < 2) return; l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); bt = Math.max(bt, q.bottom); });
+        if (r > l) out.push({ l: l - c.left - 8, t: t - c.top - 8, r: r - c.left + 8, b: bt - c.top + 8 });
+    });
+    return out;
+}
+// push a floating thing out of any box it overlaps (by the nearest side that has room on the stage) and bounce it away
+function steerAround(ent, zones) {
+    const R = 34, lo = 45, hiX = Math.max(lo, W - 45), hiY = Math.max(lo, H - 45);
+    zones.forEach(z => {
+        const nx = Math.max(z.l, Math.min(ent.x, z.r)), ny = Math.max(z.t, Math.min(ent.y, z.b));
+        const dx = ent.x - nx, dy = ent.y - ny;
+        if (dx * dx + dy * dy >= R * R) return;
+        const options = [
+            { axis: 'x', pos: z.l - R, dir: -1 }, { axis: 'x', pos: z.r + R, dir: 1 },
+            { axis: 'y', pos: z.t - R, dir: -1 }, { axis: 'y', pos: z.b + R, dir: 1 }
+        ].map(o => ({ ...o, cost: Math.abs(o.pos - (o.axis === 'x' ? ent.x : ent.y)), ok: o.axis === 'x' ? (o.pos >= lo && o.pos <= hiX) : (o.pos >= lo && o.pos <= hiY) }));
+        const best = options.filter(o => o.ok).sort((p, q) => p.cost - q.cost)[0] || options.sort((p, q) => p.cost - q.cost)[0];
+        if (best.axis === 'x') { ent.x = best.pos; ent.vx = Math.abs(ent.vx) * best.dir || 0.6 * best.dir; }
+        else { ent.y = best.pos; ent.vy = Math.abs(ent.vy) * best.dir || 0.6 * best.dir; }
+    });
+    ent.x = Math.min(Math.max(ent.x, lo), hiX); ent.y = Math.min(Math.max(ent.y, lo), hiY);
 }
 
 function spawnGameEntity() {
@@ -922,7 +968,7 @@ function animate() {
     const preBang = ch === 0 && !bigBangTriggered;
 
     const live = gameLive();
-    if (live !== lastLive) { lastLive = live; minigameContainer.hidden = !live; hotspotsContainer.hidden = !live; }
+    if (live !== lastLive) { lastLive = live; minigameContainer.hidden = !live; hotspotsContainer.hidden = !live; if (live) mascotFoldSoon(6000); }
     if (live && ch === 0 && !liveStarted) { liveStarted = true; renderHotspots(); addStars(); }
     let cap = '';
     if (ch === 0 && bigBangTriggered && age < GATE) cap = (BANG_CAPTIONS.find(c => age < c[0]) || [0, ''])[1];
@@ -954,11 +1000,13 @@ function animate() {
     }
 
     if (live) {
+        const zones = keepOutZones();
         interactiveEntities.forEach(ent => {
             if (ent.collected) return;
             ent.x += ent.vx; ent.y += ent.vy; ent.pulse += 0.05;
             if (ent.x < 45 || ent.x > W - 45) ent.vx *= -1;
             if (ent.y < 45 || ent.y > H - 45) ent.vy *= -1;
+            steerAround(ent, zones);
             ctx.save();
             ctx.translate(ent.x, ent.y);
             const sc = 1 + Math.sin(ent.pulse) * 0.12;
@@ -1163,7 +1211,7 @@ function renderMinigameUI() {
             <h2 class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider m-0">${ch.minigameTitle}</h2>
             <span class="text-xs font-black text-white bg-amber-500/30 px-2 py-0.5 rounded-full border border-amber-400/30 shrink-0">${minigameProgress} / ${total}</span>
         </div>
-        <p class="text-[11px] sm:text-xs text-slate-300 mb-2 mt-0 leading-snug">${ch.minigameDesc}</p>
+        ${minigameProgress === 0 ? `<p class="text-[11px] sm:text-xs text-slate-300 mb-2 mt-0 leading-snug">${ch.minigameDesc}</p>` : ''}
         <div class="w-full h-2.5 bg-black/60 rounded-full overflow-hidden border border-white/10" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${minigameProgress}">
             <div class="h-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300" style="width: ${pct}%"></div>
         </div>`;

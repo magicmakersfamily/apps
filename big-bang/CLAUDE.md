@@ -26,3 +26,7 @@ card and a spoken intro from Cosmo the cat.
   converted from Ogg to 96 kbps MP3). The credit and licence link must stay in the About panel and the page footer; the share-alike
   licence applies to the converted file. It loads only after the first tap, loops at low volume, dips to 0.07 while Cosmo speaks
   and pauses when the tab is hidden; the 🎵 switch is saved as `big-bang:music`. Keep Wikimedia's source page in the credit.
+- **Clear stage (2.2)**: tap targets must never sit under UI. `keepOutZones()` lists Cosmo's face/box, the mini-game panel and the fact circles;
+  `steerAround()` pushes floating things out by the nearest side with room. Cosmo's box folds after speaking (`mascotFoldSoon`). The canvas is
+  resized by a `ResizeObserver` (the footer wraps after fonts load; before 2.2 the canvas stayed taller than the stage). Test it in a *visible*
+  browser tab: hidden tabs don't run `requestAnimationFrame`, so overlap tests there measure a frozen page.

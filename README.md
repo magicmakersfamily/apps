@@ -71,7 +71,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Spellicious | `spellicious/` | 4.40 | 2026-09-30 |
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
-| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 2.1 | 2026-10-17 |
+| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 2.2 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 1.5 | 2026-10-16 |
 

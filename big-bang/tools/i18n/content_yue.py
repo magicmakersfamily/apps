@@ -95,7 +95,7 @@ UI = {
   prev='← Previous', next='Next Chapter →', restart_j='Restart Journey ↻',
   cap1='Tiny, hot and crowded…', cap2='Space itself stretches, everywhere at once! There is no middle.', cap3='It cools down. Tiny pieces join up as hydrogen.',
   ent0='Hydrogen', ent1='Space rock', ent2='Nutrient', ent3='Sea creature', ent4='Asteroid', ent5='Idea spark',
-  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play', prof='Professor Know-A-Lot', ask_prof='Ask the Professor', b_word='New word', asks='asks',
+  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play', prof='Professor Know-A-Lot', ask_prof='Ask the Professor', hear_prof='Hear the Professor', prof_short='Professor', b_word='New word', asks='asks',
   help_title='How to play & learn',
   help_body='1. Tap the glowing dot to start the Big Bang.\n2. In each chapter, tap the floating things and watch what you make happen.\n3. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about.\n4. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
   help_fun='No sound? Check that your device isn’t on silent and the volume is up, then tap “Hear Cosmo”.',
@@ -128,7 +128,7 @@ UI = {
   prev='← 上一章', next='下一章 →', restart_j='重新旅行 ↻',
   cap1='又細又熱又迫……', cap2='空間本身喺每個地方同時脹大！冇中心㗎。', cap3='慢慢變涼，細細粒嘅嘢結合成氫。',
   ent0='氫原子', ent1='太空石', ent2='養分', ent3='海洋生物', ent4='小行星', ent5='靈感火花',
-  b_discovery='新發現！', b_bigq='大問題', b_help='玩法', prof='知得多教授', ask_prof='問吓教授', b_word='新詞語', asks='問',
+  b_discovery='新發現！', b_bigq='大問題', b_help='玩法', prof='知得多教授', ask_prof='問吓教授', hear_prof='聽教授講', prof_short='教授', b_word='新詞語', asks='問',
   help_title='玩法同學習',
   help_body='1. 㩒一下發光嘅小點，開始大爆炸。\n2. 每一章都㩒一下浮緊嘅嘢，睇吓你整出啲乜。\n3. 㩒發光嘅圈圈睇有趣知識；㩒「大問題」有啲嘢可以諗吓。\n4. 儲貼紙；睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
   help_fun='冇聲？睇吓部機有冇靜音、音量夠唔夠，再㩒「聽宇宙貓講」。',
@@ -202,6 +202,7 @@ def all_yue_strings():
         for h in c['hotspots']:
             if 'ask' in h: S.add(h['ask'])
             if 'more' in h: S.add(h['more'])
+        if 'ask' in c['centre']: S.add(c['centre']['ask'])
         if 'gloss' in c: S.update([c['gloss']['word'], c['gloss']['ask'], c['gloss']['answer']])
         S.update([c['centre']['title'], c['centre']['body'], c['centre']['funFact'], c['bigQ']['q'], c['bigQ']['a'], c['bigQ']['f']])
     for k, v in UI['yue'].items():
@@ -291,3 +292,6 @@ _CAST_Y = {
 for _i, (_asks, _g) in _CAST_Y.items():
     for _h, _a in zip(YUE[_i]['hotspots'], _asks): _h['ask'] = _a
     YUE[_i]['gloss'] = _g
+
+for _c, _a in zip(YUE, ["中間嗰粒細細嘅點係乜嚟㗎？", "啱啱形成嘅地球係點樣㗎？", "啲海洋係點嚟㗎？", "嗰陣時嘅陸地係點樣㗎？", "恐龍嗰陣時嘅陸地係點樣㗎？", "呢個係邊個星球㗎？"]):
+    _c['centre']['ask'] = _a

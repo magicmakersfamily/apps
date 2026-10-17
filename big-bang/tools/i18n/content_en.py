@@ -143,3 +143,7 @@ for _i, (_asks, _g) in _CAST_EN.items():
     chapters[_i]['cast'] = True
     for _h, _a in zip(chapters[_i]['hotspots'], _asks): _h['ask'] = _a
     chapters[_i]['gloss'] = _g
+
+# ---- the centre-picture cards are cast too: Cosmo asks, the Professor answers ----
+for _c, _a in zip(chapters, ["What is the little dot in the middle?", "What was brand-new Earth like?", "How did the oceans get there?", "What was the land like back then?", "What was the land like when dinosaurs lived?", "Which planet is this one?"]):
+    _c['centre']['ask'] = _a

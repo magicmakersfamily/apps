@@ -5,7 +5,7 @@
 #   Professor Know-A-Lot (prof)  English: Daniel (British), natural.   Cantonese: Sinji pitched down 0.80.
 # Needs a Mac with ffmpeg. Only re-renders lines whose text or voice settings changed (hash cache in tools/.cache, not committed).
 # Keys: c<chapter> (chapter intro), bang, p<chapter> (payoff), h<chapter><n> (hotspot answer; ha<chapter><n> is Cosmo's question in cast
-# chapters; hm<chapter><n> is the Professor's longer "Ask the Professor" answer), m<chapter> (centre picture), q<chapter> (big question; qa<chapter> is the Professor's answer in cast chapters),
+# chapters; hm<chapter><n> is the Professor's longer "Ask the Professor" answer), m<chapter> (centre picture answer; ma<chapter> is Cosmo's question), q<chapter> (big question; qa<chapter> is the Professor's answer in cast chapters),
 # ga/gb<chapter> (glossary word: Cosmo asks, Professor answers), t<chapter> (talk together), cal, final, orderok, help.
 #   big-bang/tools/render-voice.sh
 set -eu

@@ -9,16 +9,19 @@ const clean = t => t.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '').re
 const join = (a, b) => /[.!?！？。]$/.test(a) ? a + ' ' + b : a + (lang === 'yue' ? '。' : '. ') + b;
 const out = [];
 // each line is [key, text] spoken by Cosmo, or [key, text, 'prof'] spoken by Professor Know-A-Lot.
+// Rule (family): the Professor explains the science (chapter stories c, bang, payoffs p, picture cards m, the one-year story cal);
+// Cosmo asks the questions and handles play (talk-together t, help, final, orderok).
 // Chapters with c.cast: Cosmo asks (ha<i><j>, q<i>, ga<i>) and the Professor answers (h<i><j>, qa<i>, gb<i>); hm<i><j> is his longer "Ask the Professor" answer.
 CHAPTERS.forEach((c, i) => {
-  out.push(['c' + i, c.mascotSpeech]);
-  if (c.afterBang) out.push(['bang', c.afterBang]);
-  out.push(['p' + i, c.payoff]);
+  out.push(['c' + i, c.mascotSpeech, 'prof']);
+  if (c.afterBang) out.push(['bang', c.afterBang, 'prof']);
+  out.push(['p' + i, c.payoff, 'prof']);
   c.hotspots.forEach((h, j) => {
     if (c.cast) { out.push([`ha${i}${j}`, h.ask]); out.push([`h${i}${j}`, h.body, 'prof']); if (h.more) out.push([`hm${i}${j}`, h.more, 'prof']); }
     else out.push([`h${i}${j}`, join(h.title, h.body)]);
   });
-  out.push(['m' + i, join(c.centre.title, c.centre.body)]);
+  if (c.cast) { out.push(['ma' + i, c.centre.ask]); out.push(['m' + i, c.centre.body, 'prof']); }
+  else out.push(['m' + i, join(c.centre.title, c.centre.body), 'prof']);
   if (c.cast) { out.push(['q' + i, c.bigQ.q]); out.push(['qa' + i, `${c.bigQ.a} ${c.bigQ.f}`, 'prof']); }
   else out.push(['q' + i, `${c.bigQ.q} ${c.bigQ.a}`]);
   if (c.gloss) { out.push(['ga' + i, c.gloss.ask]); out.push(['gb' + i, c.gloss.answer, 'prof']); }
@@ -28,5 +31,5 @@ const u = UI[lang];
 out.push(['final', u.v_final]);
 out.push(['orderok', u.v_orderok]);
 out.push(['help', u.v_help]);
-out.push(['cal', u.v_cal]);
+out.push(['cal', u.v_cal, 'prof']);
 out.forEach(([k, t, who]) => console.log(k + '\t' + (who || 'cosmo') + '\t' + clean(t)));

@@ -1,6 +1,6 @@
 # Cosmic Journey: plan and decisions
 
-## START HERE (updated 2026-10-17, session 3: **5.0 released** with the Cosmo and Professor characters; the grown-ups layer is now 6.0)
+## START HERE (updated 2026-10-17, session 3: **5.1 released**: Cosmo asks, the Professor explains; the grown-ups layer is now 6.0)
 
 **Two tracks are open. Do them in this order, and ask the family before starting track 2 build work.**
 
@@ -30,6 +30,23 @@ If the pitched Samantha is not child-like enough after real listening, Kokoro is
 - Checked in the browser pane for all six chapters: every clip exists in both languages, every glossary button opens its Cosmo-asks / Professor-answers card, and the card fits a phone with Jyutping on. Not checked: listening on a real device.
 - Still open from the idea list: "Ask the Professor" instead of "More", Cosmo voicing common wrong ideas, Professor in the stage layout (he lives in pop-ups only, because the stage is tight on phones), and a version bump (5.0 or 6.0) with the usual release steps.
 - A Cantonese speaker should check the new Cantonese lines and the two character names.
+
+### Voice roles (family rule, 2026-10-17, released as 5.1)
+**The Professor explains all the science; Cosmo asks all the questions and handles play.** Professor: chapter stories (`c`), the Big Bang explanation (`bang`), payoffs (`p`), centre-picture answers (`m`), fact-circle and Big-question answers, glossary answers, the one-year story (`cal`). Cosmo: fact-circle, centre-picture, Big and glossary questions (`ha`, `ma`, `q`, `ga`), Talk-together (`t`), `help`, `final`, `orderok`. The mascot box in the stage swaps to 🦉 "Professor" (button "Hear the Professor") whenever he is the speaker (`isProf()` / `paintSpeaker()` in `index.html`; roles per clip in `tools/lines.js`). The centre-picture cards are now cast too (Cosmo asks first).
+
+### Feedback from the third round of AI testing (ChatGPT, Grok, Grok), noted, NOT yet acted on
+Themes, most repeated first. Triage before building; some points are wrong (reviewers say the mini-games "still mostly count taps", but 4.0 already shows each cause and effect) or clash with repo rules (a typed name on a certificate; anything that sends data).
+1. **Child agency / "what happens if…?"**: one tiny experiment per chapter (drag dots apart to see no centre; squeeze hydrogen until a star shines; rocks from different sides make a round Earth; sunlight vs shade for oxygen bubbles; wet/shallow/deep water across generations; small vs giant asteroid; telescope before rocket). Cosmo asks a *prediction* first ("What do you think will happen?"), then reacts to the child's try ("You guessed they'd bounce; gravity pulled them together!").
+2. **Interactive calendar**: tap a date to jump to the chapter; dates light up as chapters finish; a "Where am I?" view (Big Bang 1 Jan, dinosaurs 25 to 29 Dec, people 11:49 pm 31 Dec, your family's lifetime = the last blink); optional slider.
+3. **Finale**: a "Future Page"/Next-Discovery postcard (already in the 6.0 design, section E), "Cosmic Explorer" card to save or share. Drop the typed name idea unless it stays only on the device.
+4. **Grown-up / projector mode** (already the 6.0 design): large captions, pause points, 5/15/30-minute routes, one discussion prompt per chapter, printable timeline; no accounts.
+5. **Tiny recall, no scores**: "point to where Earth appears on the story line", order three pictures, "which is still around: T. rex, trilobite or bird?"; Cosmo only helps ("Almost! Let's slide them around").
+6. **Real-world bridge**: one off-screen invitation per chapter ("Tonight, look for the Moon"; "find a bird, it is a dinosaur cousin").
+7. **Juice and polish**: tap sparkles and haptics, hyperspace transition between chapters, brighter early-universe scenes, draggable stickers on a space wallpaper, recognisable silhouettes. Optional: pinch-to-zoom scale (atom to galaxy), supernova toy.
+8. **Languages**: native-written scripts per language, expressive native recordings, tap a science word to hear it in another language; keep Jyutping an intentional layer.
+9. **Be ruthless about NOT adding**: badges and streaks, pressure, an AI chat in the child experience, accounts or classroom admin, rankings, "wrong answer" punishment, trivia card piles.
+10. **Confirmed working for them**: Cosmo asks / Professor answers, "Ask the Professor", the one-year calendar, Easy & calm, the "not a bomb" Big Bang wording, honest Big questions. Silly-banter idea (popcorn on a star) is a no: keep the Professor accurate and humble.
+Suggested build order if the family agrees: (a) 5.1 voice roles, (b) the six "what happens if" experiments with Cosmo's prediction moments, (c) the 6.0 grown-ups layer plus interactive calendar and "Where am I?", (d) finale and Future Page, (e) polish pass, (f) quiet playtests with children.
 
 ### Track 2: the grown-ups layer (version 5.0), design below, text content already written
 Nothing of it is in the game yet. Only the *text content* is written and committed (see the next section). The Professor characters could take over the "More" layer (F) and the vocabulary (words) in A.

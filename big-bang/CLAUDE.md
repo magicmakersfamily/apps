@@ -30,3 +30,11 @@ card and a spoken intro from Cosmo the cat.
   `steerAround()` pushes floating things out by the nearest side with room. Cosmo's box folds after speaking (`mascotFoldSoon`). The canvas is
   resized by a `ResizeObserver` (the footer wraps after fonts load; before 2.2 the canvas stayed taller than the stage). Test it in a *visible*
   browser tab: hidden tabs don't run `requestAnimationFrame`, so overlap tests there measure a frozen page.
+- **Languages (3.0)**: `CHAPTERS_EN` and `CHAPTERS_YUE` hold all chapter text, `UI` holds every interface string (`t('key')`; static HTML uses
+  `data-i18n`), `STICKER_TEXT` the sticker names, `JP` the Jyutping for every Cantonese string (one reading per character, `|`-separated, shown by
+  `rich()` as `<ruby>`). Cantonese voice clips live in `voice/yue/` (macOS Sinji, `zh_HK`); the browser-voice fallback accepts only `zh-HK`/`yue`
+  voices, never Mandarin. Default language: Cantonese when the browser says `zh-HK`/`yue`, else English; the choice is saved as `big-bang:lang`
+  (Jyutping on/off as `big-bang:jp`). **When you change any text, change it in BOTH languages**, regenerate `JP` (it was made with the
+  `pycantonese` package from the rime-cantonese dictionary: char readings can be wrong for words with several readings, so a Cantonese
+  speaker should check) and re-run `tools/render-voice.sh`. Cantonese is written colloquially (嘅, 咗, 喺, 冇, 啲); the "Cosmo" name is 宇宙貓.
+  Footer, credits and Ko-fi lines stay English (for grown-ups).

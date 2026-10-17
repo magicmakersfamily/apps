@@ -134,6 +134,8 @@ Audio API, started only from a button press.
 - Mark Chinese text `lang="zh-TW"`; use the fonts "Noto Serif TC", "Songti TC", "PMingLiU".
 - For spoken words use `speechSynthesis` with `lang = 'zh-TW'`, preferring a zh-TW voice, then
   zh-CN — never zh-HK or yue (that is Cantonese).
+- Second exception, at the family's request: `big-bang/` (Cosmic Journey) has a language selector, English or Traditional Chinese with a
+  Cantonese voice (recorded zh_HK clips, never Mandarin) and Jyutping over the characters, switchable in the game.
 - Exception, at the family's request: `mid-autumn/` speaks Cantonese by default (zh-HK / yue voice,
   Jyutping over the characters) with a button to switch to Mandarin and pinyin. Other games stay Mandarin
   unless the user asks otherwise.

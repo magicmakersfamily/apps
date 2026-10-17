@@ -8,10 +8,12 @@ const out = [];
 CHAPTERS.forEach((c, i) => {
   out.push(['c' + i, c.mascotSpeech]);
   if (c.afterBang) out.push(['bang', c.afterBang]);
+  out.push(['p' + i, c.payoff]);
   c.hotspots.forEach((h, j) => out.push([`h${i}${j}`, `${h.title}. ${h.body}`]));
   out.push(['m' + i, `${c.centre.title}. ${c.centre.body}`]);
+  out.push(['q' + i, `${c.bigQ.q} ${c.bigQ.a}`]);
 });
-out.push(['done', 'Awesome job! You finished this chapter’s challenge. Tap Next Chapter to keep going!']);
-out.push(['final', 'You did it! You travelled all the way from the Big Bang to today!']);
-out.push(['help', 'How to play and learn. In Chapter 1, tap the glowing core in the dark to start the Big Bang. Tap the floating things to finish each chapter’s challenge. Tap the glowing circles to learn a fun fact. Tap Cosmo to hear him again.']);
+out.push(['final', 'You did it! You travelled all the way from the Big Bang to today! What do you want to discover next?']);
+out.push(['orderok', 'You put the whole story in order. Great job, explorer!']);
+out.push(['help', 'How to play and learn. Tap the glowing dot to start the Big Bang. In each chapter, tap the floating things and watch what you make happen. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about. Collect stickers, and use the story line at the bottom to see how long ago things happened.']);
 out.forEach(([k, t]) => console.log(k + '\t' + clean(t)));

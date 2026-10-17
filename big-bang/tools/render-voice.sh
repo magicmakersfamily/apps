@@ -1,8 +1,8 @@
 #!/bin/sh
 # Re-records Cosmo's spoken lines into voice/<key>.mp3 from the CHAPTERS text in index.html.
 # Uses macOS `say` (voice "Samantha") + ffmpeg, so run it on a Mac. Only re-renders lines whose text changed
-# (hash cache in tools/.cache, not committed). Keys: c<chapter> (chapter intro), bang, done, final,
-# h<chapter><n> (hotspots), m<chapter> (centre picture), help.
+# (hash cache in tools/.cache, not committed). Keys: c<chapter> (chapter intro), bang, p<chapter> (payoff after the
+# mini-game), h<chapter><n> (hotspots), m<chapter> (centre picture), q<chapter> (big question), final, orderok, help.
 #   big-bang/tools/render-voice.sh
 set -eu
 here=$(cd "$(dirname "$0")/.." && pwd)

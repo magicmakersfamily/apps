@@ -1,0 +1,2 @@
+top.png and bottom.png: the top and bottom edges of a cockpit picture supplied by the family (AI-generated, window area was flat green
+and has been cut out; the sides were cropped away so the window spans the full width). Original not stored in the repo.

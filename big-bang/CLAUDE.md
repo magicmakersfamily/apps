@@ -38,3 +38,9 @@ card and a spoken intro from Cosmo the cat.
   `pycantonese` package from the rime-cantonese dictionary: char readings can be wrong for words with several readings, so a Cantonese
   speaker should check) and re-run `tools/render-voice.sh`. Cantonese is written colloquially (嘅, 咗, 喺, 冇, 啲); the "Cosmo" name is 宇宙貓.
   Footer, credits and Ko-fi lines stay English (for grown-ups).
+- **4.0**: read `PLAN.md` (decisions + what is next). One glowing dot starts everything (`btn-unlock-audio` unlocks audio, then fires the Big Bang).
+  Settings (⚙️) holds language, sound, voice, music, Jyutping (default OFF) and Easy & calm mode (default on when the device asks for reduced motion;
+  slower and bigger things, bigger tap area, no pulsing). Taps are forgiving (nearest thing within 62 px, 84 px in easy mode). Touch targets are at
+  least 44 px: keep them that way. All panels are `fixed` over the whole screen (inside the stage they got clipped). Each chapter has a `talk`
+  question (spoken after the payoff) and a `cal` line (its date in "the universe in one year"); the calendar modal zooms year → December → 31 December.
+  **Edit text in `tools/i18n/content_en.py` and `content_yue.py` (not in index.html), then run `tools/i18n/build.py`** (see its docstring).

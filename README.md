@@ -38,6 +38,8 @@ sequence-flow/      Sequence Flow (beta utility: routine builder and step timer)
 big-bang/           Cosmic Journey (beta): Big Bang to today, six chapters, a talking cosmic cat and a mini-game each
   index.html        the whole game (canvas scenes, mini-games, narrator, inlined Tailwind CSS)
   music/spring.mp3  background music: Vivaldi, Spring (Allegro), played by John Harrison, CC BY-SA 4.0 (credit in the game)
+  PLAN.md           decisions, the compiled review feedback and what is next
+  tools/i18n/       the English and Cantonese text, Jyutping generator and build.py (regenerates the data inside index.html)
   voice/            Cosmo's recorded lines: English (macOS Samantha) and voice/yue/ Cantonese (macOS Sinji); re-record with tools/render-voice.sh
   tools/            rebuild-css.sh (recompile the inlined Tailwind), render-voice.sh, lines.js
   cover.png         1200×744 card image (render with index.html#cover)
@@ -71,7 +73,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Spellicious | `spellicious/` | 4.40 | 2026-09-30 |
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
-| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 3.0 | 2026-10-17 |
+| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 4.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 1.5 | 2026-10-16 |
 

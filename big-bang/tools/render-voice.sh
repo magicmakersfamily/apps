@@ -2,7 +2,7 @@
 # Re-records Cosmo's spoken lines into voice/<key>.mp3 (English, macOS voice "Samantha") and voice/yue/<key>.mp3
 # (Cantonese, macOS voice "Sinji", zh_HK) from the text in index.html. Needs a Mac with ffmpeg. Only re-renders lines whose
 # text changed (hash cache in tools/.cache, not committed). Keys: c<chapter> (chapter intro), bang, p<chapter> (payoff after
-# the mini-game), h<chapter><n> (hotspots), m<chapter> (centre picture), q<chapter> (big question), final, orderok, help.
+# the mini-game), h<chapter><n> (hotspots), m<chapter> (centre picture), q<chapter> (big question), t<chapter> (talk together), cal (one-year story), final, orderok, help.
 #   big-bang/tools/render-voice.sh
 set -eu
 here=$(cd "$(dirname "$0")/.." && pwd)

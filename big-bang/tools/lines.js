@@ -15,9 +15,11 @@ CHAPTERS.forEach((c, i) => {
   c.hotspots.forEach((h, j) => out.push([`h${i}${j}`, join(h.title, h.body)]));
   out.push(['m' + i, join(c.centre.title, c.centre.body)]);
   out.push(['q' + i, `${c.bigQ.q} ${c.bigQ.a}`]);
+  out.push(['t' + i, c.talk]);
 });
 const u = UI[lang];
 out.push(['final', u.v_final]);
 out.push(['orderok', u.v_orderok]);
 out.push(['help', u.v_help]);
+out.push(['cal', u.v_cal]);
 out.forEach(([k, t]) => console.log(k + '\t' + clean(t)));

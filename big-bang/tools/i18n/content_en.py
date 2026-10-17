@@ -64,3 +64,52 @@ chapters = [
   bigQ=dict(q="What do you want humans to discover next?",a="Maybe how life began, a cure for a sickness, or a new world. People all over the world keep learning and sharing. You are a part of the universe that learned to wonder about itself!",f="What will YOU explore next?")),
 ]
 def js(): return "const CHAPTERS = " + json.dumps(chapters, ensure_ascii=False, indent=4) + ";"
+
+# ---- grown-ups layer (2.x/5.0): a "because" sentence, talking points, words, known / open, and "more" for older kids ----
+EXTRAS = [
+ dict(because="Space stretched and cooled, so hydrogen could gather, and the first stars could light up.",
+  prompts=["If space stretches, where is the middle? (There isn’t one. Try drawing dots on a balloon and blowing it up.)", "What do you think it means that nobody knows what came before the Big Bang?"],
+  words=[["Hydrogen","the lightest and most common atom in the universe"],["Fusion","when atoms squeeze together so hard that they give off light and heat"],["Galaxy","a huge family of stars held together by gravity"]],
+  known="The universe began about 13.8 billion years ago and has been growing ever since. The first stars were made of hydrogen and helium.",
+  open="What caused the Big Bang, and what came before it.",
+  more=["Scientists call this very fast stretching inflation. It may have lasted only a tiny fraction of a second, but it set up the whole universe. Small differences in the early universe later grew into galaxies. Space is still growing today, so faraway galaxies keep moving apart.",
+        "The very first stars were probably huge and short-lived. When they ended, they scattered new ingredients like carbon and oxygen into space. Those later became planets and people."]),
+ dict(because="Rocks stuck together because of gravity, so Earth could grow, and a giant crash made the Moon.",
+  prompts=["Why are planets round? (Gravity pulls everything toward the middle.)", "How is a rock sticking to Earth like a snowball getting bigger as you roll it?"],
+  words=[["Gravity","the pull between all things that have mass"],["Theia","the name scientists give the Mars-sized world that may have hit Earth"],["Molten","so hot that rock has melted"]],
+  known="Earth and the other planets formed about 4.5 billion years ago from a spinning cloud of gas and dust.",
+  open="Exactly how the Moon formed. The giant-impact idea is the leading one, and scientists keep testing it.",
+  more=["Our Sun is a medium-sized star about 4.6 billion years old, roughly halfway through its life. In its core it turns hydrogen into helium, the same fusion you saw light the first star.",
+        "Computer models of the giant impact match what we find in Moon rocks, which are very like Earth’s rocks. It is the best idea so far, but scientists keep testing it."]),
+ dict(because="Tiny cells used sunlight and made oxygen, so the air could change, and animals could one day breathe.",
+  prompts=["What do you think Earth’s sky looked like before there was oxygen?", "Plants make oxygen today. How is that like what the tiny cells did?"],
+  words=[["Microbe","a living thing too small to see without a microscope"],["Oxygen","the gas in air that most animals need to breathe"],["Photosynthesis","using sunlight to make food"]],
+  known="Life existed at least 3.5 billion years ago, and tiny cells filled the air with oxygen over a very long time.",
+  open="How life first began, and exactly when.",
+  more=["Strange animals like giant tube worms still live around sea-floor vents today. They live on chemicals from the vent, not on sunlight.",
+        "For a long time, the oxygen made by cyanobacteria reacted with iron in the oceans and rusted it out of the water. Only after that did oxygen build up in the air. This is called the Great Oxidation Event, about 2.4 billion years ago."]),
+ dict(because="Small changes built up over many generations, so new kinds of animals appeared, even ones that walk on land.",
+  prompts=["Can you think of an animal today whose body helps it live where it lives?", "Why does this take millions of years, and not one lifetime?"],
+  words=[["Evolution","changes in living things over many generations"],["Generation","a group born around the same time, like a family’s grandparents, parents and children"],["Trilobite","an ancient sea animal with a hard shell"]],
+  known="Animals with shells, eyes and fins filled the seas about 540 million years ago, and some later walked onto land about 375 million years ago.",
+  open="Why so many new kinds of animals appeared so quickly in the Cambrian.",
+  more=["Trilobites were arthropods, relatives of today’s crabs, insects and spiders. Their eyes had crystal lenses, and many could roll up into a ball.",
+        "The first land plants had no real roots or leaves like ours. Later, trees evolved wood, and forests stored so much carbon that they helped to make coal."]),
+ dict(because="A huge asteroid changed the world, so the big dinosaurs died out, and small survivors, the birds, carried on.",
+  prompts=["Why might small animals survive better after a disaster?", "Which birds near you could be dinosaur cousins?"],
+  words=[["Asteroid","a rocky object flying through space"],["Extinct","gone forever, with none left alive"],["Crater","a bowl-shaped hole made by an impact"]],
+  known="An asteroid about 10 km (6 miles) wide hit Mexico 66 million years ago, and birds are living dinosaurs.",
+  open="How much other things, like huge volcanic eruptions, added to the end of the dinosaurs.",
+  more=["T. rex lived right at the end of the dinosaur age, about 68 to 66 million years ago. It lived closer in time to us than to Stegosaurus.",
+        "The crater is buried under the coast of Yucatán in Mexico, near a town called Chicxulub. Rock layers around the world contain a thin band of a rare metal that came from the asteroid."]),
+ dict(because="People kept learning and sharing ideas, so we could build telescopes and rockets and explore space.",
+  prompts=["Which idea on the ladder do you think was the hardest to invent?", "What do you want people to discover next, and what would be needed?"],
+  words=[["Mammal","an animal with fur or hair that feeds milk to its babies"],["Telescope","a tool that makes faraway things look closer"],["Spacecraft","a machine that travels in space"]],
+  known="Modern people appeared about 300,000 years ago. People first reached space in 1961 and the Moon in 1969.",
+  open="Whether life exists anywhere else in the universe.",
+  more=["Mammoths, woolly rhinos and sabre-toothed cats lived in the last ice age. People drew them on cave walls.",
+        "Voyager 1 has left the Sun’s neighbourhood and is in interstellar space. Its radio signal takes more than 22 hours to reach us."]),
+]
+for _c, _e in zip(chapters, EXTRAS):
+    for _k in ('because', 'prompts', 'words', 'known', 'open'): _c[_k] = _e[_k]
+    for _h, _m in zip(_c['hotspots'], _e['more']): _h['more'] = _m

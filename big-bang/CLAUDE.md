@@ -1,5 +1,6 @@
 # Cosmic Journey (big-bang/): notes for Claude
 
+**New session? Read `PLAN.md` ("START HERE") first: it says what is live, what is half-built and how to build the rest.**
 Beta on the shelf since 1.0 (2026-10-17); 2.0 (same day) acted on feedback from three AI reviewers. James is helping develop it; his first draft was a single claude.ai page.
 Six chapters (Big Bang → today), each with a canvas scene, a tap mini-game, two hotspot fact cards, a centre-picture
 card and a spoken intro from Cosmo the cat.

@@ -1,6 +1,6 @@
 # Cosmic Journey: plan and decisions
 
-## START HERE (updated end of session 2, 2026-10-17)
+## START HERE (updated 2026-10-17, session 3: **5.0 released** with the Cosmo and Professor characters; the grown-ups layer is now 6.0)
 
 **Two tracks are open. Do them in this order, and ask the family before starting track 2 build work.**
 
@@ -10,16 +10,26 @@
 My recommendations, not yet confirmed by the family: Cosmo keeps narrating the chapter stories; the Professor takes the fact circles, definitions, Big questions and "More"; the Professor
 models honesty ("scientists think...", "we don't know yet"); Cosmo voices common wrong ideas ("Did the Big Bang explode from the middle?") and the Professor corrects them kindly; tappable
 glossary words in the story text ("fusion" -> Cosmo asks, Professor explains); "More ▸" becomes "Ask the Professor". Keep answers to one idea (about 15 to 25 seconds) or kids skip them.
-Possible Cantonese name for the Professor: 乜都知教授 (suggested, not decided). Pilot it in ONE chapter (fact circles, one Big question, one glossary word) before rolling out to all six.
+Possible Cantonese name for the Professor: 知得多教授 (suggested, not decided). Pilot it in ONE chapter (fact circles, one Big question, one glossary word) before rolling out to all six.
 Scale: roughly 60 extra clips per language; every future text change means re-recording both voices; the layout for two characters on a phone must be worked out (the stage is already tight).
 
-**Voice audition status:** samples were generated (macOS `say` plus ffmpeg pitch shifting) and the listening page was shown to the family, but **they have not yet picked**.
-To re-create it: run `big-bang/tools/audition.sh`, copy `big-bang/tools/audition-page.html` to `big-bang/audition/index.html`, serve with `cd /Users/ab/apps && python3 -m http.server 8765`, open `http://localhost:8765/big-bang/audition/`.
-Options: Cosmo C1 Junior, C2 Samantha pitched up 1.28, C3 Flo(US) 1.15, C4 Kathy 1.22, C5 Tessa 1.20; Professor P1 Daniel, P2 Daniel lowered 0.88, P3 Grandpa(UK) 0.95, P4 Reed(UK) 0.92, P5 Rocko(UK) 0.90, P6 Ralph 0.85;
-Cantonese (only one Cantonese voice exists on this Mac, Sinji, so it must be pitch-shifted): Cosmo YC1 1.30 or YC2 1.45; Professor YP1 0.80 or YP2 0.70.
-**FIRST THING TO DO in the next session: ask the family for their picks (Cosmo, Professor, Cantonese Cosmo, Cantonese Professor) and whether the quality is good enough.** If the English Cosmo does not sound child-like enough, the better engine is
-Kokoro (open-source, already used by Blow Up and Brush Buddy through `kokoro-onnx`; see `blow-up/tools/render-voice.py`); it needs a one-time model download of about 300 MB (ask permission first, say what/where/how big) and it does NOT cover Cantonese.
-The owl avatar is an emoji (🦉) drawn in code, like Cosmo's 🐱; no image assets. Mind the repo rules: static page, no third-party calls, kid-facing text plain and accurate.
+**Design principle (family, 2026-10-17):** the Professor *knows a lot*, never *knows it all*. Even experts don't know everything, so he says "scientists think..." and "we don't know yet" and models curiosity. His Cantonese name is 知得多教授 ("knows a lot"), not 乜都知 ("knows everything"). Keep every future Professor line consistent with this.
+
+**Voice picks (made 2026-10-17, final for the pilot):** Cosmo = macOS Samantha pitched up 1.28 (Cantonese: Sinji up 1.30); Professor = Daniel (British), natural (Cantonese: Sinji down 0.80).
+`tools/render-voice.sh` now holds these settings (all Cosmo clips in the whole game were re-recorded in the new voice). Audition page: `tools/audition.sh` + `tools/audition-page.html` (see git history of this file for the recipe).
+If the pitched Samantha is not child-like enough after real listening, Kokoro is still the fallback (about 300 MB download, ask first, no Cantonese).
+
+**CAST STATUS (built locally, NOT committed, NOT released; needs the family's listening and approval first):** the pilot was in chapter 1; on 2026-10-17 it was rolled out to **all six chapters** (`cast: True` in both content files).
+- Fact circles: Cosmo asks (`ha00`, `ha01`), the Professor answers (`h00`, `h01`, body text only). Big question: Cosmo asks (`q0`), Professor answers (`qa0`, answer plus closing line).
+  Glossary: the word **fusion** (核聚變) in the chapter-1 payoff text is a tappable button; Cosmo asks (`ga0`), Professor answers (`gb0`).
+- Text lives in `content_en.py` / `content_yue.py` (`ask` per hotspot, `gloss`, `cast`; UI keys `prof`, `b_word`, `asks`). `tools/lines.js` now emits `key<TAB>role<TAB>text`; Cantonese names: 宇宙貓 and 知得多教授 (not yet confirmed by the family).
+- Code (`index.html`): `castTalk()` plays ask then answer and lights the speaking character's box in the info modal; `openModal(hs, key, cast)`; `richGloss()`/`openGloss()`; chapters without `cast` behave exactly as before. Browser-voice fallback uses lower pitch for the Professor.
+- Checked in the browser pane (English and Cantonese, phone width, both rows, plain cards unchanged). Not checked: real-device listening, the 5-year-old's reaction, and whether two characters feel right in the modal.
+- **"Ask the Professor" button (built 2026-10-17, replaces the planned "More ▸"):** every fact-circle card in a cast chapter has an "Ask the Professor ▸" button (問吓教授). Tapping it opens a second Professor box with the longer `more` paragraph (text, Jyutping, and his voice: clips `hm<chapter><n>`, 12 per language, longest about 21 s). It is only on fact circles, not on Big question or glossary cards. Code: `#btn-ask-prof`, `#modal-more`, `askMore` in `index.html`; the `more` text is in `EXTRAS`/`EXTRAS_Y`.
+- Glossary words (each appears in that chapter's payoff text): fusion (核聚變), Theia (忒伊亞), oxygen (氧氣), evolution (演化), asteroid (小行星), universe (宇宙). Longest Professor clip is about 23 s (Cantonese big question, chapter 4).
+- Checked in the browser pane for all six chapters: every clip exists in both languages, every glossary button opens its Cosmo-asks / Professor-answers card, and the card fits a phone with Jyutping on. Not checked: listening on a real device.
+- Still open from the idea list: "Ask the Professor" instead of "More", Cosmo voicing common wrong ideas, Professor in the stage layout (he lives in pop-ups only, because the stage is tight on phones), and a version bump (5.0 or 6.0) with the usual release steps.
+- A Cantonese speaker should check the new Cantonese lines and the two character names.
 
 ### Track 2: the grown-ups layer (version 5.0), design below, text content already written
 Nothing of it is in the game yet. Only the *text content* is written and committed (see the next section). The Professor characters could take over the "More" layer (F) and the vocabulary (words) in A.

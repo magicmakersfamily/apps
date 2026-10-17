@@ -95,7 +95,7 @@ UI = {
   prev='← Previous', next='Next Chapter →', restart_j='Restart Journey ↻',
   cap1='Tiny, hot and crowded…', cap2='Space itself stretches, everywhere at once! There is no middle.', cap3='It cools down. Tiny pieces join up as hydrogen.',
   ent0='Hydrogen', ent1='Space rock', ent2='Nutrient', ent3='Sea creature', ent4='Asteroid', ent5='Idea spark',
-  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play',
+  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play', prof='Professor Know-A-Lot', ask_prof='Ask the Professor', b_word='New word', asks='asks',
   help_title='How to play & learn',
   help_body='1. Tap the glowing dot to start the Big Bang.\n2. In each chapter, tap the floating things and watch what you make happen.\n3. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about.\n4. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
   help_fun='No sound? Check that your device isn’t on silent and the volume is up, then tap “Hear Cosmo”.',
@@ -128,7 +128,7 @@ UI = {
   prev='← 上一章', next='下一章 →', restart_j='重新旅行 ↻',
   cap1='又細又熱又迫……', cap2='空間本身喺每個地方同時脹大！冇中心㗎。', cap3='慢慢變涼，細細粒嘅嘢結合成氫。',
   ent0='氫原子', ent1='太空石', ent2='養分', ent3='海洋生物', ent4='小行星', ent5='靈感火花',
-  b_discovery='新發現！', b_bigq='大問題', b_help='玩法',
+  b_discovery='新發現！', b_bigq='大問題', b_help='玩法', prof='知得多教授', ask_prof='問吓教授', b_word='新詞語', asks='問',
   help_title='玩法同學習',
   help_body='1. 㩒一下發光嘅小點，開始大爆炸。\n2. 每一章都㩒一下浮緊嘅嘢，睇吓你整出啲乜。\n3. 㩒發光嘅圈圈睇有趣知識；㩒「大問題」有啲嘢可以諗吓。\n4. 儲貼紙；睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
   help_fun='冇聲？睇吓部機有冇靜音、音量夠唔夠，再㩒「聽宇宙貓講」。',
@@ -199,6 +199,10 @@ def all_yue_strings():
         for k in ('title','shortTitle','orderName','timeLabel','gapNote','mascotSpeech','afterBang','minigameTitle','minigameDesc','payoff','talk','cal'):
             if k in c: S.add(c[k])
         for h in c['hotspots']: S.update([h['title'], h['body'], h['funFact']])
+        for h in c['hotspots']:
+            if 'ask' in h: S.add(h['ask'])
+            if 'more' in h: S.add(h['more'])
+        if 'gloss' in c: S.update([c['gloss']['word'], c['gloss']['ask'], c['gloss']['answer']])
         S.update([c['centre']['title'], c['centre']['body'], c['centre']['funFact'], c['bigQ']['q'], c['bigQ']['a'], c['bigQ']['f']])
     for k, v in UI['yue'].items():
         if k.startswith(('v_', 'tl_', 't_')): continue
@@ -258,3 +262,32 @@ def merge(en, y):
     for h, m in zip(c['hotspots'], y['more']): h['more'] = m
     return c
 YUE = [merge(e, y) for e, y in zip(EN, Y)]
+
+# ---- characters pilot (chapter 1 only) ----
+_PILOT_Y = dict(asks=["吓？空間會脹大？點解㗎？", "第一批星係點樣出現㗎？"],
+  gloss=dict(word="核聚變", ask="教授，核聚變係乜嘢嚟㗎？",
+    answer="核聚變就係好細嘅原子被擠得好實，結合成一個大啲嘅原子，同時放出好多光同熱。恆星發光，就係靠核聚變，我哋嘅太陽都係咁。"))
+for _h, _a in zip(YUE[0]['hotspots'], _PILOT_Y['asks']): _h['ask'] = _a
+YUE[0]['gloss'] = _PILOT_Y['gloss']
+
+# ---- characters rollout: chapters 2 to 6 ----
+_CAST_Y = {
+ 1: (["太陽啱啱出現嘅時候係點樣㗎？", "月球係點嚟㗎？"],
+     dict(word="忒伊亞", ask="教授，忒伊亞係邊個㗎？",
+          answer="忒伊亞係科學家畀一個好似火星咁大嘅天體改嘅名。科學家認為佢撞過年輕嘅地球。當時冇人睇到，所以科學家用電腦模擬同月球石頭嚟驗證呢個諗法。")),
+ 2: (["咁深嘅海底，真係有嘢可以生存咩？", "啲氧氣係邊個造出嚟㗎？"],
+     dict(word="氧氣", ask="教授，氧氣係乜嘢嚟㗎？",
+          answer="氧氣係空氣入面嘅一種氣體。你同大部分動物都要靠佢呼吸。早在有動物之前，細小嘅細胞已經製造氧氣。")),
+ 3: (["三葉蟲係乜嘢嚟㗎？", "光禿禿嘅陸地係點樣變綠㗎？"],
+     dict(word="演化", ask="教授，演化係咩意思㗎？",
+          answer="演化即係生物一代又一代慢慢改變。呢啲改變發生喺成個家族身上，要幾百萬年，唔係一隻動物一生之內。")),
+ 4: (["霸王龍係咪恐龍之王㗎？", "嗰粒大大粒嘅小行星撞咗去邊度㗎？"],
+     dict(word="小行星", ask="教授，小行星係乜嘢嚟㗎？",
+          answer="小行星係喺太空飛行嘅石頭。大部分都好細，但有啲好大。墨西哥有個巨大嘅撞擊坑，世界各地嘅岩石都有線索，顯示大約6600萬年前有一粒撞過地球。")),
+ 5: (["冰河時期有啲乜嘢動物㗎？", "人類係點樣去到太空㗎？"],
+     dict(word="宇宙", ask="教授，宇宙係乜嘢嚟㗎？",
+          answer="宇宙就係所有嘢：成個太空、每一粒星、每一個行星，仲有我哋。佢大約有138億年歷史。我哋已經知道好多，但仲有好多嘢未知。")),
+}
+for _i, (_asks, _g) in _CAST_Y.items():
+    for _h, _a in zip(YUE[_i]['hotspots'], _asks): _h['ask'] = _a
+    YUE[_i]['gloss'] = _g

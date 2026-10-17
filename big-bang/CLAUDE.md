@@ -8,8 +8,9 @@ card and a spoken intro from Cosmo the cat.
 - **One file**: `index.html` holds the CHAPTERS data (all kid-facing text), drawing, mini-games and UI. Tailwind is compiled
   and inlined between `/* tw:start */` and `/* tw:end */`: run `big-bang/tools/rebuild-css.sh` after adding Tailwind classes.
   No CDN, no Font Awesome (icons are emoji).
-- **Voice (read this before touching it)**: Cosmo speaks recorded files `voice/<key>.mp3`, rendered by
-  `tools/render-voice.sh` (macOS `say` Samantha + ffmpeg; keys come from `tools/lines.js`). Any text change in CHAPTERS needs a
+- **5.0 characters**: Cosmo (🐱, pitched Samantha / Sinji) ASKS and Professor Know-A-Lot (🦉, Daniel / Sinji lowered; Cantonese 知得多教授) ANSWERS in every fact circle, Big question and one tappable glossary word per chapter, plus an "Ask the Professor" second answer on fact circles. He *knows a lot, not everything*: keep his lines honest ("scientists think", "we don't know yet"). Data: `ask`, `gloss`, `cast` in `tools/i18n/content_*.py`; clips `ha/h/hm/q/qa/ga/gb`; see `render-voice.sh` and `PLAN.md`.
+- **Voice (read this before touching it)**: spoken lines are recorded files `voice/<key>.mp3`, rendered by
+  `tools/render-voice.sh` (macOS `say` + ffmpeg pitch shifting, one voice per character; keys come from `tools/lines.js`). Any text change in CHAPTERS needs a
   re-render. If a file can't play, the browser's `speechSynthesis` reads the same words. The original draft depended on
   `speechSynthesis` only and was silent: on this Mac the browser speech engine accepted `speak()` but never started
   (no `start` event, even for a bare utterance), so don't rely on it alone. Test voice with `window.bigBangNarrator`

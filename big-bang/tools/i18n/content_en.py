@@ -113,3 +113,33 @@ EXTRAS = [
 for _c, _e in zip(chapters, EXTRAS):
     for _k in ('because', 'prompts', 'words', 'known', 'open'): _c[_k] = _e[_k]
     for _h, _m in zip(_c['hotspots'], _e['more']): _h['more'] = _m
+
+# ---- characters pilot (chapter 1 only): Cosmo ASKS, Professor Know-A-Lot ANSWERS; one tappable word ----
+chapters[0]['hotspots'][0]['ask'] = "Whoa, what do you mean, space stretched?"
+chapters[0]['hotspots'][1]['ask'] = "How did the very first stars get made?"
+chapters[0]['cast'] = True   # this chapter uses Cosmo (asks) and Professor Know-A-Lot (answers)
+chapters[0]['gloss'] = dict(word="fusion", ask="Professor, what is fusion?",
+  answer="Fusion is when tiny atoms get squeezed together so hard that they join into one bigger atom. That gives off a huge burst of light and heat. Stars shine because of fusion, and so does our Sun.")
+
+# ---- characters rollout: chapters 2 to 6 ----
+_CAST_EN = {
+ 1: (["What was the Sun like when it was brand new?", "Where did the Moon come from?"],
+     dict(word="Theia", ask="Professor, who is Theia?",
+          answer="Theia is the name scientists give to a world about as big as Mars. Scientists think it crashed into young Earth. Nobody was there to see it, so they test the idea with computer models and Moon rocks.")),
+ 2: (["Could anything really live down there?", "Who made all the oxygen?"],
+     dict(word="oxygen", ask="Professor, what is oxygen?",
+          answer="Oxygen is a gas in the air. You need it to breathe, and so do most animals. Tiny cells were making oxygen long before any animal existed.")),
+ 3: (["What was a trilobite?", "How did the bare land turn green?"],
+     dict(word="evolution", ask="Professor, what does evolution mean?",
+          answer="Evolution means that living things change a little, generation after generation. It happens to whole families over millions of years, not to one animal in its own life.")),
+ 4: (["Was T. rex the king of the dinosaurs?", "Where did the big asteroid land?"],
+     dict(word="asteroid", ask="Professor, what is an asteroid?",
+          answer="An asteroid is a rocky object flying through space. Most are small, but some are huge. A giant crater in Mexico, and rocks all around the world, are clues that one hit Earth 66 million years ago.")),
+ 5: (["Who lived in the ice ages?", "How did people get to space?"],
+     dict(word="universe", ask="Professor, what is the universe?",
+          answer="The universe is everything there is: all of space, every star and planet, and us. It is about 13.8 billion years old. We have learned a lot about it, and there is still much we do not know.")),
+}
+for _i, (_asks, _g) in _CAST_EN.items():
+    chapters[_i]['cast'] = True
+    for _h, _a in zip(chapters[_i]['hotspots'], _asks): _h['ask'] = _a
+    chapters[_i]['gloss'] = _g

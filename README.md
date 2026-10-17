@@ -37,6 +37,9 @@ get-ready/          Ready To Go! (departure countdown with spoken steps)
 sequence-flow/      Sequence Flow (beta utility: routine builder and step timer)
 big-bang/           Cosmic Journey (beta): Big Bang to today, six chapters, a cosmic cat who asks and a wise owl professor who answers, and a mini-game each
   index.html        the whole game (canvas scenes, mini-games, narrator, inlined Tailwind CSS)
+  characters/       the painted guides (cosmo.png, professor.png; family-made pictures, backgrounds cut out with tools/cutout.swift) and PROMPTS.md for new poses
+  cockpit/          the spacecraft frame: top and bottom bands, ceiling and floor strips (from a family-made picture)
+  backgrounds/      starfield.jpg, a band of NASA's Deep Star Maps 2020 that scrolls slowly behind the scene (credit in the game and CREDITS.txt)
   music/spring.mp3  background music: Vivaldi, Spring (Allegro), played by John Harrison, CC BY-SA 4.0 (credit in the game)
   PLAN.md           decisions, the compiled review feedback and what is next
   tools/i18n/       the English and Cantonese text, Jyutping generator and build.py (regenerates the data inside index.html)
@@ -73,7 +76,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Spellicious | `spellicious/` | 4.40 | 2026-09-30 |
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
-| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 5.2 | 2026-10-17 |
+| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 6.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 1.5 | 2026-10-16 |
 

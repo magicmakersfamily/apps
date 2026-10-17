@@ -36,7 +36,7 @@ place search (Photon, OpenStreetMap) and drive time (OSRM). The page says so nex
 device a parent has set up once with a private link, posts which characters James wrote or tapped to the family's
 own Google Sheet (an Apps Script web app). The URL and token are never in this repository; they live in that
 device's `localStorage`. See `renzi/SETUP.md`. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
-Audio API, started only from a button press.
+Audio API, started only from a button press. Exception, at the family's request: `big-bang/` (6.0) also uses bitmap pictures: the painted guides and the cockpit frame (family-made, AI-generated, backgrounds cut out) and a star field cut from NASA's "Deep Star Maps 2020" (credited in the game's About panel).
 
 ## Adding or updating a game
 
@@ -96,6 +96,10 @@ Audio API, started only from a button press.
   a mooncake: Ko-fi" / "These apps don’t collect any information…") under its version line, and shows the
   Ko-fi links on its end screen, together with a "More from the App Shelf" card for the other games. The shelf has a
   "For grown-ups" strip above the footer.
+  Exception, at the family's request (Cosmic Journey 6.0): `big-bang/` fills the whole screen like a cockpit, so its page keeps only a
+  one-line "Version X.Y (beta) · About" strip, and the full footer (launch date, shelf, feedback and bug links, Tell a friend, Ko-fi,
+  the no-data line and the music and star-field credits) lives in its About panel. The version and the Ko-fi link must stay reachable
+  from there, and the feedback links still carry the version.
 - Every game also has "Know someone who might like this? Tell a friend" (Web Share API with the game
   link, falling back to copying it), in its footer and end screen, and the shelf has one too. Games with
   an end screen can offer "Share my night": a picture drawn from the game canvas, shared through the

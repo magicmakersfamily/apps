@@ -18,7 +18,11 @@ card and a spoken intro from Cosmo the cat.
   (sticker, story line). The Big Bang is *space stretching* (grid + dots, `drawBang`), never a blast from a centre; keep "there is no
   middle". Story line in the footer squashes the real gaps (`GAP_YEARS`). Stickers + seen cards live in `big-bang:stickers/seen`.
   End screen has a put-the-story-in-order game. Ideas not done yet: Story Journey vs Free Explore, "zoom in" detail cards, scale
-  comparisons on more cards, Kokoro voice, background music (user asked for Vivaldi's Spring: needs a licensed recording, see below).
+  comparisons on more cards, Kokoro voice, (background music is done: see Music below).
 - Never collectable before the Big Bang in chapter 1. Saved on device: sound/voice switches and finished chapters
   (`big-bang:` localStorage keys).
 - Release rules are in the repo CLAUDE.md (version on card, page footer and feedback links; tag `big-bang-vX.Y`; freeze).
+- **Music**: `music/spring.mp3` is John Harrison's violin recording of Vivaldi's Spring, 1st movement (Wikimedia Commons, CC BY-SA 4.0,
+  converted from Ogg to 96 kbps MP3). The credit and licence link must stay in the About panel and the page footer; the share-alike
+  licence applies to the converted file. It loads only after the first tap, loops at low volume, dips to 0.07 while Cosmo speaks
+  and pauses when the tab is hidden; the 🎵 switch is saved as `big-bang:music`. Keep Wikimedia's source page in the credit.

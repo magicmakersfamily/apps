@@ -94,6 +94,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
             <button id="btn-stickers" type="button" class="glass-button px-2.5 py-2 rounded-xl text-amber-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5" aria-label="Sticker book"><span aria-hidden="true">📒</span><span id="sticker-count">0/13</span></button>
             <button id="btn-sound" type="button" aria-pressed="true" class="glass-button p-2 rounded-xl text-amber-300 flex items-center justify-center w-10 h-10" title="Sound effects on/off" aria-label="Sound effects"><span aria-hidden="true" class="text-lg">🔊</span></button>
             <button id="btn-speech" type="button" aria-pressed="true" class="glass-button p-2 rounded-xl text-cyan-300 flex items-center justify-center w-10 h-10" title="Cosmo's voice on/off" aria-label="Cosmo's voice"><span aria-hidden="true" class="text-lg">🗣️</span></button>
+            <button id="btn-music" type="button" aria-pressed="true" class="glass-button p-2 rounded-xl text-pink-300 flex items-center justify-center w-10 h-10" title="Background music on/off" aria-label="Background music"><span aria-hidden="true" class="text-lg">🎵</span></button>
             <button id="btn-help" type="button" class="glass-button px-2.5 py-2 rounded-xl text-pink-300 text-xs sm:text-sm font-semibold flex items-center gap-1.5" aria-label="How to play">
                 <span aria-hidden="true">❓</span><span class="hidden sm:inline">How to Play</span>
             </button>
@@ -201,6 +202,7 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
                     </ul>
                 </div>
                 <p class="text-xs text-slate-400 mt-0 mb-2">Made by Magic Makers. More apps are on the way.</p>
+                <p class="text-xs text-slate-400 mt-0 mb-2">Music: Antonio Vivaldi, “Spring” (<i>The Four Seasons</i>), 1st movement, Allegro, played by John Harrison (violin). From <a class="text-slate-200 underline" href="https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga" target="_blank" rel="noopener">Wikimedia Commons</a>, licensed <a class="text-slate-200 underline" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>. Converted to MP3 for this game.</p>
                 <p class="text-xs text-slate-400 m-0">Grown-ups: like this? <a class="text-slate-200 underline" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake on Ko-fi</a></p>
             </div>
         </div>
@@ -224,14 +226,14 @@ button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid
             </div>
         </div>
         <p class="text-[11px] text-slate-400 text-center mt-2 mb-0 leading-snug">
-            <b class="text-slate-200">Version 2.0 (beta)</b> · Launched <time datetime="2026-10-17">October 17, 2026</time> ·
+            <b class="text-slate-200">Version 2.1 (beta)</b> · Launched <time datetime="2026-10-17">October 17, 2026</time> ·
             <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> ·
             <button class="linkish" type="button" id="btn-about">About</button> ·
-            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.0">Share your thoughts</a> ·
-            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.0&amp;kind=bug">Report a bug</a> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.1">Share your thoughts</a> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=2.1&amp;kind=bug">Report a bug</a> ·
             <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/big-bang/" data-text="Travel from the Big Bang to today with a talking cosmic cat: Cosmic Journey">Tell a friend</button>
         </p>
-        <p class="hidden sm:block text-[11px] text-slate-500 text-center m-0 leading-snug">Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a> · These apps don’t collect any information. Saved progress stays in your own browser.</p>
+        <p class="hidden sm:block text-[11px] text-slate-500 text-center m-0 leading-snug">Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a> · These apps don’t collect any information. Saved progress stays in your own browser. Music: Vivaldi, “Spring”, played by John Harrison (<a href="https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga" target="_blank" rel="noopener">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).</p>
     </footer>
 
     <script>
@@ -529,6 +531,7 @@ const store = {
 
 let currentChapterIndex = 0;
 let soundEnabled = store.get('sound') !== '0';
+let musicEnabled = store.get('music') !== '0';
 let speechEnabled = store.get('speech') !== '0';
 let completed = [];
 try { completed = JSON.parse(store.get('done') || '[]').filter(n => Number.isInteger(n) && n >= 0 && n < CHAPTERS.length); } catch (e) { completed = []; }
@@ -574,7 +577,7 @@ const Voice = (() => {
     let token = 0, watchdog = null;
 
     function status(msg) { voiceStatus.textContent = msg || ''; }
-    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); }
+    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); Music.duck(on); }
 
     function pick() {
         const all = synth ? synth.getVoices() : [];
@@ -666,11 +669,32 @@ window.bigBangVoice = Voice.stats;
 
 /* Cosmo's recorded lines (voice/<key>.mp3) play first because they work the same on every device.
    If a file can't play, the browser's own voice reads the same words instead. */
+/* Background music: Vivaldi's Spring (recording credited in the page). Loaded only after the first tap, loops quietly,
+   dips while Cosmo talks, and stops when the tab is hidden. */
+const Music = (() => {
+    let a = null, ducked = false;
+    const LOUD = 0.22, SOFT = 0.07;
+    function vol() { if (a) a.volume = ducked ? SOFT : LOUD; }
+    function start() {
+        if (!musicEnabled) return;
+        if (!a) { a = new Audio('music/spring.mp3'); a.loop = true; a.preload = 'auto'; }
+        vol();
+        const p = a.play();
+        if (p && p.catch) p.catch(() => { /* blocked until a tap: the next tap starts it */ });
+    }
+    function stop() { if (a) a.pause(); }
+    function duck(on) { ducked = on; vol(); }
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (started && musicEnabled) start(); });
+    let started = false;
+    return { start: () => { started = true; start(); }, stop, duck, get playing() { return !!a && !a.paused; }, get volume() { return a ? a.volume : 0; } };
+})();
+window.bigBangMusic = Music;
+
 const Narrator = (() => {
     let audio = null, token = 0;
     const log = { played: 0, ended: 0, fellBack: 0 };
     window.bigBangNarrator = log;
-    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); }
+    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); Music.duck(on); }
     function stop() { token++; if (audio) { try { audio.pause(); } catch (e) { /* ignore */ } audio = null; } Voice.stop(); wave(false); }
     function say(key, text, after) {
         if (!speechEnabled) { if (after) { const my0 = token; setTimeout(() => { if (my0 === token) after(); }, 3500); } return; }
@@ -701,6 +725,7 @@ function unlockAudioEngine() {
     } catch (e) { /* no Web Audio: the game still works */ }
     $('audio-unlock-overlay').style.display = 'none';
     Voice.prime();
+    Music.start();
     playSound('pop');
     sayMascot();
 }
@@ -1394,8 +1419,16 @@ function paintToggles() {
     v.setAttribute('aria-pressed', String(speechEnabled));
     v.firstElementChild.style.opacity = speechEnabled ? '1' : '0.35';
     v.classList.toggle('text-cyan-300', speechEnabled); v.classList.toggle('text-slate-500', !speechEnabled);
+    const m = $('btn-music');
+    m.setAttribute('aria-pressed', String(musicEnabled));
+    m.firstElementChild.style.opacity = musicEnabled ? '1' : '0.35';
+    m.classList.toggle('text-pink-300', musicEnabled); m.classList.toggle('text-slate-500', !musicEnabled);
 }
 $('btn-sound').addEventListener('click', () => { soundEnabled = !soundEnabled; store.set('sound', soundEnabled ? '1' : '0'); paintToggles(); playSound('pop'); });
+$('btn-music').addEventListener('click', () => {
+    musicEnabled = !musicEnabled; store.set('music', musicEnabled ? '1' : '0'); paintToggles();
+    if (musicEnabled) Music.start(); else Music.stop();
+});
 $('btn-speech').addEventListener('click', () => {
     speechEnabled = !speechEnabled; store.set('speech', speechEnabled ? '1' : '0'); paintToggles();
     if (!speechEnabled) { Narrator.stop(); voiceStatus.textContent = ''; } else sayMascot();

@@ -89,6 +89,7 @@ footer a { color: var(--ink-2); }
         <label><input type="radio" name="game" value="Spellicious"> Spellicious</label>
         <label><input type="radio" name="game" value="Ready To Go!"> Ready To Go!</label>
         <label><input type="radio" name="game" value="Brush Buddy"> Brush Buddy</label>
+        <label><input type="radio" name="game" value="Cosmic Journey"> Cosmic Journey</label>
         <label><input type="radio" name="game" value="Sequence Flow"> Sequence Flow</label>
         <label><input type="radio" name="game" value="Character Book"> Character Book</label>
         <label><input type="radio" name="game" value="Something else"> Something else</label>
@@ -155,7 +156,7 @@ footer a { color: var(--ink-2); }
 const WEB3FORMS_KEY = '2115927c-3f99-4c82-9462-546f1055e436';
 const $ = s => document.querySelector(s);
 const params = new URLSearchParams(location.search);
-const GAMES = { 'mid-autumn': 'Mid-Autumn Mayhem', aquarium: 'James’s Nature Aquarium', 'blow-up': 'Blow Up', spellicious: 'Spellicious', speller: 'Spellicious', 'get-ready': 'Ready To Go!', toothbrush: 'Brush Buddy', renzi: 'Character Book', 'sequence-flow': 'Sequence Flow' };
+const GAMES = { 'mid-autumn': 'Mid-Autumn Mayhem', aquarium: 'James’s Nature Aquarium', 'blow-up': 'Blow Up', spellicious: 'Spellicious', speller: 'Spellicious', 'get-ready': 'Ready To Go!', toothbrush: 'Brush Buddy', 'big-bang': 'Cosmic Journey', renzi: 'Character Book', 'sequence-flow': 'Sequence Flow' };
 const from = GAMES[params.get('game')];
 if (from) { const r = document.querySelector(`input[name="game"][value="${from}"]`); if (r) r.checked = true; }
 const version = (params.get('v') || '').replace(/[^0-9.]/g, '').slice(0, 8);

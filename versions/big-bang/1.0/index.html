@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<script>/* Frozen copy: keep this version's saved games separate. */
+(function(){try{var P='big-bang@1.0:',S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;
+S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};
+S.removeItem=function(k){return r.call(this,P+k)}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cosmic Journey (beta) — The App Shelf</title>
+<meta name="description" content="Start with a tap on the Big Bang and travel 13.8 billion years to today: stars, Earth and the Moon, first microbes, ocean life, dinosaurs and people, with a talking cosmic cat and a mini-game in every chapter.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cosmic Journey">
+<meta property="og:description" content="Start with a tap on the Big Bang and travel 13.8 billion years to today, with a talking cosmic cat and a mini-game in every chapter.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/big-bang/cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120a2e'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23fbbf24'/%3E%3Cpath d='M32 8v10M32 46v10M8 32h10M46 32h10M15 15l7 7M42 42l7 7M49 15l-7 7M22 42l-7 7' stroke='%23ec4899' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* tw:start */
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0}.-bottom-2{bottom:-.5rem}.-right-1{right:-.25rem}.-top-1{top:-.25rem}.bottom-2{bottom:.5rem}.left-1{left:.25rem}.left-1\/2{left:50%}.left-2{left:.5rem}.right-2{right:.5rem}.right-3{right:.75rem}.top-12{top:3rem}.top-2{top:.5rem}.top-3{top:.75rem}.z-0{z-index:0}.z-10{z-index:10}.z-20{z-index:20}.z-40{z-index:40}.z-50{z-index:50}.m-0{margin:0}.mb-0{margin-bottom:0}.mb-1{margin-bottom:.25rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mt-0{margin-top:0}.mt-1{margin-top:.25rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.table{display:table}.hidden{display:none}.h-10{height:2.5rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-2{height:.5rem}.h-2\.5{height:.625rem}.h-24{height:6rem}.h-3{height:.75rem}.h-4{height:1rem}.h-9{height:2.25rem}.h-full{height:100%}.min-h-0{min-height:0}.w-10{width:2.5rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-24{width:6rem}.w-3{width:.75rem}.w-4{width:1rem}.w-9{width:2.25rem}.w-full{width:100%}.min-w-0{min-width:0}.max-w-lg{max-width:32rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.-translate-x-1{--tw-translate-x:-0.25rem}.-translate-x-1,.-translate-x-1\/2{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-x-1\/2{--tw-translate-x:-50%}.-translate-y-1{--tw-translate-y:-0.25rem}.-translate-y-1,.-translate-y-1\/2{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%}.scale-125{--tw-scale-x:1.25;--tw-scale-y:1.25}.scale-125,.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;-moz-user-select:none;user-select:none}.resize{resize:both}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.overflow-hidden,.truncate{overflow:hidden}.truncate{text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.rounded-bl-none{border-bottom-left-radius:0}.border{border-width:1px}.border-0{border-width:0}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77/var(--tw-border-opacity,1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.border-amber-400\/30{border-color:rgba(251,191,36,.3)}.border-amber-400\/40{border-color:rgba(251,191,36,.4)}.border-amber-400\/50{border-color:rgba(251,191,36,.5)}.border-cyan-400{--tw-border-opacity:1;border-color:rgb(34 211 238/var(--tw-border-opacity,1))}.border-cyan-400\/40{border-color:rgba(34,211,238,.4)}.border-cyan-500{--tw-border-opacity:1;border-color:rgb(6 182 212/var(--tw-border-opacity,1))}.border-cyan-500\/30{border-color:rgba(6,182,212,.3)}.border-indigo-400{--tw-border-opacity:1;border-color:rgb(129 140 248/var(--tw-border-opacity,1))}.border-indigo-400\/30{border-color:rgba(129,140,248,.3)}.border-indigo-500{--tw-border-opacity:1;border-color:rgb(99 102 241/var(--tw-border-opacity,1))}.border-indigo-500\/30{border-color:rgba(99,102,241,.3)}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255/var(--tw-border-opacity,1))}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.border-white\/15{border-color:hsla(0,0%,100%,.15)}.border-white\/20{border-color:hsla(0,0%,100%,.2)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.bg-amber-400\/20{background-color:rgba(251,191,36,.2)}.bg-amber-400\/40{background-color:rgba(251,191,36,.4)}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11/var(--tw-bg-opacity,1))}.bg-amber-500\/30{background-color:rgba(245,158,11,.3)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0/var(--tw-bg-opacity,1))}.bg-black\/50{background-color:rgba(0,0,0,.5)}.bg-black\/60{background-color:rgba(0,0,0,.6)}.bg-black\/80{background-color:rgba(0,0,0,.8)}.bg-black\/85{background-color:rgba(0,0,0,.85)}.bg-cyan-500{--tw-bg-opacity:1;background-color:rgb(6 182 212/var(--tw-bg-opacity,1))}.bg-cyan-500\/20{background-color:rgba(6,182,212,.2)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.bg-emerald-400\/70{background-color:rgba(52,211,153,.7)}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229/var(--tw-bg-opacity,1))}.bg-indigo-600\/90{background-color:rgba(79,70,229,.9)}.bg-indigo-950{--tw-bg-opacity:1;background-color:rgb(30 27 75/var(--tw-bg-opacity,1))}.bg-indigo-950\/70{background-color:rgba(30,27,75,.7)}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42/var(--tw-bg-opacity,1))}.bg-slate-900\/80{background-color:rgba(15,23,42,.8)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23/var(--tw-bg-opacity,1))}.bg-slate-950\/80{background-color:rgba(2,6,23,.8)}.bg-slate-950\/85{background-color:rgba(2,6,23,.85)}.bg-slate-950\/95{background-color:rgba(2,6,23,.95)}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/10{background-color:hsla(0,0%,100%,.1)}.bg-white\/20{background-color:hsla(0,0%,100%,.2)}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.bg-gradient-to-tr{background-image:linear-gradient(to top right,var(--tw-gradient-stops))}.from-amber-300{--tw-gradient-from:#fcd34d var(--tw-gradient-from-position);--tw-gradient-to:rgba(252,211,77,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-amber-400{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgba(251,191,36,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-red-500{--tw-gradient-from:#ef4444 var(--tw-gradient-from-position);--tw-gradient-to:rgba(239,68,68,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.via-orange-400{--tw-gradient-to:rgba(251,146,60,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#fb923c var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-orange-500{--tw-gradient-to:rgba(249,115,22,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#f97316 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-pink-400{--tw-gradient-to:rgba(244,114,182,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#f472b6 var(--tw-gradient-via-position),var(--tw-gradient-to)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-cyan-300{--tw-gradient-to:#67e8f9 var(--tw-gradient-to-position)}.to-emerald-400{--tw-gradient-to:#34d399 var(--tw-gradient-to-position)}.to-indigo-300{--tw-gradient-to:#a5b4fc var(--tw-gradient-to-position)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-orange-500{--tw-gradient-to:#f97316 var(--tw-gradient-to-position)}.to-pink-500{--tw-gradient-to:#ec4899 var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-0{padding:0}.p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0{padding-top:0;padding-bottom:0}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pl-5{padding-left:1.25rem}.pr-8{padding-right:2rem}.pt-2{padding-top:.5rem}.text-center{text-align:center}.text-right{text-align:right}.align-middle{vertical-align:middle}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-7{line-height:1.75rem}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77/var(--tw-text-opacity,1))}.text-cyan-300{--tw-text-opacity:1;color:rgb(103 232 249/var(--tw-text-opacity,1))}.text-pink-300{--tw-text-opacity:1;color:rgb(249 168 212/var(--tw-text-opacity,1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249/var(--tw-text-opacity,1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240/var(--tw-text-opacity,1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23/var(--tw-text-opacity,1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.no-underline{text-decoration-line:none}.opacity-90{opacity:.9}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-2xl,.shadow-lg{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-md{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color)}.shadow-md,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.shadow-amber-400{--tw-shadow-color:#fbbf24;--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-400\/30{--tw-shadow-color:rgba(251,191,36,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500{--tw-shadow-color:#f59e0b;--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/20{--tw-shadow-color:rgba(245,158,11,.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/40{--tw-shadow-color:rgba(245,158,11,.4);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/50{--tw-shadow-color:rgba(245,158,11,.5);--tw-shadow:var(--tw-shadow-colored)}.shadow-orange-500{--tw-shadow-color:#f97316;--tw-shadow:var(--tw-shadow-colored)}.shadow-orange-500\/30{--tw-shadow-color:rgba(249,115,22,.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-orange-500\/40{--tw-shadow-color:rgba(249,115,22,.4);--tw-shadow:var(--tw-shadow-colored)}.shadow-red-500{--tw-shadow-color:#ef4444;--tw-shadow:var(--tw-shadow-colored)}.shadow-red-500\/30{--tw-shadow-color:rgba(239,68,68,.3);--tw-shadow:var(--tw-shadow-colored)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.ring{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.blur{--tw-blur:blur(8px)}.blur,.drop-shadow{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgba(0,0,0,.1)) drop-shadow(0 1px 1px rgba(0,0,0,.06))}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px)}.backdrop-blur-md,.backdrop-blur-xl{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px)}.backdrop-filter{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-300{transition-duration:.3s}.duration-500{transition-duration:.5s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-cyan-500\/30:hover{background-color:rgba(6,182,212,.3)}.hover\:bg-white\/10:hover{background-color:hsla(0,0%,100%,.1)}.hover\:bg-white\/20:hover{background-color:hsla(0,0%,100%,.2)}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.focus\:border-amber-400:focus{--tw-border-opacity:1;border-color:rgb(251 191 36/var(--tw-border-opacity,1))}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95}.active\:scale-95:active,.group:hover .group-hover\:scale-125{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-125{--tw-scale-x:1.25;--tw-scale-y:1.25}.group:hover .group-hover\:opacity-100{opacity:1}@media (min-width:640px){.sm\:bottom-6{bottom:1.5rem}.sm\:left-8{left:2rem}.sm\:left-auto{left:auto}.sm\:right-4{right:1rem}.sm\:right-auto{right:auto}.sm\:top-4{top:1rem}.sm\:block{display:block}.sm\:inline{display:inline}.sm\:flex{display:flex}.sm\:h-16{height:4rem}.sm\:h-20{height:5rem}.sm\:w-16{width:4rem}.sm\:w-20{width:5rem}.sm\:w-auto{width:auto}.sm\:max-w-md{max-width:28rem}.sm\:max-w-sm{max-width:24rem}.sm\:flex-row{flex-direction:row}.sm\:justify-end{justify-content:flex-end}.sm\:gap-2{gap:.5rem}.sm\:gap-3{gap:.75rem}.sm\:p-4{padding:1rem}.sm\:p-8{padding:2rem}.sm\:px-4{padding-left:1rem;padding-right:1rem}.sm\:px-5{padding-left:1.25rem;padding-right:1.25rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}.sm\:text-xs{font-size:.75rem;line-height:1rem}}@media (min-width:1280px){.xl\:flex{display:flex}.xl\:hidden{display:none}}
+/* tw:end */
+:root { color-scheme: dark; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; height: 100vh; height: 100dvh; font-family: 'Fredoka', 'Inter', sans-serif; user-select: none; -webkit-user-select: none; overflow: hidden; background-color: #030008; color: #f3f4f6; }
+.glass-panel { background: rgba(15, 12, 35, 0.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.18); }
+.glass-button { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25); transition: all 0.2s ease-in-out; color: inherit; font: inherit; cursor: pointer; }
+.glass-button:hover { background: rgba(255, 255, 255, 0.28); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 215, 0, 0.25); }
+.glass-button:active { transform: translateY(0); }
+.glass-button:disabled { opacity: .3; pointer-events: none; }
+button { font-family: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, select:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+.animate-float { animation: float 4s ease-in-out infinite; }
+@keyframes pulse-singularity { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); } 50% { transform: scale(1.35); filter: drop-shadow(0 0 45px rgba(236, 72, 153, 1)); } }
+.animate-singularity { animation: pulse-singularity 1.2s infinite ease-in-out; }
+@keyframes soundWave { 0%, 100% { height: 4px; } 50% { height: 18px; } }
+.wave-bar { width: 3px; background-color: #38bdf8; border-radius: 2px; display: inline-block; animation: soundWave 0.8s infinite ease-in-out; }
+.wave-bar:nth-child(2) { animation-delay: 0.15s; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; }
+.wave-bar:nth-child(4) { animation-delay: 0.45s; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+@keyframes ripple { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+.hotspot-ring { animation: ripple 2s infinite ease-out; }
+.pre-line { white-space: pre-line; }
+.linkish { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.shelf-foot a, .shelf-foot .linkish { color: #cbd5e1; text-decoration: underline; text-underline-offset: 2px; }
+.shelf-foot a:hover, .shelf-foot .linkish:hover { color: #fbbf24; }
+.shelf-foot p { margin: 0; }
+.scroll-y { overflow-y: auto; max-height: calc(100dvh - 2rem); }
+.safe-bottom { padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px)); }
+@media (prefers-reduced-motion: reduce) { .animate-float, .animate-singularity, .hotspot-ring, .wave-bar, .animate-pulse { animation: none !important; } }
+</style>
+</head>
+<body class="flex flex-col justify-between overflow-hidden bg-slate-950 text-white select-none">
+<div style="font:13px/1.4 system-ui,sans-serif;background:#2b2140;color:#f3eefc;padding:6px 12px;text-align:center">Old version 1.0, kept so we can compare. Saved games here are separate. <a style="color:#d9c8ff" href="../../../big-bang/">Play the current version</a> · <a style="color:#d9c8ff" href="../../">All versions</a></div>
+
+    <!-- AUDIO UNLOCK OVERLAY -->
+    <div id="audio-unlock-overlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
+        <div class="max-w-md w-full glass-panel p-8 rounded-3xl border border-amber-400/40 shadow-2xl flex flex-col items-center animate-float">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 via-orange-500 to-indigo-600 flex items-center justify-center text-5xl mb-6 shadow-xl shadow-amber-500/40 animate-pulse">🐱</div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-400 to-cyan-300 mb-3">Welcome, Cosmic Explorer!</h1>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                Tap below to start your adventure with sound effects and a spoken storyteller, Cosmo the Cosmic Cat!
+            </p>
+            <button id="btn-unlock-audio" type="button" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-slate-950 font-black text-lg shadow-xl shadow-orange-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                🔊 Tap to Start with Sound &amp; Voice
+            </button>
+            <p class="text-xs text-slate-400 mt-4">Sound and voice only start after you tap. You can turn either off at the top.</p>
+            <a href="../../../" class="text-xs text-slate-400 mt-3 underline">← All apps</a>
+        </div>
+    </div>
+
+    <!-- TOP BAR -->
+    <header class="w-full z-20 p-2 sm:p-4 flex flex-wrap items-center justify-between gap-2 glass-panel border-b border-white/10">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <a href="../../../" class="glass-button px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-200 no-underline shrink-0" aria-label="Back to all apps">← All apps</a>
+            <div class="min-w-0">
+                <p class="text-sm sm:text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-400 to-indigo-300 m-0 leading-tight">
+                    Cosmic Journey <span lang="zh-TW" class="font-semibold">宇宙之旅</span> <span class="align-middle text-[10px] font-bold uppercase tracking-wider text-white bg-purple-600 rounded-full px-2 py-0.5" title="Still being tested with kids and improved">Beta</span>
+                </p>
+                <p class="text-xs text-slate-400 hidden sm:block m-0">Interactive universe &amp; Earth story</p>
+            </div>
+        </div>
+
+        <div class="hidden xl:flex items-center gap-1.5 bg-black/50 p-1.5 rounded-2xl border border-white/10" id="chapter-nav-pills"></div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2">
+            <button id="btn-global-restart-bb" type="button" class="px-2.5 py-2 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-extrabold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg shadow-red-500/30 hover:brightness-110 active:scale-95 transition-all">
+                <span aria-hidden="true">💥</span><span>Restart<span class="hidden sm:inline"> Big Bang</span></span>
+            </button>
+            <button id="btn-sound" type="button" aria-pressed="true" class="glass-button p-2 rounded-xl text-amber-300 flex items-center justify-center w-10 h-10" title="Sound effects on/off" aria-label="Sound effects"><span aria-hidden="true" class="text-lg">🔊</span></button>
+            <button id="btn-speech" type="button" aria-pressed="true" class="glass-button p-2 rounded-xl text-cyan-300 flex items-center justify-center w-10 h-10" title="Cosmo's voice on/off" aria-label="Cosmo's voice"><span aria-hidden="true" class="text-lg">🗣️</span></button>
+            <button id="btn-help" type="button" class="glass-button px-2.5 py-2 rounded-xl text-pink-300 text-xs sm:text-sm font-semibold flex items-center gap-1.5" aria-label="How to play">
+                <span aria-hidden="true">❓</span><span class="hidden sm:inline">How to Play</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- STAGE -->
+    <main class="relative flex-1 w-full overflow-hidden flex items-center justify-center bg-black min-h-0">
+        <canvas id="cosmic-canvas" class="absolute inset-0 w-full h-full cursor-pointer z-0" aria-label="The universe, drawn live. Tap the glowing things to collect them."></canvas>
+
+        <div id="singularity-trigger-container" class="absolute z-10 flex flex-col items-center justify-center pointer-events-auto transition-opacity duration-500">
+            <button id="singularity-core" type="button" aria-label="Trigger the Big Bang" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white animate-singularity cursor-pointer border-4 border-amber-300 shadow-2xl flex items-center justify-center p-0">
+                <span class="w-4 h-4 rounded-full bg-amber-400 block"></span>
+            </button>
+            <div class="mt-6 px-4 py-2 rounded-2xl bg-black/80 border border-amber-400/50 text-amber-300 font-extrabold text-sm sm:text-lg tracking-wider text-center shadow-2xl pointer-events-none animate-pulse">
+                👉 Touch here to trigger the Big Bang! 👈
+            </div>
+        </div>
+
+        <div id="hotspots-container" class="absolute inset-0 pointer-events-none z-10"></div>
+
+        <div id="mascot-box" class="absolute bottom-2 sm:bottom-6 left-2 right-2 sm:right-auto sm:left-8 z-20 flex items-end gap-2 sm:gap-3 sm:max-w-md pointer-events-auto transition-all duration-300">
+            <button id="mascot-avatar" type="button" class="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-indigo-600/90 border-2 border-amber-300 shadow-xl flex items-center justify-center text-3xl sm:text-4xl animate-float shrink-0 relative cursor-pointer p-0" title="Tap Cosmo to hear him again" aria-label="Hear Cosmo again">
+                🐱
+                <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full border border-white uppercase tracking-wider leading-none">Cosmo</span>
+            </button>
+            <div class="glass-panel p-3 sm:p-4 rounded-2xl rounded-bl-none text-slate-100 text-xs sm:text-sm shadow-2xl relative border border-indigo-400/30 w-full min-w-0">
+                <p id="mascot-speech" class="leading-relaxed font-medium text-slate-100 m-0" aria-live="polite">
+                    Touch the glowing core in the center of pure dark space to unleash the Big Bang!
+                </p>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/10 gap-2">
+                    <button id="btn-speak-voice" type="button" class="px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95">
+                        <span aria-hidden="true">🔊</span><span>Hear Cosmo</span>
+                    </button>
+                    <span id="voice-status" class="text-[11px] text-amber-300 text-right leading-tight" role="status"></span>
+                    <div id="voice-wave-indicator" class="hidden items-center gap-1 px-2 py-1 bg-slate-900/80 rounded-lg border border-cyan-500/30" aria-hidden="true">
+                        <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="minigame-container" class="absolute top-2 sm:top-4 right-2 sm:right-4 left-2 sm:left-auto z-20 glass-panel p-2.5 sm:p-4 rounded-2xl sm:max-w-sm border border-amber-400/30 shadow-2xl transition-all duration-300"></div>
+
+        <!-- POP-UP INFO MODAL -->
+        <div id="info-modal" class="hidden absolute z-40 inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="glass-panel p-5 sm:p-8 rounded-3xl max-w-lg w-full border border-amber-400/40 shadow-2xl relative scroll-y">
+                <button id="btn-close-modal" type="button" aria-label="Close" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">✕</button>
+                <div class="flex items-center gap-3 mb-4 pr-8">
+                    <span id="modal-icon" class="text-4xl" aria-hidden="true">✨</span>
+                    <div>
+                        <span id="modal-badge" class="bg-amber-400/20 text-amber-300 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border border-amber-400/30">Discovery explored!</span>
+                        <h2 id="modal-title" class="text-xl sm:text-2xl font-extrabold text-white mt-1 mb-0">Cosmic Object</h2>
+                    </div>
+                </div>
+                <p id="modal-body" class="text-slate-200 text-sm sm:text-base leading-relaxed mb-4 pre-line">Explanation text...</p>
+                <div class="bg-indigo-950/70 p-3.5 rounded-xl border border-indigo-500/30 flex items-start gap-3">
+                    <span class="text-amber-300 text-xl" aria-hidden="true">💡</span>
+                    <div>
+                        <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wide m-0">Fun fact!</h3>
+                        <p id="modal-funfact" class="text-xs sm:text-sm text-slate-300 m-0 pre-line">Fun fact content...</p>
+                    </div>
+                </div>
+                <button id="btn-modal-ok" type="button" class="w-full mt-5 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-extrabold hover:brightness-110 shadow-lg shadow-amber-500/20 text-sm sm:text-base transition-all">
+                    Awesome! Got it!
+                </button>
+            </div>
+        </div>
+
+        <!-- ABOUT / END-OF-JOURNEY SCREEN -->
+        <div id="about-modal" class="hidden absolute z-40 inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="about-title">
+            <div class="glass-panel p-5 sm:p-8 rounded-3xl max-w-lg w-full border border-amber-400/40 shadow-2xl relative scroll-y">
+                <button id="btn-close-about" type="button" aria-label="Close" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg">✕</button>
+                <p id="about-emoji" class="text-4xl m-0" aria-hidden="true">🌌</p>
+                <h2 id="about-title" class="text-xl sm:text-2xl font-extrabold text-white mt-1 mb-2 pr-8">Cosmic Journey</h2>
+                <p id="about-text" class="text-slate-200 text-sm leading-relaxed mt-0 mb-4">A story of the universe in six chapters, from the Big Bang to today.</p>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button id="btn-about-again" type="button" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-pink-500 text-slate-950 font-extrabold text-sm">💥 Start again</button>
+                    <button id="btn-about-share" type="button" class="glass-button px-4 py-2.5 rounded-2xl text-sm font-bold" data-tell="https://magicmakersfamily.github.io/apps/big-bang/" data-text="Travel from the Big Bang to today with a talking cosmic cat: Cosmic Journey">Tell a friend</button>
+                </div>
+                <div class="rounded-2xl border border-white/15 p-3 mb-4">
+                    <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wide mt-0 mb-2">More from the App Shelf</h3>
+                    <ul class="m-0 pl-5 text-sm leading-7">
+                        <li><a class="text-cyan-300" href="../../../aquarium/">James’s Nature Aquarium</a></li>
+                        <li><a class="text-cyan-300" href="../../../blow-up/">Blow Up</a></li>
+                        <li><a class="text-cyan-300" href="../../../mid-autumn/">Mid-Autumn Mayhem</a></li>
+                        <li><a class="text-cyan-300" href="../../../">See all the apps</a></li>
+                    </ul>
+                </div>
+                <p class="text-xs text-slate-400 m-0">Grown-ups: like this? <a class="text-slate-200 underline" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake on Ko-fi</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <footer class="w-full z-20 px-3 pt-2 sm:p-4 glass-panel border-t border-white/10 safe-bottom shelf-foot">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex xl:hidden items-center justify-between w-full sm:w-auto gap-2">
+                <span class="text-xs text-amber-300 font-bold uppercase tracking-wider truncate" id="mobile-chapter-title">1. The Big Bang &amp; Early Universe</span>
+                <select id="mobile-chapter-select" aria-label="Choose a chapter" class="bg-slate-900 border border-white/20 text-white text-xs rounded-xl px-2 py-1.5 outline-none focus:border-amber-400"></select>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end w-full gap-3">
+                <button id="btn-prev" type="button" class="glass-button px-3 sm:px-4 py-2.5 rounded-2xl text-slate-200 font-bold text-xs sm:text-sm flex items-center gap-2">← Previous<span class="hidden sm:inline"> Chapter</span></button>
+                <div class="hidden sm:flex items-center gap-1.5" id="timeline-dots" aria-hidden="true"></div>
+                <button id="btn-next" type="button" class="px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-400 to-pink-500 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-orange-500/30 hover:brightness-110 transition-all">Next Chapter →</button>
+            </div>
+        </div>
+        <p class="text-[11px] text-slate-400 text-center mt-2 mb-0 leading-snug">
+            <b class="text-slate-200">Version 1.0 (beta)</b> · Launched <time datetime="2026-10-17">October 17, 2026</time> ·
+            <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> ·
+            <button class="linkish" type="button" id="btn-about">About</button> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=1.0">Share your thoughts</a> ·
+            <a href="https://magicmakersfamily.github.io/apps/feedback/?game=big-bang&amp;v=1.0&amp;kind=bug">Report a bug</a> ·
+            <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/big-bang/" data-text="Travel from the Big Bang to today with a talking cosmic cat: Cosmic Journey">Tell a friend</button>
+        </p>
+        <p class="text-[11px] text-slate-500 text-center m-0 leading-snug">Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a> · These apps don’t collect any information. Saved progress stays in your own browser.</p>
+    </footer>
+
+    <script>
+const CHAPTERS = [
+    {
+        "title": "The Big Bang & Early Universe",
+        "shortTitle": "1. The Big Bang",
+        "icon": "💥",
+        "timeLabel": "13.8 Billion Years Ago",
+        "bgGradient": [
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "mascotSpeech": "Touch the glowing core in the middle of the dark to start the Big Bang! Watch energy and hydrogen blast outward in every direction!",
+        "afterBang": "BOOM! Cosmic inflation! Space stretched out in every direction, filling the universe with energy and hydrogen. Tap the glowing circles to explore, and collect 4 hydrogen atoms to light the first star!",
+        "minigameTitle": "⭐ Mini-game: Fusion Star!",
+        "minigameDesc": "Tap 4 glowing hydrogen atoms to start nuclear fusion and ignite the first star!",
+        "minigameTarget": 4,
+        "hotspots": [
+            {
+                "x": 30,
+                "y": 35,
+                "icon": "✨",
+                "title": "Cosmic Inflation",
+                "body": "Right after the Big Bang, space stretched out in every direction, incredibly fast, spreading energy and matter everywhere.",
+                "funFact": "The hydrogen in your body came from the Big Bang. Heavier atoms, like the carbon and oxygen in you, were made inside stars!"
+            },
+            {
+                "x": 70,
+                "y": 60,
+                "icon": "🌟",
+                "title": "First Stars & Galaxies",
+                "body": "Gravity pulled huge clouds of hydrogen gas together until nuclear fusion switched on and the first stars began to glow.",
+                "funFact": "Some of the oldest stars in our galaxy are about 13 billion years old!"
+            }
+        ],
+        "centre": {
+            "icon": "💥",
+            "title": "Singularity & Big Bang Core",
+            "body": "The glowing centre is where scientists think everything began: all the energy and matter in the universe burst outward from an unimaginably hot, tiny beginning.",
+            "funFact": "Space and time began with the Big Bang about 13.8 billion years ago. It wasn't an explosion in space: space itself stretched!"
+        }
+    },
+    {
+        "title": "Formation of Solar System & Earth",
+        "shortTitle": "2. Earth & Moon",
+        "icon": "☀️",
+        "timeLabel": "4.5 Billion Years Ago",
+        "bgGradient": [
+            "#1a0500",
+            "#3d0e03",
+            "#08020a"
+        ],
+        "mascotSpeech": "Our Sun turned on! Around it, giant molten space rocks crashed together. A planet-sized rock named Theia hit early Earth, and the pieces made our Moon!",
+        "minigameTitle": "🪨 Mini-game: Accretion Builder!",
+        "minigameDesc": "Tap the floating space rocks to stick them onto young, molten Earth!",
+        "minigameTarget": 5,
+        "hotspots": [
+            {
+                "x": 40,
+                "y": 30,
+                "icon": "☀️",
+                "title": "The Young Sun",
+                "body": "A giant spinning cloud of gas and dust collapsed under gravity and lit up as our Sun, at the centre of the solar system.",
+                "funFact": "The Sun holds 99.8% of all the mass in our solar system!"
+            },
+            {
+                "x": 65,
+                "y": 65,
+                "icon": "🌕",
+                "title": "How the Moon Formed",
+                "body": "A young planet called Theia smashed into early molten Earth. The debris gathered in orbit and made our Moon!",
+                "funFact": "The Moon used to be much closer to Earth than it is today, and it is still drifting away a little every year!"
+            }
+        ],
+        "centre": {
+            "icon": "🌋",
+            "title": "Early Molten Earth & Moon",
+            "body": "Early Earth was covered in glowing lava until it cooled down, after the crash that made our Moon.",
+            "funFact": "The Moon helps keep Earth's tilt steady, so we get gentle seasons!"
+        }
+    },
+    {
+        "title": "Cooling Oceans & First Microbes",
+        "shortTitle": "3. First Microbes",
+        "icon": "🦠",
+        "timeLabel": "3.8 to 2.5 Billion Years Ago",
+        "bgGradient": [
+            "#02121e",
+            "#032840",
+            "#000810"
+        ],
+        "mascotSpeech": "Earth cooled down and rain filled the ocean basins! Tiny single-celled life began, and later some microbes learned to make oxygen from sunlight!",
+        "minigameTitle": "🦠 Mini-game: Primordial Soup!",
+        "minigameDesc": "Tap the swimming nutrients to feed the early microbes and make oxygen bubbles!",
+        "minigameTarget": 6,
+        "hotspots": [
+            {
+                "x": 25,
+                "y": 65,
+                "icon": "🌋",
+                "title": "Hydrothermal Vents",
+                "body": "Deep underwater mineral chimneys spewed hot fluids, giving warm energy to some of the earliest single-celled life.",
+                "funFact": "Some microbes still live in boiling hot springs today, a bit like ancient Earth!"
+            },
+            {
+                "x": 75,
+                "y": 40,
+                "icon": "🫧",
+                "title": "Photosynthesis & Oxygen",
+                "body": "Cyanobacteria learned to use sunlight for food and let out oxygen gas, slowly making air that animals could breathe.",
+                "funFact": "Before cyanobacteria, Earth's air had almost no oxygen!"
+            }
+        ],
+        "centre": {
+            "icon": "🌊",
+            "title": "The Ancient Ocean",
+            "body": "Cooling water vapour fell as rain and made giant oceans, where life first began.",
+            "funFact": "Oceans cover over 70% of Earth's surface today!"
+        }
+    },
+    {
+        "title": "Explosion of Marine & Land Life",
+        "shortTitle": "4. Ocean Explosion",
+        "icon": "🐟",
+        "timeLabel": "540 to 360 Million Years Ago",
+        "bgGradient": [
+            "#011e29",
+            "#06403d",
+            "#011017"
+        ],
+        "mascotSpeech": "The Cambrian explosion! The oceans filled with trilobites and armoured fish. Later, brave fish with strong fins crawled onto land and became the first four-legged animals!",
+        "minigameTitle": "🐠 Mini-game: Evolution Tap!",
+        "minigameDesc": "Tap the sea creatures to help them evolve legs and step onto the shore!",
+        "minigameTarget": 5,
+        "hotspots": [
+            {
+                "x": 35,
+                "y": 50,
+                "icon": "🦐",
+                "title": "Trilobites & Armoured Fish",
+                "body": "Ancient animals evolved hard shells, complex eyes and swimming fins to live in warm shallow seas.",
+                "funFact": "Trilobites lived in Earth's oceans for about 270 million years!"
+            },
+            {
+                "x": 70,
+                "y": 35,
+                "icon": "🌿",
+                "title": "The First Land Forests",
+                "body": "Mosses, then giant ferns and trees, grew on land and turned bare continents green.",
+                "funFact": "Giant dragonflies back then had wings as wide as a crow's!"
+            }
+        ],
+        "centre": {
+            "icon": "🌱",
+            "title": "Early Green Land",
+            "body": "Ancient plants spread over the continents and put more oxygen into the air.",
+            "funFact": "Forests back then made so much oxygen that insects grew giant!"
+        }
+    },
+    {
+        "title": "Age of Dinosaurs & Extinction",
+        "shortTitle": "5. Age of Dinosaurs",
+        "icon": "🦖",
+        "timeLabel": "250 to 66 Million Years Ago",
+        "bgGradient": [
+            "#1e1402",
+            "#3a2104",
+            "#0f0800"
+        ],
+        "mascotSpeech": "ROAR! Giant T. rex, Stegosaurus and Triceratops ruled Earth, until a huge asteroid, about six miles wide, hit Mexico 66 million years ago!",
+        "minigameTitle": "🦕 Mini-game: Defend Earth!",
+        "minigameDesc": "Tap the space asteroids falling from orbit to stop them before they hit!",
+        "minigameTarget": 5,
+        "hotspots": [
+            {
+                "x": 45,
+                "y": 55,
+                "icon": "🦖",
+                "title": "Tyrannosaurus Rex",
+                "body": "One of the biggest land hunters ever! Dinosaurs ruled Earth for over 165 million years.",
+                "funFact": "Modern birds are living descendants of small, feathered dinosaurs!"
+            },
+            {
+                "x": 80,
+                "y": 30,
+                "icon": "☄️",
+                "title": "The Chicxulub Asteroid",
+                "body": "A giant space rock crashed into what is now Mexico and changed Earth's climate fast, ending the age of the big dinosaurs.",
+                "funFact": "The crater it left is more than 110 miles wide!"
+            }
+        ],
+        "centre": {
+            "icon": "🌋",
+            "title": "Dinosaur Land",
+            "body": "Lush, volcanic land where giant dinosaurs lived for over 165 million years.",
+            "funFact": "A T. rex tooth, including its root, could be as long as a banana!"
+        }
+    },
+    {
+        "title": "Rise of Mammals, Humans & Future",
+        "shortTitle": "6. Humans & Space",
+        "icon": "🚀",
+        "timeLabel": "66 Million Years Ago to Today",
+        "bgGradient": [
+            "#02161f",
+            "#0c2b42",
+            "#020a12"
+        ],
+        "mascotSpeech": "Mammals took over! Woolly mammoths braved the ice ages, early humans learned to use fire, built cities, and now we build rockets to explore space!",
+        "minigameTitle": "🚀 Mini-game: Rocket Launcher!",
+        "minigameDesc": "Tap the energy orbs to fuel our modern space rocket for launch!",
+        "minigameTarget": 6,
+        "hotspots": [
+            {
+                "x": 30,
+                "y": 60,
+                "icon": "🦣",
+                "title": "Ice Age Mammals",
+                "body": "Furry mammoths and sabre-toothed cats lived through the cold ice ages across Earth's continents.",
+                "funFact": "Some woolly mammoths were still alive when the Egyptian pyramids were being built!"
+            },
+            {
+                "x": 75,
+                "y": 35,
+                "icon": "🛰️",
+                "title": "Space Exploration",
+                "body": "People went from discovering fire to landing on the Moon and launching space telescopes to study the stars.",
+                "funFact": "Voyager 1 is more than 15 billion miles from Earth right now!"
+            }
+        ],
+        "centre": {
+            "icon": "🌍",
+            "title": "Modern Planet Earth",
+            "body": "Our home planet, with oceans, forests, cities and space probes heading to the stars.",
+            "funFact": "Earth is the only place we know of in the universe that has life!"
+        }
+    }
+];
+
+/* ---------- saved settings (every access wrapped; the game works without storage) ---------- */
+const store = {
+    get(k) { try { return localStorage.getItem('big-bang:' + k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem('big-bang:' + k, v); } catch (e) { /* private window: fine */ } }
+};
+
+let currentChapterIndex = 0;
+let soundEnabled = store.get('sound') !== '0';
+let speechEnabled = store.get('speech') !== '0';
+let completed = [];
+try { completed = JSON.parse(store.get('done') || '[]').filter(n => Number.isInteger(n) && n >= 0 && n < CHAPTERS.length); } catch (e) { completed = []; }
+let minigameProgress = 0;
+let audioCtx = null;
+
+let bigBangTriggered = false;
+let radialExplosionParticles = [];
+let shockwaveRings = [];
+let particles = [];
+let interactiveEntities = [];
+
+const $ = id => document.getElementById(id);
+const canvas = $('cosmic-canvas');
+const ctx = canvas.getContext('2d');
+const mascotSpeech = $('mascot-speech');
+const hotspotsContainer = $('hotspots-container');
+const minigameContainer = $('minigame-container');
+const infoModal = $('info-modal');
+const aboutModal = $('about-modal');
+const btnPrev = $('btn-prev');
+const btnNext = $('btn-next');
+const mobileChapterTitle = $('mobile-chapter-title');
+const mobileChapterSelect = $('mobile-chapter-select');
+const singularityContainer = $('singularity-trigger-container');
+const voiceWaveIndicator = $('voice-wave-indicator');
+const voiceStatus = $('voice-status');
+let W = 0, H = 0;
+
+/* ---------- Cosmo's voice ----------
+   The browser's own speech engine (speechSynthesis). Voices load a moment after the page does, so we wait for
+   them instead of checking once; text is spoken a sentence at a time (some browsers cut off long text); and
+   if the device has no working voice we say so on screen rather than playing beeps in its place. */
+const Voice = (() => {
+    const synth = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
+    const NOVELTY = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Ralph|Kathy)\b/i;
+    const NICE = /Samantha|Google US English|Google UK English|Aria|Jenny|Natural|Enhanced|Premium|Ava|Allison|Serena|Moira|Karen|Daniel|Siri/i;
+    const stats = { supported: !!synth, voiceName: null, voices: 0, started: 0, ended: 0, errors: [], lastError: null };
+    let token = 0, watchdog = null;
+
+    function status(msg) { voiceStatus.textContent = msg || ''; }
+    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); }
+
+    function pick() {
+        const all = synth ? synth.getVoices() : [];
+        stats.voices = all.length;
+        const en = all.filter(v => /^en([-_]|$)/i.test(v.lang) && !NOVELTY.test(v.name));
+        const score = v => (/^en[-_]US/i.test(v.lang) ? 3 : /^en[-_](GB|AU|IE|ZA|IN)/i.test(v.lang) ? 2 : 0) + (NICE.test(v.name) ? 4 : 0) + (v.default ? 1 : 0);
+        en.sort((a, b) => score(b) - score(a));
+        stats.voiceName = en[0] ? en[0].name : null;
+        return en[0] || null;
+    }
+
+    // Resolves as soon as voices exist, or after maxMs (then we speak with the browser's default voice).
+    function voicesReady(maxMs) {
+        return new Promise(resolve => {
+            if (synth.getVoices().length) return resolve();
+            let done = false;
+            const finish = () => { if (done) return; done = true; synth.removeEventListener('voiceschanged', finish); resolve(); };
+            synth.addEventListener('voiceschanged', finish);
+            setTimeout(finish, maxMs);
+        });
+    }
+
+    function sentences(text) {
+        const clean = text.replace(/[\p{Extended_Pictographic}️‍]/gu, '').replace(/\s+/g, ' ').trim();
+        const parts = clean.match(/[^.!?]+[.!?]*/g) || [clean];
+        const out = [];
+        parts.forEach(p => { p = p.trim(); if (!p) return; if (out.length && (out[out.length - 1].length + p.length) < 90) out[out.length - 1] += ' ' + p; else out.push(p); });
+        return out;
+    }
+
+    function stop() {
+        token++;
+        clearTimeout(watchdog);
+        if (synth) { try { synth.cancel(); } catch (e) { /* ignore */ } }
+        wave(false);
+    }
+
+    function fail(msg) { wave(false); status(msg); }
+
+    function run(parts, i, my, voice) {
+        if (my !== token) return;
+        if (i >= parts.length) { wave(false); return; }
+        const u = new SpeechSynthesisUtterance(parts[i]);
+        u.lang = voice ? voice.lang : 'en-US';
+        if (voice) u.voice = voice;
+        u.pitch = 1.15;
+        u.rate = 1.0;
+        u.volume = 1;
+        u.onstart = () => { if (my !== token) return; stats.started++; clearTimeout(watchdog); status(''); wave(true); };
+        u.onend = () => { stats.ended++; run(parts, i + 1, my, voice); };
+        u.onerror = e => {
+            if (my !== token) return;
+            const code = e && e.error;
+            if (code === 'canceled' || code === 'interrupted') return;
+            stats.lastError = code; stats.errors.push(code);
+            fail(code === 'not-allowed' ? 'Tap “Hear Cosmo” to turn on his voice.' : 'Cosmo’s voice isn’t working on this device. You can read his words instead.');
+        };
+        // If nothing has started after a few seconds, the browser has no usable voice (or is waiting for a tap).
+        clearTimeout(watchdog);
+        watchdog = setTimeout(() => { if (my === token && !synth.speaking) fail('No voice started. Tap “Hear Cosmo” to try again, or read his words.'); }, 4000);
+        if (synth.paused) synth.resume();
+        synth.speak(u);
+    }
+
+    function speak(text) {
+        if (!speechEnabled) return;
+        if (!synth) { fail('This browser can’t speak out loud. You can read Cosmo’s words instead.'); return; }
+        stop();
+        const my = token;
+        status('');
+        const parts = sentences(text);
+        if (!parts.length) return;
+        const go = () => { if (my === token) run(parts, 0, my, pick()); };
+        // Voices already loaded: speak right now, inside the tap (some browsers only allow speech then).
+        if (synth.getVoices().length) go();
+        else voicesReady(1500).then(go);
+    }
+
+    // Called inside the first tap so phones allow speech afterwards.
+    function prime() {
+        if (!synth) return;
+        try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } catch (e) { /* ignore */ }
+    }
+
+    if (synth) { pick(); synth.addEventListener('voiceschanged', pick); }
+    return { speak, stop, prime, stats };
+})();
+window.bigBangVoice = Voice.stats;
+
+/* Cosmo's recorded lines (voice/<key>.mp3) play first because they work the same on every device.
+   If a file can't play, the browser's own voice reads the same words instead. */
+const Narrator = (() => {
+    let audio = null, token = 0;
+    const log = { played: 0, ended: 0, fellBack: 0 };
+    window.bigBangNarrator = log;
+    function wave(on) { voiceWaveIndicator.classList.toggle('hidden', !on); voiceWaveIndicator.classList.toggle('flex', on); }
+    function stop() { token++; if (audio) { try { audio.pause(); } catch (e) { /* ignore */ } audio = null; } Voice.stop(); wave(false); }
+    function say(key, text) {
+        if (!speechEnabled) return;
+        stop();
+        voiceStatus.textContent = '';
+        const my = token;
+        const a = new Audio('voice/' + key + '.mp3');
+        audio = a;
+        const fallback = () => { if (my !== token) return; log.fellBack++; audio = null; Voice.speak(text); };
+        a.onplaying = () => { if (my === token) { log.played++; wave(true); } };
+        a.onended = () => { if (my === token) { log.ended++; wave(false); } };
+        a.onerror = fallback;
+        const p = a.play();
+        if (p && p.catch) p.catch(err => { if (my !== token) return; if (err && err.name === 'NotAllowedError') { wave(false); voiceStatus.textContent = 'Tap “Hear Cosmo” to turn on his voice.'; } else fallback(); });
+    }
+    return { say, stop };
+})();
+let mascotKey = 'c0';
+function setMascot(key, text) { mascotKey = key; mascotSpeech.textContent = text; }
+function sayMascot() { Narrator.say(mascotKey, mascotSpeech.textContent); }
+
+/* ---------- sound effects (Web Audio, only after a tap) ---------- */
+function unlockAudioEngine() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* no Web Audio: the game still works */ }
+    $('audio-unlock-overlay').style.display = 'none';
+    Voice.prime();
+    playSound('pop');
+    sayMascot();
+}
+$('btn-unlock-audio').addEventListener('click', unlockAudioEngine);
+
+function playSound(type) {
+    if (!soundEnabled) return;
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const now = audioCtx.currentTime;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        let len = 0.1;
+        if (type === 'pop') {
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+            len = 0.08;
+        } else if (type === 'boom') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(30, now + 0.6);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+            len = 0.6;
+        } else if (type === 'star') {
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.08);
+            osc.frequency.setValueAtTime(783.99, now + 0.16);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+            len = 0.25;
+        } else if (type === 'win') {
+            [440, 554.37, 659.25, 880].forEach((f, i) => osc.frequency.setValueAtTime(f, now + i * 0.1));
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
+            len = 0.45;
+        }
+        osc.start(now);
+        osc.stop(now + len);
+    } catch (e) { /* ignore audio errors */ }
+}
+
+/* ---------- canvas ---------- */
+function sizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // keep everything on screen after a resize without restarting the chapter
+    interactiveEntities.forEach(e => { e.x = Math.min(Math.max(e.x, 45), Math.max(45, W - 45)); e.y = Math.min(Math.max(e.y, 45), Math.max(45, H - 45)); });
+    particles.forEach(p => { p.x = Math.min(p.x, W); p.y = Math.min(p.y, H); });
+}
+window.addEventListener('resize', sizeCanvas);
+
+const ENTITY = [['hydrogen', '🔴'], ['spaceRock', '🪨'], ['microbeFood', '🧪'], ['swimmer', '🐠'], ['asteroid', '☄️'], ['energyOrb', '⚡']];
+
+function initChapterScene() {
+    particles = [];
+    interactiveEntities = [];
+    radialExplosionParticles = [];
+    shockwaveRings = [];
+    minigameProgress = 0;
+
+    if (currentChapterIndex === 0) {
+        bigBangTriggered = false;
+        singularityContainer.style.opacity = '1';
+        singularityContainer.style.pointerEvents = 'auto';
+    } else {
+        singularityContainer.style.opacity = '0';
+        singularityContainer.style.pointerEvents = 'none';
+        for (let i = 0; i < 90; i++) {
+            particles.push({
+                x: Math.random() * W, y: Math.random() * H,
+                size: Math.random() * 2.5 + 1,
+                vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+                color: currentChapterIndex === 2 ? 'rgba(56, 189, 248, ' : 'rgba(255, 255, 255, ',
+                alpha: Math.random(), pulseSpeed: 0.01 + Math.random() * 0.02
+            });
+        }
+    }
+    for (let i = 0; i < CHAPTERS[currentChapterIndex].minigameTarget; i++) spawnGameEntity();
+
+    renderMinigameUI();
+    renderHotspots();
+    updateUI();
+}
+
+function spawnGameEntity() {
+    const margin = 90;
+    const [type, emoji] = ENTITY[currentChapterIndex];
+    interactiveEntities.push({
+        x: margin + Math.random() * Math.max(1, W - margin * 2),
+        y: margin + Math.random() * Math.max(1, H - margin * 2),
+        vx: (Math.random() - 0.5) * 1.6, vy: (Math.random() - 0.5) * 1.6,
+        radius: 26, emoji, type, pulse: Math.random() * Math.PI, collected: false
+    });
+}
+
+function triggerBigBangExplosion() {
+    if (bigBangTriggered) return;
+    bigBangTriggered = true;
+    playSound('boom');
+    singularityContainer.style.opacity = '0';
+    singularityContainer.style.pointerEvents = 'none';
+
+    const cx = W / 2, cy = H / 2;
+    radialExplosionParticles = [];
+    shockwaveRings = [];
+    for (let r = 0; r < 4; r++) {
+        shockwaveRings.push({ radius: 5, speed: 6 + r * 3, alpha: 1, color: r % 2 === 0 ? '#f59e0b' : '#ec4899' });
+    }
+    const colors = ['#ffffff', '#fbbf24', '#f97316', '#ec4899', '#a855f7', '#38bdf8'];
+    for (let i = 0; i < 350; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 12;
+        radialExplosionParticles.push({
+            x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+            size: Math.random() * 5 + 2, color: colors[Math.floor(Math.random() * colors.length)],
+            life: 1.0, decay: 0.003 + Math.random() * 0.005
+        });
+    }
+    // the first stars appear once the bang has happened
+    for (let i = 0; i < 90; i++) {
+        particles.push({
+            x: Math.random() * W, y: Math.random() * H, size: Math.random() * 2.5 + 1,
+            vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
+            color: 'rgba(255, 255, 255, ', alpha: Math.random(), pulseSpeed: 0.01 + Math.random() * 0.02
+        });
+    }
+    renderHotspots();
+    setMascot('bang', CHAPTERS[0].afterBang);
+    sayMascot();
+}
+$('singularity-core').addEventListener('click', triggerBigBangExplosion);
+
+$('btn-global-restart-bb').addEventListener('click', () => {
+    playSound('pop');
+    closeModals();
+    currentChapterIndex = 0;
+    initChapterScene();
+    sayMascot();
+});
+
+function animate() {
+    const cx = W / 2, cy = H / 2;
+    const time = Date.now() * 0.001;
+    const preBang = currentChapterIndex === 0 && !bigBangTriggered;
+
+    // Chapter 1 starts as pure black until the Big Bang
+    if (preBang) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, W, H);
+    } else {
+        const bg = CHAPTERS[currentChapterIndex].bgGradient;
+        const grad = ctx.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, bg[0]); grad.addColorStop(0.5, bg[1]); grad.addColorStop(1, bg[2]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    drawCentralIllustration(cx, cy, time);
+
+    if (currentChapterIndex === 0 && bigBangTriggered) {
+        shockwaveRings.forEach(ring => {
+            if (ring.alpha <= 0) return;
+            ring.radius += ring.speed;
+            ring.alpha -= 0.008;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, ring.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = ring.color;
+            ctx.globalAlpha = Math.max(0, ring.alpha);
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.restore();
+        });
+        radialExplosionParticles.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+            if (p.life > 0) {
+                ctx.save();
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        });
+    }
+
+    if (!preBang) {
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            p.alpha += p.pulseSpeed;
+            if (p.alpha > 1 || p.alpha < 0.2) p.pulseSpeed *= -1;
+            if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+            if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+            ctx.fillStyle = p.color + Math.min(1, Math.max(0, p.alpha)) + ')';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // the mini-game things only exist once there is a universe to find them in
+        interactiveEntities.forEach(ent => {
+            if (ent.collected) return;
+            ent.x += ent.vx; ent.y += ent.vy; ent.pulse += 0.05;
+            if (ent.x < 45 || ent.x > W - 45) ent.vx *= -1;
+            if (ent.y < 45 || ent.y > H - 45) ent.vy *= -1;
+            ctx.save();
+            ctx.translate(ent.x, ent.y);
+            const scale = 1 + Math.sin(ent.pulse) * 0.12;
+            ctx.scale(scale, scale);
+            ctx.shadowColor = '#fbbf24';
+            ctx.shadowBlur = 12;
+            ctx.font = '28px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ent.emoji, 0, 0);
+            ctx.restore();
+        });
+    }
+    requestAnimationFrame(animate);
+}
+
+function drawCentralIllustration(cx, cy, time) {
+    ctx.save();
+    const k = Math.min(1, Math.min(W, H) / 520);   // shrink the big picture on small screens
+    ctx.translate(cx, cy); ctx.scale(k, k); ctx.translate(-cx, -cy);
+    if (currentChapterIndex === 0 && bigBangTriggered) {
+        const coreGlow = ctx.createRadialGradient(cx, cy, 10, cx, cy, 170 + Math.sin(time * 2) * 20);
+        coreGlow.addColorStop(0, '#ffffff'); coreGlow.addColorStop(0.3, '#f59e0b'); coreGlow.addColorStop(0.7, '#ec4899'); coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = coreGlow;
+        ctx.beginPath(); ctx.arc(cx, cy, 180, 0, Math.PI * 2); ctx.fill();
+    } else if (currentChapterIndex === 1) {
+        ctx.fillStyle = '#f97316'; ctx.shadowColor = '#ea580c'; ctx.shadowBlur = 35;
+        ctx.beginPath(); ctx.arc(cx, cy, 95 + Math.sin(time) * 5, 0, Math.PI * 2); ctx.fill();
+        const moonX = cx + Math.cos(time * 0.8) * 165, moonY = cy + Math.sin(time * 0.8) * 65;
+        ctx.fillStyle = '#94a3b8'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(moonX, moonY, 22, 0, Math.PI * 2); ctx.fill();
+    } else if (currentChapterIndex === 2) {
+        const g = ctx.createRadialGradient(cx - 30, cy - 30, 20, cx, cy, 110);
+        g.addColorStop(0, '#38bdf8'); g.addColorStop(0.8, '#0369a1'); g.addColorStop(1, '#0c4a6e');
+        ctx.fillStyle = g; ctx.shadowColor = '#38bdf8'; ctx.shadowBlur = 25;
+        ctx.beginPath(); ctx.arc(cx, cy, 110, 0, Math.PI * 2); ctx.fill();
+    } else if (currentChapterIndex === 3) {
+        const g = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, 115);
+        g.addColorStop(0, '#4ade80'); g.addColorStop(0.6, '#15803d'); g.addColorStop(1, '#052e16');
+        ctx.fillStyle = g; ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 20;
+        ctx.beginPath(); ctx.arc(cx, cy, 115, 0, Math.PI * 2); ctx.fill();
+    } else if (currentChapterIndex === 4) {
+        ctx.font = '110px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('🌋', cx, cy - 20);
+        ctx.font = '55px serif';
+        ctx.fillText('🦕', cx - 120 + Math.sin(time) * 15, cy + 80);
+        ctx.fillText('🦖', cx + 120 + Math.cos(time) * 15, cy + 90);
+    } else if (currentChapterIndex === 5) {
+        const g = ctx.createRadialGradient(cx - 30, cy - 30, 10, cx, cy, 120);
+        g.addColorStop(0, '#60a5fa'); g.addColorStop(0.5, '#1d4ed8'); g.addColorStop(1, '#0f172a');
+        ctx.fillStyle = g; ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 30;
+        ctx.beginPath(); ctx.arc(cx, cy, 120, 0, Math.PI * 2); ctx.fill();
+        ctx.font = '36px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowBlur = 0;
+        ctx.fillText('🚀', cx + Math.cos(time * 1.2) * 175, cy + Math.sin(time * 1.2) * 80);
+    }
+    ctx.restore();
+}
+
+/* ---------- hotspots, mini-game, modals ---------- */
+function renderHotspots() {
+    hotspotsContainer.innerHTML = '';
+    if (currentChapterIndex === 0 && !bigBangTriggered) return;   // nothing to explore before the Big Bang
+    CHAPTERS[currentChapterIndex].hotspots.forEach((hs, idx) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.setAttribute('aria-label', 'Explore: ' + hs.title);
+        el.className = 'absolute pointer-events-auto transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group bg-transparent border-0 p-0';
+        el.style.left = hs.x + '%';
+        el.style.top = hs.y + '%';
+        el.innerHTML = `
+            <span class="relative flex items-center justify-center">
+                <span class="absolute w-12 h-12 rounded-full bg-amber-400/40 hotspot-ring"></span>
+                <span class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-slate-950 flex items-center justify-center text-xl shadow-lg shadow-amber-500/50 group-hover:scale-125 transition-transform">${hs.icon}</span>
+                <span class="absolute top-12 whitespace-nowrap bg-black/85 text-amber-300 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-400/40 opacity-90 group-hover:opacity-100 transition-opacity">Tap to explore!</span>
+            </span>`;
+        el.addEventListener('click', e => { e.stopPropagation(); playSound('pop'); openModal(hs, 'h' + currentChapterIndex + idx); });
+        hotspotsContainer.appendChild(el);
+    });
+}
+
+function renderMinigameUI() {
+    const ch = CHAPTERS[currentChapterIndex];
+    const target = ch.minigameTarget;
+    const pct = Math.min(100, Math.round((minigameProgress / target) * 100));
+    minigameContainer.innerHTML = `
+        <div class="flex items-center justify-between mb-1 gap-2">
+            <h2 class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider m-0">${ch.minigameTitle}</h2>
+            <span class="text-xs font-black text-white bg-amber-500/30 px-2 py-0.5 rounded-full border border-amber-400/30 shrink-0">${minigameProgress} / ${target}</span>
+        </div>
+        <p class="text-[11px] sm:text-xs text-slate-300 mb-2 mt-0 leading-snug">${ch.minigameDesc}</p>
+        <div class="w-full h-2.5 bg-black/60 rounded-full overflow-hidden border border-white/10" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${minigameProgress}">
+            <div class="h-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300" style="width: ${pct}%"></div>
+        </div>`;
+}
+
+function chapterComplete() {
+    playSound('win');
+    if (!completed.includes(currentChapterIndex)) { completed.push(currentChapterIndex); store.set('done', JSON.stringify(completed)); }
+    const last = currentChapterIndex === CHAPTERS.length - 1;
+    setMascot(last ? 'final' : 'done', last
+        ? '🎉 You did it! You travelled all the way from the Big Bang to today!'
+        : '🎉 Awesome job! You finished this chapter’s challenge. Tap “Next Chapter” to keep going!');
+    sayMascot();
+    updateUI();
+    if (last) setTimeout(() => openAbout(true), 2600);
+}
+
+canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left, clickY = e.clientY - rect.top;
+    let hit = false;
+    if (!(currentChapterIndex === 0 && !bigBangTriggered)) {
+        interactiveEntities.forEach(ent => {
+            if (hit || ent.collected) return;
+            if (Math.hypot(ent.x - clickX, ent.y - clickY) < ent.radius + 18) {
+                ent.collected = true;
+                hit = true;
+                minigameProgress++;
+                playSound('star');
+                renderMinigameUI();
+                if (minigameProgress >= CHAPTERS[currentChapterIndex].minigameTarget) chapterComplete();
+            }
+        });
+    }
+    if (!hit) {
+        playSound('pop');
+        const k = Math.min(1, Math.min(W, H) / 520);
+        if (Math.hypot(W / 2 - clickX, H / 2 - clickY) < 130 * k && !(currentChapterIndex === 0 && !bigBangTriggered)) openCentralExplanation();
+    }
+});
+
+function openCentralExplanation() { openModal(CHAPTERS[currentChapterIndex].centre, 'm' + currentChapterIndex); }
+
+function openModal(hs, key) {
+    $('modal-icon').textContent = hs.icon;
+    $('modal-title').textContent = hs.title;
+    $('modal-body').textContent = hs.body;
+    $('modal-funfact').textContent = hs.funFact;
+    infoModal.classList.remove('hidden');
+    $('btn-modal-ok').focus();
+    Narrator.say(key, `${hs.title}. ${hs.body}`);
+}
+
+function openAbout(done) {
+    $('about-emoji').textContent = done ? '🎉' : '🌌';
+    $('about-title').textContent = done ? 'You travelled 13.8 billion years!' : 'About Cosmic Journey';
+    $('about-text').textContent = done
+        ? 'From a tiny hot point to stars, Earth, dinosaurs, people and rockets: you saw it all. Go back to any chapter to explore the glowing spots you missed.'
+        : 'A story of the universe in six chapters, from the Big Bang to today. It is a beta: we are still testing it with kids and improving it. Tell us what you think with the links at the bottom of the page.';
+    $('btn-about-again').hidden = !done;
+    aboutModal.classList.remove('hidden');
+    $('btn-close-about').focus();
+    if (done) { playSound('win'); Narrator.say('final', 'You did it! You travelled all the way from the Big Bang to today!'); }
+}
+
+function closeModals() {
+    infoModal.classList.add('hidden');
+    aboutModal.classList.add('hidden');
+    Narrator.stop();
+}
+$('btn-close-modal').addEventListener('click', closeModals);
+$('btn-modal-ok').addEventListener('click', closeModals);
+$('btn-close-about').addEventListener('click', closeModals);
+$('btn-about').addEventListener('click', () => { playSound('pop'); openAbout(false); });
+$('btn-about-again').addEventListener('click', () => { closeModals(); changeChapter(0); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+/* ---------- chapter navigation ---------- */
+function updateUI() {
+    const ch = CHAPTERS[currentChapterIndex];
+    const preBang = currentChapterIndex === 0 && !bigBangTriggered;
+    if (currentChapterIndex === 0 && bigBangTriggered) setMascot('bang', ch.afterBang); else setMascot('c' + currentChapterIndex, ch.mascotSpeech);
+    mobileChapterTitle.textContent = `${currentChapterIndex + 1}. ${ch.title}`;
+    if (!mobileChapterSelect.options.length) {
+        CHAPTERS.forEach((c, i) => { const o = document.createElement('option'); o.value = i; o.textContent = c.shortTitle; mobileChapterSelect.appendChild(o); });
+    }
+    mobileChapterSelect.value = currentChapterIndex;
+    btnPrev.disabled = currentChapterIndex === 0;
+    btnNext.textContent = currentChapterIndex === CHAPTERS.length - 1 ? 'Restart Journey ↻' : 'Next Chapter →';
+
+    const navPills = $('chapter-nav-pills');
+    navPills.innerHTML = '';
+    CHAPTERS.forEach((item, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border-0 ' +
+            (idx === currentChapterIndex ? 'bg-amber-400 text-slate-950 shadow-md shadow-amber-400/30' : 'text-slate-300 hover:bg-white/10 bg-transparent');
+        btn.textContent = `${item.icon} ${item.shortTitle}${completed.includes(idx) ? ' ✓' : ''}`;
+        btn.addEventListener('click', () => changeChapter(idx));
+        navPills.appendChild(btn);
+    });
+    const dots = $('timeline-dots');
+    dots.innerHTML = '';
+    CHAPTERS.forEach((_, idx) => {
+        const d = document.createElement('div');
+        d.className = 'w-3 h-3 rounded-full transition-all ' + (idx === currentChapterIndex ? 'bg-amber-400 scale-125' : completed.includes(idx) ? 'bg-emerald-400/70' : 'bg-white/20');
+        dots.appendChild(d);
+    });
+}
+
+function changeChapter(newIndex) {
+    playSound('pop');
+    closeModals();
+    currentChapterIndex = newIndex;
+    initChapterScene();
+    sayMascot();
+}
+
+btnPrev.addEventListener('click', () => { if (currentChapterIndex > 0) changeChapter(currentChapterIndex - 1); });
+btnNext.addEventListener('click', () => changeChapter(currentChapterIndex < CHAPTERS.length - 1 ? currentChapterIndex + 1 : 0));
+mobileChapterSelect.addEventListener('change', e => changeChapter(parseInt(e.target.value, 10)));
+
+/* ---------- toggles, helpers ---------- */
+function paintToggles() {
+    const s = $('btn-sound'), v = $('btn-speech');
+    s.setAttribute('aria-pressed', String(soundEnabled));
+    s.firstElementChild.textContent = soundEnabled ? '🔊' : '🔇';
+    s.classList.toggle('text-amber-300', soundEnabled); s.classList.toggle('text-slate-500', !soundEnabled);
+    v.setAttribute('aria-pressed', String(speechEnabled));
+    v.firstElementChild.style.opacity = speechEnabled ? '1' : '0.35';
+    v.classList.toggle('text-cyan-300', speechEnabled); v.classList.toggle('text-slate-500', !speechEnabled);
+}
+$('btn-sound').addEventListener('click', () => { soundEnabled = !soundEnabled; store.set('sound', soundEnabled ? '1' : '0'); paintToggles(); playSound('pop'); });
+$('btn-speech').addEventListener('click', () => {
+    speechEnabled = !speechEnabled; store.set('speech', speechEnabled ? '1' : '0'); paintToggles();
+    if (!speechEnabled) { Narrator.stop(); voiceStatus.textContent = ''; } else sayMascot();
+});
+
+// "Hear Cosmo" always speaks, even if the voice switch at the top is off
+function hearCosmo() {
+    playSound('pop');
+    if (!speechEnabled) { speechEnabled = true; store.set('speech', '1'); paintToggles(); }
+    sayMascot();
+}
+$('btn-speak-voice').addEventListener('click', e => { e.stopPropagation(); hearCosmo(); });
+$('mascot-avatar').addEventListener('click', hearCosmo);
+
+$('btn-help').addEventListener('click', () => {
+    openModal({
+        icon: '🐱', title: 'How to play & learn',
+        body: '1. In Chapter 1, tap the glowing core in the dark to start the Big Bang.\n2. Tap the floating things to finish each chapter’s challenge.\n3. Tap the glowing circles to learn a fun fact.\n4. Tap Cosmo, or “Hear Cosmo”, to hear him again.',
+        funFact: 'No sound? Check that your device isn’t on silent and the volume is up, then tap “Hear Cosmo”.'
+    }, 'help');
+});
+
+// Tell a friend: open the share sheet, or copy the link where sharing is not available.
+document.querySelectorAll('[data-tell]').forEach(b => b.addEventListener('click', async () => {
+    const url = b.dataset.tell, text = b.dataset.text, label = b.textContent;
+    try {
+        if (navigator.share) { await navigator.share({ title: document.title, text, url }); return; }
+        await navigator.clipboard.writeText(text + ' ' + url);
+        b.textContent = 'Link copied! Paste it in a message.';
+        setTimeout(() => { b.textContent = label; }, 3500);
+    } catch (e) { if (!(e && e.name === 'AbortError')) b.textContent = url; }
+}));
+
+window.addEventListener('load', () => {
+    paintToggles();
+    sizeCanvas();
+    initChapterScene();
+    animate();
+    // #cover renders the card image: skip the welcome screen and let the Big Bang go off
+    if (location.hash === '#cover') {
+        $('audio-unlock-overlay').style.display = 'none';
+        speechEnabled = false;
+        singularityContainer.style.transition = 'none';
+        triggerBigBangExplosion();
+    }
+});
+    </script>
+</body>
+</html>

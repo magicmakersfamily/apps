@@ -8,6 +8,7 @@ card and a spoken intro from Cosmo the cat.
 - **One file**: `index.html` holds the CHAPTERS data (all kid-facing text), drawing, mini-games and UI. Tailwind is compiled
   and inlined between `/* tw:start */` and `/* tw:end */`: run `big-bang/tools/rebuild-css.sh` after adding Tailwind classes.
   No CDN, no Font Awesome (icons are emoji).
+- **5.2 look**: the guides sit on two perches (Cosmo lower left, Professor lower right) as inline-SVG characters that light up, lean in and show sound arcs while speaking; captions show one or two sentences at a time (`Speaker`, `Caption`, `splitCaption` in `index.html`; details in `PLAN.md`).
 - **5.x characters**: Cosmo (🐱, pitched Samantha / Sinji) ASKS and Professor Know-A-Lot (🦉, Daniel / Sinji lowered; Cantonese 知得多教授) EXPLAINS (5.1: all science narration, payoffs, picture cards and answers; Cosmo keeps questions, talk-together and help). Fact circles, Big question and one tappable glossary word per chapter, plus an "Ask the Professor" second answer on fact circles. He *knows a lot, not everything*: keep his lines honest ("scientists think", "we don't know yet"). Data: `ask`, `gloss`, `cast` in `tools/i18n/content_*.py`; clips `ha/h/hm/q/qa/ga/gb`; see `render-voice.sh` and `PLAN.md`.
 - **Voice (read this before touching it)**: spoken lines are recorded files `voice/<key>.mp3`, rendered by
   `tools/render-voice.sh` (macOS `say` + ffmpeg pitch shifting, one voice per character; keys come from `tools/lines.js`). Any text change in CHAPTERS needs a

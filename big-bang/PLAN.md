@@ -1,6 +1,6 @@
 # Cosmic Journey: plan and decisions
 
-## START HERE (updated 2026-10-17, session 3: **5.1 released**: Cosmo asks, the Professor explains; the grown-ups layer is now 6.0)
+## START HERE (updated 2026-10-17, session 3: **5.2 released**: Cosmo asks, the Professor explains, drawn characters on two perches; the grown-ups layer is now 6.0)
 
 **Two tracks are open. Do them in this order, and ask the family before starting track 2 build work.**
 
@@ -67,9 +67,15 @@ Suggested order if the family wants it: A first (ships with 6.0), then decide on
 - **Real finding:** Grok says the Cosmo/Professor switch is unclear on screen and Settings still says "Cosmo's voice". Fix: rename that switch to "Voices" (or "Cosmo and Professor") in both languages, and see the next section.
 - **Not a build item:** launch and marketing advice (App Store featuring nomination, STEM influencer outreach). This is a web game on GitHub Pages; a native iPhone/iPad app is a separate decision.
 
-### Speaker presentation: who is talking, and where (family discussion 2026-10-17, to decide)
-Family asks: a clear "voice imagery" near the speaker's face so it is always obvious who talks even when the text box is gone; maybe Cosmo always lower left and the Professor always lower right; maybe they look as if peering down into the simulation; dialog boxes must be useful but never interfere with the simulation.
-Recommendation (not built): two fixed "perches" in the lower corners, Cosmo left and the Professor right (questions from the left, answers from the right); the speaker lights up (coloured glow ring, radiating sound arcs, a gentle bounce driven by the real audio loudness) and "leans in" (scales up and rises toward the scene) while the other dims and recedes, which gives the peering-in perspective without moving the top controls; each speaker has its own colour (Cosmo indigo, Professor warm brown and gold) shared by the ring, name tag and caption bubble so colour tells non-readers who talks; captions show one sentence at a time beside the speaker, fade out soon after the voice ends, and sit in the keep-out zones so nothing to tap is ever under them; easy and calm mode swaps the moving arcs for a steady glow. Open points: top-corner "looking down" vs lower-corner "leaning in" (the top right holds the mini-game panel), real drawn characters (SVG: a cat, and an owl with glasses) instead of emoji, and how much phone height the perches may use. A static mock-up page should be shown to the family before touching the game.
+### Speaker presentation (family decisions 2026-10-17): released as 5.2
+Decided: lower corners with lean-in; real drawn characters; the characters may shrink a little on phones.
+- Two perches: Cosmo lower left (`#perch-cosmo`, button `#mascot-avatar`), Professor Know-A-Lot lower right (`#perch-prof`, `#prof-avatar`). Characters are inline SVG drawn in code (a violet cosmic cat with a gold star; an owl with big round glasses and bushy brows), each with a closed and an open mouth and a blink. Discs are 3.2 rem on phones, 4.4 rem on larger screens.
+- Speaking: `Speaker` (in `index.html`) lights the speaker's ring, shows three sound arcs toward the scene, flaps the mouth, and leans the character in (scale 1.32, nudged inward); the other guide dims and shrinks. It stays on screen after the caption box folds. Driven by `Narrator.wave()` and the browser-voice fallback; the speaker comes from `isProf(key)`. Mouth movement is a timer, not audio loudness (routing audio through Web Audio could silence narration on some phones; revisit only with real-device testing). Easy and calm mode and `prefers-reduced-motion` get a steady glow, steady arcs, an open mouth, no blinking or bobbing.
+- Captions: `splitCaption()` and `Caption` show one or two sentences at a time in the bubble, following the voice by character share (the bubble is much shorter). Whole text returns if a line is cut off or the browser voice is used. The bubble sits between the perches, beside the speaker (Cosmo side left, Professor side right, colour-coded), is in `keepOutZones()` with both perches, and folds after speaking as before.
+- The "Hear Cosmo" button is gone: tapping either character replays the current line. The glossary word also appears as a "💡 word" chip in the bubble after each payoff (`#btn-gloss`), plus in the text when the whole text shows.
+- Settings now say "Voices" (both guides) and the voice error messages no longer name Cosmo only.
+- Checked in the browser pane (desktop and phone width, English and Cantonese with Jyutping, easy mode, a full payoff then talk-together chain, no console errors). Not checked: real devices, how much of the lower corners the perches take in each chapter's mini-game, and a child's reaction.
+Open ideas: loudness-driven mouths, an "arrive" animation when the other guide takes over, tapping the quiet guide for a greeting, more expressions (happy, thinking, surprised) tied to events.
 
 ### Track 2: the grown-ups layer (version 5.0), design below, text content already written
 Nothing of it is in the game yet. Only the *text content* is written and committed (see the next section). The Professor characters could take over the "More" layer (F) and the vocabulary (words) in A.

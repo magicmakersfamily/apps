@@ -80,7 +80,7 @@ YUE = [merge(e, y) for e, y in zip(EN, Y)]
 UI = {
  'en': dict(
   fusion_label='H + H + H + H → He + light', gen_label='generation after generation', surv_label='small feathered survivors', ladder_label='each idea leads to the next',
-  settings_title='Settings', set_lang='Language', set_sound='Sound effects', set_voice='Cosmo’s voice', set_music='Music', set_jp='Jyutping', set_easy='Easy & calm mode',
+  settings_title='Settings', set_lang='Language', set_sound='Sound effects', set_voice='Voices (Cosmo and the Professor)', set_music='Music', set_jp='Jyutping', set_easy='Easy & calm mode',
   set_easy_d='Slower things, bigger targets, less movement.', on='On', off='Off', t_settings='Settings',
   cal_btn='One year', cal_title='📅 The universe in one year', cal_intro='Imagine the whole story squeezed into one year. Zoom in to see how late people arrive!',
   cal_bar1='The whole year', cal_bar2='December', cal_bar3='31 December', cal_last='The very last second: rockets and the Moon landing',
@@ -91,7 +91,7 @@ UI = {
   all_apps='← All apps', sub='Interactive universe & Earth story', start_over='Start over', how_to_play='How to Play',
   hear='Hear Cosmo', bigq='Big question', cosmo='Cosmo', ok='Awesome! Got it!', funfact='Fun fact!', again='💥 Start again',
   tell='Tell a friend', more='More from the App Shelf', see_all='See all the apps', about_btn='About',
-  t_sound='Sound effects on/off', t_voice='Cosmo’s voice on/off', t_music='Background music on/off', t_stickers='Sticker book', t_help='How to play', t_jp='Jyutping on/off', close='Close',
+  t_sound='Sound effects on/off', t_voice='Voices on/off', t_music='Background music on/off', t_stickers='Sticker book', t_help='How to play', t_jp='Jyutping on/off', close='Close',
   prev='← Previous', next='Next Chapter →', restart_j='Restart Journey ↻',
   cap1='Tiny, hot and crowded…', cap2='Space itself stretches, everywhere at once! There is no middle.', cap3='It cools down. Tiny pieces join up as hydrogen.',
   ent0='Hydrogen', ent1='Space rock', ent2='Nutrient', ent3='Sea creature', ent4='Asteroid', ent5='Idea spark',
@@ -108,12 +108,12 @@ UI = {
   v_final='You did it! You travelled all the way from the Big Bang to today! What do you want to discover next?',
   v_orderok='You put the whole story in order. Great job, explorer!',
   v_help='How to play and learn. Tap the glowing dot to start the Big Bang. In each chapter, tap the floating things and watch what you make happen. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
-  st_tap='Tap “Hear Cosmo” to turn on his voice.', st_novoice='No voice started. Tap “Hear Cosmo” to try again, or read his words.',
-  st_fail='Cosmo’s voice isn’t working on this device. You can read his words instead.', st_nosynth='This browser can’t speak out loud. You can read Cosmo’s words instead.',
+  st_tap='Tap Cosmo or the Professor to turn on the voices.', st_novoice='No voice started. Tap Cosmo or the Professor to try again, or read the words.',
+  st_fail='The voices aren’t working on this device. You can read the words instead.', st_nosynth='This browser can’t speak out loud. You can read the words instead.',
   tl_aria='Story line: how long ago each chapter happened. The long gaps are squashed so they fit.', jp_btn='Jyutping'),
  'yue': dict(
   fusion_label='H + H + H + H → He + 光同熱', gen_label='一代又一代', surv_label='細隻嘅有羽毛恐龍生存咗落嚟', ladder_label='每個諗法都帶出下一個',
-  settings_title='設定', set_lang='語言', set_sound='音效', set_voice='宇宙貓旁白', set_music='背景音樂', set_jp='粵拼', set_easy='輕鬆慢速模式',
+  settings_title='設定', set_lang='語言', set_sound='音效', set_voice='旁白聲音（宇宙貓同教授）', set_music='背景音樂', set_jp='粵拼', set_easy='輕鬆慢速模式',
   set_easy_d='慢啲、大啲、少啲郁動。', on='開', off='關', t_settings='設定',
   cal_btn='一年', cal_title='📅 宇宙嘅一年', cal_intro='想像成個宇宙故事壓縮成一年。放大睇吓，人類幾咁遲先出現！',
   cal_bar1='成年', cal_bar2='12月', cal_bar3='12月31日', cal_last='最後嗰一秒：火箭同登陸月球',
@@ -124,7 +124,7 @@ UI = {
   all_apps='← 所有遊戲', sub='互動宇宙同地球故事', start_over='重新開始', how_to_play='玩法',
   hear='聽宇宙貓講', bigq='大問題', cosmo='宇宙貓', ok='好嘢！明白喇！', funfact='你知唔知？', again='💥 再玩一次',
   tell='話俾朋友知', more='更多遊戲', see_all='睇晒所有遊戲', about_btn='關於',
-  t_sound='音效 開／關', t_voice='宇宙貓旁白 開／關', t_music='背景音樂 開／關', t_stickers='貼紙簿', t_help='玩法', t_jp='粵拼 開／關', close='關閉',
+  t_sound='音效 開／關', t_voice='旁白聲音 開／關', t_music='背景音樂 開／關', t_stickers='貼紙簿', t_help='玩法', t_jp='粵拼 開／關', close='關閉',
   prev='← 上一章', next='下一章 →', restart_j='重新旅行 ↻',
   cap1='又細又熱又迫……', cap2='空間本身喺每個地方同時脹大！冇中心㗎。', cap3='慢慢變涼，細細粒嘅嘢結合成氫。',
   ent0='氫原子', ent1='太空石', ent2='養分', ent3='海洋生物', ent4='小行星', ent5='靈感火花',
@@ -141,8 +141,8 @@ UI = {
   v_final='你做到喇！你由大爆炸一路旅行到今日！你想發現啲乜呢？',
   v_orderok='你將成個故事排好晒次序。好叻呀，探險家！',
   v_help='玩法。㩒一下發光嘅小點，開始大爆炸。每一章都㩒一下浮緊嘅嘢，睇吓你整出啲乜。㩒發光嘅圈圈睇有趣知識，仲有宇宙貓嘅大問題等你諗。儲貼紙，睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
-  st_tap='㩒「聽宇宙貓講」開聲。', st_novoice='冇聲音。㩒「聽宇宙貓講」再試吓，或者睇吓佢講乜。',
-  st_fail='呢部機未能夠播放宇宙貓嘅聲音。你可以睇吓佢講乜。', st_nosynth='呢個瀏覽器唔能夠讀出聲。你可以睇吓宇宙貓講乜。',
+  st_tap='㩒宇宙貓或者教授，開聲。', st_novoice='冇聲音。㩒宇宙貓或者教授再試吓，或者睇吓佢哋講乜。',
+  st_fail='呢部機未能夠播放旁白聲音。你可以睇吓佢哋講乜。', st_nosynth='呢個瀏覽器唔能夠讀出聲。你可以睇吓佢哋講乜。',
   tl_aria='故事線：每一章係幾耐之前發生。好長嘅時間畫短咗，先放得落。', jp_btn='粵拼'),
 }
 STK = {  # id: (en name, en how, yue name, yue how)

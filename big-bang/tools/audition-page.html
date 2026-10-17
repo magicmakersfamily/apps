@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voice audition: Cosmo and Professor Know-A-Lot</title>
+<style>
+:root{color-scheme:dark} body{margin:0;font:16px/1.5 system-ui,sans-serif;background:#0b0a1f;color:#eee;padding:20px;max-width:760px;margin-inline:auto}
+h1{font-size:22px;margin:0 0 4px} h2{font-size:18px;margin:26px 0 6px;color:#fcd34d} p{margin:4px 0 10px;color:#bbb}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:#16143a;border:1px solid #333a7a;border-radius:14px;padding:10px 14px;margin:8px 0}
+.row b{min-width:210px} audio{height:36px;flex:1;min-width:220px} .q{font-style:italic;color:#9ad}
+select,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #556;background:#222050;color:#fff} button{background:#f59e0b;color:#000;font-weight:700;cursor:pointer}
+</style></head><body>
+<h1>🐱 Cosmo + 🦉 Professor Know-A-Lot: voice audition</h1>
+<p>Every sample reads the same line, so they are easy to compare. Tell me your favourite number for each (Cosmo, Professor), for English and for Cantonese.</p>
+
+<h2>🐱 Cosmo (sweet, like a kid)</h2>
+<p class="q">“Wait a minute! If space is stretching, where is the middle of the universe?”</p>
+<div class="row"><b>C1 · Junior (a child’s voice)</b><audio controls src="c1.mp3"></audio></div>
+<div class="row"><b>C2 · Samantha, pitched up a lot</b><audio controls src="c2.mp3"></audio></div>
+<div class="row"><b>C3 · Flo (young voice), pitched up a little</b><audio controls src="c3.mp3"></audio></div>
+<div class="row"><b>C4 · Kathy, pitched up</b><audio controls src="c4.mp3"></audio></div>
+<div class="row"><b>C5 · Tessa, pitched up</b><audio controls src="c5.mp3"></audio></div>
+
+<h2>🦉 Professor Know-A-Lot (deep, authoritative)</h2>
+<p class="q">“Excellent question, Cosmo! There is no middle. Space itself is stretching, everywhere at once, like the surface of a balloon as it is blown up.”</p>
+<div class="row"><b>P1 · Daniel (British), natural</b><audio controls src="p1.mp3"></audio></div>
+<div class="row"><b>P2 · Daniel, lowered (deeper)</b><audio controls src="p2.mp3"></audio></div>
+<div class="row"><b>P3 · Grandpa (British)</b><audio controls src="p3.mp3"></audio></div>
+<div class="row"><b>P4 · Reed (British), lowered a little</b><audio controls src="p4.mp3"></audio></div>
+<div class="row"><b>P5 · Rocko (British), lowered</b><audio controls src="p5.mp3"></audio></div>
+<div class="row"><b>P6 · Ralph (American), lowered</b><audio controls src="p6.mp3"></audio></div>
+
+<h2>粵語 Cantonese (only one Cantonese voice exists on this Mac, so these are pitch-shifted)</h2>
+<p class="q">宇宙貓：「咦，如果空間脹大，咁宇宙嘅中心喺邊度呀？」</p>
+<div class="row"><b>YC1 · 宇宙貓, higher</b><audio controls src="yc1.mp3"></audio></div>
+<div class="row"><b>YC2 · 宇宙貓, even higher</b><audio controls src="yc2.mp3"></audio></div>
+<p class="q">教授：「問得好，宇宙貓！其實冇中心。空間本身喺每個地方同時脹大，就好似氣球嘅表面咁。」</p>
+<div class="row"><b>YP1 · 教授, lower</b><audio controls src="yp1.mp3"></audio></div>
+<div class="row"><b>YP2 · 教授, much lower</b><audio controls src="yp2.mp3"></audio></div>
+
+<h2>Try a pair as a conversation</h2>
+<div class="row">
+ <label>Cosmo <select id="cs"><option>c1</option><option>c2</option><option selected>c3</option><option>c4</option><option>c5</option><option>yc1</option><option>yc2</option></select></label>
+ <label>Professor <select id="ps"><option>p1</option><option selected>p2</option><option>p3</option><option>p4</option><option>p5</option><option>p6</option><option>yp1</option><option>yp2</option></select></label>
+ <button id="go">▶ Play the conversation</button>
+</div>
+<script>
+document.getElementById('go').onclick=()=>{ const a=new Audio(document.getElementById('cs').value+'.mp3'), b=new Audio(document.getElementById('ps').value+'.mp3'); a.onended=()=>setTimeout(()=>b.play(),350); a.play(); };
+</script></body></html>

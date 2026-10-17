@@ -1,6 +1,32 @@
 # Cosmic Journey: plan and decisions
 
-## START HERE (handoff written 2026-10-17, end of session)
+## START HERE (updated end of session 2, 2026-10-17)
+
+**Two tracks are open. Do them in this order, and ask the family before starting track 2 build work.**
+
+### Track 1: finish the voice audition, then build the characters (version 5.0 or 6.0)
+**The idea (family's, agreed in principle):** make Cosmo the time-and-space-travelling cat a sweet, kid-like voice who ASKS the questions, and add a second character,
+**Professor Know-A-Lot, a wise OWL WITH GLASSES (🦉), with a deep, authoritative adult voice** who ANSWERS and explains hard words. Questions are voiced by Cosmo, answers by the Professor.
+My recommendations, not yet confirmed by the family: Cosmo keeps narrating the chapter stories; the Professor takes the fact circles, definitions, Big questions and "More"; the Professor
+models honesty ("scientists think...", "we don't know yet"); Cosmo voices common wrong ideas ("Did the Big Bang explode from the middle?") and the Professor corrects them kindly; tappable
+glossary words in the story text ("fusion" -> Cosmo asks, Professor explains); "More ▸" becomes "Ask the Professor". Keep answers to one idea (about 15 to 25 seconds) or kids skip them.
+Possible Cantonese name for the Professor: 乜都知教授 (suggested, not decided). Pilot it in ONE chapter (fact circles, one Big question, one glossary word) before rolling out to all six.
+Scale: roughly 60 extra clips per language; every future text change means re-recording both voices; the layout for two characters on a phone must be worked out (the stage is already tight).
+
+**Voice audition status:** samples were generated (macOS `say` plus ffmpeg pitch shifting) and the listening page was shown to the family, but **they have not yet picked**.
+To re-create it: run `big-bang/tools/audition.sh`, copy `big-bang/tools/audition-page.html` to `big-bang/audition/index.html`, serve with `cd /Users/ab/apps && python3 -m http.server 8765`, open `http://localhost:8765/big-bang/audition/`.
+Options: Cosmo C1 Junior, C2 Samantha pitched up 1.28, C3 Flo(US) 1.15, C4 Kathy 1.22, C5 Tessa 1.20; Professor P1 Daniel, P2 Daniel lowered 0.88, P3 Grandpa(UK) 0.95, P4 Reed(UK) 0.92, P5 Rocko(UK) 0.90, P6 Ralph 0.85;
+Cantonese (only one Cantonese voice exists on this Mac, Sinji, so it must be pitch-shifted): Cosmo YC1 1.30 or YC2 1.45; Professor YP1 0.80 or YP2 0.70.
+**FIRST THING TO DO in the next session: ask the family for their picks (Cosmo, Professor, Cantonese Cosmo, Cantonese Professor) and whether the quality is good enough.** If the English Cosmo does not sound child-like enough, the better engine is
+Kokoro (open-source, already used by Blow Up and Brush Buddy through `kokoro-onnx`; see `blow-up/tools/render-voice.py`); it needs a one-time model download of about 300 MB (ask permission first, say what/where/how big) and it does NOT cover Cantonese.
+The owl avatar is an emoji (🦉) drawn in code, like Cosmo's 🐱; no image assets. Mind the repo rules: static page, no third-party calls, kid-facing text plain and accurate.
+
+### Track 2: the grown-ups layer (version 5.0), design below, text content already written
+Nothing of it is in the game yet. Only the *text content* is written and committed (see the next section). The Professor characters could take over the "More" layer (F) and the vocabulary (words) in A.
+
+---
+
+## (earlier handoff, still accurate) START HERE: grown-ups layer details (handoff written 2026-10-17)
 
 **Live now: version 4.0 (beta)** at https://magicmakersfamily.github.io/apps/big-bang/ (tag `big-bang-v4.0`, frozen under `versions/big-bang/4.0/`).
 **In progress: version 5.0 = the "grown-ups layer" (Tier 2 below).** Nothing of it is in the game yet. Only the *text content* is written and committed:

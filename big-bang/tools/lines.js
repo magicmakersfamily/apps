@@ -8,11 +8,19 @@ const UI = grab('UI', '\n}');
 const clean = t => t.replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, '').replace(/\s+/g, ' ').trim();
 const join = (a, b) => /[.!?！？。]$/.test(a) ? a + ' ' + b : a + (lang === 'yue' ? '。' : '. ') + b;
 const out = [];
+// chapter 0 is the wormhole (wi<n> intro lines, wt_<name> toasts, c0, q0, qa0).
 // each line is [key, text] spoken by Cosmo, or [key, text, 'prof'] spoken by Professor Know-A-Lot.
 // Rule (family): the Professor explains the science (chapter stories c, bang, payoffs p, picture cards m, the one-year story cal);
 // Cosmo asks the questions and handles play (talk-together t, help, final, orderok).
 // Chapters with c.cast: Cosmo asks (ha<i><j>, q<i>, ga<i>) and the Professor answers (h<i><j>, qa<i>, gb<i>); hm<i><j> is his longer "Ask the Professor" answer.
 CHAPTERS.forEach((c, i) => {
+  if (i === 0) {   // the wormhole: Cosmo's mission line, the story script, and the Big question (no hotspots, picture card or payoff)
+    out.push(['c0', c.mascotSpeech]);
+    c.script.intro.forEach(([who, text], n) => out.push(['wi' + n, text, who === 'prof' ? 'prof' : undefined]));
+    c.script.toasts.forEach(([name, who, text]) => out.push(['wt_' + name, text, who === 'prof' ? 'prof' : undefined]));
+    out.push(['q0', c.bigQ.q]); out.push(['qa0', `${c.bigQ.a} ${c.bigQ.f}`, 'prof']);
+    return;
+  }
   out.push(['c' + i, c.mascotSpeech, 'prof']);
   if (c.afterBang) out.push(['bang', c.afterBang, 'prof']);
   out.push(['p' + i, c.payoff, 'prof']);

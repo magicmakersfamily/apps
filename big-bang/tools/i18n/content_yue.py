@@ -86,8 +86,8 @@ UI = {
   cal_bar1='The whole year', cal_bar2='December', cal_bar3='31 December', cal_last='The very last second: rockets and the Moon landing',
   v_cal='If the whole story of the universe were squeezed into one year, the Big Bang would be on the first of January. Dinosaurs would arrive on Christmas Day. And people would appear just eleven minutes before midnight on New Year’s Eve!',
   lang_label='Language', trigger='👉 Touch here to trigger the Big Bang! 👈', ov_title='Welcome, Cosmic Explorer!',
-  ov_text='Travel from the Big Bang to today with Cosmo the Cosmic Cat, your storyteller!',
-  ov_btn='Tap the glowing dot to begin!', ov_note='Sound, voice and music start when you tap. You can turn them off in Settings (the gear).',
+  ov_text='Join Cosmo and Professor Know-A-Lot on a time-travel space adventure, from the Big Bang to today!',
+  ov_btn='Tap to board the Time Cruiser!', ov_note='Sound, voice and music start when you tap. You can turn them off in Settings (the gear).',
   all_apps='← All apps', sub='Interactive universe & Earth story', start_over='Start over', how_to_play='How to Play',
   hear='Hear Cosmo', bigq='Big question', cosmo='Cosmo', ok='Awesome! Got it!', funfact='Fun fact!', again='💥 Start again',
   tell='Tell a friend', more='More from the App Shelf', see_all='See all the apps', about_btn='About',
@@ -95,19 +95,19 @@ UI = {
   prev='← Previous', next='Next Chapter →', restart_j='Restart Journey ↻',
   cap1='Tiny, hot and crowded…', cap2='Space itself stretches, everywhere at once! There is no middle.', cap3='It cools down. Tiny pieces join up as hydrogen.',
   ent0='Hydrogen', ent1='Space rock', ent2='Nutrient', ent3='Sea creature', ent4='Asteroid', ent5='Idea spark',
-  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play', prof='Professor Know-A-Lot', ask_prof='Ask the Professor', hear_prof='Hear the Professor', all_apps_txt='All apps', prof_short='Professor', b_word='New word', asks='asks',
+  b_discovery='Discovery!', b_bigq='Big question', b_help='How to play', prof='Professor Know-A-Lot', ask_prof='Ask the Professor', hear_prof='Hear the Professor', wm_squeeze='Squeeze the drive!', wm_hold='HOLD to squeeze!', wm_hold_sub='Press and hold anywhere: make everything tiny, hot and crowded', wm_keep='Keep holding...', wm_tiny='Tinier... hotter...', wm_now='NOW!', all_apps_txt='All apps', prof_short='Professor', b_word='New word', asks='asks',
   help_title='How to play & learn',
-  help_body='1. Tap the glowing dot to start the Big Bang.\n2. In each chapter, tap the floating things and watch what you make happen.\n3. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about.\n4. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
+  help_body='1. Steer the ship through the wormhole and squeeze the drive to set off the Big Bang.\n2. In each chapter, finish the mission: tap the floating things and watch what you make happen.\n3. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about.\n4. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
   help_fun='No sound? Check that your device isn’t on silent and the volume is up, then tap “Hear Cosmo”.',
   sticker_title='📒 My Sticker Book', sticker_intro='{n} of {m} stickers collected.', locked='Not yet', got='Collected!', toast_new='New sticker!',
   order_title='Put the story in order', order_intro='Tap the cards in the order they happened. What came first?', order_yes='Yes! And what came next?',
   order_no='Not quite yet. Think about what came before this one!', order_hint='Here is a hint: look for the glowing card.', order_done='You put the whole story in order! Great job, explorer!',
   about_title='About Cosmic Journey',
-  about_text='A story of the universe in six chapters. Finish each chapter’s challenge to collect stickers. It is a beta: we are still testing it with kids and improving it. Tell us what you think with the links at the bottom of the page.',
+  about_text='A space adventure through the story of the universe in seven chapters. Finish each chapter’s challenge to collect stickers. It is a beta: we are still testing it with kids and improving it. Tell us what you think with the links at the bottom of the page.',
   done_title='You travelled 13.8 billion years!', done_text='From a tiny hot dot to stars, Earth, dinosaurs, people and rockets: you saw it all. What do you want to discover next?',
   v_final='You did it! You travelled all the way from the Big Bang to today! What do you want to discover next?',
   v_orderok='You put the whole story in order. Great job, explorer!',
-  v_help='How to play and learn. Tap the glowing dot to start the Big Bang. In each chapter, tap the floating things and watch what you make happen. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
+  v_help='How to play and learn. Steer the ship through the wormhole and squeeze the drive to set off the Big Bang. In each chapter, finish the mission: tap the floating things and watch what you make happen. Tap the glowing circles for fun facts, and Cosmo’s Big question for a puzzle to think about. Collect stickers, and use the story line at the bottom to see how long ago things happened.',
   st_tap='Tap Cosmo or the Professor to turn on the voices.', st_novoice='No voice started. Tap Cosmo or the Professor to try again, or read the words.',
   st_fail='The voices aren’t working on this device. You can read the words instead.', st_nosynth='This browser can’t speak out loud. You can read the words instead.',
   tl_aria='Story line: how long ago each chapter happened. The long gaps are squashed so they fit.', jp_btn='Jyutping'),
@@ -119,8 +119,8 @@ UI = {
   cal_bar1='成年', cal_bar2='12月', cal_bar3='12月31日', cal_last='最後嗰一秒：火箭同登陸月球',
   v_cal='如果將成個宇宙嘅故事壓縮成一年，大爆炸喺一月一號。恐龍喺聖誕節先出現。而人類呢，要到除夕夜晚，差十一分鐘就十二點先出現！',
   lang_label='語言', trigger='👉 㩒呢度，開始大爆炸！ 👈', ov_title='歡迎你，宇宙探險家！',
-  ov_text='由大爆炸一路旅行到今日，宇宙貓同你講故事！',
-  ov_btn='㩒一下發光嘅小點，開始冒險！', ov_note='㩒咗先會有音效、旁白同音樂。你可以喺「設定」（齒輪）度關掉。',
+  ov_text='同宇宙貓同知得多教授一齊，由大爆炸一路坐太空船旅行到今日！',
+  ov_btn='㩒一下，登上時光號！', ov_note='㩒咗先會有音效、旁白同音樂。你可以喺「設定」（齒輪）度關掉。',
   all_apps='← 所有遊戲', sub='互動宇宙同地球故事', start_over='重新開始', how_to_play='玩法',
   hear='聽宇宙貓講', bigq='大問題', cosmo='宇宙貓', ok='好嘢！明白喇！', funfact='你知唔知？', again='💥 再玩一次',
   tell='話俾朋友知', more='更多遊戲', see_all='睇晒所有遊戲', about_btn='關於',
@@ -128,36 +128,37 @@ UI = {
   prev='← 上一章', next='下一章 →', restart_j='重新旅行 ↻',
   cap1='又細又熱又迫……', cap2='空間本身喺每個地方同時脹大！冇中心㗎。', cap3='慢慢變涼，細細粒嘅嘢結合成氫。',
   ent0='氫原子', ent1='太空石', ent2='養分', ent3='海洋生物', ent4='小行星', ent5='靈感火花',
-  b_discovery='新發現！', b_bigq='大問題', b_help='玩法', prof='知得多教授', ask_prof='問吓教授', hear_prof='聽教授講', all_apps_txt='所有遊戲', prof_short='教授', b_word='新詞語', asks='問',
+  b_discovery='新發現！', b_bigq='大問題', b_help='玩法', prof='知得多教授', ask_prof='問吓教授', hear_prof='聽教授講', wm_squeeze='擠壓引擎！', wm_hold='撳住擠壓！', wm_hold_sub='喺任何位置撳住：令一切變得又細又熱又迫', wm_keep='繼續撳住⋯⋯', wm_tiny='越嚟越細⋯⋯越嚟越熱⋯⋯', wm_now='就係而家！', all_apps_txt='所有遊戲', prof_short='教授', b_word='新詞語', asks='問',
   help_title='玩法同學習',
-  help_body='1. 㩒一下發光嘅小點，開始大爆炸。\n2. 每一章都㩒一下浮緊嘅嘢，睇吓你整出啲乜。\n3. 㩒發光嘅圈圈睇有趣知識；㩒「大問題」有啲嘢可以諗吓。\n4. 儲貼紙；睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
+  help_body='1. 駕駛飛船穿過蟲洞，擠壓引擎，引發大爆炸。\n2. 每一章都完成任務：㩒一下浮緊嘅嘢，睇吓你整出啲乜。\n3. 㩒發光嘅圈圈睇有趣知識；㩒「大問題」有啲嘢可以諗吓。\n4. 儲貼紙；睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
   help_fun='冇聲？睇吓部機有冇靜音、音量夠唔夠，再㩒「聽宇宙貓講」。',
   sticker_title='📒 我嘅貼紙簿', sticker_intro='儲咗 {n} / {m} 張貼紙。', locked='未有', got='儲到喇！', toast_new='新貼紙！',
   order_title='將故事排好次序', order_intro='按事情發生嘅次序㩒啲卡。邊個最先？', order_yes='啱喇！跟住係邊個？',
   order_no='未得喎，諗吓邊個喺呢個之前發生！', order_hint='提示：搵發光嗰張卡。', order_done='你將成個故事排好晒次序！好叻呀，探險家！',
   about_title='關於宇宙之旅',
-  about_text='宇宙之旅有六個章節。完成每一章嘅挑戰就可以儲貼紙。呢個係測試版，我哋仲同小朋友一齊測試同改善緊。你嘅意見可以用頁底嘅連結話俾我哋知。',
+  about_text='宇宙之旅係一個太空冒險，有七個章節。完成每一章嘅挑戰就可以儲貼紙。呢個係測試版，我哋仲同小朋友一齊測試同改善緊。你嘅意見可以用頁底嘅連結話俾我哋知。',
   done_title='你旅行咗138億年！', done_text='由一個又細又熱嘅小點，去到恆星、地球、恐龍、人類同火箭：你全部都睇晒喇！你想發現啲乜呢？',
   v_final='你做到喇！你由大爆炸一路旅行到今日！你想發現啲乜呢？',
   v_orderok='你將成個故事排好晒次序。好叻呀，探險家！',
-  v_help='玩法。㩒一下發光嘅小點，開始大爆炸。每一章都㩒一下浮緊嘅嘢，睇吓你整出啲乜。㩒發光嘅圈圈睇有趣知識，仲有宇宙貓嘅大問題等你諗。儲貼紙，睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
+  v_help='玩法。駕駛飛船穿過蟲洞，擠壓引擎，引發大爆炸。每一章都完成任務：㩒一下浮緊嘅嘢，睇吓你整出啲乜。㩒發光嘅圈圈睇有趣知識，仲有宇宙貓嘅大問題等你諗。儲貼紙，睇吓下面嘅故事線，就知道嗰啲事喺幾耐之前發生。',
   st_tap='㩒宇宙貓或者教授，開聲。', st_novoice='冇聲音。㩒宇宙貓或者教授再試吓，或者睇吓佢哋講乜。',
   st_fail='呢部機未能夠播放旁白聲音。你可以睇吓佢哋講乜。', st_nosynth='呢個瀏覽器唔能夠讀出聲。你可以睇吓佢哋講乜。',
   tl_aria='故事線：每一章係幾耐之前發生。好長嘅時間畫短咗，先放得落。', jp_btn='粵拼'),
 }
 STK = {  # id: (en name, en how, yue name, yue how)
- 'c0': ('First Star','Light the first star (chapter 1)','第一粒星','點亮第一粒星（第1章）'),
- 'c1': ('Moon Maker','Build Earth (chapter 2)','月球製造師','砌地球（第2章）'),
- 'c2': ('Oxygen Maker','Feed the tiny cells (chapter 3)','氧氣製造師','餵細胞（第3章）'),
- 'c3': ('Shore Walker','Finish chapter 4','上岸先鋒','完成第4章'),
- 'c4': ('Asteroid Spotter','Finish chapter 5','小行星觀察員','完成第5章'),
- 'c5': ('Rocket Pilot','Fuel the rocket (chapter 6)','火箭師','幫火箭加燃料（第6章）'),
- 'q0': ('Bang Detective','Open both fun-fact circles in chapter 1','大爆炸偵探','打開第1章兩個知識圈'),
- 'q1': ('Earth Detective','Open both fun-fact circles in chapter 2','地球偵探','打開第2章兩個知識圈'),
- 'q2': ('Microbe Detective','Open both fun-fact circles in chapter 3','微生物偵探','打開第3章兩個知識圈'),
- 'q3': ('Ocean Detective','Open both fun-fact circles in chapter 4','海洋偵探','打開第4章兩個知識圈'),
- 'q4': ('Dino Detective','Open both fun-fact circles in chapter 5','恐龍偵探','打開第5章兩個知識圈'),
- 'q5': ('Space Detective','Open both fun-fact circles in chapter 6','太空偵探','打開第6章兩個知識圈'),
+ 'c0': ('Wormhole Escape','Break out of the wormhole (chapter 1)','衝出蟲洞','衝出蟲洞（第1章）'),
+ 'c1': ('First Star','Light the first star (chapter 2)','第一粒星','點亮第一粒星（第2章）'),
+ 'c2': ('Moon Maker','Build Earth (chapter 3)','月球製造師','砌地球（第3章）'),
+ 'c3': ('Oxygen Maker','Feed the tiny cells (chapter 4)','氧氣製造師','餵細胞（第4章）'),
+ 'c4': ('Shore Walker','Finish chapter 5','上岸先鋒','完成第5章'),
+ 'c5': ('Asteroid Spotter','Finish chapter 6','小行星觀察員','完成第6章'),
+ 'c6': ('Rocket Pilot','Fuel the rocket (chapter 7)','火箭師','幫火箭加燃料（第7章）'),
+ 'q1': ('Bang Detective','Open both fun-fact circles in chapter 2','大爆炸偵探','打開第2章兩個知識圈'),
+ 'q2': ('Earth Detective','Open both fun-fact circles in chapter 3','地球偵探','打開第3章兩個知識圈'),
+ 'q3': ('Microbe Detective','Open both fun-fact circles in chapter 4','微生物偵探','打開第4章兩個知識圈'),
+ 'q4': ('Ocean Detective','Open both fun-fact circles in chapter 5','海洋偵探','打開第5章兩個知識圈'),
+ 'q5': ('Dino Detective','Open both fun-fact circles in chapter 6','恐龍偵探','打開第6章兩個知識圈'),
+ 'q6': ('Space Detective','Open both fun-fact circles in chapter 7','太空偵探','打開第7章兩個知識圈'),
  'order': ('Story Master','Put the story in order at the end','故事大師','喺最後將故事排好次序'),
 }
 STK_T = {'en': {k: [v[0], v[1]] for k, v in STK.items()}, 'yue': {k: [v[2], v[3]] for k, v in STK.items()}}
@@ -195,10 +196,12 @@ def jyut_seg(s):
 
 def all_yue_strings():
     S = set()
-    for c in YUE:
+    for c in ALL_YUE:
         for k in ('title','shortTitle','orderName','timeLabel','gapNote','mascotSpeech','afterBang','minigameTitle','minigameDesc','payoff','talk','cal'):
             if k in c: S.add(c[k])
         for h in c['hotspots']: S.update([h['title'], h['body'], h['funFact']])
+        if 'script' in c:
+            S.update(t for _w_, t in c['script']['intro']); S.update(t for _k_, _w_, t in c['script']['toasts'])
         for h in c['hotspots']:
             if 'ask' in h: S.add(h['ask'])
             if 'more' in h: S.add(h['more'])
@@ -217,7 +220,7 @@ def js():
     if not JP:
         for s in sorted(all_yue_strings()): JP[s] = jyut(s)
     dumps = lambda x: json.dumps(x, ensure_ascii=False, indent=1)
-    return ("const CHAPTERS_YUE = " + json.dumps(YUE, ensure_ascii=False, indent=4) + ";\n"
+    return ("const CHAPTERS_YUE = " + json.dumps(ALL_YUE, ensure_ascii=False, indent=4) + ";\n"
             "const UI = " + dumps(UI) + ";\n"
             "const STICKER_TEXT = " + dumps(STK_T) + ";\n"
             "const JP = " + json.dumps(JP, ensure_ascii=False, separators=(',', ':')) + ";")
@@ -295,3 +298,38 @@ for _i, (_asks, _g) in _CAST_Y.items():
 
 for _c, _a in zip(YUE, ["中間嗰粒細細嘅點係乜嚟㗎？", "啱啱形成嘅地球係點樣㗎？", "啲海洋係點嚟㗎？", "嗰陣時嘅陸地係點樣㗎？", "恐龍嗰陣時嘅陸地係點樣㗎？", "呢個係邊個星球㗎？"]):
     _c['centre']['ask'] = _a
+
+# ---- Space Adventure: the wormhole chapter in Cantonese, in front of the six ----
+WORM_Y = dict(title="蟲洞：衝出去！", shortTitle="1. 蟲洞", orderName="蟲洞", timeLabel="大爆炸之前（喺故事入面）", gapNote="時間之外",
+  mascotSpeech="我哋困喺蟲洞入面喇！拖動飛船，穿過發光嘅時間環，再擠壓引擎衝出去！",
+  minigameTitle="🌀 衝出蟲洞！", minigameDesc="拖動飛船穿過發光嘅時間環，然後撳住個核心擠壓引擎！",
+  payoff="你將所有能量擠成一個又細又熱嘅小點，再放走佢！喺我哋嘅故事入面，呢個就係大爆炸。",
+  centre=dict(title="蟲洞", body="蟲洞係想像出嚟、穿越空間同時間嘅隧道。佢係我哋故事嘅一部分，科學家未真正發現過。", funFact="科學家會研究蟲洞，不過冇人見過呀！"),
+  talk="💬 一齊傾吓：你覺得大爆炸有可能係點樣開始㗎？", cal="1月1日之前：喺日曆之外",
+  bigQ=dict(q="大爆炸真係係點開始嘅呢？", a="冇人知道呀！科學家可以講到大爆炸之後好短嘅一刻發生咗乜嘢，但係係乜嘢引起，或者之前有啲乜，係最大嘅謎團之一。有啲科學家想過會唔會有其他時間同空間嘅維度，但係冇人證實過。", f="話唔定將來有一位小朋友可以幫手解開呢個謎！"),
+  script=dict(
+    intro=[["cosmo","嘩嘩嘩！時光號喺度轉緊呀！教授，你做咗乜嘢呀？！"],
+           ["prof","我呀？係你㩒咗個大紅掣呀，宇宙貓。時間引擎卡住咗，將我哋拋入蟲洞，返到一切嘅最開始。"],
+           ["cosmo","最開始？！但係我想返屋企呀！現代嘅地球，有零食，有我張暖笠笠嘅床！"],
+           ["prof","時間只會向前流。返屋企嘅方法，就係穿過成段歷史，一站一站咁行，沿途修理飛船。不過首先，我哋要衝出呢條隧道。"],
+           ["cosmo","點樣衝出去呀？"],
+           ["prof","蟲洞可以通向一個全新嘅宇宙。喺我哋嘅故事入面，我哋用時間環為引擎充能，將所有能量擠成一個又細又熱嘅小點，再放走佢：就係一次大爆炸！"],
+           ["cosmo","第一個任務：衝出蟲洞！手腳麻利啲！拖動飛船穿過發光嘅環！"]],
+    toasts=[["first","cosmo","搵到一個喇！好嘢！"],
+            ["four","prof","能量越嚟越多，繼續駕駛！"],
+            ["seven","cosmo","仲差一個！快成功喇！"],
+            ["miss","cosmo","嘩，搖咗一下！唔緊要，仲有好多環！"],
+            ["squeeze","prof","引擎充滿能量喇。而家擠壓：撳住個核心，令一切變得又細又熱又迫！"],
+            ["half","cosmo","越嚟越細⋯⋯而且好熱呀！"],
+            ["brace","prof","大家抓緊呀！"],
+            ["done","cosmo","我哋做到喇！我哋衝出咗蟲洞喇！"]]))
+YUE[0].update(title="大爆炸同第一粒星", shortTitle="2. 第一粒星",
+  mascotSpeech="我哋衝出咗蟲洞，去到宇宙最最最初嘅一刻！燃料箱空咗，㩒四粒氫原子，將佢哋擠埋一齊，點亮第一粒星！",
+  afterBang="我哋出到嚟喇！空間本身喺每個地方同時脹大。大爆炸唔係喺空間入面爆炸嘅炸彈，而且冇中心㗎！喺我哋嘅故事入面係我哋引發嘅，不過現實入面，冇人知道大爆炸係點開始。燃料箱空咗，㩒四粒氫原子，點亮第一粒星！",
+  minigameTitle="⭐ 任務：點亮第一粒星！", minigameDesc="㩒 4 粒氫原子，佢哋會擠埋一齊，亮起一粒星，為飛船補充燃料！",
+  payoff="氫原子擠得好實，就發出光同熱。科學家叫呢個做核聚變。第一粒星亮起嚟喇，燃料箱都開始滿返！我哋嘅太陽都係咁發光㗎。",
+  bigQ=dict(q="點解恆星會發光呢？", a="喺恆星入面，重力將氫擠得好實，原子就會結合埋一齊。科學家叫呢個做核聚變。核聚變會放出好多光同熱，所以恆星先會發光。", f="我哋嘅太陽用核聚變發光，已經發咗大約46億年！"))
+for _n, _c in enumerate(YUE[1:], start=3):
+    _c['shortTitle'] = "%d. %s" % (_n, _c['shortTitle'].split('. ', 1)[1])
+_w = copy.deepcopy(content_en.worm); _w['centre'] = dict(_w['centre'], **WORM_Y['centre']); _w.update({k: v for k, v in WORM_Y.items() if k != 'centre'})
+ALL_YUE = [_w] + YUE

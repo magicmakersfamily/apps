@@ -63,7 +63,7 @@ chapters = [
   talk="💬 Talk together: Which part of the story was your favourite? What do you want people to discover next?", cal="11:49 pm on 31 December: people appear",
   bigQ=dict(q="What do you want humans to discover next?",a="Maybe how life began, a cure for a sickness, or a new world. People all over the world keep learning and sharing. You are a part of the universe that learned to wonder about itself!",f="What will YOU explore next?")),
 ]
-def js(): return "const CHAPTERS = " + json.dumps(chapters, ensure_ascii=False, indent=4) + ";"
+def js(): return "const CHAPTERS = " + json.dumps([worm] + chapters, ensure_ascii=False, indent=4) + ";"
 
 # ---- grown-ups layer (2.x/5.0): a "because" sentence, talking points, words, known / open, and "more" for older kids ----
 EXTRAS = [
@@ -147,3 +147,40 @@ for _i, (_asks, _g) in _CAST_EN.items():
 # ---- the centre-picture cards are cast too: Cosmo asks, the Professor answers ----
 for _c, _a in zip(chapters, ["What is the little dot in the middle?", "What was brand-new Earth like?", "How did the oceans get there?", "What was the land like back then?", "What was the land like when dinosaurs lived?", "Which planet is this one?"]):
     _c['centre']['ask'] = _a
+
+# ---- Space Adventure (6.x to 7.0): a new chapter 1, the wormhole, in front of the six existing chapters (the list `chapters` stays six long; js() puts `worm` first) ----
+worm = dict(title="The Wormhole: Break Out!", shortTitle="1. Wormhole", orderName="Wormhole", icon="🌀",
+  timeLabel="Before the Big Bang (in our story)", gapNote="Outside of time", bgGradient=["#05020f","#10062b","#02010a"],
+  mascotSpeech="We are stuck in the wormhole! Drag to steer through the glowing time rings, then squeeze the drive to break out!",
+  minigameTitle="🌀 Break out of the wormhole!", minigameDesc="Drag to fly through the glowing time rings. Then press and hold to squeeze the drive!", minigameTarget=8,
+  payoff="You squeezed all the energy into one tiny, hot dot and let it go! In our story, that was the Big Bang.",
+  hotspots=[], centre=dict(icon="🌀", title="The Wormhole", body="A wormhole is a made-up tunnel through space and time. It is part of our story, not something scientists have found.", funFact="Scientists do think about wormholes, but nobody has ever seen one!"),
+  talk="💬 Talk together: What do you think could have started the Big Bang?", cal="Before 1 January: outside the calendar",
+  bigQ=dict(q="What really started the Big Bang?", a="Nobody knows yet! Scientists can describe the universe from a tiny moment after the Bang. What caused it, or what came before, is one of the biggest mysteries. Some scientists wonder about other dimensions of time and space, but nobody has proved it.", f="Maybe one of you will help to figure it out!"),
+  cast=True,
+  script=dict(
+    intro=[["cosmo","Whoa whoa WHOA! The Time Cruiser is spinning! Professor, what did you do?!"],
+           ["prof","Me? You pressed the big red button, Cosmo. Our time drive jammed and flung us into a wormhole, right back to the very beginning of everything."],
+           ["cosmo","The very beginning?! But I want to go home! Modern-day Earth, snacks, my cosy bed!"],
+           ["prof","Time only flows forward. The way home is to ride through all of history, one stop at a time, and repair the ship along the way. First, we must escape this tunnel."],
+           ["cosmo","How do we get out?"],
+           ["prof","A wormhole can open into a brand-new universe. In our story, we charge the drive with time rings, squeeze all its energy into one tiny, hot dot, and let it go: a Big Bang!"],
+           ["cosmo","Mission one: break out of the wormhole! Paws on the controls. Drag to steer through the glowing rings!"]],
+    toasts=[["first","cosmo","Got one! Whee!"],
+            ["four","prof","Energy is building. Keep steering!"],
+            ["seven","cosmo","One more! Almost there!"],
+            ["miss","cosmo","Wobble! No worries, there are more rings!"],
+            ["squeeze","prof","The drive is charged. Now squeeze: press and hold to make everything tiny, hot and crowded!"],
+            ["half","cosmo","It is getting tiny... and HOT!"],
+            ["brace","prof","Brace yourselves!"],
+            ["done","cosmo","We did it! We are out of the wormhole!"]]))
+
+# the old chapter 1 is now chapter 2: the first star, the way the ship refuels
+chapters[0].update(title="The Big Bang & the First Star", shortTitle="2. First Star",
+  mascotSpeech="We are out of the wormhole, in the very first moments of the universe! Our fuel tank is empty, so tap four hydrogen atoms to squeeze them together and light the first star.",
+  afterBang="We made it out! Space itself is growing, everywhere at once. The Big Bang was not a bomb going off inside space, and there is no middle! In our story we set it off, but in real life nobody knows what started it. Our fuel tank is empty, so tap four hydrogen atoms to light the first star!",
+  minigameTitle="⭐ Mission: Light the First Star!", minigameDesc="Tap 4 hydrogen atoms. They squeeze together until a star lights up and refuels the ship!",
+  payoff="Hydrogen squeezed together so hard that it made light and heat. Scientists call that fusion. The first star is shining, and our fuel tank is filling up! Our Sun shines the very same way.",
+  bigQ=dict(q="Why do stars shine?", a="Inside a star, gravity squeezes hydrogen so hard that the atoms join together. Scientists call that fusion. It makes huge amounts of light and heat, and that is why stars shine.", f="Our Sun has been shining by fusion for about 4.6 billion years!"))
+for _n, _c in enumerate(chapters[1:], start=3):
+    _c['shortTitle'] = "%d. %s" % (_n, _c['shortTitle'].split('. ', 1)[1])

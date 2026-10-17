@@ -35,7 +35,7 @@ get-ready/          Ready To Go! (departure countdown with spoken steps)
   index.html        page, timer, steps, destination ETA
   cover.png         1200×744 card image
 sequence-flow/      Sequence Flow (beta utility: routine builder and step timer)
-big-bang/           Cosmic Journey (beta): Big Bang to today, six chapters, a cosmic cat who asks and a wise owl professor who answers, and a mini-game each
+big-bang/           Cosmic Journey (beta): a space adventure from a wormhole and the Big Bang to today, seven missions, a cosmic cat who asks and a wise owl professor who answers
   index.html        the whole game (canvas scenes, mini-games, narrator, inlined Tailwind CSS)
   characters/       the painted guides (cosmo.png, professor.png; family-made pictures, backgrounds cut out with tools/cutout.swift) and PROMPTS.md for new poses
   cockpit/          the spacecraft frame: top and bottom bands, ceiling and floor strips (from a family-made picture)
@@ -76,7 +76,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Spellicious | `spellicious/` | 4.40 | 2026-09-30 |
 | Ready To Go! | `get-ready/` | 1.4 | 2026-10-02 |
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
-| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 6.0 | 2026-10-17 |
+| Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 1.5 | 2026-10-16 |
 

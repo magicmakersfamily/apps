@@ -10,7 +10,8 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf: one card per game
+index.html          the shelf itself (version 2.0): Games and Utilities tabs, one icon tile per app
+TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
   sim.js            the ecosystem model (hour-by-hour simulation)
@@ -80,6 +81,9 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 1.8 | 2026-10-16 |
+
+The shelf is versioned too: **The App Shelf 2.0** (2026-10-18). Version 1.0, the long page of cards, is frozen at
+`versions/shelf/1.0/` (`tools/freeze-shelf.sh`) in case we want to roll back.
 
 Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).

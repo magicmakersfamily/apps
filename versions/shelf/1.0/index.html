@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>The App Shelf</title>
+<meta name="description" content="Learning games and small family tools. The games run in your browser, with nothing to install.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The App Shelf">
+<meta property="og:description" content="Learning games and small family tools. The games run in your browser, with nothing to install.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/aquarium/cover.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232C5E86'/%3E%3Cpath d='M16 46h32M20 46V22h8v24M30 46V16h8v30M40 46V26h6v20' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+:root {
+  --paper: #ECF0F2; --card: #FFFFFF; --ink: #14202A; --ink-2: #4E5E6B; --ink-3: #7A8894; --line: #D5DDE3;
+  --accent: #2C5E86; --accent-ink: #FFFFFF; --chip: #E1E9EF;
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  color-scheme: light;
+  padding-block: env(safe-area-inset-top, 0px) env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #0E151B; --card: #151F27; --ink: #E4ECF1; --ink-2: #A3B2BD; --ink-3: #74838F; --line: #24323D; --accent: #7FB2DA; --accent-ink: #0E151B; --chip: #1D2A34; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { background: var(--paper); }
+body { margin: 0; color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 64px; display: grid; gap: 48px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(36px, 6vw, 60px); line-height: 1; letter-spacing: -.02em; }
+.lede { margin: 4px 0 0; color: var(--ink-2); font-size: 18px; max-width: 56ch; text-wrap: pretty; }
+.sections { display: grid; gap: 48px; }
+.section { display: grid; gap: 20px; }
+.section > h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -.01em; }
+.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.game { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+.game:only-child { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-rows: auto; }
+@media (max-width: 760px) { .game:only-child { grid-template-columns: minmax(0, 1fr); } }
+.cover { display: block; background: #0c1211; }
+.cover img { display: block; width: 100%; height: 100%; aspect-ratio: 1000 / 620; object-fit: cover; }
+.info { padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+.info h2 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1.1; letter-spacing: -.01em; text-wrap: balance; }
+.info h2 span { font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif; font-weight: 700; color: #B3432E; font-size: .8em; margin-left: 6px; }
+@media (prefers-color-scheme: dark) { .info h2 span { color: #EE8A72; } }
+.info p { margin: 0; color: var(--ink-2); }
+.version { margin: -6px 0 0; font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.version b { color: var(--accent); font-weight: 700; }
+.beta { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: #6C4B8C; border-radius: 999px; padding: 1px 8px; vertical-align: 1px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.tags li { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: var(--chip); color: var(--ink-2); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--ink-3); margin: 0; padding: 0; list-style: none; }
+.meta b { color: var(--ink-2); font-weight: 700; }
+.play { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; font-size: 17px; padding: 12px 22px; border-radius: 12px; }
+.play:hover { filter: brightness(1.08); }
+.play svg { width: 18px; height: 18px; }
+.util { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px 24px; display: grid; gap: 12px; max-width: 720px; }
+.util h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.1; }
+.util p { margin: 0; color: var(--ink-2); }
+.grownups { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; justify-content: space-between; }
+.grownups h2 { margin: 0 0 4px; font-family: var(--display); font-weight: 800; font-size: 22px; }
+.grownups p { margin: 0; color: var(--ink-2); max-width: 60ch; }
+.grownups-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.support { display: inline-flex; align-items: center; font-weight: 700; font-size: 17px; padding: 12px 20px; border-radius: 12px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; background: var(--chip); }
+.support:hover { border-color: var(--accent); }
+footer a { color: var(--ink-2); }
+.linkish { background: none; border: 0; padding: 0; color: var(--ink-2); text-decoration: underline; font: inherit; cursor: pointer; }
+button.support { font-family: inherit; cursor: pointer; }
+footer { border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-3); font-size: 14px; display: grid; gap: 6px; max-width: 70ch; }
+</style>
+</head>
+<body>
+<div style="font:13px/1.4 system-ui,sans-serif;background:#2b2140;color:#f3eefc;padding:6px 12px;text-align:center">Old version 1.0 of The App Shelf, kept so we can compare. <a style="color:#d9c8ff" href="../../../">Go to the current shelf</a> · <a style="color:#d9c8ff" href="../../">All versions</a></div>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Learning games and family tools</span>
+    <h1>The App Shelf</h1>
+    <p class="lede">Learning games for curious kids, and small tools for families. The games run in your web browser, on a computer, tablet or phone, with nothing to install.</p>
+  </header>
+
+  <main class="sections">
+    <section class="section" aria-labelledby="games-heading">
+      <h2 id="games-heading">Games</h2>
+      <div class="games">
+    <article class="game">
+      <a class="cover" href="../../../aquarium/" aria-label="Play James’s Nature Aquarium"><img src="../../../aquarium/cover.png" alt="A planted aquarium with driftwood, grey stones, green and red plants, blue-and-red tetras and red shrimp" width="1200" height="744"></a>
+      <div class="info">
+        <h2>James’s Nature Aquarium<span lang="zh-TW">水草</span></h2>
+        <p class="version"><b>Version 3.4</b> · Launched <time datetime="2026-09-24">September 24, 2026</time></p>
+        <p>Start with an empty tank and build a living ecosystem in the style of Takashi Amano. Add plants, stones, shrimp, fish, light — even a turtle — then watch a week go by. Keep everything in balance to reach a Harmony score of 90.</p>
+        <ul class="tags">
+          <li>Photosynthesis</li><li>Nitrogen cycle</li><li>Food webs</li><li>Systems thinking</li><li>Chinese words</li><li>Music</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 8 and up</li>
+          <li><b>Progress</b> saved on your device</li>
+          <li><b>Sound</b> optional</li>
+        </ul>
+        <a class="play" href="../../../aquarium/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+    <article class="game">
+      <a class="cover" href="../../../renzi/" aria-label="Open 認字簿"><img src="../../../renzi/cover.png?v=1.0" alt="A big Chinese character on a grid with a numbered stroke guide and arrows showing where to start and which way to go" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Character Book<span lang="zh-TW">認字簿</span></h2>
+        <p class="version"><b>Version 1.0</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-10-12">October 12, 2026</time></p>
+        <p>A new picture story in Traditional Chinese every morning, made for a five-year-old who is learning to read. Read it page by page, then write the day’s characters on a grid that shows the stroke order: numbered starts, arrows for the direction, and a little 筆順 strip that builds each character one stroke at a time. Trace it, or try it on your own. Tap the words you know. It works best on a tablet in full screen (Add to Home Screen). This game is in beta: we’re still testing it with kids and improving it.</p>
+        <ul class="tags">
+          <li>Chinese reading</li><li>Writing</li><li>Stroke order</li><li>Daily story</li><li>Beta</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 4 and up (a grown-up helps at first)</li>
+          <li><b>Progress</b> saved on your device</li>
+          <li><b>Sound</b> none</li>
+        </ul>
+        <a class="play" href="../../../renzi/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../mid-autumn/" aria-label="Play Mid-Autumn Mayhem"><img src="../../../mid-autumn/cover.png" alt="A Hong Kong harbour city at night under a huge full moon, with neon signs, lanterns, a crowd celebrating and Chang'e floating up toward the moon" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Mid-Autumn Mayhem<span lang="zh-TW">中秋大混亂</span></h2>
+        <p class="version"><b>Version 1.8</b> · Launched <time datetime="2026-09-25">September 25, 2026</time></p>
+        <p>Build the biggest Mid-Autumn party under the full moon: buildings, families, lanterns, mooncakes, tea, mahjong and fireworks. Overdo anything and the fire trucks, ambulances or police show up. Tap the Jade Rabbit and Chang’e in time, and read the moon legends behind them. Fruit brings monkeys, too much food brings a terrible smell, and lantern riddles test your Chinese. A storyteller explains everything in English and Cantonese, and a telescope lets you look up close.</p>
+        <ul class="tags">
+          <li>Cause and effect</li><li>Ratios</li><li>Chinese legends</li><li>Cantonese narration</li><li>Hong Kong</li><li>Music</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 8 and up</li>
+          <li><b>Best score</b> saved on your device</li>
+          <li><b>Sound</b> optional</li>
+        </ul>
+        <a class="play" href="../../../mid-autumn/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../blow-up/" aria-label="Play Blow Up"><img src="../../../blow-up/cover.png" alt="A cartoon kid named Pip erupting like a glitter volcano in a classroom, with a pressure bucket overflowing with coloured drops, a barking guard dog and a wise owl inside Pip’s head" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Blow Up<span lang="zh-TW">大爆發</span></h2>
+        <p class="version"><b>Version 1.4</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-09-27">September 27, 2026</time></p>
+        <p>Live one day with Pip and watch the pressure bucket fill, drop by drop: hunger, rushing, noise, a broken cookie. When it overflows, Pip blows up (a glitter volcano, a Hangry Monster…). Then help Pip calm down, make up and learn why. A storyteller explains everything out loud, so it works for kids who can’t read yet. This game is in beta: we’re still testing it with kids and improving it.</p>
+        <ul class="tags">
+          <li>Big feelings</li><li>Self-regulation</li><li>Cause and effect</li><li>Storyteller voice</li><li>Chinese words</li><li>Beta</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 4 to 7, with a grown-up</li>
+          <li><b>Stickers and skills</b> saved on your device</li>
+          <li><b>Sound</b> on (spoken story)</li>
+        </ul>
+        <a class="play" href="../../../blow-up/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../spellicious/?v=4.28&amp;refresh=20260930-36" aria-label="Play Spellicious"><img src="../../../spellicious/cover.png?v=4.28&amp;refresh=20260930-36" alt="A warm, cream-colored Spellicious game with a microphone and giant letters" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Spellicious</h2>
+        <p class="version"><b>Version 4.40</b> · Launched <time datetime="2026-09-30">September 30, 2026</time></p>
+        <p>Say a word and see it appear in giant letters. The spoken word highlights in orange, and Spell mode highlights each letter or number as it is spoken. Numbers like 10 say “ten,” while 111 says “one one one.” Choose Default, Robot, Chipmunk, Storyteller, or Slow Motion voices, plus speeds from 0.5x to 2x. Tap the mic or press the space bar to start or interrupt speech.</p>
+        <ul class="tags">
+          <li>Phonics</li><li>Reading</li><li>Speech</li><li>Syllables</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 5 and up</li>
+          <li><b>Progress</b> nothing saved — just say a word</li>
+          <li><b>Sound</b> on (mic and spoken words)</li>
+        </ul>
+        <a class="play" href="../../../spellicious/?v=4.28&amp;refresh=20260930-36">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../get-ready/" aria-label="Open Ready To Go!"><img src="../../../get-ready/cover.png" alt="A big countdown timer ring showing 30:00 with a green Start button, on a dark blue background" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Ready To Go!<span lang="zh-TW">準備出門</span></h2>
+        <p class="version"><b>Version 1.4</b> · Launched <time datetime="2026-10-02">October 2, 2026</time></p>
+        <p>A calm countdown for busy mornings. Add your own steps, like “brush your teeth” or “shoes on,” and pick when each one is said out loud. Each step shows as a dot on the timer ring, so kids can see what’s next. Tell it where you’re going and when you need to arrive, and the timer works out when to leave. Add your ZIP code to see the current weather and what to wear.</p>
+        <ul class="tags">
+          <li>Routines</li><li>Telling time</li><li>Independence</li><li>Spoken reminders</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 4 and up, with a grown-up</li>
+          <li><b>Steps</b> saved on your device</li>
+          <li><b>Sound</b> on (spoken reminders)</li>
+        </ul>
+        <a class="play" href="../../../get-ready/">Open
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../toothbrush/" aria-label="Play Brush Buddy"><img src="../../../toothbrush/cover.png?v=2.4" alt="A cartoon face with big eyes and a wide-open mouth full of sugar bugs; a glowing toothbrush is on the top teeth, under the words Top teeth, Outside" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Brush Buddy<span lang="zh-TW">刷牙好夥伴</span></h2>
+        <p class="version"><b>Version 2.4</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-10-03">October 3, 2026</time></p>
+        <p>Two minutes of brushing, the way dentists teach it: four parts of the mouth, and in each one the outsides, the chewing tops and the insides. A friendly face looks at the teeth to brush next, a calm voice says “this side” or “the other side”, and the sugar bugs leave only from the teeth you are brushing right now. Then brush your tongue, spit without rinsing, and the face shows its sparkly smile. Grown-ups can see why these steps (based on ADA and AAPD guidance) in the Grown-ups panel. This game is in beta: we’re still testing it with kids and improving it.</p>
+        <ul class="tags">
+          <li>Healthy habits</li><li>Left and right</li><li>Routines</li><li>Spoken steps</li><li>Beta</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 3 and up</li>
+          <li><b>Settings</b> saved on your device</li>
+          <li><b>Sound</b> on (recorded voice and soft chimes)</li>
+        </ul>
+        <a class="play" href="../../../toothbrush/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+    <article class="game">
+      <a class="cover" href="../../../big-bang/" aria-label="Play Cosmic Journey"><img src="../../../big-bang/cover.png?v=7.0" alt="Flying through a glowing purple wormhole from inside a spaceship, steering toward a golden time ring, with Cosmo the kitten in a space helmet on the left and Professor Know-A-Lot, an owl with goggles, on the right" width="1200" height="744"></a>
+      <div class="info">
+        <h2>Cosmic Journey<span lang="zh-TW">宇宙之旅</span></h2>
+        <p class="version"><b>Version 7.0</b> <span class="beta" title="Still being tested with kids and improved">Beta</span> · Launched <time datetime="2026-10-17">October 17, 2026</time></p>
+        <p>Climb aboard the Time Cruiser with Cosmo and Professor Know-A-Lot. The time drive has jammed and thrown you into a wormhole, so steer through the time rings and squeeze the drive to break out (in our story, that sets off the Big Bang), then fly through real stars as you travel 13.8 billion years to today: the first star, Earth and the Moon, the tiny cells that made oxygen, the first animals to walk on land, the dinosaurs and the asteroid, and finally people and rockets. Wise Professor Know-A-Lot, an owl with glasses, tells each chapter out loud and explains the science (and says when scientists don’t know yet), while Cosmo the cosmic cat asks the questions. Every mini-game shows what you made happen (a star ignites, Earth grows, the sky clears, a rocket launches), and Cosmo asks a question to talk about together. A story line and a “universe in one year” calendar show how long ago it all was, you collect stickers, and at the end you put the whole story in order. Play it in English or in Traditional Chinese with a Cantonese voice (粵語). There is an easy and calm mode for little fingers. This game is in beta: we’re still testing it with kids and improving it.</p>
+        <ul class="tags">
+          <li>Space adventure</li><li>Earth history</li><li>Evolution</li><li>Time and scale</li><li>Mini-games</li><li>Spoken story</li><li>English or 粵語</li><li>Beta</li>
+        </ul>
+        <ul class="meta">
+          <li><b>Ages</b> 6 and up</li>
+          <li><b>Progress</b> saved on your device</li>
+          <li><b>Sound</b> on (recorded voice, sound effects and Vivaldi’s Spring)</li>
+        </ul>
+        <a class="play" href="../../../big-bang/">Play
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+        </a>
+      </div>
+    </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="utilities-heading">
+      <h2 id="utilities-heading">Utilities</h2>
+      <article class="util">
+        <h3>Sequence Flow <span class="beta" title="Still being tested and improved">Beta</span></h3>
+        <p class="version"><b>Version 1.7</b> · Launched <time datetime="2026-10-16">October 16, 2026</time></p>
+        <p>Build a routine from timed steps, rest breaks and repeating sections, then run it one step at a time with a big countdown. Good for workouts, homework blocks, cooking and getting ready. This tool is in beta: we’re still testing it and improving it.</p>
+        <ul class="meta">
+          <li><b>Needs</b> just a web browser (the optional AI builder needs your own AI key and can be turned off)</li>
+          <li><b>Progress</b> saved on your device</li>
+          <li><b>Sound</b> optional chime</li>
+        </ul>
+        <a class="play" href="../../../sequence-flow/">Open Sequence Flow</a>
+      </article>
+      <article class="util">
+        <h3>Back Space</h3>
+        <p>For Macs. Copies photos and videos from an iPhone to a folder on your Mac, checks that each copy matches the original, and then frees up space on the phone. Nothing is removed from the iPhone until the copy is saved and checked, and you confirm.</p>
+        <ul class="meta">
+          <li><b>Version</b> 1.0</li>
+          <li><b>Needs</b> a Mac and a USB cable</li>
+        </ul>
+        <a class="play" href="../../../tools/backspace/">Get Back Space</a>
+      </article>
+    </section>
+  </main>
+
+  <aside class="grownups" aria-label="For grown-ups">
+    <div>
+      <h2>For grown-ups</h2>
+      <p>We’re a family making little apps about the things we’re learning and curious about. New ones come out whenever we get curious about something new.</p>
+    </div>
+    <div class="grownups-links">
+      <a class="play" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Follow for new apps</a>
+      <a class="support" href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">♥ Support the next app</a>
+      <a class="support" href="../../../feedback/">Share your thoughts</a>
+      <button class="support" type="button" data-tell="https://magicmakersfamily.github.io/apps/" data-text="Free learning games and family tools, made by a family: The App Shelf">Tell a friend</button>
+    </div>
+  </aside>
+
+  <footer>
+    <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
+    <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
+    <span>Found a bug or have an idea? <a href="../../../feedback/">Share your thoughts</a>. Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/" data-text="Free learning games and family tools: The App Shelf">Tell a friend</button></span>
+  </footer>
+</div>
+<script>
+// Tell a friend: open the share sheet, or copy the link where sharing is not available.
+document.querySelectorAll('[data-tell]').forEach(b => b.addEventListener('click', async () => {
+  const url = b.dataset.tell, text = b.dataset.text;
+  try { if (navigator.share) { await navigator.share({ title: document.title, text, url }); return; } await navigator.clipboard.writeText(text + ' ' + url); b.textContent = 'Link copied! Paste it in a message.'; }
+  catch (e) { if (!(e && e.name === 'AbortError')) b.textContent = url; }
+}));
+</script>
+</body>
+</html>

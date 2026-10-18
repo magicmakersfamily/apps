@@ -50,19 +50,33 @@ Audio API, started only from a button press. Exception, at the family's request:
    Add an `<a href="../">← All apps</a>` link at the top.
 3. **Cover image.** Render the game in a good-looking state with headless Chrome at 1200×744:
    `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --window-size=1200,744 --virtual-time-budget=4000 --screenshot=cover.png <file>`
-4. **Version and launch date.** Every game shows `Version X.Y · Launched <Month D, YYYY>` under
-   its title on the shelf card and at the bottom of the game page. New games start at 1.0 with
+4. **Version and launch date.** Every game shows `Version X.Y · Launched <Month D, YYYY>` in its
+   "About" write-up on the shelf and at the bottom of the game page. New games start at 1.0 with
    today's date. The launch date never changes; bump the version on every release (minor for
    tweaks, major for big additions). Keep the README games table in sync.
    **Beta:** a game still being tested with kids shows a purple "Beta" badge next to its version on
-   the shelf card and in the game's title, "(beta)" in the version line at the bottom of the page, and
+   the shelf tile (a pill on the icon corner) and in the game's title, "(beta)" in the version line at the bottom of the page, and
    "(beta)" in the README table. Drop the badge when the family says it's done.
-5. **Shelf card.** Add an `<article class="game">` to `index.html`, matching the existing card:
-   cover link, title (with the game's Chinese name in a `lang="zh-TW"` span), version line,
-   2–3 sentence description, topic tags, meta (ages, progress saved, sound), Play button.
+5. **Shelf tile.** Add an `<article class="tile">` to the right tab panel in `index.html` (Games or Utilities),
+   matching the existing tiles: a squircle icon drawn in code (inline SVG, 120×120, with a `--tint` colour), the title
+   (Chinese name in a `lang="zh-TW"` span), a one-line promise, a short age line, a Play/Open button, and an About
+   button that opens a `.detail` block: 2–3 sentence description, topic tags, meta (ages, progress saved, sound) and the
+   version line. The newest game may be the featured `.hero` (cover art, "Newest" pill). Keep tile text short.
 6. **Commit and push** (see Git below), then verify the live site before reporting done:
    poll `https://magicmakersfamily.github.io/apps/<game>/` until it returns 200 and contains the
    new version string (usually 30–60 seconds after the push).
+
+## The shelf's own version
+
+- The shelf page (`index.html`) has its own version, shown in its footer as `The App Shelf, version X.Y · Launched <date>`.
+  Bump it (and the date next to it only for a new major version) on every change to the shelf itself, not when a game
+  ships. A game release only edits that game's tile (version line, beta pill) and the README table.
+- Freeze each shelf version before replacing it: `tools/freeze-shelf.sh <X.Y> <git-ref>` copies the committed
+  `index.html` to `versions/shelf/<X.Y>/` (links fixed, noindex, old-version strip), then add a row under "The App
+  Shelf" in `versions/index.html`. Frozen copies are never edited.
+- Rolling the shelf back: take `versions/shelf/<X.Y>/index.html`, remove the `../../../` link prefixes, the noindex
+  meta and the old-version strip, put it at the repo root, and release it as a new shelf version (never reuse a number).
+- Shelf versions so far: **1.0** (Sep 25, 2026, one long page of cards, frozen), **2.0** (Oct 18, 2026, tabs and icon tiles).
 
 ## Versions: every release stays playable
 

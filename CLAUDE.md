@@ -35,7 +35,7 @@ place search (Photon, OpenStreetMap) and drive time (OSRM). The page says so nex
 (`renzi/content/`: character lists, titles and story pictures only, never a parent's marks or notes) and, on a
 device a parent has set up once with a private link, posts which characters James wrote or tapped to the family's
 own Google Sheet (an Apps Script web app). The URL and token are never in this repository; they live in that
-device's `localStorage`. See `renzi/SETUP.md`. Third exception, at the family's request: `sequence-flow/` has an optional AI Flow Builder. Only when a grown-up pastes their own Anthropic API key (kept in that device's `localStorage`, never in this repository), the page sends their message and the routine on screen straight to `api.anthropic.com`; nothing goes through us, and the page says so. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
+device's `localStorage`. See `renzi/SETUP.md`. Third exception, at the family's request: `sequence-flow/` has an optional AI Flow Builder. Only when a grown-up pastes their own Anthropic API key (kept in that device's `localStorage`, never in this repository), the page sends their message and the routine on screen straight to the AI provider they pick (Anthropic by default; the 1.8 provider list also names OpenAI, Google Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, or an address they type, such as a local Ollama); nothing goes through us, and the page explains the cost and says what is sent. The feature can be switched off, and the app works the same without it. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
 Audio API, started only from a button press. Exception, at the family's request: `big-bang/` (6.0) also uses bitmap pictures: the painted guides and the cockpit frame (family-made, AI-generated, backgrounds cut out) and a star field cut from NASA's "Deep Star Maps 2020" (credited in the game's About panel).
 
 ## Adding or updating a game
@@ -106,6 +106,15 @@ Audio API, started only from a button press. Exception, at the family's request:
   share sheet or saved; nothing is sent to us.
 - When a new game or a big update ships, draft a short Ko-fi post for the user to publish (what the game
   is, what James was curious about, the play link). Ko-fi notifies followers.
+
+## Tracking features and bugs
+
+- `TRACKER.md` (repo root) is the one index of features and bugs for every game and the shelf: one line per item with an
+  ID (`<game-folder>-F<n>` or `-B<n>`), priority, status and the version that fixed it. Read it before starting work and
+  update it in the same commit as the change (new item, status change, move to Closed with "Fixed in"). Cite IDs in
+  commit messages. Detail stays in each game's `PLAN.md` / `KNOWN-BUGS.md`.
+- It is public: no names, emails or private quotes, only one-line summaries of feedback. `node tools/tracker.mjs` lists
+  and checks it (`--check`, `--game <folder>`, `--next`); `node --test tools/` tests the checker.
 
 ## Feedback page
 

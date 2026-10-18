@@ -104,10 +104,67 @@ test('chained clock deadlines project to the last deadline, not a sum from now',
   assert.strictEqual(plan[5].endMs - at(9, 0), 3 * 3600 * 1000 + 45 * 60 * 1000);
 });
 
-test('a deadline already passed for the previous step rolls to tomorrow only for that step', () => {
+test('a passed deadline is late, gets no time, and is never moved to tomorrow', () => {
   const plan = L.projectSteps([dl('a', '10:00'), dl('b', '09:00')], at(9, 30));
   assert.strictEqual(plan[0].endMs, at(10, 0));
-  assert.strictEqual(plan[1].endMs, at(9, 0, 19));
+  assert.strictEqual(plan[1].late, true);
+  assert.strictEqual(plan[1].secs, 0);
+  assert.strictEqual(plan[1].lateBySecs, 3600);
+  assert.strictEqual(plan[1].endMs, at(10, 0));
+});
+
+test('blockSeconds: a passed deadline is 0 seconds, not 22 hours; nextDay is explicit', () => {
+  assert.strictEqual(L.blockSeconds(dl('x', '10:25'), at(11, 10)), 0);
+  assert.strictEqual(L.blockSeconds(dl('x', '12:25'), at(11, 10)), 75 * 60);
+  const tom = Object.assign(dl('x', '08:30'), { nextDay: true });
+  assert.strictEqual(L.blockSeconds(tom, at(22, 30)), 10 * 3600);
+});
+
+test('nextDay lets a chain cross midnight on purpose', () => {
+  const plan = L.projectSteps([dl('a', '23:30'), Object.assign(dl('b', '00:30'), { nextDay: true })], at(23, 0));
+  assert.strictEqual(plan[1].late, false);
+  assert.strictEqual(plan[1].secs, 3600);
+  assert.strictEqual(plan[1].endMs, at(0, 30, 19));
+});
+
+// The reported case: Stretching 10, Bike 10, Strength 40, then deadline blocks, started at 11:10.
+const sunday = () => [timer('Stretching', 600), timer('Bike', 600), timer('Strength', 2400),
+  dl('Sauna', '10:25'), dl('Shower', '10:45'), dl('Breakfast', '11:45'), dl('Ready', '12:45')];
+
+test('late start: sauna, shower and breakfast are conflicts, ready is not', () => {
+  const c = L.findConflicts(sunday(), at(11, 10));
+  assert.deepStrictEqual(c.map(x => x.step.id), ['Sauna', 'Shower', 'Breakfast']);
+  assert.strictEqual(c[0].lateBySecs, (12 * 60 + 10 - (10 * 60 + 25)) * 60);   // 12:10 start vs 10:25
+  assert.deepStrictEqual(L.findConflicts(sunday(), at(8, 0)), []);
+});
+
+test('inferPlanned reads lengths off the original plan, null when the start is unknown', () => {
+  const s = sunday();
+  const noStart = L.inferPlanned(s, { dayMs: at(11, 10) });
+  assert.strictEqual(noStart.Sauna, null);               // first deadline, nothing to measure from
+  assert.strictEqual(noStart.Shower, 20 * 60);
+  assert.strictEqual(noStart.Breakfast, 60 * 60);
+  const withStart = L.inferPlanned([dl('A', '10:00'), dl('B', '10:05')], { dayMs: at(8, 0), refStartMs: at(9, 0) });
+  assert.strictEqual(withStart.A, 3600); assert.strictEqual(withStart.B, 300);
+  const recorded = L.inferPlanned([Object.assign(dl('A', '10:00'), { plannedSecs: 900 })], { dayMs: at(8, 0) });
+  assert.strictEqual(recorded.A, 900);
+});
+
+test('shiftSteps keeps each intended length and reports the new finish', () => {
+  const planned = { Sauna: 20 * 60, Shower: 20 * 60, Breakfast: 60 * 60, Ready: 60 * 60 };
+  const r = L.shiftSteps(sunday(), at(11, 10), planned);
+  assert.strictEqual(r.steps[3].timerType, 'duration');
+  assert.strictEqual(r.steps[3].durationValue, 1200);
+  assert.strictEqual(r.steps[6].shiftedSecs, 3600);
+  assert.strictEqual(r.steps[0], sunday()[0] && r.steps[0]);          // earlier steps untouched
+  assert.strictEqual(r.endMs, at(11, 10) + (60 + 20 + 20 + 60 + 60) * 60 * 1000);   // 14:50
+  assert.deepStrictEqual(L.findConflicts(r.steps, at(11, 10)), []);
+});
+
+test('shiftSteps with no conflict changes nothing', () => {
+  const r = L.shiftSteps(sunday(), at(8, 0), {});
+  assert.strictEqual(r.steps[3].timerType, 'endtime');
+  assert.strictEqual(r.endMs, at(12, 45));
 });
 
 test('anchorInstant: today within the grace window, else the next one', () => {

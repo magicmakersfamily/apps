@@ -34,6 +34,7 @@ get-ready/          Ready To Go! (departure countdown with spoken steps)
   PLAN.md           handoff: where development stands and what is next (Apple Maps)
   index.html        page, timer, steps, destination ETA
   cover.png         1200×744 card image
+TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 sequence-flow/      Sequence Flow (beta utility: routine builder and step timer)
 big-bang/           Cosmic Journey (beta): a space adventure from a wormhole and the Big Bang to today, seven missions, a cosmic cat who asks and a wise owl professor who answers
   index.html        the whole game (canvas scenes, mini-games, narrator, inlined Tailwind CSS)
@@ -78,7 +79,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
 | Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
-| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.7 | 2026-10-16 |
+| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.8 | 2026-10-16 |
 
 Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).

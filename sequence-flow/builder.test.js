@@ -110,3 +110,78 @@ test('ask sends the key headers and turns failures into plain messages', async (
   const down = async () => { throw new Error('x'); };
   await assert.rejects(A.ask({ key: 'k', text: 'hi', routine: { items: [] }, fetchFn: down }), /Could not reach/);
 });
+
+const okJson = body => async () => ({ ok: true, json: async () => body });
+
+test('every provider has a url, a model and a kind; only Anthropic is marked tested', () => {
+  Object.entries(A.PROVIDERS).forEach(([id, p]) => {
+    assert.ok(/^https?:\/\//.test(p.url), id); assert.ok(p.model, id); assert.ok(['anthropic', 'openai'].includes(p.kind), id); assert.ok(p.label, id);
+  });
+  assert.deepStrictEqual(Object.keys(A.PROVIDERS).filter(k => A.PROVIDERS[k].tested), ['anthropic']);
+  assert.strictEqual(A.PROVIDERS[A.DEFAULT_PROVIDER].model, A.DEFAULT_MODEL);
+});
+
+test('buildOpenAIRequest uses a system message, function tool and auto choice', () => {
+  const r = A.fromAI(sample, null, { stamp: 9 }).routine;
+  const req = A.buildOpenAIRequest('m', [{ role: 'user', text: 'hi' }, { role: 'assistant', text: 'yo' }], 'shorter', r);
+  assert.strictEqual(req.messages[0].role, 'system');
+  assert.strictEqual(req.messages.length, 4);
+  assert.strictEqual(req.tools[0].type, 'function');
+  assert.strictEqual(req.tools[0].function.name, 'set_routine');
+  assert.strictEqual(req.tools[0].function.parameters.type, 'object');
+  assert.strictEqual(req.tool_choice, 'auto');
+  assert.ok(/Routine on screen/.test(req.messages[3].content));
+});
+
+test('parseOpenAIResponse reads tool calls, text, bad JSON and content filter', () => {
+  const good = A.parseOpenAIResponse({ choices: [{ finish_reason: 'tool_calls', message: { content: 'Done', tool_calls: [{ function: { name: 'set_routine', arguments: JSON.stringify(sample) } }] } }] });
+  assert.strictEqual(good.text, 'Done'); assert.strictEqual(good.ai.title, 'Sunday Morning');
+  const obj = A.parseOpenAIResponse({ choices: [{ message: { content: null, tool_calls: [{ function: { name: 'set_routine', arguments: sample } }] } }] });
+  assert.strictEqual(obj.ai.title, 'Sunday Morning');
+  const bad = A.parseOpenAIResponse({ choices: [{ message: { content: '', tool_calls: [{ function: { name: 'set_routine', arguments: '{oops' } }] } }] });
+  assert.strictEqual(bad.ai, null); assert.ok(/garbled/.test(bad.text));
+  assert.strictEqual(A.parseOpenAIResponse({ choices: [{ finish_reason: 'content_filter', message: { content: '' } }] }).refused, true);
+  const parts = A.parseOpenAIResponse({ choices: [{ message: { content: [{ type: 'text', text: 'How long?' }] } }] });
+  assert.strictEqual(parts.text, 'How long?');
+  assert.strictEqual(A.parseOpenAIResponse({}).ai, null);
+});
+
+test('ask routes each provider to its own url and auth header', async () => {
+  const seen = {};
+  const spy = id => async (url, init) => { seen[id] = { url, init }; return { ok: true, json: async () => ({ choices: [{ message: { content: 'ok' } }] }) }; };
+  for (const id of Object.keys(A.PROVIDERS).filter(k => A.PROVIDERS[k].kind === 'openai' && !A.PROVIDERS[k].custom)) {
+    const r = await A.ask({ provider: id, key: 'KEY', text: 'hi', routine: { items: [] }, fetchFn: spy(id) });
+    assert.strictEqual(r.text, 'ok');
+    assert.strictEqual(seen[id].url, A.PROVIDERS[id].url);
+    assert.strictEqual(seen[id].init.headers.authorization, 'Bearer KEY');
+    assert.strictEqual(JSON.parse(seen[id].init.body).model, A.PROVIDERS[id].model);
+    assert.strictEqual(seen[id].init.headers['x-api-key'], undefined);
+  }
+});
+
+test('custom server uses the given address and works without a key', async () => {
+  let seen;
+  const spy = async (url, init) => { seen = { url, init }; return { ok: true, json: async () => ({ choices: [{ message: { content: 'hi' } }] }) }; };
+  await A.ask({ provider: 'custom', baseUrl: 'http://192.168.1.5:8080/v1/chat/completions', model: 'qwen', text: 'x', routine: { items: [] }, fetchFn: spy });
+  assert.strictEqual(seen.url, 'http://192.168.1.5:8080/v1/chat/completions');
+  assert.strictEqual(seen.init.headers.authorization, undefined);
+  assert.strictEqual(JSON.parse(seen.init.body).model, 'qwen');
+});
+
+test('errors name the provider and explain themselves', async () => {
+  await assert.rejects(A.ask({ provider: 'groq', key: 'k', text: 'x', routine: { items: [] }, fetchFn: async () => { throw new Error('cors'); } }), /Groq.*web page/);
+  await assert.rejects(A.ask({ provider: 'openai', key: 'k', text: 'x', routine: { items: [] }, fetchFn: async () => ({ ok: false, status: 404, json: async () => ({}) }) }), /model/);
+  await assert.rejects(A.ask({ provider: 'deepseek', key: 'k', text: 'x', routine: { items: [] }, fetchFn: async () => ({ ok: false, status: 402, json: async () => ({}) }) }), /credit/);
+});
+
+test('a deadline block keeps its intended length and its tomorrow flag through fromAI and toAI', () => {
+  const { routine } = A.fromAI({ title: 'T', startAt: '22:00', anchorTomorrow: true, items: [{ title: 'Sauna', deadline: '10:25', durationSecs: 1200, tomorrow: true }] }, null, { stamp: 10 });
+  const b = routine.items[0];
+  assert.strictEqual(b.timerType, 'endtime'); assert.strictEqual(b.plannedSecs, 1200); assert.strictEqual(b.nextDay, true);
+  assert.strictEqual(routine.anchorTomorrow, true);
+  const back = A.toAI(routine);
+  assert.strictEqual(back.items[0].deadline, '10:25'); assert.strictEqual(back.items[0].durationSecs, 1200); assert.strictEqual(back.items[0].tomorrow, true);
+  assert.strictEqual(back.anchorTomorrow, true);
+  const plain = A.fromAI({ title: 'T', items: [{ title: 'S', deadline: '10:25' }] }, null, { stamp: 11 }).routine.items[0];
+  assert.strictEqual(plain.nextDay, undefined); assert.strictEqual(plain.plannedSecs, undefined);
+});

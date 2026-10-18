@@ -4,11 +4,36 @@
 (function (root) {
   'use strict';
 
-  const MODELS = {
+  // Providers. "anthropic" uses the Messages API; every other kind is the OpenAI-style Chat Completions format,
+  // which most providers (and local servers such as Ollama) also speak. Only Anthropic has been tested; the model
+  // names for the rest are starting suggestions the person can change.
+  const PROVIDERS = {
+    anthropic: { label: 'Anthropic (Claude)', kind: 'anthropic', url: 'https://api.anthropic.com/v1/messages', tested: true,
+      model: 'claude-haiku-5-5', models: { 'claude-haiku-5-5': 'Haiku 5.5 (cheapest)', 'claude-sonnet-5-5': 'Sonnet 5.5 (more careful)' },
+      keyUrl: 'https://console.anthropic.com/settings/keys', keyHint: 'sk-ant-...', keyRegex: /^sk-ant-[A-Za-z0-9_-]{20,}$/ },
+    openai: { label: 'OpenAI', kind: 'openai', url: 'https://api.openai.com/v1/chat/completions', model: 'gpt-4o-mini',
+      keyUrl: 'https://platform.openai.com/api-keys', keyHint: 'sk-...' },
+    gemini: { label: 'Google Gemini', kind: 'openai', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', model: 'gemini-2.0-flash',
+      keyUrl: 'https://aistudio.google.com/apikey', keyHint: 'AI...' },
+    deepseek: { label: 'DeepSeek', kind: 'openai', url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-chat',
+      keyUrl: 'https://platform.deepseek.com/api_keys', keyHint: 'sk-...' },
+    groq: { label: 'Groq', kind: 'openai', url: 'https://api.groq.com/openai/v1/chat/completions', model: 'llama-3.3-70b-versatile',
+      keyUrl: 'https://console.groq.com/keys', keyHint: 'gsk_...' },
+    mistral: { label: 'Mistral', kind: 'openai', url: 'https://api.mistral.ai/v1/chat/completions', model: 'mistral-small-latest',
+      keyUrl: 'https://console.mistral.ai/api-keys', keyHint: '' },
+    xai: { label: 'xAI (Grok)', kind: 'openai', url: 'https://api.x.ai/v1/chat/completions', model: 'grok-3-mini',
+      keyUrl: 'https://console.x.ai', keyHint: 'xai-...' },
+    openrouter: { label: 'OpenRouter', kind: 'openai', url: 'https://openrouter.ai/api/v1/chat/completions', model: 'openrouter/auto',
+      keyUrl: 'https://openrouter.ai/keys', keyHint: 'sk-or-...' },
+    custom: { label: 'Your own server (OpenAI-compatible, e.g. Ollama)', kind: 'openai', url: 'http://localhost:11434/v1/chat/completions', model: 'llama3.1',
+      custom: true, keyOptional: true, keyUrl: '', keyHint: 'optional for a local server' }
+  };
+  const DEFAULT_PROVIDER = 'anthropic';
+  const DEFAULT_MODEL = PROVIDERS.anthropic.model;
+  const MODELS = {   // kept for the Anthropic dropdown
     'claude-haiku-5-5': { label: 'Haiku 5.5 (cheapest)', note: 'about a tenth of a cent per message' },
     'claude-sonnet-5-5': { label: 'Sonnet 5.5 (more careful)', note: 'about 1 to 3 cents per message' }
   };
-  const DEFAULT_MODEL = 'claude-haiku-5-5';
 
   const SYSTEM = [
     'You build and edit routines for Sequence Flow, a step-by-step routine timer for grown-ups (workouts, cooking, mornings, work sprints).',
@@ -16,7 +41,7 @@
     'Block kinds: "timer" (counts down durationSecs, or ends at a clock time with deadline "HH:MM"), "tap" (no timer; the person taps Done; optional target text like "8 reps"), "checklist" (rows to tick; optional timer), "pacer" (paced breathing: inhale, hold1, exhale, hold2 seconds and cycles).',
     'A block can repeat with sets (1 to 99) and restSecs between sets. autoStart starts its timer when the step before ends; autoAdvance moves on when it ends. For flowing routines use autoStart true and autoAdvance true; for steps where the person must act or decide (taps, stops, anything with an unknown length) use false.',
     'The whole routine can have startAt ("HH:MM", 24-hour: Run waits for that time and begins) or finishBy ("HH:MM": the app works back to the start time). Use at most one, and only when the person gives a time.',
-    'Use deadline only when a block must END at a clock time (for example "until 10:00"). Otherwise use durationSecs. Blocks that follow a deadline block start when it ends.',
+    'Use deadline only when a block must END at a clock time (for example "until 10:00"). For a deadline block also give durationSecs, how long it should take, so the app can shift the flow if someone starts late. Times are today unless you set tomorrow true (or anchorTomorrow for startAt/finishBy). Blocks that follow a deadline block start when it ends.',
     'When the person describes or changes a routine, call set_routine with the COMPLETE routine every time (not just the changes). When editing, keep the "id" of every block you leave in place so the app can show what changed. Give new blocks no id.',
     'Keep titles short (under 40 characters). Put a short tip in notes only when it helps (at most 2 per block). Do not add steps the person did not ask for, except a sensible short rest between hard intervals.',
     'If something essential is missing (for example total length for a workout), ask ONE short question and do not call the tool. Otherwise make reasonable assumptions and state them briefly after calling the tool.',
@@ -30,7 +55,8 @@
       type: 'object',
       properties: {
         title: { type: 'string' },
-        startAt: { type: 'string', description: '24-hour HH:MM. Optional.' },
+        startAt: { type: 'string', description: '24-hour HH:MM, today unless anchorTomorrow is true. Optional.' },
+        anchorTomorrow: { type: 'boolean', description: 'True if startAt or finishBy is tomorrow.' },
         finishBy: { type: 'string', description: '24-hour HH:MM. Optional.' },
         items: {
           type: 'array',
@@ -44,7 +70,8 @@
               kind: { type: 'string', enum: ['timer', 'tap', 'checklist', 'pacer'] },
               rest: { type: 'boolean', description: 'True if this is a rest or gap rather than an activity.' },
               durationSecs: { type: 'integer', description: 'Timer length in seconds. Omit for taps.' },
-              deadline: { type: 'string', description: 'Timer ends at this 24-hour clock time HH:MM instead of after a length.' },
+              deadline: { type: 'string', description: 'Timer ends at this 24-hour clock time HH:MM instead of after a length. Also give durationSecs: how long the block should take if the person starts late.' },
+              tomorrow: { type: 'boolean', description: 'True only if the deadline (or startAt/finishBy) is tomorrow. Times are today unless this is true.' },
               sets: { type: 'integer' },
               restSecs: { type: 'integer', description: 'Rest between sets, in seconds.' },
               autoStart: { type: 'boolean' },
@@ -95,6 +122,7 @@
     const sa = pad(str(ai && ai.startAt, 5)), fb = pad(str(ai && ai.finishBy, 5));
     if (sa) r.startAt = sa;
     else if (fb) r.finishBy = fb;
+    if ((sa || fb) && ai && ai.anchorTomorrow === true) r.anchorTomorrow = true;
     if (sa && fb) warnings.push('Both Start at and Finish by were given, so only Start at was kept.');
 
     const src = Array.isArray(ai && ai.items) ? ai.items.slice(0, 60) : [];
@@ -124,7 +152,11 @@
         b.durationValue = b.cycles * (b.pattern.inhale + b.pattern.hold1 + b.pattern.exhale + b.pattern.hold2);
       } else if (kind === 'timer' || (kind === 'checklist' && (deadline || secsIn > 0))) {
         b.timerEnabled = true;
-        if (deadline) { b.timerType = 'endtime'; b.targetEndTime = deadline; }
+        if (deadline) {
+          b.timerType = 'endtime'; b.targetEndTime = deadline;
+          if (it.tomorrow === true) b.nextDay = true;
+          if (secsIn > 0) b.plannedSecs = clampInt(secsIn, 1, 86400, 60);   // how long it should take if started late
+        }
         else {
           const secs = clampInt(secsIn, 1, 86400, 60);
           if (secs >= 60 && secs % 60 === 0) { b.durationValue = secs / 60; b.durationUnit = 'mins'; }
@@ -155,13 +187,14 @@
     const out = { title: routine.title || '', items: [] };
     if (routine.startAt) out.startAt = routine.startAt;
     if (routine.finishBy) out.finishBy = routine.finishBy;
+    if (routine.anchorTomorrow) out.anchorTomorrow = true;
     (routine.items || []).forEach(i => {
       if (i.isSection) { out.items.push({ id: i.id, section: true, title: i.title, repeatCount: i.repeatCount || 1 }); return; }
       const o = { id: i.id, title: i.title, kind: i.kind || (i.timerEnabled ? 'timer' : 'tap') };
       if (i.type === 'gap') o.rest = true;
       if (o.kind === 'pacer') o.pacer = Object.assign({}, i.pattern, { cycles: i.cycles });
       else if (i.timerEnabled) {
-        if (i.timerType === 'endtime') o.deadline = i.targetEndTime;
+        if (i.timerType === 'endtime') { o.deadline = i.targetEndTime; if (i.nextDay) o.tomorrow = true; if (i.plannedSecs) o.durationSecs = i.plannedSecs; }
         else o.durationSecs = (Number(i.durationValue) || 0) * (i.durationUnit === 'mins' ? 60 : 1);
       }
       if (i.target) o.target = i.target;
@@ -209,13 +242,27 @@
     return s;
   }
 
+  function userContent(userText, routine) {
+    return userText + '\n\n[Routine on screen now, as JSON]\n' + JSON.stringify(toAI(routine));
+  }
+
   // The request body for POST /v1/messages. History is plain text; only the last user turn carries the routine.
   function buildRequest(model, history, userText, routine) {
     const msgs = history.slice(-12).map(m => ({ role: m.role, content: m.text }));
-    msgs.push({ role: 'user', content: userText + '\n\n[Routine on screen now, as JSON]\n' + JSON.stringify(toAI(routine)) });
+    msgs.push({ role: 'user', content: userContent(userText, routine) });
     return {
       model, max_tokens: 4096, system: SYSTEM, tools: [TOOL], tool_choice: { type: 'auto' },
       output_config: { effort: 'low' }, messages: msgs
+    };
+  }
+
+  // Same conversation in the OpenAI-style Chat Completions format (system prompt is the first message).
+  function buildOpenAIRequest(model, history, userText, routine) {
+    const msgs = [{ role: 'system', content: SYSTEM }].concat(history.slice(-12).map(m => ({ role: m.role, content: m.text })));
+    msgs.push({ role: 'user', content: userContent(userText, routine) });
+    return {
+      model, messages: msgs, tool_choice: 'auto',
+      tools: [{ type: 'function', function: { name: TOOL.name, description: TOOL.description, parameters: TOOL.input_schema } }]
     };
   }
 
@@ -232,39 +279,63 @@
     return out;
   }
 
+  function parseOpenAIResponse(resp) {
+    const out = { text: '', ai: null, refused: false };
+    const ch = resp && Array.isArray(resp.choices) ? resp.choices[0] : null;
+    if (!ch || !ch.message) return out;
+    if (ch.finish_reason === 'content_filter') out.refused = true;
+    const m = ch.message;
+    if (typeof m.content === 'string') out.text = m.content.trim();
+    else if (Array.isArray(m.content)) out.text = m.content.map(p => (p && p.text) || '').join('\n').trim();
+    (m.tool_calls || []).forEach(tc => {
+      if (out.ai || !tc.function || tc.function.name !== 'set_routine') return;
+      const a = tc.function.arguments;
+      try { out.ai = typeof a === 'string' ? JSON.parse(a) : a; } catch (e) {
+        if (!out.text) out.text = 'I built something but it came back garbled. Please try again.';
+      }
+    });
+    return out;
+  }
+
   // Plain-English message for a failed call.
   function errorMessage(status, body) {
-    if (status === 401 || status === 403) return 'That key was not accepted. Check it in Settings and try again.';
-    if (status === 429) return 'Too many requests right now. Wait a moment and try again.';
-    if (status === 400 && body && /credit balance/i.test(JSON.stringify(body))) return 'The account behind this key is out of credits. Add credits in the Anthropic Console.';
+    if (status === 401 || status === 403) return 'That key was not accepted. Check it in the AI settings and try again.';
+    if (status === 404) return 'The provider did not recognise that model or address. Check the model name in the AI settings.';
+    if (status === 429) return 'Too many requests right now, or this key has no credit or free quota left. Wait a moment and try again.';
+    if (status === 402 || (status === 400 && body && /credit balance|insufficient/i.test(JSON.stringify(body)))) return 'The account behind this key is out of credit.';
     if (status >= 500 || status === 529) return 'The AI service is busy. Try again in a minute.';
     return 'Something went wrong (' + status + '). Your routine was not changed.';
   }
 
-  // Send one message. `fetchFn` is injectable for tests and for the draft preview.
+  // Send one message. `fetchFn` is injectable for tests and previews. opts: provider, key, model, baseUrl (custom), history, text, routine.
   async function ask(opts) {
     const f = opts.fetchFn || (typeof fetch !== 'undefined' ? fetch.bind(root) : null);
     if (!f) throw new Error('No network available.');
+    const prov = PROVIDERS[opts.provider || DEFAULT_PROVIDER] || PROVIDERS[DEFAULT_PROVIDER];
+    const model = opts.model || prov.model;
+    const url = prov.custom && opts.baseUrl ? opts.baseUrl : prov.url;
+    const headers = { 'content-type': 'application/json' };
+    let body;
+    if (prov.kind === 'anthropic') {
+      headers['x-api-key'] = opts.key; headers['anthropic-version'] = '2023-06-01'; headers['anthropic-dangerous-direct-browser-access'] = 'true';
+      body = buildRequest(model, opts.history || [], opts.text, opts.routine);
+    } else {
+      if (opts.key) headers.authorization = 'Bearer ' + opts.key;
+      body = buildOpenAIRequest(model, opts.history || [], opts.text, opts.routine);
+    }
     let res;
     try {
-      res = await f('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json', 'x-api-key': opts.key, 'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify(buildRequest(opts.model || DEFAULT_MODEL, opts.history || [], opts.text, opts.routine))
-      });
+      res = await f(url, { method: 'POST', headers, body: JSON.stringify(body) });
     } catch (e) {
-      throw new Error('Could not reach the AI service. Check your connection.');
+      throw new Error('Could not reach ' + prov.label + '. Check your connection' + (prov.kind === 'anthropic' ? '.' : '; some providers do not allow calls from a web page.'));
     }
-    let body = null;
-    try { body = await res.json(); } catch (e) {}
-    if (!res.ok) throw new Error(errorMessage(res.status, body));
-    return parseResponse(body);
+    let json = null;
+    try { json = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error(errorMessage(res.status, json));
+    return prov.kind === 'anthropic' ? parseResponse(json) : parseOpenAIResponse(json);
   }
 
-  const api = { MODELS, DEFAULT_MODEL, SYSTEM, TOOL, fromAI, toAI, diffRoutines, describeItem, buildRequest, parseResponse, errorMessage, ask };
+  const api = { PROVIDERS, DEFAULT_PROVIDER, MODELS, DEFAULT_MODEL, SYSTEM, TOOL, fromAI, toAI, diffRoutines, describeItem, buildRequest, buildOpenAIRequest, parseResponse, parseOpenAIResponse, errorMessage, ask };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqAI = api;
 })(typeof self !== 'undefined' ? self : globalThis);

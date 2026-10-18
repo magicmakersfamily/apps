@@ -44,7 +44,7 @@ nothing leaves the device. Origin: built with Gemini and Claude, brought here as
 | 1.3 | Sets and rest-between per block (1 to 99), section Repeat 1x to 10x plus Custom up to 99, Round/Set labels, compact rest chips, Norwegian 4x4 and Tabata starters |
 | 1.4 | Running-timers tray, Move on (timer keeps running), live chip time, "Done around" estimate, Got it / +1m alert, Resume or Discard after refresh (`sequence_flow_active_v1`, 6 hours) |
 | 1.8 | Missed deadlines never roll to tomorrow (`dayInstant`/`deadlineMs`, `findConflicts`, `shiftSteps`, `inferPlanned`): Run stops and shows "Your flow needs adjusting" (Shift the flow / Keep the final deadline / Edit the schedule); deadline blocks keep `plannedSecs`; explicit `nextDay` per block and `anchorTomorrow` per routine. AI builder: explainer of cost, provider list (Anthropic tested; OpenAI, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, own server not), on/off switch (bell settings). Repo `TRACKER.md` added |
-| 1.7 | AI Flow Builder (`builder.js`, opt-in, bring-your-own Anthropic key in `localStorage` `sequence_flow_ai_v1`, Haiku 5.5 default, Sonnet 5.5 optional): describe or speak a routine, preview with change chips, Use this / Not yet / Undo; edits start from the routine on screen. **The live API call was not tested against the real service before release** (no key in the build environment); first thing to do is paste a key and try it |
+| 1.7 | AI Flow Builder (`builder.js`, opt-in, bring-your-own Anthropic key in `localStorage` `sequence_flow_ai_v1`, Haiku 5.5 default, Sonnet 5.5 optional): describe or speak a routine, preview with change chips, Use this / Not yet / Undo; edits start from the routine on screen. The Anthropic call was confirmed working on the live page by the family (2026-10-18); the other providers are untested |
 | 1.6 | Start at / Finish by anchor (Build, collapsed "Schedule"), timetable in Build and Run, waiting screen then auto-start, clock deadlines laid end to end (`projectSteps`) so totals/"Done around" are right, deadline blocks always end at their clock time, on-track/behind line. Not done from PR 5: Squeeze/`skippable`, per-block `estimate`, School Morning starter |
 | 1.5 | Block kinds Timer / Tap (target) / Checklist (optional timer) / Pacer (breathing circle); new starters (Push Day, Sauna, Property Turnover, Weekly Reset, Kids Bedtime, Travel Day) |
 
@@ -137,6 +137,6 @@ header total changed oddly. Required:
   (`diffRoutines`) work. A failed turn is shown in the chat but never sent back to the model.
 - Request: `POST https://api.anthropic.com/v1/messages` with `x-api-key`, `anthropic-version: 2023-06-01`,
   `anthropic-dangerous-direct-browser-access: true`, `output_config.effort: low`, no thinking or sampling params.
-- Open: verify with a real key (see the 1.7 row); Speak button (browser speech recognition, English only) untested on
+- Open: the other providers (see TRACKER sequence-flow-F1); Speak button (browser speech recognition, English only) untested on
   real devices; a "save as a new routine" option on Use this (today it replaces the routine on screen, with Undo);
   hosted free tier with a hard cap is a later decision.

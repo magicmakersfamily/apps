@@ -27,7 +27,6 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
-| sequence-flow-B1 | bug | sequence-flow | AI builder's real Anthropic call has never been run against the live service | P1 | testing | self | | Built and tested only against a stand-in server. Paste a key, try "Sunday morning, start at 9", report what happens. |
 | sequence-flow-F1 | feature | sequence-flow | Test the other AI providers (OpenAI, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, own server) | P2 | testing | self | | Built in `builder.js` (1.8), none tested. Model names are guesses; some providers may block calls from a web page (CORS). Mark each provider `tested` in `PROVIDERS` once it works. |
 | sequence-flow-F2 | feature | sequence-flow | "Save as new routine" when applying an AI proposal | P2 | planned | self | | Today "Use this" replaces the routine on screen (Undo and the change chips are there). |
 | sequence-flow-F3 | feature | sequence-flow | Squeeze: mark steps skippable and show the time skipping them recovers | P2 | planned | self | | Left over from the time-anchored routines plan (PLAN.md, PR 5b). Never auto-skip. |
@@ -51,6 +50,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-F14 | feature | sequence-flow | AI builder: cost explainer, provider choice, and an on/off switch | P1 | done | family | 1.8 | Only Anthropic is tested; see sequence-flow-F1. |
 | shelf-F2 | feature | shelf | Feature and bug tracker (`TRACKER.md`, `tools/tracker.mjs`) | P2 | done | family | 1.8 | |
 | shelf-F1 | feature | shelf | Ko-fi post for Sequence Flow 1.6 and 1.7 | P3 | dropped | self | | The family does not want Ko-fi post reminders. |
+| sequence-flow-B1 | bug | sequence-flow | AI builder's real Anthropic call had never been run against the live service | P1 | done | self | 1.8 | Confirmed working by the family on the live page, 2026-10-18. Other providers are still untested (sequence-flow-F1). |
 | sequence-flow-B5 | bug | sequence-flow | Chained clock deadlines added up to over 12 hours and a wrong finish time | P1 | done | family | 1.6 | Deadlines are now laid end to end (`projectSteps`). |
 | sequence-flow-B6 | bug | sequence-flow | A deadline block that auto-started after another used a stale duration | P1 | done | self | 1.6 | It now always ends at its clock time. |
 | sequence-flow-B7 | bug | sequence-flow | Before starting, the first block counted down from now instead of from its planned start | P2 | done | family | 1.6 | Start at makes Run wait, then start by itself. |

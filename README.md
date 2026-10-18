@@ -78,7 +78,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
 | Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
-| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.6 | 2026-10-16 |
+| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.7 | 2026-10-16 |
 
 Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for
 grown-ups; each keeps its own saved games). Every release is also a git tag (`blow-up-v1.3`, …).

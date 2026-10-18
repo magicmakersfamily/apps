@@ -35,7 +35,7 @@ place search (Photon, OpenStreetMap) and drive time (OSRM). The page says so nex
 (`renzi/content/`: character lists, titles and story pictures only, never a parent's marks or notes) and, on a
 device a parent has set up once with a private link, posts which characters James wrote or tapped to the family's
 own Google Sheet (an Apps Script web app). The URL and token are never in this repository; they live in that
-device's `localStorage`. See `renzi/SETUP.md`. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
+device's `localStorage`. See `renzi/SETUP.md`. Third exception, at the family's request: `sequence-flow/` has an optional AI Flow Builder. Only when a grown-up pastes their own Anthropic API key (kept in that device's `localStorage`, never in this repository), the page sends their message and the routine on screen straight to `api.anthropic.com`; nothing goes through us, and the page says so. Graphics are drawn in code (canvas/SVG) and sound is generated with the Web
 Audio API, started only from a button press. Exception, at the family's request: `big-bang/` (6.0) also uses bitmap pictures: the painted guides and the cockpit frame (family-made, AI-generated, backgrounds cut out) and a star field cut from NASA's "Deep Star Maps 2020" (credited in the game's About panel).
 
 ## Adding or updating a game

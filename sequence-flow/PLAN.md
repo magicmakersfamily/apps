@@ -2,7 +2,7 @@
 
 Read this first. It is the handoff between sessions (chat history is not). Live at
 https://magicmakersfamily.github.io/apps/sequence-flow/ , shown on the shelf under Utilities, still **beta**.
-Current version: **1.6**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
+Current version: **1.7**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
 
 ## What it is
 
@@ -12,8 +12,9 @@ nothing leaves the device. Origin: built with Gemini and Claude, brought here as
 
 ## Hard constraints (from the v1.2 spec; keep them)
 
-1. Static site. No new third-party network calls (Google Fonts for Inter is the only one). The footer claim
-   "This app doesn't collect any information" must stay true.
+1. Static site. No third-party network calls except Google Fonts for Inter and, only when the person opts in with their
+   own key, `api.anthropic.com` from the AI Flow Builder (family-approved exception; the footer says what is sent).
+   The footer claim "This app doesn't collect any information" must stay true: nothing goes through us.
 2. Never break saved data. Routines live in `localStorage` key `sequence_flow_routines_v14` (last-opened id in
    `sequence_flow_last_v14`). When the schema changes, migrate to `v15` non-destructively: read v15, else read v14 and
    convert, never delete v14 in the same release. New fields are optional with defaults that reproduce old behaviour.
@@ -42,6 +43,7 @@ nothing leaves the device. Origin: built with Gemini and Claude, brought here as
 | 1.2 | Timers use `endsAt` and the wall clock; silent in-order catch-up after the tab was hidden; cue settings popover (sound, 3-2-1 ticks, vibrate, voice, keep screen on); screen wake lock; flash on every step change; `logic.js` + tests; spec section 6 polish |
 | 1.3 | Sets and rest-between per block (1 to 99), section Repeat 1x to 10x plus Custom up to 99, Round/Set labels, compact rest chips, Norwegian 4x4 and Tabata starters |
 | 1.4 | Running-timers tray, Move on (timer keeps running), live chip time, "Done around" estimate, Got it / +1m alert, Resume or Discard after refresh (`sequence_flow_active_v1`, 6 hours) |
+| 1.7 | AI Flow Builder (`builder.js`, opt-in, bring-your-own Anthropic key in `localStorage` `sequence_flow_ai_v1`, Haiku 5.5 default, Sonnet 5.5 optional): describe or speak a routine, preview with change chips, Use this / Not yet / Undo; edits start from the routine on screen. **The live API call was not tested against the real service before release** (no key in the build environment); first thing to do is paste a key and try it |
 | 1.6 | Start at / Finish by anchor (Build, collapsed "Schedule"), timetable in Build and Run, waiting screen then auto-start, clock deadlines laid end to end (`projectSteps`) so totals/"Done around" are right, deadline blocks always end at their clock time, on-track/behind line. Not done from PR 5: Squeeze/`skippable`, per-block `estimate`, School Morning starter |
 | 1.5 | Block kinds Timer / Tap (target) / Checklist (optional timer) / Pacer (breathing circle); new starters (Push Day, Sauna, Property Turnover, Weekly Reset, Kids Bedtime, Travel Day) |
 
@@ -126,12 +128,14 @@ header total changed oddly. Required:
 - "Move on" from a running background timer marks the step done and keeps the timer in the tray; Skip cancels it.
 - Version numbers are the shelf's, not the original file's: the first shelf release was 1.0, not 1.4.
 
-## Next after 1.6: AI Flow Builder (bring-your-own key)
+## AI Flow Builder (shipped in 1.7): how it works and what is left
 
-Agreed with the owner: describe a routine by talking or typing and the app builds it, and edit the current routine the
-same way. Opt-in and disclosed; the user pastes their own Anthropic API key, kept only in this device's `localStorage`,
-and the page calls the API directly (needs a new documented exception in the repo `CLAUDE.md`: the footer claim must say
-what is sent). The model returns JSON in the routine schema (incl. `startAt`/`finishBy`); `logic.js` validates it and
-the UI previews with Accept and Undo; edits are small change operations, not a rewrite. Voice input uses the browser's
-speech recognition (audio goes to Google/Apple; say so), with typing always available. Draft privately first. A hosted
-free tier with a hard cap is a later decision.
+- `builder.js` (pure, tested in `builder.test.js`): the model sees a small "AI format" (`toAI`), answers by calling the
+  `set_routine` tool with the COMPLETE routine (tool_choice stays `auto`: forced tool use is rejected by these models), and
+  `fromAI` validates and clamps it into the app's own routine. Only ids that already exist are kept, so the diff chips
+  (`diffRoutines`) work. A failed turn is shown in the chat but never sent back to the model.
+- Request: `POST https://api.anthropic.com/v1/messages` with `x-api-key`, `anthropic-version: 2023-06-01`,
+  `anthropic-dangerous-direct-browser-access: true`, `output_config.effort: low`, no thinking or sampling params.
+- Open: verify with a real key (see the 1.7 row); Speak button (browser speech recognition, English only) untested on
+  real devices; a "save as a new routine" option on Use this (today it replaces the routine on screen, with Undo);
+  hosted free tier with a hard cap is a later decision.

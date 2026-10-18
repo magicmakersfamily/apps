@@ -41,7 +41,6 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-F10 | feature | sequence-flow | Replace `confirm()` and `alert()` with in-page dialogs | P3 | planned | self | | The restart confirmation blocks automated testers. |
 | sequence-flow-B3 | bug | sequence-flow | Never tested on a real phone: wake lock, background timing, chimes, vibration, voice, Safari and Firefox | P1 | testing | self | | Scenarios are listed in PLAN.md "Known gaps". Also covers the AI Speak button. |
 | sequence-flow-B4 | bug | sequence-flow | Cover image is out of date (header now has the AI Builder button) | P3 | planned | self | | Re-render `cover.png` with headless Chrome. |
-| shelf-F1 | feature | shelf | Ko-fi post for Sequence Flow 1.6 and 1.7 | P3 | planned | self | | Draft for the family to publish; Ko-fi notifies followers. |
 
 ## Closed
 
@@ -51,6 +50,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-F13 | feature | sequence-flow | Explicit Tomorrow setting for deadlines and Start at / Finish by (crossing midnight on purpose) | P1 | done | family | 1.8 | `nextDay` on a block, `anchorTomorrow` on the routine. Old routines that relied on the silent roll now get the dialog and can tick Tomorrow. |
 | sequence-flow-F14 | feature | sequence-flow | AI builder: cost explainer, provider choice, and an on/off switch | P1 | done | family | 1.8 | Only Anthropic is tested; see sequence-flow-F1. |
 | shelf-F2 | feature | shelf | Feature and bug tracker (`TRACKER.md`, `tools/tracker.mjs`) | P2 | done | family | 1.8 | |
+| shelf-F1 | feature | shelf | Ko-fi post for Sequence Flow 1.6 and 1.7 | P3 | dropped | self | | The family does not want Ko-fi post reminders. |
 | sequence-flow-B5 | bug | sequence-flow | Chained clock deadlines added up to over 12 hours and a wrong finish time | P1 | done | family | 1.6 | Deadlines are now laid end to end (`projectSteps`). |
 | sequence-flow-B6 | bug | sequence-flow | A deadline block that auto-started after another used a stale duration | P1 | done | self | 1.6 | It now always ends at its clock time. |
 | sequence-flow-B7 | bug | sequence-flow | Before starting, the first block counted down from now instead of from its planned start | P2 | done | family | 1.6 | Start at makes Run wait, then start by itself. |

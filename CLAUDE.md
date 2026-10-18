@@ -104,8 +104,8 @@ Audio API, started only from a button press. Exception, at the family's request:
   link, falling back to copying it), in its footer and end screen, and the shelf has one too. Games with
   an end screen can offer "Share my night": a picture drawn from the game canvas, shared through the
   share sheet or saved; nothing is sent to us.
-- When a new game or a big update ships, draft a short Ko-fi post for the user to publish (what the game
-  is, what James was curious about, the play link). Ko-fi notifies followers.
+- Do not draft, offer or ask about Ko-fi posts after a release. Only write one if the user asks for it (the family
+  asked to stop being reminded, 2026-10-18).
 
 ## Tracking features and bugs
 

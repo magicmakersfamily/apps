@@ -2,7 +2,7 @@
 
 Read this first. It is the handoff between sessions (chat history is not). Live at
 https://magicmakersfamily.github.io/apps/sequence-flow/ , shown on the shelf under Utilities, still **beta**.
-Current version: **1.5**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
+Current version: **1.6**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
 
 ## What it is
 
@@ -42,9 +42,10 @@ nothing leaves the device. Origin: built with Gemini and Claude, brought here as
 | 1.2 | Timers use `endsAt` and the wall clock; silent in-order catch-up after the tab was hidden; cue settings popover (sound, 3-2-1 ticks, vibrate, voice, keep screen on); screen wake lock; flash on every step change; `logic.js` + tests; spec section 6 polish |
 | 1.3 | Sets and rest-between per block (1 to 99), section Repeat 1x to 10x plus Custom up to 99, Round/Set labels, compact rest chips, Norwegian 4x4 and Tabata starters |
 | 1.4 | Running-timers tray, Move on (timer keeps running), live chip time, "Done around" estimate, Got it / +1m alert, Resume or Discard after refresh (`sequence_flow_active_v1`, 6 hours) |
+| 1.6 | Start at / Finish by anchor (Build, collapsed "Schedule"), timetable in Build and Run, waiting screen then auto-start, clock deadlines laid end to end (`projectSteps`) so totals/"Done around" are right, deadline blocks always end at their clock time, on-track/behind line. Not done from PR 5: Squeeze/`skippable`, per-block `estimate`, School Morning starter |
 | 1.5 | Block kinds Timer / Tap (target) / Checklist (optional timer) / Pacer (breathing circle); new starters (Push Day, Sauna, Property Turnover, Weekly Reset, Kids Bedtime, Travel Day) |
 
-## Next: PR 5, time-anchored routines (release 1.6)
+## PR 5, time-anchored routines (shipped as 1.6, Squeeze and School Morning still open)
 
 **Owner decision needed first:** the meaning of "Target Clock Deadline". Proposed (assumed unless the owner says
 otherwise): the block counts down to the next occurrence of the chosen local time, rolling to tomorrow if already past.
@@ -124,3 +125,13 @@ header total changed oddly. Required:
 - Generated rests (from Sets and rest) are plain "Rest" steps with no notes.
 - "Move on" from a running background timer marks the step done and keeps the timer in the tray; Skip cancels it.
 - Version numbers are the shelf's, not the original file's: the first shelf release was 1.0, not 1.4.
+
+## Next after 1.6: AI Flow Builder (bring-your-own key)
+
+Agreed with the owner: describe a routine by talking or typing and the app builds it, and edit the current routine the
+same way. Opt-in and disclosed; the user pastes their own Anthropic API key, kept only in this device's `localStorage`,
+and the page calls the API directly (needs a new documented exception in the repo `CLAUDE.md`: the footer claim must say
+what is sent). The model returns JSON in the routine schema (incl. `startAt`/`finishBy`); `logic.js` validates it and
+the UI previews with Accept and Undo; edits are small change operations, not a rewrite. Voice input uses the browser's
+speech recognition (audio goes to Google/Apple; say so), with typing always available. Draft privately first. A hosted
+free tier with a hard cap is a later decision.

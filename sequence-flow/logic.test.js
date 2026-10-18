@@ -91,3 +91,47 @@ test('a pacer step expands to a timed step and counts in totals', () => {
   assert.strictEqual(steps[0].timerEnabled, true);
   assert.strictEqual(L.totals(steps.map(s => Object.assign({}, s, { status: 'pending' })), 0).secs, 192);
 });
+
+const at = (h, m, d) => new Date(2026, 9, d || 18, h, m, 0, 0).getTime();
+const dl = (id, hhmm) => ({ id, isSection: false, type: 'activity', title: id, timerEnabled: true, timerType: 'endtime', targetEndTime: hhmm });
+
+test('chained clock deadlines project to the last deadline, not a sum from now', () => {
+  const steps = [dl('workout', '10:00'), dl('buffer', '10:05'), dl('sauna', '10:25'), dl('shower', '10:45'), dl('breakfast', '11:45'), dl('ready', '12:45')];
+  const plan = L.projectSteps(steps, at(9, 0));
+  assert.strictEqual(plan[0].secs, 3600);
+  assert.strictEqual(plan[1].secs, 300);
+  assert.strictEqual(plan[5].endMs, at(12, 45));
+  assert.strictEqual(plan[5].endMs - at(9, 0), 3 * 3600 * 1000 + 45 * 60 * 1000);
+});
+
+test('a deadline already passed for the previous step rolls to tomorrow only for that step', () => {
+  const plan = L.projectSteps([dl('a', '10:00'), dl('b', '09:00')], at(9, 30));
+  assert.strictEqual(plan[0].endMs, at(10, 0));
+  assert.strictEqual(plan[1].endMs, at(9, 0, 19));
+});
+
+test('anchorInstant: today within the grace window, else the next one', () => {
+  assert.strictEqual(L.anchorInstant('09:00', at(8, 50), 3600), at(9, 0));
+  assert.strictEqual(L.anchorInstant('09:00', at(9, 20), 3600), at(9, 0));
+  assert.strictEqual(L.anchorInstant('09:00', at(10, 30), 3600), at(9, 0, 19));
+  assert.strictEqual(L.anchorInstant('09:00', at(9, 20), 0), at(9, 0, 19));
+});
+
+test('backPlan: 20 minutes of steps finishing at 8:15 starts at 7:55', () => {
+  const r = L.backPlan([timer('a', 600), timer('b', 600)], at(8, 15));
+  assert.strictEqual(r.startMs, at(7, 55));
+  assert.strictEqual(r.plan[1].endMs, at(8, 15));
+});
+
+test('untimed steps use the estimate only when asked', () => {
+  const tap = { id: 't', isSection: false, type: 'activity', title: 't', timerEnabled: false };
+  assert.strictEqual(L.projectSteps([tap], 0)[0].secs, 0);
+  const p = L.projectSteps([tap], 0, { untimedSecs: 120 })[0];
+  assert.strictEqual(p.secs, 120);
+  assert.strictEqual(p.estimated, true);
+});
+
+test('paceBehind: positive when the projected end is later than planned', () => {
+  assert.strictEqual(L.paceBehind(at(8, 15), at(8, 19)), 240);
+  assert.strictEqual(L.paceBehind(at(8, 15), at(8, 9)), -360);
+});

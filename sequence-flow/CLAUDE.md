@@ -1,7 +1,7 @@
 # Sequence Flow: notes for Claude
 
 A routine builder and step runner (Utilities on the shelf, beta). Read `PLAN.md` first: it has the constraints, what has
-shipped, the next work (PR 5 time-anchored routines, PR 6 PWA and notifications), and the backlog.
+shipped, the next work (PR 6 PWA and notifications, then the AI Flow Builder with the user's own API key), and the backlog.
 
 - Files: `index.html` (page, styles, UI and engine), `logic.js` (pure logic), `logic.test.js`
   (`node --test sequence-flow/logic.test.js`), `tools/rebuild-css.sh` (recompiles the inlined Tailwind).

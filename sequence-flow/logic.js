@@ -57,6 +57,54 @@
     return b.durationUnit === 'mins' ? v * 60 : v;
   }
 
+
+  // The instant (epoch ms) of "HH:MM" local time. Today's if it passed no more than `graceSecs` ago (so starting a
+  // few minutes late still counts as today's start), otherwise the next occurrence.
+  function anchorInstant(timeStr, now, graceSecs) {
+    const p = (timeStr || '00:00').split(':');
+    const t = new Date(now);
+    t.setHours(parseInt(p[0], 10) || 0, parseInt(p[1], 10) || 0, 0, 0);
+    if (t.getTime() + (graceSecs || 0) * 1000 <= now) t.setDate(t.getDate() + 1);
+    return t.getTime();
+  }
+
+  // Lay steps out on the clock from `startMs`. A fixed-deadline step ends at the next occurrence of its clock time
+  // after the step before it ends; any other timer lasts its remaining (or starting) length. Untimed steps take
+  // opts.untimedSecs (default 0) and are flagged `estimated`.
+  function projectSteps(steps, startMs, opts) {
+    const untimed = (opts && opts.untimedSecs) || 0;
+    let cursor = startMs;
+    return steps.map(s => {
+      const from = cursor;
+      let estimated = false;
+      if (s.timerEnabled && s.timerType === 'endtime') {
+        cursor = anchorInstant(s.targetEndTime, from + 1000, 0);
+      } else if (s.timerEnabled) {
+        cursor += 1000 * (s.remainingSecs !== undefined ? s.remainingSecs : blockSeconds(s, from));
+      } else if (untimed > 0) {
+        cursor += untimed * 1000; estimated = true;
+      }
+      return { startMs: from, endMs: cursor, secs: Math.round((cursor - from) / 1000), estimated };
+    });
+  }
+
+  // Work backwards from a finish time: when must the routine start to end at finishMs?
+  function backPlan(steps, finishMs, opts) {
+    let start = finishMs;
+    for (let i = 0; i < 4; i++) {   // deadlines depend on the start, so settle by repeating
+      const plan = projectSteps(steps, start, opts);
+      const len = plan.length ? plan[plan.length - 1].endMs - start : 0;
+      if (start + len === finishMs) break;
+      start = finishMs - len;
+    }
+    return { startMs: start, plan: projectSteps(steps, start, opts) };
+  }
+
+  // Seconds behind the plan (negative = ahead) given where the routine will really end.
+  function paceBehind(plannedEndMs, projectedEndMs) {
+    return Math.round((projectedEndMs - plannedEndMs) / 1000);
+  }
+
   // Seconds left for a timer that ends at `endsAt` (epoch ms); never negative.
   function remainingSecs(endsAt, now) {
     return Math.max(0, Math.ceil((endsAt - now) / 1000));
@@ -144,7 +192,7 @@
     return text;
   }
 
-  const api = { blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural };
+  const api = { blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

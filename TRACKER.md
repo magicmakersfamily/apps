@@ -39,7 +39,6 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-B2 | bug | sequence-flow | Pacer: +1m does not add a breathing cycle | P3 | planned | self | | Total could be set by duration instead of cycles. |
 | sequence-flow-F10 | feature | sequence-flow | Replace `confirm()` and `alert()` with in-page dialogs | P3 | planned | self | | The restart confirmation blocks automated testers. |
 | sequence-flow-B3 | bug | sequence-flow | Never tested on a real phone: wake lock, background timing, chimes, vibration, voice, Safari and Firefox | P1 | testing | self | | Scenarios are listed in PLAN.md "Known gaps". Also covers the AI Speak button. |
-| sequence-flow-B4 | bug | sequence-flow | Cover image is out of date (header now has the AI Builder button) | P3 | planned | self | | Re-render `cover.png` with headless Chrome. |
 | shelf-F4 | feature | shelf | Search or filter chips (by age, "for little kids", Chinese) | P3 | idea | AI review | | Not needed yet with 10 apps. |
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
 | shelf-F6 | feature | shelf | A detail page per app (screenshots, what kids learn, privacy and storage) | P3 | idea | AI review | | Today the About panel holds this. |
@@ -56,6 +55,10 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | shelf-F1 | feature | shelf | Ko-fi post for Sequence Flow 1.6 and 1.7 | P3 | dropped | self | | The family does not want Ko-fi post reminders. |
 | sequence-flow-B1 | bug | sequence-flow | AI builder's real Anthropic call had never been run against the live service | P1 | done | self | 1.8 | Confirmed working by the family on the live page, 2026-10-18. Other providers are still untested (sequence-flow-F1). |
 | shelf-F3 | feature | shelf | Redesigned shelf: Games and Utilities tabs, big icon tiles, expandable About, featured game, shelf version in the footer | P1 | done | family | 2.0 | Shelf 1.0 is frozen at `versions/shelf/1.0/`. |
+| sequence-flow-B4 | bug | sequence-flow | Cover image is out of date (header now has the AI Builder button) | P3 | done | self | 1.9 | Cover re-rendered from the new home screen. |
+| sequence-flow-F15 | feature | sequence-flow | A clear first screen: big play button to build with AI, then templates and the classic builder | P1 | done | family | 1.9 | |
+| sequence-flow-F16 | feature | sequence-flow | Make starting the flow obvious: a ready panel after the AI builds, and a big Start / Change it with AI card on Build | P1 | done | family | 1.9 | |
+| sequence-flow-F17 | feature | sequence-flow | After the AI builds a flow, ask how talkative it should be (silent by default, talk-through, or customize) | P1 | done | family | 1.9 | Talk-through speaks each step and its length, counts 3-2-1, says halfway and one minute left. |
 | sequence-flow-B5 | bug | sequence-flow | Chained clock deadlines added up to over 12 hours and a wrong finish time | P1 | done | family | 1.6 | Deadlines are now laid end to end (`projectSteps`). |
 | sequence-flow-B6 | bug | sequence-flow | A deadline block that auto-started after another used a stale duration | P1 | done | self | 1.6 | It now always ends at its clock time. |
 | sequence-flow-B7 | bug | sequence-flow | Before starting, the first block counted down from now instead of from its planned start | P2 | done | family | 1.6 | Start at makes Run wait, then start by itself. |

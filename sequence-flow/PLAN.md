@@ -2,7 +2,7 @@
 
 Read this first. It is the handoff between sessions (chat history is not). Live at
 https://magicmakersfamily.github.io/apps/sequence-flow/ , shown on the shelf under Utilities, still **beta**.
-Current version: **1.8**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
+Current version: **1.9**. Each release is tagged `sequence-flow-vX.Y` and frozen in `versions/sequence-flow/`.
 
 ## What it is
 
@@ -43,6 +43,7 @@ nothing leaves the device. Origin: built with Gemini and Claude, brought here as
 | 1.2 | Timers use `endsAt` and the wall clock; silent in-order catch-up after the tab was hidden; cue settings popover (sound, 3-2-1 ticks, vibrate, voice, keep screen on); screen wake lock; flash on every step change; `logic.js` + tests; spec section 6 polish |
 | 1.3 | Sets and rest-between per block (1 to 99), section Repeat 1x to 10x plus Custom up to 99, Round/Set labels, compact rest chips, Norwegian 4x4 and Tabata starters |
 | 1.4 | Running-timers tray, Move on (timer keeps running), live chip time, "Done around" estimate, Got it / +1m alert, Resume or Discard after refresh (`sequence_flow_active_v1`, 6 hours) |
+| 1.9 | Home screen (`home-view`, `setMode('home')`): big play button builds a flow with AI (starts a blank routine and a fresh AI conversation; Use this goes to Build), secondary Open a template (Library) and Use the classic builder, Continue when there is work in progress; with the AI builder off the big button starts the classic builder. Header logo returns home. After Use this the AI panel shows "Your flow is ready" (Start the flow / Look at it and edit / Keep talking). The ready panel asks "How talkative should it be?" (Silent default / Talk me through it = `settings.voiceFull` / Let me customize with inline switches); the bell has the same switches. Build has a big "Your flow" card (summary, Start flow, Change it with AI) plus a pinned Start bar. New cover |
 | 1.8 | Missed deadlines never roll to tomorrow (`dayInstant`/`deadlineMs`, `findConflicts`, `shiftSteps`, `inferPlanned`): Run stops and shows "Your flow needs adjusting" (Shift the flow / Keep the final deadline / Edit the schedule); deadline blocks keep `plannedSecs`; explicit `nextDay` per block and `anchorTomorrow` per routine. AI builder: explainer of cost, provider list (Anthropic tested; OpenAI, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, own server not), on/off switch (bell settings). Repo `TRACKER.md` added |
 | 1.7 | AI Flow Builder (`builder.js`, opt-in, bring-your-own Anthropic key in `localStorage` `sequence_flow_ai_v1`, Haiku 5.5 default, Sonnet 5.5 optional): describe or speak a routine, preview with change chips, Use this / Not yet / Undo; edits start from the routine on screen. The Anthropic call was confirmed working on the live page by the family (2026-10-18); the other providers are untested |
 | 1.6 | Start at / Finish by anchor (Build, collapsed "Schedule"), timetable in Build and Run, waiting screen then auto-start, clock deadlines laid end to end (`projectSteps`) so totals/"Done around" are right, deadline blocks always end at their clock time, on-track/behind line. Not done from PR 5: Squeeze/`skippable`, per-block `estimate`, School Morning starter |

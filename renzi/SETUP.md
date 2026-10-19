@@ -10,3 +10,7 @@ James wrote or tapped to a private Google Sheet that you own. Nothing is sent fr
 5. To stop sending: open the page with `?setup=off`, or use "Hold to stop sending" in the grown-ups panel (the (i) button).
 
 Events are appended to the **Events** tab (time, device, day, kind, char, value, mistakes, mode, eid). The **Summary** tab counts them. To rotate the token, change `TOKEN` in the script, redeploy, and run the setup link again.
+
+## Where the family's files are
+
+Everything lives in one Google Drive folder with these names: **James writing log** (the iPad's practice log, Events and Summary tabs), **James Chinese Wordbank** (the word list), **James writing log - Code.gs** (the script, with a placeholder token), and **Read me first - James learning files** (a short guide). The Sheet's ID, the folder and the token are not in this repository. The 認字簿 tracker keeps the Sheet's ID in its settings.

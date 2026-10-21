@@ -31,6 +31,8 @@ blow-up/            Blow Up (beta)
 spellicious/ Spellicious
   index.html        page, mic input, syllable/sound breakdown and interface
   cover.png         1200×744 card image
+speller/            redirect only: forwards old links to spellicious/
+word-deconstructor/ redirect only: forwards old links to spellicious/
 get-ready/          Ready To Go! (departure countdown with spoken steps)
   PLAN.md           handoff: where development stands and what is next (Apple Maps)
   index.html        page, timer, steps, destination ETA

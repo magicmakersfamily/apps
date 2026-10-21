@@ -418,6 +418,8 @@ img { max-width: 100%; }
               <span id="run-total-time" class="text-xs font-mono font-bold text-amber-400">--:--</span>
               <span id="run-ends-at" class="text-[10px] text-slate-500 block"></span>
               <span id="run-pace" class="text-[10px] font-bold block"></span>
+              <button id="run-squeeze" type="button" onclick="toggleSqueeze()" aria-pressed="false" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30 text-amber-300">Squeeze</button>
+              <span id="run-squeeze-line" class="hidden text-[10px] text-amber-300 block"></span>
             </div>
             <button onclick="restartSessionPrompt()" class="p-1.5 sm:p-2 bg-slate-800 hover:bg-rose-900/40 border border-slate-700 hover:border-rose-500/40 text-slate-400 hover:text-rose-300 rounded-xl transition text-xs" title="Restart Session">
               <i class="fa-solid fa-rotate"></i>
@@ -1129,7 +1131,7 @@ img { max-width: 100%; }
         const p = at[i];
         if (!p) return { when: '✓', title: b.title || 'Step', len: '', cls: 'opacity-40 line-through' };
         return { when: clock(p.startMs) + (p.secs ? '–' + clock(p.endMs) : ''), title: b.title || 'Step',
-                 len: p.late ? 'time passed' : (p.estimated ? 'about ' : '') + (p.secs ? fmtMin(p.secs) : 'tap'), cls: p.late ? 'text-rose-300' : i === currentStepIdx ? 'text-indigo-300 font-bold' : '' };
+                 len: p.late ? 'time passed' : (p.estimated ? 'about ' : '') + (p.secs ? fmtMin(p.secs) : 'tap'), cls: squeezeIds.has(b.id) ? 'text-amber-300 font-bold' : p.late ? 'text-rose-300' : i === currentStepIdx ? 'text-indigo-300 font-bold' : '' };
       }));
     }
 
@@ -1347,15 +1349,35 @@ img { max-width: 100%; }
       }
     }
 
+    // Squeeze view: only highlights skippable steps and says what skipping them would save. It never skips anything.
+    let squeezeOn = false, squeezeIds = new Set();
+    function toggleSqueeze() { squeezeOn = !squeezeOn; updatePaceLine(); renderRunSchedule(); }
+    function updateSqueeze(behind, pend, plan) {
+      const btn = document.getElementById('run-squeeze'), line = document.getElementById('run-squeeze-line');
+      const sq = behind !== null && behind >= 60 ? SeqLogic.squeezeSavings(pend, plan) : { ids: [], savedSecs: 0 };
+      if (!sq.ids.length) squeezeOn = false;
+      squeezeIds = squeezeOn ? new Set(sq.ids) : new Set();
+      btn.classList.toggle('hidden', !sq.ids.length);
+      btn.setAttribute('aria-pressed', squeezeOn ? 'true' : 'false');
+      btn.style.background = squeezeOn ? 'rgba(251,191,36,.18)' : '';
+      line.classList.toggle('hidden', !squeezeOn);
+      line.textContent = squeezeOn ? 'Skipping these saves about ' + (sq.savedSecs < 60 ? 'under 1 min' : Math.round(sq.savedSecs / 60) + ' min') : '';
+      sessionBlocks.forEach((b, i) => {
+        const pill = document.getElementById('seq-pill-' + i);
+        if (pill) pill.style.outline = squeezeIds.has(b.id) && b.status === 'pending' ? '2px solid #fbbf24' : '';
+      });
+    }
+
     function updatePaceLine() {
       const el = document.getElementById('run-pace');
       if (!el) return;
-      if (!runPlanEnd || runStartAt) { el.textContent = ''; return; }
+      if (!runPlanEnd || runStartAt) { el.textContent = ''; updateSqueeze(null, [], []); return; }
       const now = Date.now();
       const pend = sessionBlocks.filter(b => b.status === 'pending');
-      if (!pend.length) { el.textContent = ''; return; }
+      if (!pend.length) { el.textContent = ''; updateSqueeze(null, [], []); return; }
       const plan = SeqLogic.projectSteps(pend, now, dayOpts({ untimedSecs: 0 }));
       const behind = SeqLogic.paceBehind(runPlanEnd, plan[plan.length - 1].endMs);
+      updateSqueeze(behind, pend, plan);
       const m = Math.round(Math.abs(behind) / 60);
       if (Math.abs(behind) < 30) { el.textContent = 'On track'; el.className = 'text-[10px] font-bold block text-emerald-400'; }
       else if (behind > 0) { el.textContent = m + ' min behind'; el.className = 'text-[10px] font-bold block text-rose-400'; }
@@ -1708,6 +1730,7 @@ img { max-width: 100%; }
                 </div>
                 <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 flex-shrink-0">${getItemNumber(idx)}</span>
                 <input type="text" value="${item.title}" oninput="markUnsaved(); currentRoutine.items[${idx}].title = this.value" class="bg-transparent font-bold text-slate-100 text-sm sm:text-base focus:outline-none flex-1 placeholder:text-slate-600 truncate" placeholder="${isGap ? 'Rest / Gap' : 'Add Title...'}">
+                ${item.skippable === true ? '<span class="text-[10px] font-bold text-amber-300 border border-amber-500/30 rounded-full px-2 py-0.5 flex-shrink-0">skippable</span>' : ''}
               </div>
 
               <div class="flex items-center space-x-1.5 flex-shrink-0">
@@ -1731,6 +1754,7 @@ img { max-width: 100%; }
               </button>
             </div>
             ${setsHTML(item, idx)}
+            <label class="flex items-center gap-2 text-[11px] text-slate-400"><input type="checkbox" ${item.skippable === true ? 'checked' : ''} aria-label="Can skip if running late" onchange="setSkippable(${idx}, this.checked)" class="w-4 h-4 accent-indigo-500"><span>Can skip if running late</span></label>
           `;
         }
 
@@ -1740,6 +1764,12 @@ img { max-width: 100%; }
         }
         container.appendChild(el);
       });
+    }
+
+    function setSkippable(idx, on) {
+      markUnsaved();
+      if (on) currentRoutine.items[idx].skippable = true; else delete currentRoutine.items[idx].skippable;
+      renderBuild();
     }
 
     function validateAndSetDuration(idx, val) {

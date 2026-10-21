@@ -241,6 +241,24 @@
 
   function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
 
+  // "Save as new routine": a title that clashes (case-insensitive, trimmed) gets " (2)", " (3)", ... (first free number).
+  function uniqueTitle(title, existingTitles) {
+    const taken = new Set((existingTitles || []).map(t => String(t == null ? '' : t).trim().toLowerCase()));
+    const base = String(title == null ? '' : title).trim();
+    if (!taken.has(base.toLowerCase())) return title;
+    let n = 2;
+    while (taken.has((base + ' (' + n + ')').toLowerCase())) n++;
+    return base + ' (' + n + ')';
+  }
+  // A deep copy with a brand-new id and a unique title; the input is never touched.
+  function asNewRoutine(routine, existingTitles, nowMs) {
+    const copy = JSON.parse(JSON.stringify(routine));
+    copy.id = 'routine_' + nowMs;
+    if (copy.id === routine.id) copy.id += '_2';
+    copy.title = uniqueTitle(copy.title, existingTitles);
+    return copy;
+  }
+
   // "3 steps (7 when repeated) · 9 min" for the Library.
   function summarizeRoutine(routine, now) {
     const base = (routine.items || routine.blocks || []).filter(i => !i.isSection).length;
@@ -256,7 +274,7 @@
     return text;
   }
 
-  const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural };
+  const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural, uniqueTitle, asNewRoutine };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

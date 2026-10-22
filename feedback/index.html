@@ -154,6 +154,12 @@ footer a { color: var(--ink-2); }
 // Web3Forms delivers each message to the family's inbox; the key only allows sending, never reading.
 // Leave it empty and the page explains that feedback is not switched on yet.
 const WEB3FORMS_KEY = '2115927c-3f99-4c82-9462-546f1055e436';
+// Also files the message as a ticket in Skippy's feedback list (one inbox for every project).
+// Best effort: the email above is still the delivery that decides success. Empty = off.
+const FEEDBACK_ENDPOINT = '';
+const PROJECT = { 'Mid-Autumn Mayhem': 'mid-autumn', 'Blow Up': 'blow-up', 'James’s Nature Aquarium': 'aquarium', 'Spellicious': 'spellicious', 'Ready To Go!': 'get-ready', 'Brush Buddy': 'toothbrush', 'Cosmic Journey': 'big-bang', 'Sequence Flow': 'sequence-flow', 'Character Book': 'renzi' };
+const KIND = { 'I love it': 'praise', 'An idea': 'idea', 'Something is broken': 'broken' };
+const loadedAt = Date.now();
 const $ = s => document.querySelector(s);
 const params = new URLSearchParams(location.search);
 const GAMES = { 'mid-autumn': 'Mid-Autumn Mayhem', aquarium: 'James’s Nature Aquarium', 'blow-up': 'Blow Up', spellicious: 'Spellicious', speller: 'Spellicious', 'get-ready': 'Ready To Go!', toothbrush: 'Brush Buddy', 'big-bang': 'Cosmic Journey', renzi: 'Character Book', 'sequence-flow': 'Sequence Flow' };
@@ -201,6 +207,11 @@ $('#fb').addEventListener('submit', async e => {
     const r = await fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.success === false) throw new Error(j.message || 'Something went wrong.');
+    if (FEEDBACK_ENDPOINT) {
+      fetch(FEEDBACK_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, keepalive: true, body: JSON.stringify({
+        project: PROJECT[game] || 'app-shelf', kind: KIND[kindV] || 'other', message: msg, contact: email,
+        page: location.pathname.slice(0, 80), version, elapsedMs: Date.now() - loadedAt, website: document.querySelector('.hp').checked ? 'x' : '' }) }).catch(() => {});
+    }
     $('#fb').hidden = true; $('#done').hidden = false; $('#done').scrollIntoView({ block: 'center' });
   } catch (err) {
     status.className = 'status err'; status.textContent = 'Sorry, that didn’t send. Check your internet connection and try again.';

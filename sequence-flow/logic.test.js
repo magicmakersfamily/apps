@@ -212,3 +212,16 @@ test('paceBehind: positive when the projected end is later than planned', () => 
   assert.strictEqual(L.paceBehind(at(8, 15), at(8, 19)), 240);
   assert.strictEqual(L.paceBehind(at(8, 15), at(8, 9)), -360);
 });
+
+test('squeezeSavings: no skippable steps saves nothing', () => {
+  const steps = [timer('a', 300), timer('b', 60)];
+  assert.deepStrictEqual(L.squeezeSavings(steps, L.projectSteps(steps, 0)), { ids: [], savedSecs: 0 });
+});
+
+test('squeezeSavings: sums skippable steps, ignores skippable false, leaves inputs alone', () => {
+  const steps = [timer('a', 600), timer('b', 300, { skippable: true }), timer('c', 240, { skippable: false }), timer('d', 180, { skippable: true })];
+  const plan = L.projectSteps(steps, 1000000);
+  const before = JSON.stringify([steps, plan]);
+  assert.deepStrictEqual(L.squeezeSavings(steps, plan), { ids: ['b', 'd'], savedSecs: 480 });
+  assert.strictEqual(JSON.stringify([steps, plan]), before);
+});

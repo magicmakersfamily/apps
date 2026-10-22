@@ -169,6 +169,19 @@
     return Math.round((projectedEndMs - plannedEndMs) / 1000);
   }
 
+  // Which of the remaining steps are marked skippable, and how many seconds skipping all of them would recover
+  // (their planned lengths from projectSteps). Only reports; it never changes the steps.
+  function squeezeSavings(steps, plan) {
+    const ids = [];
+    let savedSecs = 0;
+    steps.forEach((s, i) => {
+      if (!s || s.skippable !== true || s.isSection || !plan[i]) return;
+      if (ids.indexOf(s.id) < 0) ids.push(s.id);
+      savedSecs += Math.round((plan[i].endMs - plan[i].startMs) / 1000);
+    });
+    return { ids, savedSecs };
+  }
+
   // Seconds left for a timer that ends at `endsAt` (epoch ms); never negative.
   function remainingSecs(endsAt, now) {
     return Math.max(0, Math.ceil((endsAt - now) / 1000));
@@ -274,7 +287,7 @@
     return text;
   }
 
-  const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural, uniqueTitle, asNewRoutine };
+  const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, squeezeSavings, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural, uniqueTitle, asNewRoutine };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

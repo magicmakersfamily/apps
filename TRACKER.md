@@ -28,8 +28,6 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
 | sequence-flow-F1 | feature | sequence-flow | Test the other AI providers (OpenAI, Gemini, DeepSeek, Groq, Mistral, xAI, OpenRouter, own server) | P2 | testing | self | | Built in `builder.js` (1.8), none tested. Model names are guesses; some providers may block calls from a web page (CORS). Mark each provider `tested` in `PROVIDERS` once it works. |
-| sequence-flow-F2 | feature | sequence-flow | "Save as new routine" when applying an AI proposal | P2 | planned | self | | Today "Use this" replaces the routine on screen (Undo and the change chips are there). |
-| sequence-flow-F3 | feature | sequence-flow | Squeeze: mark steps skippable and show the time skipping them recovers | P2 | planned | self | | Left over from the time-anchored routines plan (PLAN.md, PR 5b). Never auto-skip. |
 | sequence-flow-F4 | feature | sequence-flow | Per-block time estimate for tap steps, and a School Morning starter using Finish by | P3 | planned | self | | Timetable assumes about 2 minutes for a tap step. |
 | sequence-flow-F5 | feature | sequence-flow | Installable app and offline use (manifest, service worker, icons) | P2 | planned | self | | PLAN.md "PR 6a". Frozen copies under `versions/` must not register the worker. |
 | sequence-flow-F6 | feature | sequence-flow | Notifications when a background timer ends while the page is hidden | P3 | idea | self | | PLAN.md "PR 6b". Only works installed on iOS. |
@@ -64,6 +62,9 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-B7 | bug | sequence-flow | Before starting, the first block counted down from now instead of from its planned start | P2 | done | family | 1.6 | Start at makes Run wait, then start by itself. |
 | sequence-flow-F11 | feature | sequence-flow | Start at / Finish by, and a timetable in Build and Run | P1 | done | family | 1.6 | |
 | sequence-flow-F12 | feature | sequence-flow | AI Flow Builder (bring your own Anthropic key) | P1 | done | family | 1.7 | Provider choice and the on/off switch are in the 1.8 draft. |
+| sequence-flow-F2 | feature | sequence-flow | "Save as new routine" when applying an AI proposal | P2 | done | self | 2.0 | A third button in the proposal box: new id, unique title ("Morning (2)"), then the save dialog. Built by Mission Control (apps PR #3). |
+| sequence-flow-F3 | feature | sequence-flow | Squeeze: mark steps skippable and show the time skipping them recovers | P2 | done | self | 2.0 | Never auto-skips. "Can skip if running late" per step; the Squeeze button shows when 1+ min behind. Built by Mission Control (apps PR #4). |
+| sequence-flow-B9 | bug | sequence-flow | An edited starter template was saved under the starter's own id, so after a reload the built-in starter hid the edits | P0 | done | AI review | 2.0 | Saves now get their own id; copies already saved are repaired on load (`repairStarterIds`). Built by Mission Control (apps PR #5). |
 
 ## Pointers to older notes
 

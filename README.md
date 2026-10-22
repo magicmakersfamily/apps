@@ -80,7 +80,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Brush Buddy (beta) | `toothbrush/` | 2.4 | 2026-10-03 |
 | Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
-| Sequence Flow (beta; a utility) | `sequence-flow/` | 1.9 | 2026-10-16 |
+| Sequence Flow (beta; a utility) | `sequence-flow/` | 2.0 | 2026-10-16 |
 
 The shelf is versioned too: **The App Shelf 2.0** (2026-10-18). Version 1.0, the long page of cards, is frozen at
 `versions/shelf/1.0/` (`tools/freeze-shelf.sh`) in case we want to roll back.

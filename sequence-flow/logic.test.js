@@ -3,6 +3,26 @@ const test = require('node:test');
 const assert = require('node:assert');
 const L = require('./logic.js');
 
+test('uniqueTitle: no clash is unchanged, clash takes the first free number', () => {
+  assert.strictEqual(L.uniqueTitle('Evening', ['Morning']), 'Evening');
+  assert.strictEqual(L.uniqueTitle('Morning', ['Morning', 'morning (2)']), 'Morning (3)');
+  assert.strictEqual(L.uniqueTitle(' morning ', ['Morning']), 'morning (2)');
+});
+
+test('asNewRoutine: new id, unique title, input untouched', () => {
+  const r = { id: 'routine_1', title: 'Morning', items: [{ id: 'a', title: 'x' }] };
+  const snap = JSON.parse(JSON.stringify(r));
+  const n = L.asNewRoutine(r, ['Morning'], 1000);
+  assert.notStrictEqual(n.id, r.id);
+  assert.strictEqual(n.id, 'routine_1000');
+  assert.strictEqual(n.title, 'Morning (2)');
+  assert.deepStrictEqual(r, snap);
+  n.items[0].title = 'changed';
+  assert.strictEqual(r.items[0].title, 'x');
+  assert.strictEqual(L.asNewRoutine(r, [], 1).title, 'Morning');
+  assert.notStrictEqual(L.asNewRoutine(r, [], 1).id, r.id);
+});
+
 const timer = (id, secs, extra) => Object.assign({ id, isSection: false, type: 'activity', title: id, timerEnabled: true, timerType: 'duration', durationValue: secs, durationUnit: 'secs' }, extra);
 const secs = steps => steps.reduce((a, s) => a + L.blockSeconds(s, 0), 0);
 

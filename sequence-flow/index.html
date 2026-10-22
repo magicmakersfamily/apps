@@ -216,6 +216,7 @@ img { max-width: 100%; }
           <div id="ai-proposal-body" class="px-3 py-2 space-y-1 overflow-y-auto max-h-44"></div>
           <div class="flex gap-2 p-3 pt-1">
             <button onclick="applyAiProposal()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl">Use this</button>
+            <button onclick="applyAiProposal(true)" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700">Save as new routine</button>
             <button onclick="discardAiProposal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700">Not yet</button>
           </div>
         </div>
@@ -1566,15 +1567,21 @@ img { max-width: 100%; }
       aiBusy = false; renderAi();
     }
 
-    function applyAiProposal() {
+    function applyAiProposal(asNew) {
       if (!aiPending) return;
       aiUndo = JSON.parse(JSON.stringify(currentRoutine));
       currentRoutine = aiPending.routine;
+      if (asNew) {   // new id and a free title, so saving can never overwrite the routine we started from
+        const all = [...STARTER_TEMPLATES, ...savedRoutines];
+        currentRoutine = SeqLogic.asNewRoutine(currentRoutine, all.map(r => r.title), Date.now());
+        while (all.some(r => r.id === currentRoutine.id)) currentRoutine.id += '_n';
+      }
       aiPending = null;
       markUnsaved();
       if (currentMode === 'home') setMode('build'); else renderBuild();   // behind the panel, so closing it lands on the flow
       talkCustom = false; aiDone = true;                                   // show "Your flow is ready" with a big Start button
       renderAi();
+      if (asNew) { closeAiModal(); openSaveModal(); }
     }
     // How talkative: Silent (default), Talk me through it, or customize. Settings are the same ones the bell button edits.
     let talkCustom = false;

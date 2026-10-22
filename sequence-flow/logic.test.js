@@ -82,6 +82,50 @@ test('clock target rolls to tomorrow when already past', () => {
   assert.strictEqual(L.secondsToTarget('09:30', now), 1800);
 });
 
+test('repairStarterIds gives saved copies of starters their own id', () => {
+  const ids = ['starter_pomodoro', 'starter_other'];
+  const copy = { id: 'starter_pomodoro', title: 'My focus', items: [timer('a', 10), { id: 's', isSection: true, title: 'S', repeatCount: 2 }] };
+  const r = L.repairStarterIds([copy], ids, null, 1000);
+  assert.notStrictEqual(r.routines[0].id, 'starter_pomodoro');
+  assert.ok(!ids.includes(r.routines[0].id) && !r.routines[0].id.startsWith('starter_'));
+  assert.strictEqual(r.routines[0].title, 'My focus');
+  assert.deepStrictEqual(r.routines[0].items, copy.items);
+  assert.deepStrictEqual(r.renamed, { starter_pomodoro: r.routines[0].id });
+});
+
+test('repairStarterIds gives two copies two different ids', () => {
+  const r = L.repairStarterIds([{ id: 'starter_pomodoro', items: [] }, { id: 'starter_other', items: [] }], ['starter_pomodoro', 'starter_other'], null, 1000);
+  assert.notStrictEqual(r.routines[0].id, r.routines[1].id);
+});
+
+test('repairStarterIds leaves ordinary ids alone and avoids clashes', () => {
+  const saved = [{ id: 'routine_1000', title: 'Mine', items: [] }, { id: 'starter_x', items: [] }];
+  const r = L.repairStarterIds(saved, [], null, 1000);
+  assert.strictEqual(r.routines[0], saved[0]);
+  assert.notStrictEqual(r.routines[1].id, 'routine_1000');
+  assert.deepStrictEqual(L.repairStarterIds([saved[0]], ['starter_pomodoro'], null, 5).renamed, {});
+});
+
+test('repairStarterIds moves lastId only when its copy was renamed', () => {
+  const ids = ['starter_pomodoro'];
+  const r = L.repairStarterIds([{ id: 'starter_pomodoro', items: [] }], ids, 'starter_pomodoro', 2000);
+  assert.strictEqual(r.lastId, r.routines[0].id);
+  assert.strictEqual(L.repairStarterIds([], ids, 'starter_pomodoro', 2000).lastId, 'starter_pomodoro');
+  assert.strictEqual(L.repairStarterIds([{ id: 'routine_9', items: [] }], ids, 'routine_9', 2000).lastId, 'routine_9');
+});
+
+test('repairStarterIds is idempotent and does not modify its input', () => {
+  const saved = [{ id: 'starter_pomodoro', title: 'T', items: [timer('a', 10)] }, { id: 'routine_5', items: [] }];
+  const snap = JSON.parse(JSON.stringify(saved));
+  const ids = ['starter_pomodoro'];
+  const once = L.repairStarterIds(saved, ids, 'starter_pomodoro', 3000);
+  assert.deepStrictEqual(saved, snap);
+  const twice = L.repairStarterIds(once.routines, ids, once.lastId, 4000);
+  assert.deepStrictEqual(twice.routines, once.routines);
+  assert.strictEqual(twice.lastId, once.lastId);
+  assert.deepStrictEqual(twice.renamed, {});
+});
+
 test('v14 blocks get the kind they already behaved as', () => {
   assert.strictEqual(L.blockKind({ timerEnabled: true }), 'timer');
   assert.strictEqual(L.blockKind({ timerEnabled: false }), 'tap');

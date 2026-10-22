@@ -2136,6 +2136,10 @@ img { max-width: 100%; }
 
     function confirmSave() {
       currentRoutine.folder = document.getElementById('save-folder').value;
+      // An edited starter is saved as the person's own routine, never under the starter's id (the built-in would hide it).
+      if (STARTER_TEMPLATES.some(t => t.id === currentRoutine.id) || String(currentRoutine.id).indexOf('starter_') === 0) {
+        currentRoutine.id = 'routine_' + Date.now();
+      }
       const existingIdx = savedRoutines.findIndex(r => r.id === currentRoutine.id);
       if (existingIdx >= 0) {
         savedRoutines[existingIdx] = JSON.parse(JSON.stringify(currentRoutine));
@@ -2993,6 +2997,16 @@ img { max-width: 100%; }
         try { 
           savedRoutines = JSON.parse(data); 
         } catch (e) { savedRoutines = []; }
+        // Repair saved copies that were stored under a starter's id: give them their own id so they can be reached.
+        if (Array.isArray(savedRoutines)) {
+          const fix = SeqLogic.repairStarterIds(savedRoutines, STARTER_TEMPLATES.map(t => t.id), lastId, Date.now());
+          if (Object.keys(fix.renamed).length) {
+            savedRoutines = fix.routines;
+            lastId = fix.lastId;
+            saveToLocalStorage();
+            try { localStorage.setItem('sequence_flow_last_v14', lastId); } catch (e) {}
+          }
+        }
       }
       const last = lastId && [...STARTER_TEMPLATES, ...savedRoutines].find(r => r.id === lastId);
       if (last) { currentRoutine = JSON.parse(JSON.stringify(last)); markSaved(); workedOnRoutine = true; }

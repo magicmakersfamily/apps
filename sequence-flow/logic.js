@@ -187,6 +187,28 @@
     return Math.max(0, Math.ceil((endsAt - now) / 1000));
   }
 
+  // A saved routine must never share an id with a built-in starter (the starter would win every lookup and hide the
+  // person's edits). Give any saved copy with a starter id (or a 'starter_' prefix) a fresh unique 'routine_' id.
+  // Pure: inputs are not modified. `renamed` maps old id to new id. Running it again on its output changes nothing.
+  function repairStarterIds(savedRoutines, starterIds, lastId, nowMs) {
+    const starters = new Set(starterIds || []);
+    const isStarterId = id => starters.has(id) || (typeof id === 'string' && id.indexOf('starter_') === 0);
+    const used = new Set(starters);
+    (savedRoutines || []).forEach(r => { if (r && !isStarterId(r.id)) used.add(r.id); });
+    let n = 0;
+    const renamed = {};
+    const routines = (savedRoutines || []).map(r => {
+      if (!r || !isStarterId(r.id)) return r;
+      let id;
+      do { id = 'routine_' + (nowMs + n++); } while (used.has(id));
+      used.add(id);
+      renamed[r.id] = id;
+      return Object.assign({}, r, { id });
+    });
+    const newLast = (lastId != null && Object.prototype.hasOwnProperty.call(renamed, lastId)) ? renamed[lastId] : lastId;
+    return { routines, lastId: newLast, renamed };
+  }
+
   // Turn a routine (sections with Repeat, blocks with optional Sets and Rest) into the flat list of steps
   // that Run mode walks through. Round = a section repeat; set = a block repeat. Rest steps are generated
   // between sets, never after the last one.
@@ -288,6 +310,7 @@
   }
 
   const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, squeezeSavings, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural, uniqueTitle, asNewRoutine };
+  api.repairStarterIds = repairStarterIds;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

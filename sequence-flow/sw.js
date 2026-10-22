@@ -25,12 +25,13 @@ self.addEventListener('fetch', (event) => {
     fetch(req).then((res) => {
       if (res && res.ok && res.type === 'basic') {
         const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+        event.waitUntil(caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {}));
       }
       return res;
     }).catch(() =>
-      caches.match(req)
-        .then((hit) => hit || (req.mode === 'navigate' ? caches.match('index.html') : undefined))
+      (req.mode === 'navigate'
+        ? caches.match('index.html').then((hit) => hit || caches.match(req))
+        : caches.match(req))
         .then((r) => r || Response.error())
     )
   );

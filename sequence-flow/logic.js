@@ -309,8 +309,14 @@
     return text;
   }
 
+  // Frozen copies under /versions/ must never install the service worker.
+  function shouldRegisterSW(pathname, hasSW) {
+    return !!hasSW && String(pathname || '').indexOf('/versions/') === -1;
+  }
+
   const api = { dayInstant, deadlineMs, plannedSecsOf, findConflicts, inferPlanned, shiftSteps, blockKind, pacerPattern, pacerSeconds, pacerPhase, secondsToTarget, anchorInstant, projectSteps, backPlan, paceBehind, squeezeSavings, blockSeconds, remainingSecs, expandRoutine, totals, formatDuration, summarizeRoutine, plural, uniqueTitle, asNewRoutine };
   api.repairStarterIds = repairStarterIds;
+  api.shouldRegisterSW = shouldRegisterSW;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.SeqLogic = api;
 })(typeof self !== 'undefined' ? self : globalThis);

@@ -99,4 +99,3 @@ grown-ups; each keeps its own saved games). Every release is also a git tag (`bl
    The launch date never changes; bump the version on each release (on the card and at the
    bottom of the game page).
 4. Commit and push to `main`. GitHub Pages redeploys in about a minute.
-Updates to this site are merged by Mission Control after an owner's yes in Discord.

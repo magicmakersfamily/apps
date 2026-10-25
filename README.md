@@ -1,3 +1,5 @@
+These apps are built and updated with Mission Control.
+
 # The App Shelf
 
 Learning games for curious kids, published with GitHub Pages:

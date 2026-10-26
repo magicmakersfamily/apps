@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<script>/* Frozen copy: keep this version's saved games separate. */
+(function(){try{var P='guts@1.0:',S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;
+S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};
+S.removeItem=function(k){return r.call(this,P+k)}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GUTS: Around the World in 80 Bites (beta)</title>
+<meta name="description" content="A comic platformer where whatever Gus eats and feels becomes motion. Eat greens to spring, build pressure to rocket, breathe to stay in control. Play with keyboard, PlayStation controller or touch. Beta: the first level.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GUTS: Around the World in 80 Bites (beta)">
+<meta property="og:description" content="Whatever Gus eats and feels becomes motion. A comic platformer for keyboard, PlayStation controller and touch.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/guts/cover.png">
+<meta property="og:url" content="https://magicmakersfamily.github.io/apps/guts/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ff9a3c'/%3E%3Ccircle cx='32' cy='36' r='19' fill='%23ffd166' stroke='%232b1d14' stroke-width='3.5'/%3E%3Cpath d='M18 20c4-8 10-6 14-2 4-6 12-4 14 4' fill='%232b1d14'/%3E%3Ccircle cx='25' cy='33' r='3' fill='%232b1d14'/%3E%3Ccircle cx='39' cy='33' r='3' fill='%232b1d14'/%3E%3Cpath d='M24 43q8 7 16 0' fill='none' stroke='%232b1d14' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Luckiest+Guy&family=Noto+Serif+TC:wght@500;700&display=swap">
+<style>
+:root {
+  --paper: #EAF0F4; --ink: #13202B; --ink-2: #485A68; --card: #fff; --line: #D3DDE4; --accent: #2C5E86; --beta: #6C4B8C; --chip: #E0E9EF;
+  --g-ink: #2b1d14; --g-yellow: #ffcb2f; --g-orange: #ff8a3d; --g-panel: rgba(255,248,232,.97); --g-dark: #14131f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #0C1319; --ink: #E4ECF1; --ink-2: #A3B2BD; --card: #152029; --line: #24323D; --accent: #7FB2DA; --beta: #9B7BC0; --chip: #1C2A34; color-scheme: dark; } }
+:root[data-theme="dark"] { --paper: #0C1319; --ink: #E4ECF1; --ink-2: #A3B2BD; --card: #152029; --line: #24323D; --accent: #7FB2DA; --beta: #9B7BC0; --chip: #1C2A34; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+body { margin: 0; line-height: 1.5; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+a { color: var(--accent); }
+.back { display: inline-block; margin: 8px 16px; font-weight: 600; text-decoration: none; padding: 4px 2px; }
+.back:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid #5ac8ff; outline-offset: 2px; }
+
+#stage { position: relative; display: flex; flex-direction: column; width: min(100%, 1500px); height: calc(100svh - 48px); min-height: 440px; margin: 0 auto; background: var(--g-dark); border-radius: 14px; overflow: hidden; color: var(--g-ink); }
+#stage.pseudo-fs { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; z-index: 99999; border-radius: 0; margin: 0; }
+#stage:fullscreen { width: 100vw; height: 100vh; border-radius: 0; }
+#view { position: relative; flex: 1; min-height: 0; overflow: hidden; touch-action: none; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.caption { min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: #1b1930; color: #fff7e6; font-size: clamp(16px, 2.2vw, 22px); font-weight: 500; border-top: 3px solid #3a3558; }
+.caption .who { font-weight: 700; color: #ffcb2f; text-transform: uppercase; font-size: .62em; letter-spacing: .08em; white-space: nowrap; }
+.caption #cap-text { flex: 1; min-width: 0; }
+.caption ruby rt { font-size: .5em; color: #ffd9a0; }
+.caption .tag { font-size: 11px; color: #bdb7d9; border: 1px solid #4a4570; border-radius: 99px; padding: 1px 8px; white-space: nowrap; }
+.hudbtns { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 6; }
+.ibtn { width: 44px; height: 44px; border-radius: 14px; border: 3px solid var(--g-ink); background: #fff3d6; color: var(--g-ink); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.ibtn svg { width: 22px; height: 22px; fill: currentColor; }
+.ibtn:hover { background: #ffe3a3; }
+.ibtn[aria-pressed="true"] { background: #ffb02e; }
+
+/* screens over the canvas */
+.screen { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: 16px; overflow: auto; }
+.screen.dim { background: rgba(14,12,28,.62); backdrop-filter: blur(3px); }
+.panel { background: var(--g-panel); border: 4px solid var(--g-ink); border-radius: 26px; padding: clamp(16px, 3vw, 28px); width: min(100%, 560px); box-shadow: 0 10px 0 rgba(0,0,0,.28); text-align: center; }
+.panel.wide { width: min(100%, 860px); text-align: left; }
+.panel h2 { font-family: "Luckiest Guy", "Fredoka", sans-serif; font-weight: 400; font-size: clamp(26px, 5vw, 38px); margin: 0 0 6px; color: #d9473f; letter-spacing: .01em; }
+.panel p { margin: 6px 0; }
+.sub { color: #6b5a48; font-size: 15px; }
+.btn { font: inherit; font-weight: 700; font-size: 18px; border: 3px solid var(--g-ink); background: #fff3d6; color: var(--g-ink); border-radius: 16px; padding: 10px 20px; cursor: pointer; box-shadow: 0 4px 0 var(--g-ink); transition: transform .08s, box-shadow .08s; min-height: 48px; }
+.btn:hover { background: #ffe3a3; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--g-ink); }
+.btn.primary { background: #ff8a3d; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.25); font-size: 24px; padding: 12px 34px; }
+.btn.primary:hover { background: #ff9a58; }
+.btn.small { font-size: 15px; padding: 6px 14px; min-height: 40px; }
+.btn.nav-focus, .btn:focus-visible { outline: 4px solid #5ac8ff; outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+.seg { display: inline-flex; border: 3px solid var(--g-ink); border-radius: 16px; overflow: hidden; background: #fff3d6; }
+.seg button { font: inherit; font-weight: 600; border: 0; background: transparent; padding: 8px 14px; cursor: pointer; color: var(--g-ink); border-right: 2px solid var(--g-ink); min-height: 44px; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: #ff8a3d; color: #fff; }
+.seg button.nav-focus { outline: 4px solid #5ac8ff; outline-offset: -4px; }
+
+/* title */
+#s-title { background: linear-gradient(180deg, rgba(20,19,31,.05), rgba(20,19,31,.35)); }
+@media (min-width: 900px) { #s-title { place-items: center start; padding-left: 5vw; } }
+@media (max-height: 640px) { #s-title .panel { padding: 10px 16px; } #s-title .logo { font-size: 15vh; -webkit-text-stroke-width: 4px; } #s-title .row { margin-top: 8px; } #s-title .modeDesc { min-height: 0; margin: 2px 0; } #s-title .sub { margin: 2px 0; } .btn.primary { padding: 8px 28px; font-size: 20px; } .soundhint { margin: 4px 0 0; } }
+#s-title .panel { background: rgba(255,248,232,.94); }
+.logo { font-family: "Luckiest Guy", Impact, sans-serif; font-size: clamp(56px, min(14vw, 20vh), 128px); line-height: .9; color: var(--g-yellow); -webkit-text-stroke: 5px var(--g-ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--g-ink); margin: 0; letter-spacing: .02em; }
+.tagline { font-family: "Luckiest Guy", sans-serif; font-size: clamp(16px, 3vw, 22px); color: #d9473f; margin: 4px 0 0; letter-spacing: .02em; }
+.beta { display: inline-block; background: var(--beta); color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .1em; border-radius: 99px; padding: 2px 12px; vertical-align: middle; }
+.modeDesc { min-height: 2.8em; font-size: 15px; color: #6b5a48; margin: 6px 0 0; }
+.soundhint { font-size: 13px; color: #8a6a3a; margin: 8px 0 0; }
+.padhint { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #3b6a3b; font-weight: 600; }
+
+/* lists */
+.dexgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; max-height: 36vh; overflow: auto; padding: 4px; }
+.dexcard { border: 3px solid var(--g-ink); border-radius: 14px; background: #fff; padding: 6px 4px; text-align: center; cursor: pointer; font: inherit; color: var(--g-ink); min-height: 92px; }
+.dexcard img { width: 48px; height: 48px; display: block; margin: 0 auto 2px; }
+.dexcard small { display: block; font-size: 12px; line-height: 1.1; font-weight: 600; }
+.dexcard.locked { background: #e8e1d2; cursor: default; color: #9a8f7b; }
+.dexcard.locked img { filter: brightness(0) opacity(.18); }
+.dexcard.sel, .dexcard.nav-focus { outline: 4px solid #5ac8ff; outline-offset: 1px; }
+.dexhead { font-weight: 700; margin: 10px 0 4px; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: #8a6a3a; }
+.dexdetail { display: flex; gap: 14px; align-items: center; margin-top: 10px; background: #fff; border: 3px solid var(--g-ink); border-radius: 18px; padding: 10px 14px; min-height: 110px; }
+.dexdetail img { width: 84px; height: 84px; flex: none; }
+.dexdetail h3 { margin: 0; font-size: 22px; }
+.dexdetail .zh { font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif; font-size: 22px; color: #b3432e; }
+.dexdetail ruby rt { font-size: 11px; color: #8a6a3a; font-family: "Fredoka", sans-serif; }
+.field { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 0; border-bottom: 2px dashed #d9cdb4; }
+.field:last-of-type { border-bottom: 0; }
+.field label, .field .lab { font-weight: 600; }
+.field small { display: block; font-weight: 400; color: #6b5a48; }
+input[type=range] { width: 160px; accent-color: #ff8a3d; height: 30px; }
+.switch { appearance: none; width: 54px; height: 30px; border-radius: 99px; border: 3px solid var(--g-ink); background: #d9cdb4; position: relative; cursor: pointer; flex: none; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid var(--g-ink); transition: left .12s; }
+.switch:checked { background: #5cc46a; } .switch:checked::after { left: 26px; }
+.switch.nav-focus, input[type=range].nav-focus { outline: 4px solid #5ac8ff; outline-offset: 2px; }
+
+/* results */
+.medals { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+.medal { width: 120px; padding: 10px 6px; border: 3px solid var(--g-ink); border-radius: 18px; background: #ece4d2; color: #9a8f7b; }
+.medal.on { background: #fff3b8; color: var(--g-ink); }
+.medal svg { width: 52px; height: 52px; display: block; margin: 0 auto 4px; }
+.medal b { display: block; font-size: 16px; } .medal small { display: block; font-size: 12px; line-height: 1.2; }
+.stats { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-weight: 600; margin: 6px 0 4px; }
+.stats span { background: #fff; border: 3px solid var(--g-ink); border-radius: 14px; padding: 4px 14px; }
+.links { font-size: 14px; margin-top: 14px; display: flex; gap: 8px 16px; justify-content: center; flex-wrap: wrap; }
+.links a { color: #2c5e86; font-weight: 600; }
+.toast { position: absolute; left: 50%; top: 14px; transform: translate(-50%, -140%); opacity: 0; visibility: hidden; z-index: 9; background: #fff3d6; border: 3px solid var(--g-ink); border-radius: 18px; padding: 8px 16px; display: flex; gap: 10px; align-items: center; font-weight: 600; transition: transform .25s, opacity .25s, visibility .25s; pointer-events: none; color: var(--g-ink); max-width: 90%; }
+.toast.on { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
+.toast img { width: 40px; height: 40px; }
+.toast small { display: block; font-weight: 500; color: #6b5a48; }
+.hint-rot { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 6; background: rgba(255,243,214,.95); border: 3px solid var(--g-ink); border-radius: 14px; padding: 6px 12px; font-size: 14px; font-weight: 600; max-width: 92%; text-align: center; color: var(--g-ink); }
+
+/* touch controls */
+#touch { position: absolute; inset: 0; z-index: 4; pointer-events: none; display: none; }
+#touch.on { display: block; }
+.tb { position: absolute; pointer-events: auto; width: 74px; height: 74px; border-radius: 50%; border: 4px solid var(--g-ink); background: rgba(255,243,214,.55); color: var(--g-ink); display: grid; place-items: center; touch-action: none; user-select: none; -webkit-user-select: none; font-weight: 700; font-size: 12px; padding: 0; }
+.tb svg { width: 34px; height: 34px; fill: currentColor; display: block; margin: 0 auto -2px; }
+.tb span { display: block; line-height: 1; }
+.tb.down, .tb:active { background: rgba(255,176,46,.85); }
+#tb-left { left: 14px; bottom: 18px; } #tb-right { left: 104px; bottom: 18px; }
+#tb-jump { right: 14px; bottom: 18px; width: 86px; height: 86px; } #tb-blast { right: 112px; bottom: 18px; } #tb-breathe { right: 22px; bottom: 116px; }
+#touch.little #tb-left, #touch.little #tb-right { display: none; }
+
+/* page below the game */
+.info { max-width: 900px; margin: 0 auto; padding: 24px 18px 8px; }
+.info h2 { font-size: 24px; margin: 22px 0 6px; }
+.keys { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.keys th, .keys td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.keys th { background: var(--chip); }
+.info ul { padding-left: 20px; }
+footer.about { max-width: 900px; margin: 0 auto; padding: 8px 18px calc(36px + env(safe-area-inset-bottom)); font-size: 14px; color: var(--ink-2); display: grid; gap: 8px; }
+footer.about .linkish { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+@media (max-height: 520px) {
+  .back { display: none; } #stage { height: 100svh; min-height: 0; border-radius: 0; }
+  .tb { width: 58px; height: 58px; } .tb svg { width: 26px; height: 26px; } .tb span { font-size: 10px; }
+  #tb-right { left: 82px; } #tb-jump { width: 68px; height: 68px; } #tb-blast { right: 92px; } #tb-breathe { right: 18px; bottom: 92px; }
+  .caption { min-height: 44px; padding: 4px 12px; } .ibtn { width: 38px; height: 38px; }
+}
+@media (max-width: 640px) {
+  .back { margin: 4px 12px; } #stage { height: calc(100svh - 40px); border-radius: 0; }
+  .btn.primary { font-size: 20px; padding: 10px 24px; }
+  .hudbtns { top: 6px; right: 6px; gap: 6px; } .ibtn { width: 40px; height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { .toast, .btn { transition: none; } }
+</style>
+</head>
+<body>
+<div style="font:13px/1.4 system-ui,sans-serif;background:#2b2140;color:#f3eefc;padding:6px 12px;text-align:center">Old version 1.0, kept so we can compare. Saved games here are separate. <a style="color:#d9c8ff" href="../../../guts/">Play the current version</a> · <a style="color:#d9c8ff" href="../../">All versions</a></div>
+<a class="back" href="../../../">← All apps</a>
+
+<div id="stage" tabindex="-1">
+  <div id="view">
+    <canvas id="cv" aria-label="GUTS game"></canvas>
+    <div class="hudbtns" id="hudbtns" hidden>
+      <button class="ibtn" id="b-pause" title="Pause (Esc)" aria-label="Pause"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg></button>
+      <button class="ibtn" id="b-mute" title="Music on/off" aria-label="Music" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="7" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+      <button class="ibtn" id="b-fs" title="Full screen (F)" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div id="touch" aria-label="Touch controls">
+      <button class="tb" id="tb-left" data-act="left" aria-label="Move left"><svg viewBox="0 0 24 24"><path d="M15 4 6 12l9 8z"/></svg></button>
+      <button class="tb" id="tb-right" data-act="right" aria-label="Move right"><svg viewBox="0 0 24 24"><path d="M9 4l9 8-9 8z"/></svg></button>
+      <button class="tb" id="tb-breathe" data-act="breathe" aria-label="Breathe"><svg viewBox="0 0 24 24"><path d="M4 9c4-3 7 3 11 0s5-1 5-1M4 15c4-3 7 3 11 0s5-1 5-1" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>CALM</span></button>
+      <button class="tb" id="tb-blast" data-act="blast" aria-label="Blast"><svg viewBox="0 0 24 24"><path d="M12 2c3 4 4 8 2 12l-2 8-2-8c-2-4-1-8 2-12z"/></svg><span>BLAST</span></button>
+      <button class="tb" id="tb-jump" data-act="jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M12 4l8 9h-5v7H9v-7H4z"/></svg><span>JUMP</span></button>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <section class="screen" id="s-title">
+      <div class="panel">
+        <p class="sub" style="margin:0"><span class="beta">BETA</span> &nbsp;the first level</p>
+        <h1 class="logo">GUTS</h1>
+        <p class="tagline">Around the World in 80 Bites</p>
+        <p class="sub"><i>You are what you eat. And what you feel.</i></p>
+        <div class="row"><button class="btn primary" id="b-play" data-first>Play</button></div>
+        <div class="row" style="margin-top:14px"><div class="seg" id="modes" role="group" aria-label="Mode">
+          <button data-mode="little" aria-pressed="false">Little Guts</button><button data-mode="standard" aria-pressed="true">Standard</button><button data-mode="check" aria-pressed="false">Gut Check</button></div></div>
+        <p class="modeDesc" id="modeDesc"></p>
+        <div class="row"><button class="btn small" id="b-village">Gut Village</button><button class="btn small" id="b-dex">Food Dex</button><button class="btn small" id="b-settings">Settings</button><button class="btn small" id="b-fs2">Full screen</button></div>
+        <p class="soundhint" id="soundhint">Press any key or click to turn the sound on.</p>
+        <p class="padhint" id="padhint" hidden>PlayStation controller ready</p>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-pause" hidden>
+      <div class="panel"><h2>Paused</h2>
+        <div class="row" style="flex-direction:column;align-items:stretch">
+          <button class="btn primary" id="p-resume" data-first data-back>Keep going</button>
+          <button class="btn" id="p-restart">Start the level again</button>
+          <button class="btn" id="p-settings">Settings</button>
+          <button class="btn" id="p-fs">Full screen</button>
+          <button class="btn" id="p-quit">Back to title</button>
+        </div></div>
+    </section>
+
+    <section class="screen dim" id="s-results" hidden>
+      <div class="panel" id="results"></div>
+    </section>
+
+    <section class="screen dim" id="s-end" hidden>
+      <div class="panel"><h2>To be continued…</h2>
+        <p>You finished the first level of <b>GUTS</b>. Next stop: <b>Eastern Market</b> in Detroit, then Mexico, Japan, Taiwan and Hong Kong, where Grandma’s feast is waiting.</p>
+        <p class="sub">This beta only has Morning at Home so far. We would love to know what felt fun and what felt confusing.</p>
+        <div class="row"><a class="btn small" id="e-feedback" href="../../../feedback/?game=guts&amp;v=1.0" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
+        <div class="row"><button class="btn primary" id="e-again" data-first>Play again</button><button class="btn" id="e-title" data-back>Title</button></div>
+        <p class="links"><a href="../../../">More from the App Shelf</a><a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake: Ko-fi</a></p>
+        <p class="sub" id="e-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="screen dim" id="s-dex" hidden>
+      <div class="panel wide"><h2>Food Dex <span class="sub" id="dexcount"></span></h2>
+        <div class="dexgrid" id="dexgrid"></div>
+        <div class="dexdetail" id="dexdetail"></div>
+        <div class="row"><button class="btn" id="dex-back" data-first data-back>Back</button></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s-village" hidden style="align-items:end;pointer-events:none">
+      <div class="panel wide" style="margin-bottom:6px;padding:12px 16px;pointer-events:auto"><div class="field" style="border:0"><div><b>The Gut Village</b><small id="villageInfo"></small></div><button class="btn" id="v-back" data-first data-back>Back</button></div></div>
+    </section>
+
+    <section class="screen dim" id="s-settings" hidden>
+      <div class="panel wide"><h2>Settings</h2>
+        <div class="field"><span class="lab">Gross-o-Meter<small>How the blasts look and sound. Parents choose.</small></span><div class="seg" id="gross"><button data-g="mild">Mild</button><button data-g="medium">Medium</button><button data-g="max">Maximum</button></div></div>
+        <div class="field"><label for="set-music">Music</label><input type="range" id="set-music" min="0" max="100"></div>
+        <div class="field"><label for="set-sfx">Sounds</label><input type="range" id="set-sfx" min="0" max="100"></div>
+        <div class="field"><label for="set-voice">Spoken story<small>Uses your device’s voice.</small></label><input class="switch" type="checkbox" id="set-voice"></div>
+        <div class="field"><label for="set-meters">Show meters<small>Bars for vitality and pressure.</small></label><input class="switch" type="checkbox" id="set-meters"></div>
+        <div class="field"><label for="set-shake">Screen shake</label><input class="switch" type="checkbox" id="set-shake"></div>
+        <div class="field"><label for="set-flash">Flashes</label><input class="switch" type="checkbox" id="set-flash"></div>
+        <div class="field"><label for="set-cb">Colour-blind friendly meters</label><input class="switch" type="checkbox" id="set-cb"></div>
+        <div class="field"><span class="lab">Game speed</span><div class="seg" id="speed"><button data-s="100">Normal</button><button data-s="80">Slower</button><button data-s="60">Slowest</button></div></div>
+        <div class="field"><span class="lab">Saved game<small>Stays on this device only.</small></span><button class="btn small" id="set-erase">Erase saved game</button></div>
+        <div class="row"><button class="btn primary" id="set-back" data-first data-back>Done</button></div>
+      </div>
+    </section>
+  </div>
+  <div class="caption" id="caption" aria-live="polite"><span class="who" id="cap-who"></span><span id="cap-text"></span><span class="tag" id="voice-tag" hidden>backup voice</span></div>
+</div>
+
+<div class="info">
+  <h2>How to play</h2>
+  <p>Gus is a round little kid with a very expressive belly. <b>Whatever he eats and feels becomes motion.</b> Greens and fruit make him springy. Sweets, grease and big feelings build pressure you can blast like a rocket. A well-fed Gus blasts long and straight. A frazzled one blasts wild. Breathe to let the pressure out slowly and stay in control.</p>
+  <table class="keys">
+    <tr><th>Action</th><th>Keyboard</th><th>PlayStation controller</th><th>Touch</th></tr>
+    <tr><td>Move</td><td>Arrow keys or A / D</td><td>Left stick or d-pad</td><td>Arrow buttons</td></tr>
+    <tr><td>Jump</td><td>Space, Z or ↑</td><td>✕ Cross</td><td>Jump</td></tr>
+    <tr><td>Blast (tap to hop, hold to rocket)</td><td>X or Shift</td><td>□ Square, R1 or R2</td><td>Blast</td></tr>
+    <tr><td>Breathe (stand still)</td><td>B, C or ↓</td><td>○ Circle or L1</td><td>Calm</td></tr>
+    <tr><td>Pause</td><td>Esc or P</td><td>Options</td><td>Pause button</td></tr>
+  </table>
+  <p>Press a button on a plugged-in or Bluetooth PlayStation controller once and the game finds it. In Gut Check mode the stick aims your blast.</p>
+  <h2>What it teaches</h2>
+  <ul><li>Whole foods give steady energy; sugar gives a quick burst and then a crash.</li><li>Feelings fill the same belly as food, and slow breathing lets them out.</li><li>Eating well makes the wild stuff easier to control.</li></ul>
+</div>
+
+<footer class="about">
+  <span>Version 1.0 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../../../feedback/?game=guts&amp;v=1.0">Share your thoughts</a> · <a href="../../../feedback/?game=guts&amp;v=1.0&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
+  <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
+  <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
+</footer>
+
+<noscript><p style="padding:16px">GUTS needs JavaScript to run.</p></noscript>
+<script src="belly.js"></script>
+<script src="data.js"></script>
+<script src="art.js"></script>
+<script src="art2.js"></script>
+<script src="audio.js"></script>
+<script src="input.js"></script>
+<script src="game.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

@@ -66,6 +66,9 @@
     if (L.lantern) st.lanItem = { x: (L.lantern.x + 0.5) * T, y: (L.lantern.y + 1) * T, taken: false };
     else st.lan.has = false;
     if (L.goal) st.goal = { x: (L.goal.x + 0.5) * T, y: (L.goal.y + 1) * T, type: L.goal.type };
+    st.reacts = (L.reacts || []).map(function (r) { return { type: r.type, x: r.x, y: r.y, w: r.w, h: r.h, state: 'idle', anim: 0, swing: 0, swingT: 0, spent: false, ang: 0, spin: 0, spun: 0, done: false, wobble: 0, landX: (r.x + 5) * T, landY: 13 * T + 10, fallH: (14 - r.y - r.h) * T - 10 }; });
+    st.cat = L.cat ? { path: L.cat.path, i: 0, x: L.cat.path[0].x * T, y: L.cat.path[0].y * T, face: 1, state: L.cat.path[0].sleep ? 'sleep' : 'sit', t: 0, mv: null, to: 0, trust: 0, calm: 0, bao: true, startle: 0, wait: L.cat.path[0].wait || 0.4, meowT: 7, dropped: false } : null;
+    st.sockT = 0; st.slow = null; st.firstBlastDone = false; st.baoEaten = false;
     L.crowds.forEach(function (z) {
       var n = Math.max(2, Math.floor((z.x1 - z.x0) / 2.2));
       for (var i = 0; i < n; i++) st.persons.push({ x: (z.x0 + i * 2.2 + (i % 3) * 0.3) * T, y: (z.y) * T, c: (i * 5 + 1) % 6, s: (i * 3) % 5, h: (i % 4) * 2, ph: i * 1.7, ox: 0, vendor: false });
@@ -167,6 +170,7 @@
     var n = set.gross === 'max' ? 70 : 44;
     for (var i = 0; i < n; i++) { var a = rnd(0, TAU), sp = rnd(120, 520); part(i % 3 ? 'splat' : 'cloud', g.x, g.y - 20, Math.cos(a) * sp, Math.sin(a) * sp - 120, rnd(1, 2), i % 3 ? rnd(4, 8) : rnd(16, 30), grossCol(i), 600); }
     st.crowd.scatter = 3; st.crowd.cheer = 0; st.crowd.chant = 0;
+    if (st.cat && !st.cat.mv && !st.cat.dropped && Math.abs(st.cat.x - g.x) < 14 * T) { st.cat.startle = 1.1; st.cat.t0 = st.t; }
     if (st.lan.has) { st.lan.tears = Math.min(3, st.lan.tears + 1); Au.sfx('tear'); st.lan.vel += 6; }
     Game.save.fandom = Math.max(0, Game.save.fandom - 4);
   }
@@ -207,7 +211,8 @@
         var before = b.pres; B.feeling(b, bu.size);
         if (g.breathing) b.pres = before + (b.pres - before) * 0.5;
         if (bu.kind === 'high') B.addButterflies(b, 2);
-        g.scared = 0.9; Au.sfx('pop'); burst(10, bu.x, by, 120, 140, '#fff', 0.7, 4, 200);
+        if (bu.kind === 'excited') { b.boostT = Math.max(b.boostT, 3); g.relief = 0.7; Au.sfx('bounce'); } else g.scared = 0.9;
+        Au.sfx('pop'); burst(10, bu.x, by, 120, 140, '#fff', 0.7, 4, 200);
         if (bu.size === 'big') st.shake = Math.max(st.shake, Game.save.set.shake ? 6 : 0);
         st.bubbles.splice(i, 1); continue;
       }
@@ -224,6 +229,15 @@
     st.stats.bites++; g.chomp = 0.22; sv.eaten[id] = (sv.eaten[id] || 0) + 1;
     if (!sv.dex[id]) { sv.dex[id] = 1; st.stats.newBites++; if (Game.hooks.dex) Game.hooks.dex(id); Au.sfx('dex'); }
     Game.persist();
+    if (id === 'soda' && !st.firstBlastDone && !st.slow && st.stats.blasts === 0 && st.b.pres >= 6 && st.id === 'home') {
+      st.slow = { t: 0 }; Au.sfx('gurgle'); say('Your belly is rumbling! Tap BLAST!', 'narrator', { prompt: true });
+    }
+    if (id === 'bao') {
+      st.baoEaten = true; Au.sfx('fed'); st.crowd.cheer = 4; st.b.boostT = Math.max(st.b.boostT, 4);
+      for (var bi = 0; bi < 24; bi++) part('conf', f.x + rnd(-40, 40), f.y - rnd(0, 60), rnd(-90, 90), rnd(-120, -20), rnd(1.5, 2.6), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][bi % 5], 120);
+      say('Bao! Gus shares a bite with Mimi. Purr, purr. Breakfast found!', 'narrator', {});
+      if (st.cat) { st.cat.state = 'purr'; st.cat.t0 = st.t; Au.sfx('purr'); }
+    }
     var col = F.vit >= 10 ? '#7be07b' : F.pres > 0 ? '#ffb347' : '#6bc4ff';
     burst(12, f.x, f.y, 140, 200, col, 0.7, 4.5, 260);
     if (F.pres > 0) for (var i = 0; i < 4; i++) part('cloud', g.x, g.y - 22, rnd(-40, 40), rnd(-60, -10), 0.7, rnd(8, 14), 'rgba(255,200,120,.6)', -30);
@@ -236,14 +250,18 @@
     var locked = g.lockT > 0; if (locked) g.lockT -= dt;
     var clear = st.status !== 'play';
     var wantX = clear ? 0 : p.mx;
-    if (little && !clear) wantX = (p.breatheGround && g.grounded) ? 0 : 1;
+    if (little && !clear) {
+      wantX = (p.breatheGround && g.grounded) ? 0 : (p.mx < -0.3 ? -1 : 1);   // auto-runs forward; steer left to go back and try again
+      // a safety rail: Little Guts stops at the edge of a drop of 2 or more tiles, so you choose when to jump
+      if (g.grounded && wantX) { var ex = Math.floor((g.x + 22) / T), fr = Math.round(g.y / T), has = false; for (var er = fr; er <= fr + 1; er++) { var ec = L.get(ex, er); if (D.SOLID.indexOf(ec) >= 0 || ec === '=') { has = true; break; } } if (!has) wantX = 0; }
+    }
     if (locked) wantX = 0;
     var breathing = !clear && p.breatheGround && g.grounded && Math.abs(g.vx) < 40 && Math.abs(wantX) < 0.2 && !locked && !p.blast;
     g.breathing = breathing; if (breathing) { Au.breatheOn(); if (!g.wasBreathing) st.stats.breathes++; } else Au.breatheOff();
     g.wasBreathing = breathing;
 
     g.slippery = g.grounded && g.surface === '~';
-    var target = wantX * s.speed, acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
+    var target = wantX * s.speed * (little ? (g.grounded ? 0.8 : 0.5) : 1), acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
     if (Math.abs(wantX) > 0.05) {
       var step = acc * dt, dv = target - g.vx; g.vx += clamp(dv, -step, step);
       g.face = wantX > 0 ? 1 : -1;
@@ -263,6 +281,7 @@
     // blast: tap = toot hop, hold = rocket
     var aim = 0;
     if (check) aim = clamp(p.aimX * 0.95, -1.05, 1.05);
+    if (st.slow && p.blastP) { st.slow = null; st.firstBlastDone = true; }
     var holdBlast = p.blast && !clear && !locked;
     if (p.blastP && !clear && !locked) {
       g.blastT = 0; g.blastTotal = 0; g.blowDuring = false;
@@ -293,7 +312,8 @@
 
     // gravity
     var up = g.vy < 0, gr;
-    if (up) gr = (p.jump || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55; else gr = PH.G;
+    if (little && p.jumpP) g.jumpHold = 0.32; if (g.jumpHold > 0) g.jumpHold -= dt;      // Little Guts: any tap is a full jump
+    if (up) gr = (p.jump || g.jumpHold > 0 || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55; else gr = PH.G;
     if (!up || g.grounded) g.boost = false;
     gr *= s.gravMul;
     if (g.pounding) gr = 0;
@@ -351,7 +371,7 @@
     for (i = 0; i < st.foods.length; i++) {
       f = st.foods[i];
       if (f.taken) { if (f.respawn) { f.timer -= dt; if (f.timer <= 0) f.taken = false; } continue; }
-      if (Math.hypot(gcx - f.x, gcy - f.y) < 32) {
+      if (Math.hypot(gcx - f.x, gcy - f.y) < 42) {
         var head = f.y < g.y - 30; eatFood(f, head ? 1.5 : 1); f.taken = true; f.timer = 6;
       }
     }
@@ -378,6 +398,7 @@
       var go = st.goal;
       if (Math.abs(gcx - go.x) < 40 && Math.abs(g.y - go.y) < 70) {
         if (go.type === 'gate' && !st.lan.has && st.lanItem && !st.lanItem.taken) { st.lanItem.taken = true; st.lan.has = true; say('Oops, Gus nearly forgot Po Po’s lantern! A breeze brings it over.', 'narrator', {}); Au.sfx('bug'); }
+        if (go.type === 'gate' && st.cat && !st.baoEaten) { eatFood({ id: 'bao', x: g.x, y: g.y - 30 }, 1); say('Mimi trots over and drops the bao at Gus’s feet. Breakfast found!', 'narrator', {}); }
         finish();
       }
       st.gate.nag -= dt;
@@ -389,7 +410,7 @@
     st.crowd.cheer = 6; if (Game.save.set.flash) st.flash = 0.2;
     for (var i = 0; i < 70; i++) part('conf', st.g.x + rnd(-200, 200), st.g.y - rnd(80, 300), rnd(-60, 60), rnd(20, 90), rnd(2, 3.5), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][i % 5], 60);
     var res = { id: st.id, zen: st.stats.blowouts === 0, chaos: st.stats.controlled >= 3 && st.stats.chants >= 1, bugs: st.stats.bugs, bugsHere: st.bugs.filter(function (b) { return b.state !== 'trapped'; }).length, bugsTotal: st.bugs.length,
-      tears: st.lan.tears, bites: st.stats.bites, newBites: st.stats.newBites, blowouts: st.stats.blowouts, controlled: st.stats.controlled, lantern: st.lan.has };
+      tears: st.lan.tears, bites: st.stats.bites, newBites: st.stats.newBites, blowouts: st.stats.blowouts, controlled: st.stats.controlled, lantern: st.lan.has, mimi: !!(st.cat && st.cat.trust), baoEaten: st.baoEaten };
     var old = sv.cleared[st.id] || {};
     sv.cleared[st.id] = { clear: true, zen: old.zen || res.zen, chaos: old.chaos || res.chaos, perfect: old.perfect || res.tears === 0 };
     Game.persist(); st.result = res;
@@ -445,6 +466,111 @@
     c.x += (tx - c.x) * k; c.y += (ty - c.y) * Math.min(1, snap ? 1 : dt * 5);
   }
 
+
+  /* ---------------- Mimi the cat ---------------- */
+  function catMove(c, to, speedMul) {
+    var wp = c.path[to], x1 = wp.x * T, y1 = wp.y * T, dx = x1 - c.x, dy = y1 - c.y, len = Math.max(1, Math.hypot(dx, dy));
+    c.mv = { x0: c.x, y0: c.y, x1: x1, y1: y1, s: 0, len: len, speed: 380 * (speedMul || 1), h: Math.min(120, 34 + len * 0.1 + Math.max(0, c.y - y1) * 0.35) };
+    c.to = to; c.state = 'run'; c.face = dx >= 0 ? 1 : -1;
+  }
+  function updateCat(dt) {
+    var st = Game.st, c = st.cat; if (!c) return; c.t += dt;
+    var g = st.g, gT = g.x / T, wp = c.path[c.i], next = c.path[c.i + 1];
+    if (c.startle > 0 && !c.mv) {
+      c.startle -= dt; c.state = 'startle';
+      if (c.startle <= 0 && next && !wp.final) { Au.sfx('hiss'); catMove(c, c.i + 1, 1.5); }
+      return;
+    }
+    if (c.mv) {
+      var m = c.mv; m.s = Math.min(1, m.s + dt * m.speed / m.len);
+      c.x = m.x0 + (m.x1 - m.x0) * m.s; c.y = m.y0 + (m.y1 - m.y0) * m.s - 4 * m.h * m.s * (1 - m.s);
+      if (m.s >= 1) {
+        c.mv = null; c.i = c.to; wp = c.path[c.i]; c.x = m.x1; c.y = m.y1; c.wait = 0.5; c.calm = 0;
+        c.state = wp.sleep ? 'sleep' : 'sit'; c.face = gT < wp.x ? -1 : 1;
+        if (Math.abs(gT - wp.x) < 18) Au.sfx('meow', { pitch: rnd(0.95, 1.2) });
+        if (wp.sleep) say('Mimi curls up on the sofa. Shh! Gus’s belly is rumbling.', 'narrator', { soft: true });
+        if (wp.final) say('Mimi is on the fence with the bao. Hop up the crates!', 'narrator', { soft: true });
+      }
+      return;
+    }
+    c.face = gT < c.x / T ? -1 : 1;
+    if (wp.final) {
+      c.state = c.dropped ? (st.baoEaten ? 'purr' : 'sit') : 'perch';
+      if (!c.dropped && Math.abs(gT - c.x / T) < 3.6 && Math.abs(g.y - c.y) < 4 * T) {
+        c.dropped = true; c.bao = false; Au.sfx('meow', { pitch: 1.3 });
+        st.foods.push({ x: c.x - 14, y: c.y - 34, id: 'bao', respawn: false, taken: false, timer: 0, ph: 0, fall: true, vy: -120, vx: -45, bounced: 0 });
+        say('Mimi drops the bao! Gus, quick!', 'narrator', {});
+      }
+      return;
+    }
+    if (wp.sleep) {
+      c.state = 'sleep'; var d = Math.abs(gT - wp.x);
+      if (d < 6.5 && g.breathing) { c.calm += dt; if (c.calm > 1.4 && !c.trusted) { c.trusted = true; st.cat.trust = 1; Au.sfx('purr'); c.state = 'purr'; c.purrT = 2.2; say('Mimi purrs. She trusts Gus’s calm belly!', 'narrator', { soft: true }); } }
+      if (c.purrT > 0) { c.purrT -= dt; c.state = 'purr'; if (c.purrT <= 0 && next) catMove(c, c.i + 1, 1); return; }
+      var rude = g.blasting && d < 8, loud = st.b.state === 'critical' && d < 6;
+      if ((rude || loud) && !c.trusted) { c.startle = 0.9; Au.sfx('hiss'); return; }
+      if (gT > wp.x + 3.5 && next) catMove(c, c.i + 1, 1);
+      return;
+    }
+    c.state = 'sit'; c.wait -= dt; c.meowT -= dt;
+    var near = Math.abs(gT - c.x / T) < 4.6, passed = gT > c.x / T + 6;
+    if (c.wait <= 0 && next && (near || passed || wp.wait)) { if (!wp.wait || c.t > wp.wait) { wp.wait = 0; catMove(c, c.i + 1, 1); } }
+    else if (c.meowT <= 0 && Math.abs(gT - c.x / T) > 10) { c.meowT = 9; Au.sfx('meow'); }
+  }
+
+  /* ---------------- things that react to Gus ---------------- */
+  function updateReacts(dt) {
+    var st = Game.st, g = st.g, L = st.L;
+    st.reacts.forEach(function (r) {
+      var rx = r.x * T, ry = r.y * T, rw = r.w * T, rh = r.h * T;
+      var touching = Math.abs(g.x - (rx + rw / 2)) < rw / 2 + 16 && g.y > ry && g.y - 46 < ry + rh;
+      var exNear = false;
+      for (var i = 0; i < st.particles.length; i++) { var q = st.particles[i]; if ((q.k === 'ex' || q.k === 'cloud') && q.x > rx - 40 && q.x < rx + rw + 40 && q.y > ry - 40 && q.y < ry + rh + 40) { exNear = true; break; } }
+      if (r.type === 'basket') {
+        if (r.state === 'idle' && (touching || exNear)) {
+          r.state = 'tipping'; r.anim = 0; Au.sfx('sock'); st.shake = Game.save.set.shake ? 5 : 0;
+          for (var k = 0; k < 18; k++) part('sock', rx + rw / 2 + rnd(-20, 20), ry + rh - 10, rnd(-170, 170), rnd(-520, -200), rnd(2, 3), rnd(7, 11), ['#e0584a', '#4a90d9', '#58b368', '#f0a53a', '#9b6bd1', '#fff'][k % 6], 900);
+          say('Whoa! Socks everywhere!', 'narrator', { soft: true }); r.sockDelay = 0.5;
+        } else if (r.state === 'tipping') {
+          r.anim += dt / 0.95;
+          if (r.sockDelay > 0) { r.sockDelay -= dt; if (r.sockDelay <= 0) { st.sockT = 6; Au.sfx('sock'); } }
+          var lx = Math.floor(r.landX / T);
+          if (r.anim >= 1 && !(Math.abs(g.x - r.landX) < 2.8 * T && g.y > 11 * T)) {
+            r.state = 'landed'; st.L.put(lx - 1, 13, 'B'); st.L.put(lx, 13, 'B'); Au.sfx('stomp'); st.shake = Game.save.set.shake ? 6 : 0;
+            for (var d = 0; d < 8; d++) part('dust', r.landX + rnd(-30, 30), 14 * T, rnd(-90, 90), rnd(-90, -20), 0.6, rnd(4, 8), 'rgba(235,225,205,.8)', 120);
+          }
+        }
+      } else if (r.type === 'hanger') {
+        if (!r.spent && (touching || exNear) && g.vy < 120) {
+          r.spent = true; r.swing = 0.45; Au.sfx('pop'); st.shake = Game.save.set.shake ? 3 : 0;
+          ['apple', 'banana', 'cherries'].forEach(function (id, i) { st.foods.push({ x: rx + rw / 2 + (i - 1) * 24, y: ry + rh, id: id, respawn: false, taken: false, timer: 0, ph: i, fall: true, vy: -80 - i * 40, vx: (i - 1) * 60, bounced: 0 }); });
+          say('Fruit shakes loose!', 'narrator', { soft: true });
+        }
+        if (r.swing > 0.001) { r.swingT += dt; r.swing *= Math.pow(0.35, dt); }
+      } else if (r.type === 'pinwheel') {
+        var near = (g.blasting && Math.abs(g.x - (rx + rw / 2)) < 5 * T && g.y > ry - 4 * T) || exNear;
+        r.spin += (near ? 22 : -6) * dt; r.spin = Math.max(0, Math.min(24, r.spin)); r.ang += r.spin * dt;
+        if (r.spin > 8) { r.spun += dt; r.whirrT = (r.whirrT || 0) - dt; if (r.whirrT <= 0) { r.whirrT = 0.45; Au.sfx('whirr'); } }
+        if (r.spun > 2 && !r.done) {
+          r.done = true; Au.sfx('bloom'); st.crowd.cheer = 3;
+          for (var q2 = 0; q2 < 30; q2++) part('conf', rx + rw / 2 + rnd(-30, 30), ry + 20, rnd(-120, 120), rnd(-300, -80), rnd(1.5, 2.6), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][q2 % 5], 200);
+          ['banana', 'blueberries'].forEach(function (id, i) { st.foods.push({ x: rx + rw / 2 + (i ? 30 : -30), y: ry + 20, id: id, respawn: false, taken: false, timer: 0, ph: i, fall: true, vy: -260, vx: i ? 80 : -80, bounced: 0 }); });
+          say('The pinwheel pops out a snack!', 'narrator', { soft: true });
+        }
+      }
+    });
+    if (st.sockT > 0) st.sockT -= dt;
+  }
+  function updateFalling(dt) {
+    var st = Game.st, L = st.L;
+    st.foods.forEach(function (f) {
+      if (!f.fall || f.taken) return;
+      f.vy += 1500 * dt; f.x += f.vx * dt; f.y += f.vy * dt;
+      var ty = Math.floor((f.y + 18) / T), tx = Math.floor(f.x / T), ch = L.get(tx, ty);
+      if ((D.SOLID.indexOf(ch) >= 0 || ch === '=') && f.vy > 0) { f.y = ty * T - 18; if (f.bounced < 1) { f.vy = -f.vy * 0.35; f.bounced++; } else { f.fall = false; f.vy = 0; f.vx = 0; } }
+    });
+  }
+
   /* If Gus hasn't got anywhere for a while, a few snacks turn up next to him and a hint appears. Never a dead end. */
   function updateStuck(dt) {
     var st = Game.st, g = st.g, pr = st.prog || (st.prog = { x: g.x, t: 0, aided: 0 });
@@ -465,13 +591,14 @@
   Game.update = function (dt) {
     var st = Game.st; if (!st) return;
     dt = Math.min(dt, 0.05) * (Game.save.set.speed / 100);
+    if (st.slow) { st.slow.t += dt; if (st.slow.t > 6) { st.slow = null; st.firstBlastDone = true; } else dt *= 0.3; }
     st.t += dt;
     var b = st.b;
     if (st.status === 'play') {
       updateGus(dt);
       B.tick(b, dt, { breathing: st.g.breathing });
       handleEvents();
-      updatePickups(dt); updatePrompts(dt); updateTriggers(); updateBubbles(dt); updateStuck(dt);
+      updatePickups(dt); updatePrompts(dt); updateTriggers(); updateBubbles(dt); updateStuck(dt); updateCat(dt); updateReacts(dt); updateFalling(dt);
     } else if (st.status === 'clear') {
       st.clearT += dt; updateGus(dt); B.tick(b, dt, {}); b.events = [];
       updatePickups(dt);
@@ -503,7 +630,7 @@
     for (var i = 0; i < 8; i++) { var a = Math.PI + i / 7 * Math.PI; A.p.circ(cx, Math.cos(a) * 46, -104 + Math.sin(a) * 46, 7, ['#ff7fa8', '#ffd84a', '#7be07b'][i % 3], 2); }
     if (!open) { for (var k = -1; k <= 1; k += 2) A.p.rr(cx, k < 0 ? -32 : 2, -88, 30, 88, 3, '#c98b4f', 3); }
     else { A.p.rr(cx, -32, -88, 10, 88, 3, '#c98b4f', 3); A.p.rr(cx, 22, -88, 10, 88, 3, '#c98b4f', 3); }
-    if (!st.lan.has && !open) { A.p.rr(cx, -12, -62, 24, 20, 4, '#9aa3b5', 2.5); cx.beginPath(); cx.arc(0, -62, 8, Math.PI, 0); cx.lineWidth = 3; cx.strokeStyle = INK; cx.stroke(); }
+
     cx.restore();
   }
   var INK = '#2b1d14';
@@ -593,10 +720,12 @@
       else if (bg.state === 'freeing') { var k = bg.t / 0.9; A.bug(cx, bg.x + (g.x - bg.x) * k, bg.y + (g.y - 24 - bg.y) * k - Math.sin(k * Math.PI) * 30, t, bg.fam, { hop: true, r: 13 * (1 - k * 0.5) }); }
       else A.bug(cx, bg.x, bg.y, t, bg.fam, { hop: Math.sin(t * 0.7 + bg.x) > 0.9 });
     });
+    st.reacts.forEach(function (r) { A.react(cx, r, t); });
     st.foods.forEach(function (f) { drawFoodItem(f, t); });
+    if (st.cat) A.cat(cx, st.cat.x, st.cat.y, t, { face: st.cat.face, state: st.cat.state, bao: st.cat.bao });
     // Gus
     A.gus(cx, { x: g.x, y: g.y, face: g.face, sx: g.sx, sy: g.sy, state: b.state, pres: b.pres, vit: b.vit, t: t, run: g.run, vy: g.vy, air: !g.grounded, moving: Math.abs(g.vx) > 20,
-      grounded: g.grounded, lan: st.lan.ang, tears: st.lan.tears, hasLantern: st.lan.has, breathing: g.breathing, relief: g.relief > 0 || st.status === 'clear', butterflies: b.butterflies, spin: g.spin, glow: true });
+      grounded: g.grounded, lan: st.lan.ang, tears: st.lan.tears, hasLantern: st.lan.has, breathing: g.breathing, relief: g.relief > 0 || st.status === 'clear', butterflies: b.butterflies, spin: g.spin, glow: true, sock: st.sockT > 0, dizzy: g.lockT > 0, buildup: !!st.slow || (g.blastT > 0.02 && g.blastT < 0.18 && !g.blasting) });
     // particles
     var gm = Game.save.set.gross;
     st.particles.forEach(function (p) {
@@ -604,6 +733,7 @@
       if (p.k === 'decal') return;
       cx.globalAlpha = p.k === 'cloud' ? a * 0.8 : a;
       if (p.k === 'conf') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 4); cx.fillStyle = p.col; cx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); cx.restore(); }
+      else if (p.k === 'sock') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 7); A.p.rr(cx, -3.5, -9, 7, 16, 3, p.col, 1.8); cx.fillStyle = '#fff'; cx.fillRect(-3.5, -3, 7, 3); cx.restore(); }
       else if (p.k === 'petal') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 3); cx.fillStyle = p.col; cx.beginPath(); cx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, TAU); cx.fill(); cx.restore(); }
       else if (p.k === 'fly') { cx.save(); cx.translate(p.x, p.y); var wg = Math.sin(st.t * 30) * 0.6; A.p.ell(cx, -3, 0, 3.4, 2, p.col, 1, wg); A.p.ell(cx, 3, 0, 3.4, 2, p.col, 1, -wg); cx.restore(); }
       else if (p.k === 'cloud') { cx.fillStyle = p.col; cx.beginPath(); cx.arc(p.x, p.y, p.size * (1.3 - a * 0.5), 0, TAU); cx.fill(); }
@@ -612,6 +742,7 @@
     cx.globalAlpha = 1;
     st.bubbles.forEach(function (bu) { A.bubble(cx, D.FEELINGS[bu.kind].icon, bu.x, bu.y, bu.size, bu.t, bu.a); });
     drawPrompt(st);
+    if (st.slow) { var gl = Math.sin(t * 12) * 0.5 + 0.5; cx.save(); cx.globalAlpha = 0.96; A.p.rr(cx, g.x - 96, g.y - 150 - gl * 4, 192, 62, 18, '#fff3d6', 3.5); A.glyph(cx, 'blast', g.x - 52, g.y - 119 - gl * 4, In.kind, 19); cx.fillStyle = '#d9473f'; cx.font = '700 24px "Luckiest Guy", Fredoka, sans-serif'; cx.textAlign = 'left'; cx.fillText('BLAST!', g.x - 24, g.y - 110 - gl * 4); cx.restore(); }
     cx.restore();
     // screen effects
     cx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);

@@ -29,6 +29,7 @@
     coney: { kind: 'grease', vit: 4, pres: 26, heavy: 10 },
     pizza: { kind: 'grease', vit: 4, pres: 24, heavy: 10 },
     chili: { kind: 'spice', vit: 4, pres: 14, fire: true },
+    bao: { kind: 'grain', vit: 25, pres: 0, boost: 4 },
     snax: { kind: 'snax', vit: 0, pres: 6 }
   };
 

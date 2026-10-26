@@ -207,7 +207,7 @@
     var leaf = '<svg viewBox="0 0 48 48"><path d="M8 40C8 20 20 8 42 6c0 22-10 34-30 36" fill="' + '#7be07b' + '" stroke="#2b1d14" stroke-width="3" stroke-linejoin="round"/><path d="M10 38C20 28 28 20 38 12" fill="none" stroke="#2b1d14" stroke-width="3" stroke-linecap="round"/></svg>';
     var star = '<svg viewBox="0 0 48 48"><path d="M24 3l5 13 14 1-11 9 4 14-12-8-12 8 4-14L5 17l14-1z" fill="#ffcb2f" stroke="#2b1d14" stroke-width="3" stroke-linejoin="round"/></svg>';
     var lan = '<svg viewBox="0 0 48 48"><rect x="12" y="10" width="24" height="30" rx="10" fill="#ee4b3f" stroke="#2b1d14" stroke-width="3"/><rect x="17" y="4" width="14" height="6" rx="3" fill="#ffd36b" stroke="#2b1d14" stroke-width="2.5"/><path d="M18 20h12M18 30h12" stroke="#ffd36b" stroke-width="3"/></svg>';
-    var h = '<h2>Morning at Home: done!</h2><p class="sub">Gus is ready for the big trip.</p><div class="medals">' +
+    var h = '<h2>Breakfast found!</h2><p class="sub">' + (r.mimi ? 'Mimi purred all the way. ' : '') + 'Gus is ready for the big trip.</p><div class="medals">' +
       medal(r.zen, 'Zen medal', r.zen ? 'No blowouts. Calm!' : 'Finish with no blowouts.', leaf) +
       medal(r.chaos, 'Chaos medal', r.chaos ? 'Stylish blasts and a crowd chant!' : 'Three long, controlled blasts and a crowd chant.', star) +
       medal(r.tears === 0 && r.lantern, 'Perfect lantern', r.tears === 0 ? 'Not a single tear.' : 'Finish with no lantern tears.', lan) + '</div>' +

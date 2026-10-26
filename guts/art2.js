@@ -163,7 +163,7 @@
   A.tile = function (ctx, theme, ch, x, y, top, seed) { ctx.drawImage(tileSprite(theme, ch, top, seed || 0), x - 0.3, y - 0.3, 32.6, 32.6); };
 
   /* ---------------- decorations ---------------- */
-  var FRONT = { fridge: 1, sofa: 1, rug: 1, fence: 1, tower: 1, crates: 1 };
+  var FRONT = { fridge: 1, sofa: 1, rug: 1, fence: 1, tower: 1, crates: 1, dresser: 1 };
   A.decorIsFront = function (d) { return !!FRONT[d.type]; };
   A.decor = function (ctx, d, t, st) {
     var x = d.x * 32, y = d.y * 32, w = (d.w || 1) * 32, h = (d.h || 1) * 32;
@@ -183,6 +183,7 @@
       case 'fence': for (var f = 0; f < d.w * 2; f++) { rr(ctx, x + f * 16 + 1, y, 14, h, 3, '#f2f0e6', 2.5); poly(ctx, [x + f * 16 + 1, y, x + f * 16 + 8, y - 8, x + f * 16 + 15, y], '#f2f0e6', 2.5); } ctx.fillStyle = 'rgba(43,29,20,.2)'; ctx.fillRect(x, y + 30, w, 8); ctx.fillRect(x, y + h - 50, w, 8); break;
       case 'billboard': rr(ctx, x, y, 224, 128, 8, '#e6d3a8', 4); A.baron(ctx, x + 70, y + 128, 0.62, t, 'smile'); ctx.fillStyle = '#7a6a48'; ctx.font = '700 22px Fredoka, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('BEIGE', x + 126, y + 56); ctx.fillText('IS BEST!', x + 126, y + 84); line(ctx, x + 40, y + 128, x + 40, y + 300, '#6b5f4c', 8); line(ctx, x + 184, y + 128, x + 184, y + 300, '#6b5f4c', 8); break;
       case 'crates': for (var cr = 0; cr < d.h; cr++) for (var cc = 0; cc < d.w; cc++) { rr(ctx, x + cc * 32 + 1, y + cr * 32 + 1, 30, 30, 3, '#d9a566', 3); line(ctx, x + cc * 32 + 4, y + cr * 32 + 4, x + cc * 32 + 28, y + cr * 32 + 28, 'rgba(43,29,20,.35)', 2); line(ctx, x + cc * 32 + 28, y + cr * 32 + 4, x + cc * 32 + 4, y + cr * 32 + 28, 'rgba(43,29,20,.35)', 2); } break;
+      case 'dresser': rr(ctx, x, y, w, h, 8, '#c98b4f', 4); for (var dr = 0; dr < 2; dr++) { rr(ctx, x + 8, y + 6 + dr * 28, w - 16, 22, 4, '#dda56a', 2.5); rr(ctx, x + w / 2 - 8, y + 14 + dr * 28, 16, 5, 2, '#7a4a2a', 1.5); } ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x + 4, y + 4, w - 8, 4); break;
       case 'tower': for (var r = 0; r < d.h; r++) for (var c2 = 0; c2 < d.w; c2++) { var col = ['#e63946', '#58b368', '#f0a53a', '#4a90d9'][(r + c2) % 4]; rr(ctx, x + c2 * 32 + 2, y + r * 32 + 2, 28, 28, 7, '#d9a566', 3); circ(ctx, x + c2 * 32 + 16, y + r * 32 + 16, 8, col, 2); } break;
       case 'freeway': for (var px = d.x * 32 + 100; px < d.x1 * 32; px += 420) { rr(ctx, px, d.y * 32 + 104, 46, 700, 4, '#8f95a3', 3); } break;
       case 'antenna': line(ctx, x + 16, y + 20, x + 16, y + 360, '#6b5f7a', 6); circ(ctx, x + 16, y + 20, 10, '#ff4b6a', 2); ell(ctx, x + 16, y + 70, 30, 9, '#d8d4ec', 2.5); line(ctx, x - 10, y + 50, x + 42, y + 50, '#6b5f7a', 4); if (((t * 2) | 0) % 2) circ(ctx, x + 16, y + 20, 18, 'rgba(255,75,106,.35)', 0); break;

@@ -249,6 +249,11 @@
       case 'ring': for (var r = 0; r < 4; r++) { note(B, 'sine', 440, t + r * 0.5, 0.2, 0.3); note(B, 'sine', 480, t + r * 0.5, 0.2, 0.3); note(B, 'sine', 440, t + r * 0.5 + 0.25, 0.2, 0.3); note(B, 'sine', 480, t + r * 0.5 + 0.25, 0.2, 0.3); } break;
       case 'freeze': [1500, 2000, 2600, 3200].forEach(function (f, i) { note(B, 'sine', f, t + i * 0.06, 0.4, 0.14); }); note(B, 'sine', 300, t, 0.6, 0.2, { slideTo: 120 }); break;
       case 'tear': noise(B, t, 0.18, 0.4, { type: 'highpass', f: 2500, fTo: 6000 }); break;
+      case 'meow': note(B, 'sawtooth', 520 * (o.pitch || 1), t, 0.55, 0.22, { slideTo: 900 * (o.pitch || 1), slideT: 0.18, lp: 1800, a: 0.04, vib: [9, 25], hold: 0.5 }); note(B, 'sawtooth', 900 * (o.pitch || 1), t + 0.18, 0.4, 0.2, { slideTo: 480, lp: 1500, a: 0.01 }); break;
+      case 'purr': for (var pr = 0; pr < 8; pr++) note(B, 'sawtooth', 62 + (pr % 2) * 5, t + pr * 0.085, 0.12, 0.2, { lp: 260 }); break;
+      case 'hiss': noise(B, t, 0.5, 0.4, { type: 'highpass', f: 3500, a: 0.04 }); break;
+      case 'sock': note(B, 'sine', 150, t, 0.12, 0.3, { slideTo: 70 }); noise(B, t, 0.1, 0.2, { f: 700, q: 0.6 }); break;
+      case 'whirr': note(B, 'triangle', 500, t, 0.5, 0.18, { slideTo: 900, vib: [18, 40] }); break;
       case 'hurt': note(B, 'square', 300, t, 0.18, 0.3, { slideTo: 120 }); break;
       case 'select': note(B, 'triangle', 660, t, 0.08, 0.3); break;
       case 'back': note(B, 'triangle', 440, t, 0.08, 0.3); break;

@@ -1,5 +1,17 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.2 (beta, 2026-10-26): the first level rebuilt, "Find the missing breakfast"
+
+The family asked for a rebuild after an outside review and James's play. 1.2 keeps 1.1's never-stuck rules and adds:
+- **Mimi the family cat** (`catPath` in `data.js`, `updateCat` in `game.js`, `A.cat` in `art3.js`): she carries Gus's bao and leads, waiting at each stop. She curls up asleep on the sofa: breathe calmly nearby and she purrs and trusts Gus; blast or blow out beside her and she hisses and bolts. At the fence she drops the bao, Gus eats it (Dex: Bao 包 baau1), and the gate also hands it over if he skipped her.
+- **First blast by accident**: eating the first fizzy drink starts a slow-motion belly rumble with a big "Tap BLAST!" prompt (`st.slow`).
+- **Things that react**: laundry basket on a shelf (tips, socks fly, one lands on Gus's head, it lands as a step), hanging fruit basket (jump into it: fruit falls), pinwheel (blast near it for 2 s: a snack pops out). All optional.
+- Excitement as a power: the "Ooh! Mimi has my bao!" bubble gives pressure *and* a short speed boost. Food wording is neutral ("Crunchy greens make Gus bouncy"), not good/bad.
+- Little Guts: auto-run is slower, a jump tap is always a full jump, Gus stops at any drop of 2+ tiles (so you choose when to jump), and steering left walks back.
+- Dizzy stars when a blowout spins Gus, a belly wobble that grows with pressure and a shaking buildup before a held blast, pickups are easier to grab.
+- Checks: `node guts/tools/route.mjs` plays the whole level jump-only at vitality 15 (31 hops, no failures); `levels.test.js` now also checks the cat path and the reactive objects (39 tests with the tracker's).
+- Next: playtest 1.2 with James unprompted; then Detroit (guts-F2). Backlog ideas in `guts-F10`.
+
 ## 1.1 (beta, 2026-10-26): never stuck, and playable by taps and AI
 
 Playtest: James got stuck at the last fence (needed a big blast). An outside AI review could not play at all (its key presses were too brief, and key-only events were ignored). 1.1:
@@ -15,7 +27,7 @@ Playtest: James got stuck at the last fence (needed a big blast). An outside AI 
 The family asked for the first level first, to prove the gameplay and mechanics. **Shipped: the Prologue, "Morning at Home"**,
 with everything the brief's Phase 0–1 needs: move, jump, eat, blast, breathe, the sound ladder (gurgle, tuba, foghorn), belly states,
 feelings bubbles and butterflies, compost gardens that persist (bounce flower), the lantern and its tears, the crowd arc, Gut Bugs,
-medals, Food Dex (19 findable bites of 80), Gut Village screen, intro story and Po Po's lines, three modes (Little Guts, Standard, Gut Check),
+medals, Food Dex (20 findable bites of 80), Gut Village screen, intro story and Po Po's lines, three modes (Little Guts, Standard, Gut Check),
 Gross-o-Meter, settings, keyboard + PlayStation pad (Gamepad API, standard and raw Sony mapping) + touch, original music (6 songs) and effects.
 
 **Not wired up yet** (built as data or art, not in the engine): the Detroit levels, the Golem boss and The Mouth are *built and path-checked in

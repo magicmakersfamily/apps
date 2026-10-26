@@ -70,7 +70,7 @@ guts/               GUTS (beta): a comic platformer where what Gus eats and feel
   belly.js          the belly model: foods, vitality, pressure, blast stats (tested by belly.test.js)
   data.js           levels (builder calls, tested by levels.test.js), Food Dex, story lines
   game.js           physics, belly in motion, compost gardens, feelings, rendering
-  art.js, art2.js   every character, icon, background and cutscene panel, drawn in code
+  art.js, art2.js, art3.js  every character (Gus, Mimi the cat), icon, background, reactive object and cutscene panel, drawn in code
   audio.js          original songs, adaptive layers and all sound effects (Web Audio)
   input.js          keyboard, Gamepad API (PlayStation / standard pads), touch, Tap mode and Step mode
   ai.js             text view of the game and GUTS.ai (read state, press a button for a moment)
@@ -96,7 +96,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Cosmic Journey 宇宙之旅 (beta) | `big-bang/` | 7.0 | 2026-10-17 |
 | Character Book 認字簿 (beta) | `renzi/` | 1.0 | 2026-10-12 |
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 2.0 | 2026-10-16 |
-| GUTS 大肚仔歷險 (beta) | `guts/` | 1.1 | 2026-10-26 |
+| GUTS 大肚仔歷險 (beta) | `guts/` | 1.2 | 2026-10-26 |
 
 The shelf is versioned too: **The App Shelf 2.0** (2026-10-18). Version 1.0, the long page of cards, is frozen at
 `versions/shelf/1.0/` (`tools/freeze-shelf.sh`) in case we want to roll back.

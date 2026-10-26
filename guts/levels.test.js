@@ -103,3 +103,24 @@ test('every findable food has a Dex card with Traditional Chinese and jyutping p
     assert.ok(/[a-z]+[1-6]$/.test(e.jp.split(' ')[0]), id + ' jyutping format');
   }
 });
+
+test('Mimi the cat: every waypoint is inside the level, in open air, with the final stop on the fence top', () => {
+  const L = D.STAGES.home.build();
+  assert.ok(L.cat && L.cat.path.length >= 6, 'cat path');
+  L.cat.path.forEach((w, i) => {
+    assert.ok(w.x > 0 && w.x < L.w && w.y > 1 && w.y <= L.h, 'waypoint ' + i + ' out of bounds');
+    assert.ok(!solid(L, Math.floor(w.x), Math.floor(w.y) - 1), 'waypoint ' + i + ' is inside a wall');
+    assert.ok(i === 0 || w.x >= L.cat.path[i - 1].x - 0.01, 'the cat only ever leads forward');
+  });
+  const last = L.cat.path[L.cat.path.length - 1];
+  assert.ok(last.final, 'last waypoint is the final one');
+  assert.ok(solid(L, Math.floor(last.x), Math.floor(last.y)), 'the final stop stands on something solid (the fence)');
+});
+test('reactive objects sit inside the level and the basket has room to land', () => {
+  const L = D.STAGES.home.build();
+  const kinds = L.reacts.map(r => r.type).sort().join();
+  assert.strictEqual(kinds, 'basket,hanger,pinwheel');
+  L.reacts.forEach(r => { assert.ok(r.x >= 0 && r.x + r.w <= L.w && r.y >= 0 && r.y + r.h <= L.h, r.type + ' inside the level'); });
+  const b = L.reacts.find(r => r.type === 'basket'), lx = b.x + 5;
+  assert.ok(!solid(L, lx, 13) && !solid(L, lx - 1, 13), 'the tipped basket lands on free floor');
+});

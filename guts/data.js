@@ -15,7 +15,7 @@
     this.checks = []; this.foods = []; this.bots = []; this.drones = []; this.bugs = [];
     this.prompts = []; this.feelings = []; this.patches = []; this.crowds = []; this.movers = [];
     this.chompers = []; this.crates = {}; this.decor = []; this.puddles = [];
-    this.goal = null; this.lantern = null; this.blastZones = []; this.pitY = h + 6;
+    this.goal = null; this.lantern = null; this.blastZones = []; this.pitY = h + 6; this.reacts = []; this.cat = null;
   }
   Lvl.prototype = {
     get: function (x, y) { if (x < 0 || x >= this.w) return '#'; if (y < 0) return ' '; if (y >= this.h) return ' '; return this.g[y][x]; },
@@ -38,71 +38,82 @@
     mover: function (m) { this.movers.push(m); return this; },
     chomp: function (x, w, period, phase, minLen, maxLen) { this.chompers.push({ x: x, w: w, period: period, phase: phase || 0, minLen: minLen || 3, maxLen: maxLen || 11 }); return this; },
     dec: function (type, x, y, o) { var d = o || {}; d.type = type; d.x = x; d.y = y; this.decor.push(d); return this; },
-    blast: function (x0, x1) { this.blastZones.push([x0, x1]); return this; }
+    blast: function (x0, x1) { this.blastZones.push([x0, x1]); return this; },
+    react: function (type, x, y, w, h, o) { var r = o || {}; r.type = type; r.x = x; r.y = y; r.w = w; r.h = h; this.reacts.push(r); return this; },
+    catPath: function (list) { this.cat = { path: list }; return this; }
   };
 
   /* ---------- the stages ---------- */
   var VEG = ['broccoli', 'carrot'];
 
   function buildHome() {
-    var L = new Lvl(132, 18, 'home');
-    L.ground(0, 132, 14);
-    L.box(0, 0, 92, 2, '#');                      // indoor ceiling; the back yard is open sky
-    L.start = { x: 3, y: 13 };
-    // bedroom
-    L.box(12, 12, 3, 2, 'B');                     // toy box: 2 tiles up
-    L.food(13, 10, 'apple');
-    L.dec('bed', 3, 14, {}); L.dec('window', 8, 5, {});
-    L.feel(8, 'shoes', 'small');
+    var L = new Lvl(118, 18, 'home');
+    L.ground(0, 118, 14);
+    L.box(0, 0, 88, 2, '#');                      // indoor ceiling; the back yard is open sky
+    L.start = { x: 4, y: 13 };
+    // ---- bedroom: a rumbling belly, a fizzy drink, and a laundry basket that is about to have a very big morning
+    L.dec('bed', 1, 14, {}); L.dec('window', 9, 4, {}); L.dec('dresser', 10, 12, { w: 4, h: 2 });
+    L.food(7, 13, 'apple');
+    L.box(10, 12, 4, 2, 'B');                     // dresser: 2 tiles up
+    L.food(11, 11, 'soda');                       // the first fizzy drink: eating it starts the first blast
+    L.plat(14, 10, 2); L.plat(16, 8, 5);          // hop up: dresser, little shelf, wall shelf
+    L.react('basket', 17, 6, 3, 2);               // laundry basket on the wall shelf
+    L.bug(21, 6, 'home-1');
+    L.feel(5, 'shoes', 'small');
     L.prompt(2, 'move', 'Walk with the stick or arrow keys.');
-    L.prompt(10, 'jump', 'Jump on the toy box!');
-    // kitchen
-    L.box(21, 12, 3, 2, 'B');                     // step
-    L.box(24, 10, 7, 4, 'B');                     // counter, 4 tiles up (the step makes it two hops)
-    L.food(26, 9, 'broccoli'); L.food(28, 9, 'banana');
-    L.prompt(25, 'eat:broccoli', 'Eat greens to be springy!');
-    L.plat(32, 8, 5);                             // cabinet shelf
-    L.bug(34, 7, 'home-1');
-    L.box(38, 12, 7, 2, 'B');                     // table
-    L.food(40, 11, 'soda'); L.food(43, 11, 'candy');
-    L.dec('kitchen', 20, 0, { w: 36 });
-    L.check(46, 13);
-    // snack counter in front of the fridge (respawning so the lesson can't be missed)
-    L.food(48, 13, 'soda', true); L.food(50, 13, 'candy', true);
-    L.prompt(47, 'eat:soda', 'Sugar fills your belly with pressure.');
-    L.plat(45, 12, 2); L.plat(47, 10, 2); L.plat(49, 8, 2); L.plat(51, 6, 1);   // kitchen shelves: the walking way up (blasting is the shortcut)
-    L.box(52, 4, 3, 10, 'B');                     // fridge: 10 tiles. Climb the shelves, or blast over it!
-    L.dec('fridge', 52, 4, { w: 3, h: 10 });
-    L.prompt(50, 'blast', 'Hold Blast to rocket over the fridge, or hop up the shelves!');
-    // breathe lesson
-    L.feel(59, 'waffle', 'big');
-    L.prompt(61, 'breathe', 'Tight tummy? Stand still and hold Breathe.');
-    L.food(64, 13, 'water', true);
+    L.prompt(8, 'jump', 'Jump onto the dresser!');
+    L.check(23, 13);
+    // ---- the cat has the bao: Mimi leads the way
+    L.catPath([
+      { x: 8.5, y: 14, wait: 2.6 }, { x: 25, y: 14 }, { x: 31, y: 10 }, { x: 55.5, y: 4 },
+      { x: 68, y: 12, sleep: true }, { x: 91, y: 14 }, { x: 99, y: 14 }, { x: 109.5, y: 8, final: true }
+    ]);
+    L.feel(26, 'excited', 'small');
+    // ---- kitchen: counter, a hanging fruit basket, a cupboard shelf, the fridge
+    L.box(27, 12, 3, 2, 'B');                     // step
+    L.box(30, 10, 6, 4, 'B');                     // counter, 4 tiles up (the step makes it two hops)
+    L.food(31, 9, 'broccoli'); L.food(34, 9, 'carrot');
+    L.prompt(29, 'eat:broccoli', 'Crunchy greens make Gus bouncy.');
+    L.react('hanger', 31, 5, 4, 2);               // jump up and bump it: fruit falls
+    L.plat(37, 8, 4); L.bug(39, 7, 'home-2');     // cupboard shelf
+    L.box(38, 12, 5, 2, 'B');                     // table
+    L.food(40, 11, 'candy');
+    L.dec('kitchen', 26, 0, { w: 30 });
+    L.check(45, 13);
+    L.food(46, 13, 'soda', true); L.food(48, 13, 'candy', true);      // snack counter before the fridge, always refilled
+    L.prompt(45, 'eat:soda', 'Fizzy and sweet fill the belly with bubbles.');
+    L.plat(47, 12, 2); L.plat(49, 10, 2); L.plat(51, 8, 2); L.plat(53, 6, 1);   // kitchen shelves: the walking way up
+    L.box(54, 4, 3, 10, 'B');                     // fridge: 10 tiles. Climb the shelves, or rocket over it!
+    L.dec('fridge', 54, 4, { w: 3, h: 10 });
+    L.prompt(52, 'blast', 'Hop up the shelves, or hold BLAST to rocket over the fridge!');
+    // ---- living room: Mimi is asleep on the sofa
+    L.feel(60, 'hungry', 'small');
+    L.prompt(62, 'breathe', 'Mimi is asleep. Stand still and hold CALM so the rumbles stay quiet.');
+    L.food(61, 13, 'water', true);
     L.dec('rug', 58, 14, { w: 10 });
-    L.check(70, 13);
-    // living room
-    L.box(72, 12, 6, 2, 'B');                     // sofa
-    L.dec('sofa', 72, 12, { w: 6 });
-    L.box(82, 12, 4, 2, 'B');                     // coffee table
-    L.lantern = { x: 83, y: 11 };
-    L.dec('tv', 87, 9, {});
-    L.prompt(79, 'jump', 'Grab the lantern for Po Po!');
-    L.feel(90, 'stop', 'medium');
-    L.food(76, 11, 'blueberries'); L.food(88, 13, 'carrot');
-    // back yard: plenty of snacks, a bounce flower to grow, and crates you can simply hop up
-    L.prompt(97, 'blast', 'Blast over the dirt to grow a bounce flower!');
-    L.food(95, 13, 'candy', true); L.food(97, 13, 'soda', true); L.food(99, 13, 'candy', true);
-    L.patch(102, 14, 3, 'flower');
-    L.box(106, 12, 2, 2, 'B'); L.box(108, 10, 2, 4, 'B');                 // crate steps, 2 tiles each
-    L.dec('crates', 106, 12, { w: 2, h: 2 }); L.dec('crates', 108, 10, { w: 2, h: 4 });
-    L.box(110, 8, 3, 6, 'B');                     // fence: hop the crates, or bounce over it
-    L.dec('fence', 110, 8, { w: 3, h: 6 });
-    L.bug(111, 6, 'home-2');
-    L.check(94, 13);
-    L.bug(122, 13, 'home-3');
-    L.food(116, 13, 'banana'); L.food(119, 13, 'apple'); L.food(122, 13, 'blueberries');
-    L.goal = { x: 128, y: 13, type: 'gate' };
-    L.crowd(96, 126, 14);
+    L.check(62, 13);
+    L.box(66, 12, 6, 2, 'B'); L.dec('sofa', 66, 12, { w: 6 });
+    L.box(76, 12, 4, 2, 'B');                     // coffee table
+    L.lantern = { x: 77, y: 11 };
+    L.dec('tv', 82, 9, {});
+    L.prompt(74, 'jump', 'Po Po’s lantern is on the coffee table!');
+    L.food(70, 11, 'blueberries'); L.food(83, 13, 'carrot');
+    L.feel(84, 'wait', 'small');
+    L.check(86, 13);
+    // ---- back yard: snacks, a bounce flower to grow, a pinwheel, and crates to hop up
+    L.food(90, 13, 'candy', true); L.food(92, 13, 'soda', true);
+    L.react('pinwheel', 95, 10, 3, 4);            // blast near it and watch it spin
+    L.prompt(96, 'blast', 'Blast over the dirt and see what grows!');
+    L.patch(100, 14, 3, 'flower');
+    L.box(104, 12, 2, 2, 'B'); L.box(106, 10, 2, 4, 'B');                 // crate steps, 2 tiles each
+    L.dec('crates', 104, 12, { w: 2, h: 2 }); L.dec('crates', 106, 10, { w: 2, h: 4 });
+    L.box(108, 8, 3, 6, 'B');                     // fence: hop the crates, or bounce over it
+    L.dec('fence', 108, 8, { w: 3, h: 6 });
+    L.bug(109, 6, 'home-3');
+    L.check(97, 13);
+    L.food(114, 13, 'banana'); L.food(112, 13, 'apple');
+    L.goal = { x: 115, y: 13, type: 'gate' };
+    L.crowd(90, 106, 14);
     return L;
   }
 
@@ -298,7 +309,7 @@
 
   var STAGES = {
     home:   { id: 'home',   n: '0',   name: 'Morning at Home', zh: '早晨在家', world: 'detroit', theme: 'home', music: 'home', build: buildHome, beige: false, noMeter: true,
-              intro: 'Morning in Detroit. Gus has a very big day ahead.', next: 'market' },
+              intro: 'Gus wakes up with a rumbling belly. His breakfast bao is gone! And there goes Mimi the cat, trotting off with it.', next: 'market' },
     market: { id: 'market', n: '1-1', name: 'Eastern Market Mayhem', zh: '東方市場', world: 'detroit', theme: 'market', music: 'detroit', build: buildMarket, beige: true,
               intro: 'Eastern Market is turning beige. Unplug the Snax machine!', next: 'commute' },
     commute:{ id: 'commute',n: '1-2', name: 'The Coney Commute', zh: '熱狗通勤', world: 'detroit', theme: 'commute', music: 'detroit', build: buildCommute, beige: true,
@@ -349,6 +360,7 @@
     yogurt:     { w: 'inside', name: 'Yogurt', zh: '乳酪', jp: 'jyu5 lok3', fact: 'Yogurt is milk that friendly bacteria turned tangy.', power: 'Vitality, and new neighbours for the village.' },
     blueberries:{ w: 'inside', name: 'Blueberries', zh: '藍莓', jp: 'laam4 mui2', fact: 'One of the few naturally blue foods.', power: 'Vitality and a quick speed boost.' },
     tomato:     { w: 'inside', name: 'Tomato', zh: '番茄', jp: 'faan1 ke2', fact: 'Tomatoes are fruits because they hold seeds.', power: 'Vitality. Great for dropping on red buttons.' },
+    bao:        { w: 'hongkong', name: 'Bao', zh: '包', jp: 'baau1', fact: 'Steamed buns are a Hong Kong breakfast and tea-time favourite.', power: 'A happy, full belly and a burst of speed.' },
     snax:       { w: 'special', name: 'Beige Snax', zh: '米色零食', jp: 'mai5 sik1 ling4 sik6', fact: 'Fills you up. Does nothing.', power: 'Nothing! And a bored grey squatter moves in.' }
   };
 
@@ -363,7 +375,7 @@
       { panel: 'belly', who: 'narrator', line: 'Everything Gus eats, and everything he feels, goes into his belly. And his belly makes him move!' }
     ],
     afterHome: [
-      { panel: 'tv', who: 'narrator', line: 'On the news: beige cubes are appearing at Eastern Market!' }
+      { panel: 'tv', who: 'narrator', line: 'Gus and Mimi share the bao. Then, on the news: beige cubes are appearing at Eastern Market!' }
     ],
     beforeBoss: [
       { panel: 'golemReveal', who: 'narrator', line: 'The Assembly Line Golem is boxing food into Snax. Do not fight it. Feed it!' }
@@ -392,7 +404,8 @@
     waffle: { icon: 'waffle', line: 'The last waffle is gone!', size: 'big' },
     wait:   { icon: 'wait',   line: 'Grandma’s waiting!', size: 'small' },
     high:   { icon: 'high',   line: 'That’s too high!', size: 'medium' },
-    stop:   { icon: 'stop',   line: 'I have to stop playing!', size: 'medium' }
+    stop:   { icon: 'stop',   line: 'I have to stop playing!', size: 'medium' },
+    excited:{ icon: 'excited',line: 'Ooh! Mimi has my bao!', size: 'small' }
   };
 
   function ground(L) { // helper for tests: is a cell standable (solid or one-way)

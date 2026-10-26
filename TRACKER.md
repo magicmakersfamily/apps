@@ -43,7 +43,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | guts-F4 | feature | guts | Mexico, Japan, Taiwan, Hong Kong and the feast | P3 | idea | family | | See `guts/DESIGN-BRIEF` notes in `guts/PLAN.md`. |
 | guts-B1 | bug | guts | Only tested with simulated PlayStation pads in Chrome; never with a real controller, Safari, Firefox or a phone | P1 | testing | self | | Standard and raw Sony mappings are both coded. |
 | guts-F5 | feature | guts | Tune the blast, pressure and breathing numbers after the family plays the first level | P1 | testing | self | | Constants live in `guts/belly.js`; `belly.test.js` guards the balance. |
-| guts-F7 | feature | guts | Rebuild the first level around a memorable toy, a question-shaped goal ("find the missing breakfast"), a reactive world, quick funny recovery and a hidden secret | P1 | planned | AI review | | From an outside review (2026-10-26) and the family's play. 1.1 only made the existing level never-stuck; the rebuild is next. |
+| guts-F10 | feature | guts | More reactions and a bigger secret: flour pile, a pigeon that steals a bite, a windmill, a hidden room; a Hong Kong destination built with the family | P2 | idea | AI review | | Keep every required step a plain jump. |
 | guts-F9 | feature | guts | A "where did we get stuck?" list kept on the device, for grown-ups to read and share | P3 | idea | self | | Nothing sent anywhere. |
 | shelf-F4 | feature | shelf | Search or filter chips (by age, "for little kids", Chinese) | P3 | idea | AI review | | Not needed yet with 10 apps. |
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
@@ -54,6 +54,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| guts-F7 | feature | guts | Rebuild the first level around a memorable toy, a question-shaped goal, a reactive world, quick funny recovery and a secret | P1 | done | AI review | 1.2 | "Find the missing breakfast": Mimi the cat leads, a fizzy drink starts the first blast in slow motion, a laundry basket tips into a step, a fruit hanger drops snacks, a pinwheel pops a snack; every required step is a plain jump (`tools/route.mjs` plays it through at vitality 15). |
 | guts-B2 | bug | guts | Key presses sent with only `key` (no `code`), or shorter than one frame, were ignored, so automation tools and quick taps did nothing | P0 | done | AI review | 1.1 | `input.js` falls back to `key` and holds every press for a frame. |
 | guts-B3 | bug | guts | The final fence needed a big blast to pass, so a 5-year-old got stuck at the end of the level | P0 | done | family | 1.1 | Crate steps (hop only), kitchen shelves past the fridge, more snacks, a stuck helper that floats snacks by, and the gate hands over a forgotten lantern. |
 | guts-F6 | feature | guts | Tap mode, Step mode, on-screen buttons with a mouse, a text view and `GUTS.ai` for one-finger, switch and AI players | P1 | done | family | 1.1 | Settings, or `?ai=1` switches them all on. |

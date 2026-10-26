@@ -134,6 +134,9 @@ input[type=range] { width: 160px; accent-color: #ff8a3d; height: 30px; }
 #tb-jump { right: 14px; bottom: 18px; width: 86px; height: 86px; } #tb-blast { right: 112px; bottom: 18px; } #tb-breathe { right: 22px; bottom: 116px; }
 #touch.little #tb-left, #touch.little #tb-right { display: none; }
 
+.stepbadge { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 6; background: rgba(90,200,255,.95); color: #0b2433; font-weight: 600; font-size: 13px; border-radius: 99px; padding: 4px 14px; max-width: 94%; text-align: center; }
+.textview { padding: 8px 16px; background: #0f0e1a; color: #e9e4ff; font-size: 13px; line-height: 1.4; max-height: 22vh; overflow: auto; border-top: 2px solid #3a3558; }
+#touch.on #tb-wait:not([hidden]) { left: calc(50% - 29px); bottom: 38px; }
 /* page below the game */
 .info { max-width: 900px; margin: 0 auto; padding: 24px 18px 8px; }
 .info h2 { font-size: 24px; margin: 22px 0 6px; }
@@ -173,8 +176,10 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <button class="tb" id="tb-right" data-act="right" aria-label="Move right"><svg viewBox="0 0 24 24"><path d="M9 4l9 8-9 8z"/></svg></button>
       <button class="tb" id="tb-breathe" data-act="breathe" aria-label="Breathe"><svg viewBox="0 0 24 24"><path d="M4 9c4-3 7 3 11 0s5-1 5-1M4 15c4-3 7 3 11 0s5-1 5-1" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>CALM</span></button>
       <button class="tb" id="tb-blast" data-act="blast" aria-label="Blast"><svg viewBox="0 0 24 24"><path d="M12 2c3 4 4 8 2 12l-2 8-2-8c-2-4-1-8 2-12z"/></svg><span>BLAST</span></button>
+      <button class="tb" id="tb-wait" data-act="wait" aria-label="Wait a moment" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>WAIT</span></button>
       <button class="tb" id="tb-jump" data-act="jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M12 4l8 9h-5v7H9v-7H4z"/></svg><span>JUMP</span></button>
     </div>
+    <div class="stepbadge" id="stepbadge" hidden>Step mode: the game moves when you press a button. Press N or Wait to look around.</div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <section class="screen" id="s-title">
@@ -212,7 +217,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <div class="panel"><h2>To be continued…</h2>
         <p>You finished the first level of <b>GUTS</b>. Next stop: <b>Eastern Market</b> in Detroit, then Mexico, Japan, Taiwan and Hong Kong, where Grandma’s feast is waiting.</p>
         <p class="sub">This beta only has Morning at Home so far. We would love to know what felt fun and what felt confusing.</p>
-        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.0" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
+        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.1" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
         <div class="row"><button class="btn primary" id="e-again" data-first>Play again</button><button class="btn" id="e-title" data-back>Title</button></div>
         <p class="links"><a href="../">More from the App Shelf</a><a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake: Ko-fi</a></p>
         <p class="sub" id="e-status" aria-live="polite"></p>
@@ -242,11 +247,16 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
         <div class="field"><label for="set-flash">Flashes</label><input class="switch" type="checkbox" id="set-flash"></div>
         <div class="field"><label for="set-cb">Colour-blind friendly meters</label><input class="switch" type="checkbox" id="set-cb"></div>
         <div class="field"><span class="lab">Game speed</span><div class="seg" id="speed"><button data-s="100">Normal</button><button data-s="80">Slower</button><button data-s="60">Slowest</button></div></div>
+        <div class="field"><label for="set-tap">Tap mode<small>One tap keeps going for a moment: walk, jump, blast, breathe. No holding needed.</small></label><input class="switch" type="checkbox" id="set-tap"></div>
+        <div class="field"><label for="set-step">Step mode<small>The game waits between presses. Good for slow clickers, thinking time and AI helpers.</small></label><input class="switch" type="checkbox" id="set-step"></div>
+        <div class="field"><label for="set-buttons">On-screen buttons<small>Always show the touch buttons, even with a mouse.</small></label><input class="switch" type="checkbox" id="set-buttons"></div>
+        <div class="field"><label for="set-readout">Text view<small>Describes what is happening in words, under the game.</small></label><input class="switch" type="checkbox" id="set-readout"></div>
         <div class="field"><span class="lab">Saved game<small>Stays on this device only.</small></span><button class="btn small" id="set-erase">Erase saved game</button></div>
         <div class="row"><button class="btn primary" id="set-back" data-first data-back>Done</button></div>
       </div>
     </section>
   </div>
+  <div class="textview" id="textview" hidden aria-live="off"></div>
   <div class="caption" id="caption" aria-live="polite"><span class="who" id="cap-who"></span><span id="cap-text"></span><span class="tag" id="voice-tag" hidden>backup voice</span></div>
 </div>
 
@@ -262,12 +272,14 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
     <tr><td>Pause</td><td>Esc or P</td><td>Options</td><td>Pause button</td></tr>
   </table>
   <p>Press a button on a plugged-in or Bluetooth PlayStation controller once and the game finds it. In Gut Check mode the stick aims your blast.</p>
+  <h2>Playing with one finger, a mouse, or an AI helper</h2>
+  <p>In <b>Settings</b> turn on <b>Tap mode</b> (one tap keeps going for a moment), <b>Step mode</b> (the game waits between presses), <b>On-screen buttons</b> (clickable with a mouse) and <b>Text view</b> (describes the game in words). Add <code>?ai=1</code> to the web address to switch all four on, for an AI assistant that can press keys and click but not hold buttons.</p>
   <h2>What it teaches</h2>
   <ul><li>Whole foods give steady energy; sugar gives a quick burst and then a crash.</li><li>Feelings fill the same belly as food, and slow breathing lets them out.</li><li>Eating well makes the wild stuff easier to control.</li></ul>
 </div>
 
 <footer class="about">
-  <span>Version 1.0 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.0&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
+  <span>Version 1.1 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.1&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
   <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
   <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
 </footer>
@@ -280,6 +292,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
 <script src="audio.js"></script>
 <script src="input.js"></script>
 <script src="game.js"></script>
+<script src="ai.js"></script>
 <script src="ui.js"></script>
 </body>
 </html>

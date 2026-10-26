@@ -372,13 +372,13 @@
     });
     if (st.lanItem && !st.lanItem.taken && Math.hypot(gcx - st.lanItem.x, gcy - (st.lanItem.y - 20)) < 62) {
       st.lanItem.taken = true; st.lan.has = true; Au.sfx('bug'); burst(20, st.lanItem.x, st.lanItem.y - 20, 180, 200, '#ffd36b', 1, 5, 120);
-      say('Por Por’s lantern! Gus clips it to his backpack.', 'narrator', { soft: true });
+      say('Po Po’s lantern! Gus clips it to his backpack.', 'narrator', { soft: true });
     }
     if (st.goal && st.status === 'play') {
       var go = st.goal;
       if (Math.abs(gcx - go.x) < 40 && Math.abs(g.y - go.y) < 70) {
-        if (go.type === 'gate' && !st.lan.has) { if (st.gate.nag <= 0) { st.gate.nag = 3; say('Grab the lantern for Por Por first!', 'narrator', {}); g.vx = -200; Au.sfx('puff'); } }
-        else finish();
+        if (go.type === 'gate' && !st.lan.has && st.lanItem && !st.lanItem.taken) { st.lanItem.taken = true; st.lan.has = true; say('Oops, Gus nearly forgot Po Po’s lantern! A breeze brings it over.', 'narrator', {}); Au.sfx('bug'); }
+        finish();
       }
       st.gate.nag -= dt;
     }
@@ -445,6 +445,22 @@
     c.x += (tx - c.x) * k; c.y += (ty - c.y) * Math.min(1, snap ? 1 : dt * 5);
   }
 
+  /* If Gus hasn't got anywhere for a while, a few snacks turn up next to him and a hint appears. Never a dead end. */
+  function updateStuck(dt) {
+    var st = Game.st, g = st.g, pr = st.prog || (st.prog = { x: g.x, t: 0, aided: 0 });
+    if (Math.abs(g.x - pr.x) > 2.5 * T) { pr.x = g.x; pr.t = 0; return; }
+    if (g.breathing || st.bubbles.length) return;
+    pr.t += dt;
+    if (pr.t > 22 && pr.aided < 4) {
+      pr.aided++; pr.t = 8;
+      var dir = g.face, ids = ['candy', 'soda', 'banana', 'broccoli'];
+      for (var i = 0; i < 3; i++) st.foods.push({ x: g.x + dir * (60 + i * 46), y: g.y - 58 - i * 6, id: ids[(pr.aided + i) % 4], respawn: false, taken: false, timer: 0, ph: i });
+      burst(14, g.x + dir * 90, g.y - 60, 120, 140, '#ffe9a0', 0.9, 4, 100); Au.sfx('bloom');
+      say('Hungry? Some snacks floated by! Try the shelves, the crates, or a big blast.', 'narrator', { soft: true });
+      st.stats.helped = (st.stats.helped || 0) + 1;
+    }
+  }
+
   /* ---------------- update loop ---------------- */
   Game.update = function (dt) {
     var st = Game.st; if (!st) return;
@@ -455,7 +471,7 @@
       updateGus(dt);
       B.tick(b, dt, { breathing: st.g.breathing });
       handleEvents();
-      updatePickups(dt); updatePrompts(dt); updateTriggers(); updateBubbles(dt);
+      updatePickups(dt); updatePrompts(dt); updateTriggers(); updateBubbles(dt); updateStuck(dt);
     } else if (st.status === 'clear') {
       st.clearT += dt; updateGus(dt); B.tick(b, dt, {}); b.events = [];
       updatePickups(dt);
@@ -612,7 +628,16 @@
     if (Game.hooks.tick) Game.hooks.tick(dt);
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height);
     if (Game.override) { cx.setTransform(dpr, 0, 0, dpr, 0, 0); Game.panelT += dt; Game.override(cx, W, H, Game.panelT, dt); }
-    else if (Game.view === 'stage' && Game.st) { if (!Game.paused) Game.update(dt); Game.render(); }
+    else if (Game.view === 'stage' && Game.st) {
+      // Step mode: between presses the world waits, but only once Gus has come to rest (never freeze him mid-air)
+      var gs = Game.st.g, rest = Game.st.status !== 'play' || (gs.grounded && Math.abs(gs.vx) < 30 && Math.abs(gs.vy) < 20 && !(gs.lockT > 0));
+      Game.unsettled = rest ? 0 : (Game.unsettled || 0) + dt;
+      var wait = In.stepMode && In.frozen && (rest || Game.unsettled > 5);
+      Game.waiting = wait;
+      if (wait) { Au.blastOff(); Au.breatheOff(); }
+      if (!Game.paused && !wait) Game.update(dt);
+      Game.render();
+    }
     requestAnimationFrame(loop);
   }
   Game.step = function (dt, n) { for (var i = 0; i < (n || 1); i++) { In.frame(dt); Game.update(dt); } };

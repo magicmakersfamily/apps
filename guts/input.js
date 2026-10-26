@@ -3,33 +3,55 @@
 (function (root) {
   'use strict';
   var G = root.GUTS = root.GUTS || {};
-  var keys = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0 };
+  var keys = {}, latch = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0, wait: 0 }, tlatch = {};
+  var clock = 0, until = {}, tprev = {}, aiHold = {}, advUntil = 0;
+  var DUR = { move: 0.45, jump: 0.32, blast: 0.85, breathe: 2.4 };   // how long one tap keeps going in Tap mode
   var last = 'kb', padSeen = false, dead = 0.3;
   var prev = {}, rep = {}, listeners = [];
   var I = {
     p1: { mx: 0, my: 0, jump: false, blast: false, breathe: false, jumpP: false, blastP: false, breatheP: false, poundP: false, aimX: 0, aimY: 0 },
     p2: { mx: 0, my: 0, feed: false, feedP: false, breathe: false },
     nav: { up: false, down: false, left: false, right: false, ok: false, back: false },
-    pauseP: false, anyP: false, kind: 'kb', pads: 0, padName: '', capture: true
+    pauseP: false, anyP: false, kind: 'kb', pads: 0, padName: '', capture: true,
+    tap: false, stepMode: false, frozen: false, active: false
   };
 
   function isTextTarget(t) { return t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName); }
   function inStage(t) { return !t || t === document.body || (t.closest && t.closest('#stage')); }
   var BLOCK = { Space: 1, ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1, Enter: 1 };
 
+  /* Some automation tools send key events with only `key` set (no `code`), so fall back to it. */
+  var KEYMAP = { ArrowLeft: 'ArrowLeft', ArrowRight: 'ArrowRight', ArrowUp: 'ArrowUp', ArrowDown: 'ArrowDown', ' ': 'Space', Spacebar: 'Space', Enter: 'Enter', Escape: 'Escape', Esc: 'Escape', Shift: 'ShiftLeft', '.': 'Period', Left: 'ArrowLeft', Right: 'ArrowRight', Up: 'ArrowUp', Down: 'ArrowDown' };
+  function codeOf(e) {
+    if (e.code && e.code !== 'Unidentified') return e.code;
+    var kk = e.key; if (!kk) return '';
+    if (KEYMAP[kk]) return KEYMAP[kk];
+    if (kk.length === 1) { var u = kk.toUpperCase(); if (/[A-Z]/.test(u)) return 'Key' + u; if (/[0-9]/.test(u)) return 'Digit' + u; }
+    return '';
+  }
   root.addEventListener('keydown', function (e) {
     if (isTextTarget(e.target)) return;
-    if (BLOCK[e.code] && inStage(e.target) && I.capture) e.preventDefault();
-    if (!keys[e.code]) edge[e.code] = true;
-    keys[e.code] = true; last = 'kb';
+    var c = codeOf(e); if (!c) return;
+    if (BLOCK[c] && inStage(e.target) && I.capture) e.preventDefault();
+    if (!keys[c]) edge[c] = true;
+    keys[c] = true; latch[c] = true; last = 'kb';
   });
-  root.addEventListener('keyup', function (e) { keys[e.code] = false; });
-  root.addEventListener('blur', function () { keys = {}; touch.left = touch.right = touch.jump = touch.blast = touch.breathe = touch.down = 0; });
+  /* a key that goes down and up between two frames still counts for one frame */
+  root.addEventListener('keyup', function (e) { var c = codeOf(e); if (c) keys[c] = false; });
+  root.addEventListener('blur', function () { for (var c in keys) keys[c] = false; latch = {}; touch.left = touch.right = touch.jump = touch.blast = touch.breathe = touch.down = touch.wait = 0; });
   root.addEventListener('gamepadconnected', function (e) { padSeen = true; I.padName = e.gamepad.id; listeners.forEach(function (f) { f('connect', e.gamepad); }); });
   root.addEventListener('gamepaddisconnected', function (e) { listeners.forEach(function (f) { f('disconnect', e.gamepad); }); });
 
-  function k(c) { return !!keys[c]; }
-  function anyK(list) { for (var i = 0; i < list.length; i++) if (keys[list[i]]) return true; return false; }
+  function k(c) { return !!(keys[c] || latch[c]); }
+  function anyK(list) { for (var i = 0; i < list.length; i++) if (keys[list[i]] || latch[list[i]]) return true; return false; }
+  function tv(n) { return (touch[n] || tlatch[n]) ? 1 : 0; }
+  function ai(n) { return clock < (aiHold[n] || 0); }
+  /* Tap mode: one press keeps the action going for a moment (a tap walks, jumps, blasts, breathes). */
+  function lat(name, raw, dur) {
+    if (raw && !tprev[name]) until[name] = clock + dur;
+    tprev[name] = raw;
+    return raw || clock < (until[name] || 0);
+  }
 
   /* Normalise a gamepad. Standard mapping (what Chrome and Safari give a PS4/PS5 pad):
      0 Cross, 1 Circle, 2 Square, 3 Triangle, 4 L1, 5 R1, 6 L2, 7 R2, 9 Options, 12-15 d-pad.
@@ -65,21 +87,40 @@
 
     // ----- player 1
     var p = I.p1, mx = 0, my = 0;
+    if (!I.frozen) clock += dt;
     if (anyK(['ArrowLeft', 'KeyA'])) mx -= 1; if (anyK(['ArrowRight', 'KeyD'])) mx += 1;
     if (anyK(['ArrowDown', 'KeyS'])) my += 1; if (anyK(['ArrowUp', 'KeyW'])) my -= 1;
     if (a) { mx += a.lx; my += a.ly; }
-    mx += touch.right - touch.left;
-    p.mx = Math.max(-1, Math.min(1, mx)); p.my = Math.max(-1, Math.min(1, my));
+    mx += tv('right') - tv('left');
+    if (ai('right')) mx += 1; if (ai('left')) mx -= 1;
+    mx = Math.max(-1, Math.min(1, mx));
+    var jump = anyK(['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || tv('jump') || ai('jump');
+    var blast = anyK(['KeyX', 'ShiftLeft', 'ShiftRight', 'Period']) || (a && (a.square || a.r1 || a.r2)) || tv('blast') || ai('blast');
+    var breatheRaw = anyK(['KeyB', 'KeyC', 'ArrowDown', 'KeyS']) || (a && (a.circle || a.l1)) || tv('breathe') || ai('breathe');
+    var pound = (a && a.tri) || (a && a.ly > 0.6) || tv('breathe') || k('ArrowDown') || k('KeyS') || ai('breathe');
+    var breatheGround = breatheRaw;
+    // presses (edges) come from the raw buttons, so a tap is still a tap in Tap mode
+    p.jumpP = !!(jump && !prev.jump); p.blastP = !!(blast && !prev.blast); p.breatheP = !!(breatheRaw && !prev.breathe);
+    p.poundP = !!(pound && !prev.pound); p.pound = !!pound;
+    prev.jump = jump; prev.blast = blast; prev.breathe = breatheRaw; prev.pound = pound;
+    if (I.tap || I.stepMode) {
+      var rl = mx < -0.3, rr = mx > 0.3;
+      if (rl && !tprev.l) { until.l = clock + DUR.move; until.r = 0; }
+      if (rr && !tprev.r) { until.r = clock + DUR.move; until.l = 0; }
+      tprev.l = rl; tprev.r = rr;
+      mx = (rl || clock < (until.l || 0) ? -1 : 0) + (rr || clock < (until.r || 0) ? 1 : 0);
+      jump = lat('jump', jump, DUR.jump); blast = lat('blast', blast, DUR.blast); breatheGround = breatheRaw = lat('breathe', breatheRaw, DUR.breathe);
+    }
+    p.mx = mx; p.my = Math.max(-1, Math.min(1, my));
     p.aimX = a ? a.lx : p.mx; p.aimY = a ? a.ly : p.my;
-    var jump = anyK(['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || touch.jump;
-    var blast = anyK(['KeyX', 'ShiftLeft', 'ShiftRight', 'Period']) || (a && (a.square || a.r1 || a.r2)) || touch.blast;
-    var breathe = anyK(['KeyB', 'KeyC', 'ArrowDown', 'KeyS']) || (a && (a.circle || a.l1)) || touch.breathe;
-    var pound = (a && a.tri) || (a && a.ly > 0.6) || touch.breathe || k('ArrowDown') || k('KeyS');
-    p.jumpP = jump && !prev.jump; p.blastP = blast && !prev.blast; p.breatheP = breathe && !prev.breathe;
-    p.poundP = pound && !prev.pound; p.pound = !!pound;
-    p.jump = !!jump; p.blast = !!blast; p.breathe = !!breathe;
-    p.breatheGround = anyK(['KeyB', 'KeyC', 'ArrowDown', 'KeyS']) || (a && (a.circle || a.l1)) || !!touch.breathe;
-    prev.jump = jump; prev.blast = blast; prev.breathe = breathe; prev.pound = pound;
+    p.jump = !!jump; p.blast = !!blast; p.breathe = !!breatheRaw; p.breatheGround = !!breatheGround;
+    // Step mode: the game only moves while an action is going, or for a moment after "wait"
+    if (k('KeyN') && edge.KeyN) advUntil = clock + 0.5;
+    if (tv('wait') && !prev.wait) advUntil = clock + 0.5;
+    if (ai('wait') && !prev.aiwait) advUntil = clock + 0.5;
+    prev.wait = tv('wait'); prev.aiwait = ai('wait');
+    I.active = !!(p.mx || p.jump || p.blast || p.breatheGround || clock < advUntil);
+    I.frozen = !!(I.stepMode && !I.active);
 
     // ----- player 2 (Biffy): second pad, or IJKL + U feed + O breathe
     var q = I.p2, qx = 0, qy = 0;
@@ -110,10 +151,15 @@
       prev['n' + d] = on;
     });
     prev.nCross = a && a.cross;
-    edge = {};
+    edge = {}; latch = {}; tlatch = {};
   };
 
   I.touch = touch;
+  I.touchDown = function (a) { touch[a] = 1; tlatch[a] = 1; last = 'touch'; };
+  I.touchUp = function (a) { touch[a] = 0; };
+  /* hold an action for `secs` of game time (used by GUTS.ai and by tests) */
+  I.press = function (name, secs) { aiHold[name] = clock + (secs || 0.4); last = 'ai'; };
+  I.setTap = function (tap, step) { I.tap = !!tap; I.stepMode = !!step; if (!step) I.frozen = false; };
   I.setKind = function (kind) { last = kind; };
   I.onPad = function (fn) { listeners.push(fn); };
   I.rumble = function (ms, strong, weak) {
@@ -121,5 +167,6 @@
   };
   /* test hook: the headless smoke test sets keys and fake pads through these */
   I._keys = keys;
+  I.durations = DUR;
   G.Input = I;
 })(typeof window !== 'undefined' ? window : this);

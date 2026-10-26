@@ -35,6 +35,7 @@
       var segs = [text];
       if (canto && text.indexOf(canto) >= 0) { var p = text.split(canto); segs = []; if (p[0].trim()) segs.push(p[0]); segs.push({ canto: canto }); if (p[1] && p[1].replace(/[!.?\s]/g, '')) segs.push(p[1]); else if (p[1]) segs.push(p[1]); }
       var c = Voice.cfg(who), i = 0;
+      segs = segs.map(function (x) { return typeof x === 'string' ? x.replace(/Po Po/g, 'Poh Poh') : x; });
       Voice.speaking = true; Au.duck(true);
       var est = 1500 + text.length * 75; setTimeout(end, est + 1500);
       var wait = Math.max(0, 200 - (Date.now() - Voice.lastCancel));
@@ -60,7 +61,7 @@
   UI.Voice = Voice;
 
   /* ---------------- captions ---------------- */
-  var WHO = { narrator: '', baron: 'Baron Von Processo', porpor: 'Por Por', biffy: 'Biffy' };
+  var WHO = { narrator: '', baron: 'Baron Von Processo', porpor: 'Po Po', biffy: 'Biffy' };
   function rubyFor(str, canto, jyut) {
     if (!canto || str.indexOf(canto) < 0) return esc(str);
     var syl = jyut.split(' '), chars = Array.from(canto), r = '';
@@ -100,8 +101,8 @@
     if (name !== 'play') { UI.clearCaption(); Voice.stop(); pendingSay = null; }
     var playing = name === 'play' || name === 'cutscene';
     $('hudbtns').hidden = !(name === 'play' || name === 'pause');
-    $('touch').classList.toggle('on', touchDevice && name === 'play');
     $('touch').classList.toggle('little', Game.save.mode === 'little');
+    applyAccess();
     Game.paused = name === 'pause' || name === 'settings' && returnTo === 'pause';
     if (name === 'title') { Game.override = titleScene; Game.view = 'none'; Au.playSong('title'); UI.clearCaption(); Au.blastOff(); Au.breatheOff(); }
     if (name === 'village') { Game.override = villageScene; Au.setLayers(Math.min(5, Math.floor(Game.bugsRescued() / 1.5))); Au.playSong('village'); updateVillageInfo(); }
@@ -251,12 +252,25 @@
   function syncSettings() {
     var s = Game.save.set;
     $('set-music').value = s.music; $('set-sfx').value = s.sfx;
-    ['voice', 'meters', 'shake', 'flash', 'cb'].forEach(function (k) { $('set-' + k).checked = !!s[k]; });
+    ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).checked = !!s[k]; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === s.gross)); });
     Array.prototype.forEach.call($('speed').children, function (b) { b.setAttribute('aria-pressed', String(+b.dataset.s === s.speed)); });
     $('set-erase').textContent = 'Erase saved game';
   }
-  function setSetting(k, v) { Game.save.set[k] = v; Game.persist(); Game.applySettings(); }
+  function setSetting(k, v) { Game.save.set[k] = v; Game.persist(); Game.applySettings(); applyAccess(); }
+  /* tap / step / on-screen buttons / text view, from Settings or from ?ai=1 (never saved by the address) */
+  var Q = (function () { var o = {}; try { new URLSearchParams(location.search).forEach(function (v, k) { o[k] = v; }); } catch (e) {} return o; })();
+  function flag(k) { return !!(Q.ai === '1' || Q[k] === '1' || Game.save.set[k]); }
+  function applyAccess() {
+    In.setTap(flag('tap'), flag('step'));
+    $('stepbadge').hidden = !(flag('step') && UI.screen === 'play');
+    $('tb-wait').hidden = !flag('step');
+    var tv = $('textview'); tv.hidden = !flag('readout'); tv.setAttribute('aria-live', 'off');
+    var on = (touchDevice || flag('buttons') || flag('step') || flag('tap')) && UI.screen === 'play';
+    $('touch').classList.toggle('on', on);
+  }
+  UI.applyAccess = applyAccess;
+  var tvT = 0;
 
   /* ---------------- misc ---------------- */
   var MODES = {
@@ -299,6 +313,7 @@
       navMenu();
       if (sc === 'pause' && In.pauseP) $('p-resume').click();
     }
+    tvT -= dt; if (tvT <= 0 && !$('textview').hidden && G.ai) { tvT = 0.5; var tx = G.ai.describe(); if (tx !== $('textview').textContent) $('textview').textContent = tx; }
     if (In.kind === 'touch' && !touchDevice) { touchDevice = true; if (sc === 'play') $('touch').classList.add('on'); }
   };
   Game.hooks.say = UI.say;
@@ -344,7 +359,7 @@
     $('e-again').onclick = function () { startLevel(); }; $('e-title').onclick = function () { show('title'); };
     $('e-tell').onclick = function () { tellFriend($('e-status')); }; $('tellBtn').onclick = function () { tellFriend($('tellStatus')); };
     $('set-music').oninput = function () { setSetting('music', +this.value); }; $('set-sfx').oninput = function () { setSetting('sfx', +this.value); };
-    ['voice', 'meters', 'shake', 'flash', 'cb'].forEach(function (k) { $('set-' + k).onchange = function () { setSetting(k, this.checked); }; });
+    ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).onchange = function () { setSetting(k, this.checked); }; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.onclick = function () { setSetting('gross', b.dataset.g); syncSettings(); Au.sfx('toot'); }; });
     Array.prototype.forEach.call($('speed').children, function (b) { b.onclick = function () { setSetting('speed', +b.dataset.s); syncSettings(); }; });
     var armed = false;
@@ -352,8 +367,8 @@
     // touch buttons
     Array.prototype.forEach.call(document.querySelectorAll('.tb'), function (b) {
       var act = b.dataset.act;
-      function down(e) { e.preventDefault(); touchDevice = true; In.setKind('touch'); try { Au.init(); } catch (x) {} In.touch[act] = 1; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) {} }
-      function up() { In.touch[act] = 0; b.classList.remove('down'); }
+      function down(e) { e.preventDefault(); touchDevice = true; try { Au.init(); } catch (x) {} In.touchDown(act); b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) {} }
+      function up() { In.touchUp(act); b.classList.remove('down'); }
       b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
       b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     });
@@ -363,7 +378,7 @@
     if (matchMedia('(prefers-reduced-motion: reduce)').matches && !localStorage.getItem('guts:1')) Game.save.set.shake = false;
     // portrait phone hint
     if (window.innerWidth < 560 && window.innerHeight > window.innerWidth) { var hn = document.createElement('div'); hn.className = 'hint-rot'; hn.textContent = 'Turn your phone sideways for a bigger view.'; $('view').appendChild(hn); setTimeout(function () { hn.remove(); }, 7000); }
-    syncMode(); show('title');
+    syncMode(); applyAccess(); show('title');
     root.__guts = { Game: Game, UI: UI, startLevel: startLevel, show: show, runScenes: runScenes };
   }
   if (location.hash === '#cover') {

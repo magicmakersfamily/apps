@@ -70,10 +70,10 @@
     // snack counter in front of the fridge (respawning so the lesson can't be missed)
     L.food(48, 13, 'soda', true); L.food(50, 13, 'candy', true);
     L.prompt(47, 'eat:soda', 'Sugar fills your belly with pressure.');
-    L.box(52, 4, 3, 10, 'B');                     // fridge wall: 10 tiles. Blast over it!
+    L.plat(45, 12, 2); L.plat(47, 10, 2); L.plat(49, 8, 2); L.plat(51, 6, 1);   // kitchen shelves: the walking way up (blasting is the shortcut)
+    L.box(52, 4, 3, 10, 'B');                     // fridge: 10 tiles. Climb the shelves, or blast over it!
     L.dec('fridge', 52, 4, { w: 3, h: 10 });
-    L.blast(48, 56);
-    L.prompt(50, 'blast', 'Hold Blast to rocket over the fridge!');
+    L.prompt(50, 'blast', 'Hold Blast to rocket over the fridge, or hop up the shelves!');
     // breathe lesson
     L.feel(59, 'waffle', 'big');
     L.prompt(61, 'breathe', 'Tight tummy? Stand still and hold Breathe.');
@@ -86,20 +86,21 @@
     L.box(82, 12, 4, 2, 'B');                     // coffee table
     L.lantern = { x: 83, y: 11 };
     L.dec('tv', 87, 9, {});
-    L.prompt(79, 'jump', 'Grab the lantern for Por Por!');
+    L.prompt(79, 'jump', 'Grab the lantern for Po Po!');
     L.feel(90, 'stop', 'medium');
     L.food(76, 11, 'blueberries'); L.food(88, 13, 'carrot');
-    // back yard
-    L.prompt(99, 'blast', 'Blast over the dirt to grow a bounce flower!');
-    L.food(101, 13, 'candy', true);
-    L.patch(104, 14, 3, 'flower');
-    L.blast(97, 112);
-    L.box(110, 8, 3, 6, 'B');                     // fence, 6 tiles
+    // back yard: plenty of snacks, a bounce flower to grow, and crates you can simply hop up
+    L.prompt(97, 'blast', 'Blast over the dirt to grow a bounce flower!');
+    L.food(95, 13, 'candy', true); L.food(97, 13, 'soda', true); L.food(99, 13, 'candy', true);
+    L.patch(102, 14, 3, 'flower');
+    L.box(106, 12, 2, 2, 'B'); L.box(108, 10, 2, 4, 'B');                 // crate steps, 2 tiles each
+    L.dec('crates', 106, 12, { w: 2, h: 2 }); L.dec('crates', 108, 10, { w: 2, h: 4 });
+    L.box(110, 8, 3, 6, 'B');                     // fence: hop the crates, or bounce over it
     L.dec('fence', 110, 8, { w: 3, h: 6 });
     L.bug(111, 6, 'home-2');
     L.check(94, 13);
     L.bug(122, 13, 'home-3');
-    L.food(118, 13, 'banana');
+    L.food(116, 13, 'banana'); L.food(119, 13, 'apple'); L.food(122, 13, 'blueberries');
     L.goal = { x: 128, y: 13, type: 'gate' };
     L.crowd(96, 126, 14);
     return L;
@@ -358,7 +359,7 @@
       { panel: 'machine', who: 'narrator', line: 'His Snax machines squish every food on Earth into the same beige cube. Crunch. Crunch. Boring.' },
       { panel: 'baron', who: 'baron', line: 'Tacos? Beige! Noodles? Beige! Soon the whole world will taste like nothing!' },
       { panel: 'room', who: 'narrator', line: 'Meet Gus. Today he flies to Hong Kong for Grandma’s Mid-Autumn feast.' },
-      { panel: 'lantern', who: 'narrator', line: 'He made a paper lantern for Por Por. Now he just has to get there.' },
+      { panel: 'lantern', who: 'narrator', line: 'He made a paper lantern for Po Po. Now he just has to get there.' },
       { panel: 'belly', who: 'narrator', line: 'Everything Gus eats, and everything he feels, goes into his belly. And his belly makes him move!' }
     ],
     afterHome: [

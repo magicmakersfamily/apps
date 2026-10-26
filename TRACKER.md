@@ -37,12 +37,14 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-B2 | bug | sequence-flow | Pacer: +1m does not add a breathing cycle | P3 | planned | self | | Total could be set by duration instead of cycles. |
 | sequence-flow-F10 | feature | sequence-flow | Replace `confirm()` and `alert()` with in-page dialogs | P3 | planned | self | | The restart confirmation blocks automated testers. |
 | sequence-flow-B3 | bug | sequence-flow | Never tested on a real phone: wake lock, background timing, chimes, vibration, voice, Safari and Firefox | P1 | testing | self | | Scenarios are listed in PLAN.md "Known gaps". Also covers the AI Speak button. |
-| guts-F1 | feature | guts | Recorded voices for the storyteller, Por Por (Cantonese) and Biffy | P2 | planned | self | | 1.0 uses the browser's own voices (the "backup voice" tag shows). Needs a local Kokoro render like blow-up/. |
+| guts-F1 | feature | guts | Recorded voices for the storyteller, Po Po (Cantonese) and Biffy | P2 | planned | self | | 1.0 uses the browser's own voices (the "backup voice" tag shows). Needs a local Kokoro render like blow-up/. |
 | guts-F2 | feature | guts | Detroit: Eastern Market, The Coney Commute, People Mover Rooftops and the Assembly Line Golem boss | P1 | planned | family | | The four levels are already built in `guts/data.js` and path-checked by `levels.test.js`; the engine still needs Snax bots, crates, drones, moving platforms and the boss. |
 | guts-F3 | feature | guts | The Mouth, Biffy and two-player co-op | P2 | planned | family | | Level built in `data.js`; chompers, saliva and the molar scene are not wired up. |
 | guts-F4 | feature | guts | Mexico, Japan, Taiwan, Hong Kong and the feast | P3 | idea | family | | See `guts/DESIGN-BRIEF` notes in `guts/PLAN.md`. |
 | guts-B1 | bug | guts | Only tested with simulated PlayStation pads in Chrome; never with a real controller, Safari, Firefox or a phone | P1 | testing | self | | Standard and raw Sony mappings are both coded. |
 | guts-F5 | feature | guts | Tune the blast, pressure and breathing numbers after the family plays the first level | P1 | testing | self | | Constants live in `guts/belly.js`; `belly.test.js` guards the balance. |
+| guts-F7 | feature | guts | Rebuild the first level around a memorable toy, a question-shaped goal ("find the missing breakfast"), a reactive world, quick funny recovery and a hidden secret | P1 | planned | AI review | | From an outside review (2026-10-26) and the family's play. 1.1 only made the existing level never-stuck; the rebuild is next. |
+| guts-F9 | feature | guts | A "where did we get stuck?" list kept on the device, for grown-ups to read and share | P3 | idea | self | | Nothing sent anywhere. |
 | shelf-F4 | feature | shelf | Search or filter chips (by age, "for little kids", Chinese) | P3 | idea | AI review | | Not needed yet with 10 apps. |
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
 | shelf-F6 | feature | shelf | A detail page per app (screenshots, what kids learn, privacy and storage) | P3 | idea | AI review | | Today the About panel holds this. |
@@ -52,6 +54,10 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| guts-B2 | bug | guts | Key presses sent with only `key` (no `code`), or shorter than one frame, were ignored, so automation tools and quick taps did nothing | P0 | done | AI review | 1.1 | `input.js` falls back to `key` and holds every press for a frame. |
+| guts-B3 | bug | guts | The final fence needed a big blast to pass, so a 5-year-old got stuck at the end of the level | P0 | done | family | 1.1 | Crate steps (hop only), kitchen shelves past the fridge, more snacks, a stuck helper that floats snacks by, and the gate hands over a forgotten lantern. |
+| guts-F6 | feature | guts | Tap mode, Step mode, on-screen buttons with a mouse, a text view and `GUTS.ai` for one-finger, switch and AI players | P1 | done | family | 1.1 | Settings, or `?ai=1` switches them all on. |
+| guts-F8 | feature | guts | Grandma is "Po Po" (spoken "Poh Poh"), not "Por Por" | P2 | done | family | 1.1 | |
 | sequence-flow-B8 | bug | sequence-flow | A deadline that has passed is moved to tomorrow, so a restarted 20 minute sauna becomes a 22 hour timer | P0 | done | family | 1.8 | Deadlines stay on the run's day; the "Your flow needs adjusting" dialog offers Shift the flow, Keep the final deadline or Edit the schedule. Deadline blocks keep their intended length (`plannedSecs`). |
 | sequence-flow-F13 | feature | sequence-flow | Explicit Tomorrow setting for deadlines and Start at / Finish by (crossing midnight on purpose) | P1 | done | family | 1.8 | `nextDay` on a block, `anchorTomorrow` on the routine. Old routines that relied on the silent roll now get the dialog and can tick Tomorrow. |
 | sequence-flow-F14 | feature | sequence-flow | AI builder: cost explainer, provider choice, and an on/off switch | P1 | done | family | 1.8 | Only Anthropic is tested; see sequence-flow-F1. |

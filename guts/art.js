@@ -182,7 +182,7 @@
   };
   A.snaxCube = function (ctx, x, y, r, s) { s = s || 18; ctx.save(); ctx.translate(x, y); ctx.rotate(r || 0); rr(ctx, -s / 2, -s / 2, s, s, 4, '#e6d3a8', 2.5); ctx.fillStyle = '#8a7650'; ctx.font = '700 8px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('S', 0, 3); ctx.restore(); };
 
-  /* ---------------- Baron, Por Por, Golem ---------------- */
+  /* ---------------- Baron, Po Po, Golem ---------------- */
   A.baron = function (ctx, x, y, s, t, mood) {
     s = s || 1; ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     var bob = Math.sin(t * 3) * 2;

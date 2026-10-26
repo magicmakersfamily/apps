@@ -37,6 +37,12 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | sequence-flow-B2 | bug | sequence-flow | Pacer: +1m does not add a breathing cycle | P3 | planned | self | | Total could be set by duration instead of cycles. |
 | sequence-flow-F10 | feature | sequence-flow | Replace `confirm()` and `alert()` with in-page dialogs | P3 | planned | self | | The restart confirmation blocks automated testers. |
 | sequence-flow-B3 | bug | sequence-flow | Never tested on a real phone: wake lock, background timing, chimes, vibration, voice, Safari and Firefox | P1 | testing | self | | Scenarios are listed in PLAN.md "Known gaps". Also covers the AI Speak button. |
+| guts-F1 | feature | guts | Recorded voices for the storyteller, Por Por (Cantonese) and Biffy | P2 | planned | self | | 1.0 uses the browser's own voices (the "backup voice" tag shows). Needs a local Kokoro render like blow-up/. |
+| guts-F2 | feature | guts | Detroit: Eastern Market, The Coney Commute, People Mover Rooftops and the Assembly Line Golem boss | P1 | planned | family | | The four levels are already built in `guts/data.js` and path-checked by `levels.test.js`; the engine still needs Snax bots, crates, drones, moving platforms and the boss. |
+| guts-F3 | feature | guts | The Mouth, Biffy and two-player co-op | P2 | planned | family | | Level built in `data.js`; chompers, saliva and the molar scene are not wired up. |
+| guts-F4 | feature | guts | Mexico, Japan, Taiwan, Hong Kong and the feast | P3 | idea | family | | See `guts/DESIGN-BRIEF` notes in `guts/PLAN.md`. |
+| guts-B1 | bug | guts | Only tested with simulated PlayStation pads in Chrome; never with a real controller, Safari, Firefox or a phone | P1 | testing | self | | Standard and raw Sony mappings are both coded. |
+| guts-F5 | feature | guts | Tune the blast, pressure and breathing numbers after the family plays the first level | P1 | testing | self | | Constants live in `guts/belly.js`; `belly.test.js` guards the balance. |
 | shelf-F4 | feature | shelf | Search or filter chips (by age, "for little kids", Chinese) | P3 | idea | AI review | | Not needed yet with 10 apps. |
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
 | shelf-F6 | feature | shelf | A detail page per app (screenshots, what kids learn, privacy and storage) | P3 | idea | AI review | | Today the About panel holds this. |

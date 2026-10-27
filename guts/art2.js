@@ -27,7 +27,12 @@
       ctx.fillStyle = '#d98a4a'; ctx.fillRect(0, gy - 70, w, 70);       // wainscot
       ctx.fillStyle = '#c0763a'; ctx.fillRect(0, gy - 74, w, 6);
       ctx.fillStyle = '#9a5a2a'; ctx.fillRect(0, wy0, w, 6);
-      if (o.cy < 0) { ctx.fillStyle = '#5a3a28'; ctx.fillRect(0, 0, w, wy0); }
+      if (o.cy < 0) {   // above the ceiling: the roof of the house, then sky
+        var rh = Math.min(wy0, 120), ry = wy0 - rh;
+        ctx.fillStyle = '#8f4a3c'; ctx.fillRect(0, ry, w, rh); ctx.strokeStyle = 'rgba(43,29,20,.35)'; ctx.lineWidth = 2;
+        for (var rr2 = 0; rr2 < rh; rr2 += 16) { ctx.beginPath(); ctx.moveTo(0, ry + rr2); ctx.lineTo(w, ry + rr2); ctx.stroke(); for (var rx = ((rr2 / 16) % 2) * 20 - (o.cx % 40); rx < w; rx += 40) { ctx.beginPath(); ctx.moveTo(rx, ry + rr2); ctx.lineTo(rx, ry + rr2 + 16); ctx.stroke(); } }
+        ctx.fillStyle = '#6b3328'; ctx.fillRect(0, ry, w, 8);
+      }
     }
   };
   BG.market = function (ctx, o) {
@@ -174,7 +179,7 @@
       case 'kitchen': // upper cabinets and a window sill
         for (var i = 0; i < d.w; i += 4) { rr(ctx, x + i * 32 + 4, 100, 116, 76, 5, '#f0d9a8', 3); circ(ctx, x + i * 32 + 100, 154, 4, '#8a5a30', 1.5); }
         rr(ctx, x + 40, 20, 300, 40, 8, '#fff', 3); ctx.fillStyle = '#8a5a30'; ctx.font = '700 15px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('KITCHEN', x + 190, 46); break;
-      case 'fridge': rr(ctx, x, y, w, h, 10, '#e8edf5', 4); line(ctx, x + 4, y + h * 0.36, x + w - 4, y + h * 0.36, INK, 3); rr(ctx, x + w - 18, y + 16, 6, 40, 3, '#9aa3b5', 2); rr(ctx, x + w - 18, y + h * 0.36 + 16, 6, 60, 3, '#9aa3b5', 2); rr(ctx, x + 14, y + 22, 28, 22, 3, '#ffd93d', 2); rr(ctx, x + 50, y + 70, 22, 22, 3, '#58b9f5', 2); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(x + 8, y + 8, 8, h - 16); break;
+      case 'fridge': rr(ctx, x, y, w, h, 10, '#e8edf5', 4); line(ctx, x + 4, y + h * 0.36, x + w - 4, y + h * 0.36, INK, 3); rr(ctx, x + w - 18, y + 16, 6, 40, 3, '#9aa3b5', 2); rr(ctx, x + w - 18, y + h * 0.36 + 16, 6, 60, 3, '#9aa3b5', 2); ctx.save(); ctx.translate(x + 28, y + 33); ctx.rotate(Math.sin(t * 35) * (st.wob || 0) * 0.35); rr(ctx, -14, -11, 28, 22, 3, '#ffd93d', 2); ctx.restore(); ctx.save(); ctx.translate(x + 61, y + 81); ctx.rotate(Math.sin(t * 31 + 1) * (st.wob || 0) * 0.35); rr(ctx, -11, -11, 22, 22, 3, '#58b9f5', 2); ctx.restore(); ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.fillRect(x + 8, y + 8, 8, h - 16); break;
       case 'rug': ctx.fillStyle = 'rgba(224,88,74,.85)'; ctx.fillRect(x, y - 6, w, 8); ctx.fillStyle = '#fff1d6'; for (var k = 0; k < d.w; k++) ctx.fillRect(x + k * 32 + 12, y - 6, 8, 8); break;
       case 'sofa': rr(ctx, x - 6, y - 36, w + 12, 66, 14, '#4a90d9', 3.5); rr(ctx, x + 6, y - 20, w - 12, 40, 10, '#6aa7ec', 2.5); rr(ctx, x - 14, y - 24, 22, 54, 9, '#3a7bc4', 3); rr(ctx, x + w - 8, y - 24, 22, 54, 9, '#3a7bc4', 3); break;
       case 'tv': rr(ctx, x, y, 176, 108, 8, '#2b2b36', 4); rr(ctx, x + 10, y + 10, 156, 84, 4, '#0d1a2a', 0);
@@ -183,6 +188,7 @@
       case 'fence': for (var f = 0; f < d.w * 2; f++) { rr(ctx, x + f * 16 + 1, y, 14, h, 3, '#f2f0e6', 2.5); poly(ctx, [x + f * 16 + 1, y, x + f * 16 + 8, y - 8, x + f * 16 + 15, y], '#f2f0e6', 2.5); } ctx.fillStyle = 'rgba(43,29,20,.2)'; ctx.fillRect(x, y + 30, w, 8); ctx.fillRect(x, y + h - 50, w, 8); break;
       case 'billboard': rr(ctx, x, y, 224, 128, 8, '#e6d3a8', 4); A.baron(ctx, x + 70, y + 128, 0.62, t, 'smile'); ctx.fillStyle = '#7a6a48'; ctx.font = '700 22px Fredoka, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('BEIGE', x + 126, y + 56); ctx.fillText('IS BEST!', x + 126, y + 84); line(ctx, x + 40, y + 128, x + 40, y + 300, '#6b5f4c', 8); line(ctx, x + 184, y + 128, x + 184, y + 300, '#6b5f4c', 8); break;
       case 'crates': for (var cr = 0; cr < d.h; cr++) for (var cc = 0; cc < d.w; cc++) { rr(ctx, x + cc * 32 + 1, y + cr * 32 + 1, 30, 30, 3, '#d9a566', 3); line(ctx, x + cc * 32 + 4, y + cr * 32 + 4, x + cc * 32 + 28, y + cr * 32 + 28, 'rgba(43,29,20,.35)', 2); line(ctx, x + cc * 32 + 28, y + cr * 32 + 4, x + cc * 32 + 4, y + cr * 32 + 28, 'rgba(43,29,20,.35)', 2); } break;
+      case 'plate': rr(ctx, x - 6, y - 46, 46, 46, 5, '#c98b4f', 3); rr(ctx, x - 2, y - 40, 38, 14, 3, '#dda56a', 2); ell(ctx, x + 17, y - 52, 20, 5, '#fff', 2.5); if (st.plateBao !== false) A.drawFood(ctx, 'bao', x + 17, y - 66, 34); break;
       case 'dresser': rr(ctx, x, y, w, h, 8, '#c98b4f', 4); for (var dr = 0; dr < 2; dr++) { rr(ctx, x + 8, y + 6 + dr * 28, w - 16, 22, 4, '#dda56a', 2.5); rr(ctx, x + w / 2 - 8, y + 14 + dr * 28, 16, 5, 2, '#7a4a2a', 1.5); } ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x + 4, y + 4, w - 8, 4); break;
       case 'tower': for (var r = 0; r < d.h; r++) for (var c2 = 0; c2 < d.w; c2++) { var col = ['#e63946', '#58b368', '#f0a53a', '#4a90d9'][(r + c2) % 4]; rr(ctx, x + c2 * 32 + 2, y + r * 32 + 2, 28, 28, 7, '#d9a566', 3); circ(ctx, x + c2 * 32 + 16, y + r * 32 + 16, 8, col, 2); } break;
       case 'freeway': for (var px = d.x * 32 + 100; px < d.x1 * 32; px += 420) { rr(ctx, px, d.y * 32 + 104, 46, 700, 4, '#8f95a3', 3); } break;
@@ -284,8 +290,14 @@
       if (i < lamps) { line(ctx, hx + 62 * s, hy, hx + 62 * s, hy - 40 * s, INK, 3); circ(ctx, hx + 62 * s, hy - 44 * s, 6 * s, '#ffe066', 2); }
     }
     for (var j = 0; j < stalls; j++) { var sx = w * (0.12 + j * 0.17), syy = gy + 26 * s; for (var k = 0; k < 4; k++) { ctx.fillStyle = k % 2 ? '#fff' : ['#e0584a', '#4a90d9', '#58b368', '#f0a53a', '#9b6bd1'][j]; ctx.fillRect(sx + k * 10 * s, syy - 46 * s, 10 * s, 12 * s); } rr(ctx, sx, syy - 34 * s, 40 * s, 22 * s, 3, '#c98b4f', 2.5); A.drawFood(ctx, ['apple', 'carrot', 'yogurt', 'blueberries', 'tomato'][j], sx + 20 * s, syy - 36 * s, 24 * s); }
-    var nb = Math.min(12, (st.bugs || 0) + 2), fams = ['yogurt', 'kimchi', 'natto'];
-    for (var b = 0; b < nb; b++) A.bug(ctx, w * (0.1 + hash(b + 3) * 0.8) + Math.sin(t * 0.8 + b * 2) * 22 * s, gy + 40 * s + hash(b + 7) * 24 * s, t + b, fams[b % 3], { r: 11 * s, hop: ((t + b) % 4) < 0.6 });
+    var nb = Math.min(12, (st.bugs || 0) + 2), fams = ['yogurt', 'kimchi', 'natto'], res = st.res || [];
+    for (var b = 0; b < Math.max(0, nb - res.length); b++) A.bug(ctx, w * (0.1 + hash(b + 3) * 0.8) + Math.sin(t * 0.8 + b * 2) * 22 * s, gy + 40 * s + hash(b + 7) * 24 * s, t + b, fams[b % 3], { r: 11 * s, hop: ((t + b) % 4) < 0.6 });
+    res.forEach(function (r, i) {
+      var rx2 = w * (0.12 + (i % 6) * 0.15) + Math.sin(t * 0.7 + i) * 10 * s, ry2 = gy + (44 + (i % 2) * 22) * s, selr = st.sel === r.id;
+      if (selr) { ctx.save(); ctx.globalAlpha = 0.5 + 0.3 * Math.sin(t * 6); circ(ctx, rx2, ry2 - 10 * s, 24 * s, '#ffe9a0', 0); ctx.restore(); }
+      A.bug(ctx, rx2, ry2 - (selr ? Math.abs(Math.sin(t * 8)) * 16 * s : 0), t + i, r.fam, { r: (selr ? 15 : 12) * s, hop: selr });
+      ctx.fillStyle = '#4a2a1a'; ctx.font = '700 ' + Math.max(11, 13 * s) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(r.name, rx2, ry2 + 24 * s);
+    });
     for (var q = 0; q < Math.min(8, st.snax || 0); q++) { var qx = w * (0.2 + hash(q + 40) * 0.6), qy = gy + 56 * s + hash(q + 20) * 14 * s; ell(ctx, qx, qy, 12 * s, 11 * s, '#b8b1a0', 2.5); line(ctx, qx - 5 * s, qy - 2 * s, qx - 1 * s, qy - 2 * s, INK, 2); line(ctx, qx + 1 * s, qy - 2 * s, qx + 5 * s, qy - 2 * s, INK, 2); line(ctx, qx - 4 * s, qy + 4 * s, qx + 4 * s, qy + 4 * s, INK, 2); }
     ctx.save(); ctx.translate(w * 0.5, gy + 62 * s - Math.abs(Math.sin(t * 3)) * 14 * s); ctx.scale(s * 1.2, s * 1.2); A.biffy(ctx, 0, 0, t, { face: 1 }); ctx.restore();
     ctx.restore();

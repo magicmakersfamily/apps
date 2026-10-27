@@ -5,10 +5,10 @@ import { launch } from './cdp.mjs';
 const base = process.env.GUTS_URL || 'http://localhost:8765/guts/index.html';
 const stage = process.env.STAGE || 'home';
 const p = await launch({ url: base, w: 1280, h: 800 });
-await p.sleep(2500);
+await p.ready();
 const out = await p.eval(`(function(){
   var G = GUTS, Game = G.Game, D = G.Data, K = G.Input._keys, T = 32;
-  Game.begin('${stage}'); var st = Game.st, g = st.g, L = D.STAGES['${stage}'].build();
+  Game.begin('${stage}', { noHeist: true }); var st = Game.st, g = st.g, L = D.STAGES['${stage}'].build();
   function solid(x, y) { return D.SOLID.indexOf(L.get(x, y)) >= 0; }
   function floorAt(x, y) { if (solid(x, y) || solid(x, y - 1)) return false; var b = L.get(x, y + 1); return D.SOLID.indexOf(b) >= 0 || D.ONEWAY.indexOf(b) >= 0; }
   // ---- plan: breadth-first search over standable cells

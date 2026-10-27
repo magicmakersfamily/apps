@@ -89,9 +89,9 @@
 
   /* ---------------- toast ---------------- */
   var toastT = 0;
-  UI.toast = function (title, sub, iconId) {
+  UI.toast = function (title, sub, iconId, ms) {
     var el = $('toast'); el.innerHTML = (iconId ? '<img alt="" src="' + A.foodIcon(iconId).toDataURL() + '">' : '') + '<div>' + esc(title) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>';
-    el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove('on'); }, 2600);
+    el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove('on'); }, ms || 2600);
   };
 
   /* ---------------- screens ---------------- */
@@ -150,11 +150,18 @@
     A.gus(ctx, { x: gx, y: gy + 20 - Math.abs(Math.sin(t * 2.4)) * 18, t: t, state: 'springy', vit: 80, sx: s, sy: s, air: true, hasLantern: true, lan: Math.sin(t * 2) * 0.4, moving: true, run: t * 6 });
     for (var f = 0; f < names.length; f++) { var a = t * 0.8 + f * 1.05; A.drawFood(ctx, names[f], gx + Math.cos(a) * w * (w > 900 ? 0.18 : 0.34), gy - h * 0.34 + Math.sin(a * 1.3) * h * 0.1, Math.min(w, h) * 0.1, Math.sin(a) * 0.4); }
   }
-  function villageScene(ctx, w, h, t) { A.village(ctx, w, h * 0.8, t, { bugs: Game.bugsRescued(), dex: Game.bitesFound(), snax: Game.save.snax || 0 }); }
+  function villageScene(ctx, w, h, t) { A.village(ctx, w, h * 0.66, t, { bugs: Game.bugsRescued(), dex: Game.bitesFound(), snax: Game.save.snax || 0, res: Game.residents(), sel: UI.villageSel }); }
   function endScene(ctx, w, h, t) { A.panel('golemFed', ctx, w, h, t); }
   function updateVillageInfo() {
     var b = Game.bugsRescued(), d = Game.bitesFound();
-    $('villageInfo').textContent = b + ' Gut Bug' + (b === 1 ? '' : 's') + ' rescued · ' + d + ' of 80 bites found. Rescue bugs and eat new foods to grow the village.';
+    $('villageInfo').textContent = b + ' Gut Bug' + (b === 1 ? '' : 's') + ' live here · ' + d + ' of 80 bites found. Tap a neighbour to meet them.';
+    var box = $('residents'); box.innerHTML = '';
+    Game.residents().forEach(function (r) {
+      var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn small'; bt.textContent = r.name + ' · ' + r.job;
+      bt.onclick = function () { UI.villageSel = r.id; var bi = D.bugInfo(r.id); Au.sfx(bi.sfx || 'bug'); UI.say(r.name + ' the ' + r.job.toLowerCase() + '. ' + bi.line, 'narrator', { soft: true }); };
+      box.appendChild(bt);
+    });
+    if (!b) { var none = document.createElement('span'); none.className = 'sub'; none.textContent = 'No neighbours yet. Free Gut Bugs from their bubbles in the levels!'; box.appendChild(none); }
   }
 
   /* ---------------- story scenes ---------------- */
@@ -211,7 +218,7 @@
       medal(r.zen, 'Zen medal', r.zen ? 'No blowouts. Calm!' : 'Finish with no blowouts.', leaf) +
       medal(r.chaos, 'Chaos medal', r.chaos ? 'Stylish blasts and a crowd chant!' : 'Three long, controlled blasts and a crowd chant.', star) +
       medal(r.tears === 0 && r.lantern, 'Perfect lantern', r.tears === 0 ? 'Not a single tear.' : 'Finish with no lantern tears.', lan) + '</div>' +
-      '<div class="stats"><span>Gut Bugs ' + r.bugsHere + '/' + r.bugsTotal + '</span><span>Bites ' + Game.bitesFound() + '/80</span>' + (r.newBites ? '<span>' + r.newBites + ' new!</span>' : '') + '</div>' +
+      '<div class="stats"><span>Gut Bugs freed this run: ' + r.bugs + '</span><span>Friends in the Gut Village: ' + r.bugsAll + '</span></div><div class="stats"><span>New bites this run: ' + r.newBites + '</span><span>Food Dex: ' + Game.bitesFound() + ' of 80</span></div>' +
       '<div class="row"><button class="btn primary" id="r-next" data-first>Next</button><button class="btn" id="r-again">Play again</button><button class="btn" id="r-title" data-back>Title</button></div>';
     $('results').innerHTML = h; show('results');
     Au.sfx(r.zen || r.chaos ? 'medal' : 'clear');
@@ -298,8 +305,9 @@
     root.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && /^[-=+_0]$/.test(e.key) && (UI.screen === 'play' || UI.screen === 'pause')) { e.preventDefault(); UI.toast('Zoom is locked while you play', 'Settings → Screen size changes the picture'); }
     }, true);
-    var dpr0 = root.devicePixelRatio || 1, dismissed = false, kind = '', tried = 0;
-    var bn = $('zoombanner'); document.body.appendChild(bn); bn.style.position = 'fixed'; bn.style.zIndex = '100000';
+    var dpr0 = root.devicePixelRatio || 1, dismissed = false, kind = '', tried = 0, shownAt = 0;
+    var bn = $('zoombanner'); document.body.appendChild(bn);
+    var xb = document.createElement('button'); xb.type = 'button'; xb.textContent = 'Close'; xb.className = 'btn small'; xb.style.marginLeft = '8px'; xb.onclick = function () { dismissed = true; bn.hidden = true; }; $('zoomfix').parentNode.appendChild(xb); bn.style.position = 'fixed'; bn.style.zIndex = '100000';
     /* keep the banner on screen and normal-sized even when the page is zoomed in */
     function place() {
       var vv = root.visualViewport; if (!vv || bn.hidden) return;
@@ -313,15 +321,14 @@
       setTimeout(function () { m.setAttribute('content', orig); }, 350);
     }
     function check() {
-      var vv = root.visualViewport, pinch = vv && vv.scale > 1.04;
-      // browser zoom in: the window's outer width stays put while the page width in CSS pixels shrinks (desktop only; phones skip this)
-      var browser = !touchDevice && root.outerWidth > 600 && root.innerWidth > 0 && root.outerWidth / root.innerWidth > 1.3;
-      if (!(pinch || browser) || dismissed) { bn.hidden = true; tried = 0; return; }
+      var vv = root.visualViewport, pinch = vv && vv.scale > 1.04, browser = false;
+      if (!(pinch || browser) || dismissed) { bn.hidden = true; tried = 0; shownAt = 0; return; }
+      if (!shownAt) shownAt = Date.now(); else if (Date.now() - shownAt > 12000) { bn.hidden = true; return; }   // never lingers over the game
       if (pinch && tried < 2 && (touchDevice || 'ontouchstart' in root)) { tried++; snapBack(); }
       kind = pinch ? 'pinch' : 'browser';
       var mac = /Mac/.test(navigator.platform || '');
       $('zoomtext').textContent = pinch ? 'The screen is zoomed in. Pinch out with two fingers, or tap the button.' : 'The page zoom changed. Press ' + (mac ? '⌘' : 'Ctrl') + ' + 0 to put it back.';
-      $('zoomfix').textContent = pinch ? 'Fix the zoom' : 'Got it'; bn.hidden = false; place();
+      $('zoomfix').textContent = 'Fix the zoom'; bn.hidden = false; place();
     }
     $('zoomfix').onclick = function () { if (kind === 'pinch') { snapBack(); setTimeout(function () { if (root.visualViewport && root.visualViewport.scale > 1.04) { try { location.reload(); } catch (e) {} } }, 600); } else { dismissed = true; bn.hidden = true; } };
     setInterval(check, 1000); if (root.visualViewport) { root.visualViewport.addEventListener('resize', function () { check(); place(); }); root.visualViewport.addEventListener('scroll', place); }
@@ -366,7 +373,7 @@
   };
   Game.hooks.say = UI.say;
   Game.hooks.clear = showResults;
-  Game.hooks.dex = function (id) { var e = D.DEX[id]; if (e) UI.toast('New bite! ' + e.name, e.zh + ' · ' + Game.bitesFound() + ' of 80', id); };
+  Game.hooks.dex = function (id) { var e = D.DEX[id]; if (e) { UI.toast('New bite! ' + e.name + '  ' + e.zh, e.power, id, 4200); setTimeout(function () { if (UI.screen === 'play') Voice.speakZh(e.zh); }, 900); } };
   var sproutSaid = false;
   Game.hooks.event = function (name) {
     if (name === 'bug') { var fam = A.famOf(arguments[1].id), nm = { yogurt: 'a Yogurt Bloomer', kimchi: 'a Kimchi Crew friend', natto: 'a Natto Stringer' }[fam]; UI.toast('New friend!', nm + ' will live in the Gut Village'); return; }

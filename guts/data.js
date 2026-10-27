@@ -53,7 +53,8 @@
     L.start = { x: 4, y: 13 };
     // ---- bedroom: a rumbling belly, a fizzy drink, and a laundry basket that is about to have a very big morning
     L.dec('bed', 1, 14, {}); L.dec('window', 9, 4, {}); L.dec('dresser', 10, 12, { w: 4, h: 2 });
-    L.food(7, 13, 'apple');
+    L.dec('plate', 7, 14, {});                    // Gus's breakfast bao sits on the nightstand: Mimi is about to steal it
+    L.food(15, 13, 'apple');
     L.box(10, 12, 4, 2, 'B');                     // dresser: 2 tiles up
     L.food(11, 11, 'soda');                       // the first fizzy drink: eating it starts the first blast
     L.plat(14, 10, 2); L.plat(16, 8, 5);          // hop up: dresser, little shelf, wall shelf
@@ -65,7 +66,7 @@
     L.check(23, 13);
     // ---- the cat has the bao: Mimi leads the way
     L.catPath([
-      { x: 8.5, y: 14, wait: 2.6 }, { x: 25, y: 14 }, { x: 31, y: 10 }, { x: 55.5, y: 4 },
+      { x: 8.5, y: 14 }, { x: 18.5, y: 8, hide: true }, { x: 31, y: 10 }, { x: 55.5, y: 4 },
       { x: 68, y: 12, sleep: true }, { x: 91, y: 14 }, { x: 99, y: 14 }, { x: 109.5, y: 8, final: true }
     ]);
     L.feel(26, 'excited', 'small');
@@ -86,6 +87,7 @@
     L.box(54, 4, 3, 10, 'B');                     // fridge: 10 tiles. Climb the shelves, or rocket over it!
     L.dec('fridge', 54, 4, { w: 3, h: 10 });
     L.prompt(52, 'blast', 'Hop up the shelves, or hold BLAST to rocket over the fridge!');
+    L.food(55, 3, 'cherries');                    // a treat for climbing the fridge
     // ---- living room: Mimi is asleep on the sofa
     L.feel(60, 'hungry', 'small');
     L.prompt(62, 'breathe', 'Mimi is asleep. Stand still and hold CALM so the rumbles stay quiet.');
@@ -395,6 +397,14 @@
     porporCanto: { text: '食飯啦', jyut: 'sik6 faan6 laa1' }
   };
 
+  /* ---------- Gut Bugs: each one a little character who lives in the Gut Village ---------- */
+  var BUGS = {
+    'home-1': { name: 'Pip', job: 'Drummer', line: 'Pip taps a tiny drum whenever Gus walks by. Boom-ba-boom!', sfx: 'drum' },
+    'home-2': { name: 'Spice', job: 'Joke teller', line: 'Spice tells terrible jokes. "Why did the bean go to school? To get a little smarter!"', sfx: 'joke' },
+    'home-3': { name: 'Noodle', job: 'Builder', line: 'Noodle is building a bouncy playground out of stretchy strings.', sfx: 'bounce' }
+  };
+  function bugInfo(id) { return BUGS[id] || { name: 'Little friend', job: 'Neighbour', line: 'A new neighbour waves hello.', sfx: 'bug' }; }
+
   /* ---------- feelings (thought bubbles) ---------- */
   var FEELINGS = {
     shoes:  { icon: 'shoes',  line: 'Shoes on the wrong feet!', size: 'small' },
@@ -413,7 +423,7 @@
   }
 
   var api = { Lvl: Lvl, SOLID: SOLID, ONEWAY: ONEWAY, STAGES: STAGES, ORDER: ORDER, LOCKED_WORLDS: LOCKED_WORLDS,
-    DEX: DEX, DEX_WORLDS: DEX_WORLDS, STORY: STORY, FEELINGS: FEELINGS, isStand: ground, VEG: VEG };
+    DEX: DEX, DEX_WORLDS: DEX_WORLDS, BUGS: BUGS, bugInfo: bugInfo, STORY: STORY, FEELINGS: FEELINGS, isStand: ground, VEG: VEG };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else { root.GUTS = root.GUTS || {}; root.GUTS.Data = api; }
 })(typeof window !== 'undefined' ? window : this);

@@ -193,8 +193,8 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <button class="tb" id="tb-blast" data-act="blast" aria-label="Blast"><svg viewBox="0 0 24 24"><path d="M12 2c3 4 4 8 2 12l-2 8-2-8c-2-4-1-8 2-12z"/></svg><span>BLAST</span></button>
       <button class="tb sm" id="tb-runL" data-act="runLeft" aria-label="Run left"><svg viewBox="0 0 24 24"><path d="M12 5 4 12l8 7zM20 5l-8 7 8 7z"/></svg><span>RUN</span></button>
       <button class="tb sm" id="tb-runR" data-act="runRight" aria-label="Run right"><svg viewBox="0 0 24 24"><path d="M12 5l8 7-8 7zM4 5l8 7-8 7z"/></svg><span>RUN</span></button>
-      <button class="tb sm" id="tb-jumpL" data-act="jumpLeft" aria-label="Jump left"><svg viewBox="0 0 24 24"><path d="M5 12 11 4v5h8v6h-8v5z" transform="rotate(90 12 12)"/></svg><span>JUMP</span></button>
-      <button class="tb sm" id="tb-jumpR" data-act="jumpRight" aria-label="Jump right"><svg viewBox="0 0 24 24"><path d="M5 12 11 4v5h8v6h-8v5z" transform="rotate(-90 12 12) scale(-1 1) translate(-24 0)"/></svg><span>JUMP</span></button>
+      <button class="tb sm" id="tb-jumpL" data-act="jumpLeft" aria-label="Jump left"><svg viewBox="0 0 24 24"><path d="M12 3l7 8h-4.5v9h-5v-9H5z" transform="rotate(-42 12 12)"/></svg><span>◀ JUMP</span></button>
+      <button class="tb sm" id="tb-jumpR" data-act="jumpRight" aria-label="Jump right"><svg viewBox="0 0 24 24"><path d="M12 3l7 8h-4.5v9h-5v-9H5z" transform="rotate(42 12 12)"/></svg><span>JUMP ▶</span></button>
       <button class="tb sm" id="tb-size" type="button" aria-label="Change the tap distance"><span id="tb-size-l" style="font-size:15px">S</span><span>DISTANCE</span></button>
       <button class="tb" id="tb-wait" data-act="wait" aria-label="Wait a moment" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>WAIT</span></button>
       <button class="tb" id="tb-jump" data-act="jump" aria-label="Jump"><svg viewBox="0 0 24 24"><path d="M12 4l8 9h-5v7H9v-7H4z"/></svg><span>JUMP</span></button>
@@ -238,7 +238,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <div class="panel"><h2>To be continued…</h2>
         <p>You finished the first level of <b>GUTS</b>. Next stop: <b>Eastern Market</b> in Detroit, then Mexico, Japan, Taiwan and Hong Kong, where Grandma’s feast is waiting.</p>
         <p class="sub">This beta only has Morning at Home so far. We would love to know what felt fun and what felt confusing.</p>
-        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.3" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
+        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.4" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
         <div class="row"><button class="btn primary" id="e-again" data-first>Play again</button><button class="btn" id="e-title" data-back>Title</button></div>
         <p class="links"><a href="../">More from the App Shelf</a><a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake: Ko-fi</a></p>
         <p class="sub" id="e-status" aria-live="polite"></p>
@@ -254,7 +254,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
     </section>
 
     <section class="screen" id="s-village" hidden style="align-items:end;pointer-events:none">
-      <div class="panel wide" style="margin-bottom:6px;padding:12px 16px;pointer-events:auto"><div class="field" style="border:0"><div><b>The Gut Village</b><small id="villageInfo"></small></div><button class="btn" id="v-back" data-first data-back>Back</button></div></div>
+      <div class="panel wide" style="margin-bottom:6px;padding:12px 16px;pointer-events:auto"><div class="field" style="border:0"><div><b>The Gut Village</b><small id="villageInfo"></small></div><button class="btn" id="v-back" data-first data-back>Back</button></div><div class="row" id="residents" style="margin-top:6px"></div></div>
     </section>
 
     <section class="screen dim" id="s-settings" hidden>
@@ -285,7 +285,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
 
 <div class="info">
   <h2>How to play</h2>
-  <p>Gus is a round little kid with a very expressive belly, and this morning his breakfast bao has gone missing: Mimi the cat has it! <b>Whatever Gus eats and feels becomes motion.</b> Crunchy greens and fruit make him bouncy. Fizzy, sweet and greasy things, and big feelings, fill his belly with pressure you can blast like a rocket. Breathe to let the pressure out slowly and stay in control. Touch things and see what happens: baskets tip, fruit shakes loose, pinwheels spin.</p>
+  <p>Gus is a round little kid with a very expressive belly, and this morning Mimi the cat steals his breakfast bao right in front of him! A short scene plays at the start and end of the level; press any button to skip it. <b>Whatever Gus eats and feels becomes motion.</b> Crunchy greens and fruit make him bouncy. Fizzy, sweet and greasy things, and big feelings, fill his belly with pressure you can blast like a rocket. Breathe to let the pressure out slowly and stay in control. Touch things and see what happens: baskets tip, fruit shakes loose, pinwheels spin.</p>
   <table class="keys">
     <tr><th>Action</th><th>Keyboard</th><th>PlayStation controller</th><th>Touch</th></tr>
     <tr><td>Move</td><td>Arrow keys or A / D</td><td>Left stick or d-pad</td><td>Arrow buttons</td></tr>
@@ -303,7 +303,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
 </div>
 
 <footer class="about">
-  <span>Version 1.3 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.3">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.3&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
+  <span>Version 1.4 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.4">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.4&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
   <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
   <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
 </footer>

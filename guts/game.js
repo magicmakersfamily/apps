@@ -7,6 +7,9 @@
   var cv, cx, dpr = 1, S = 1, VW = 640, VH = 576, W = 640, H = 576;
   var Game = G.Game = { st: null, view: 'none', save: null, hooks: {}, paused: false, override: null, panelT: 0 };
   var KEY = 'guts:1';
+  var Sbase = 1, ZF = 1, ZT = 1;
+  var NOIN = { mx: 0, my: 0, jump: false, blast: false, breathe: false, jumpP: false, blastP: false, breatheP: false, poundP: false, pound: false, breatheGround: false, aimX: 0, aimY: 0, hopP: 0, hopDist: 3 };
+  function applyZoom() { S = Sbase * ZF; VW = W / S; VH = H / S; }
 
   /* ---------------- save and settings ---------------- */
   function defaults() {
@@ -23,6 +26,7 @@
   Game.applySettings = function () { var s = Game.save.set; Au.setVolumes(s.music / 100, s.sfx / 100); Au.setGross(s.gross); };
   Game.bitesFound = function () { var n = 0; for (var k in Game.save.dex) if (k !== 'snax') n++; return n; };
   Game.bugsRescued = function () { return Object.keys(Game.save.bugs).length; };
+  Game.residents = function () { return Object.keys(Game.save.bugs).map(function (id) { var bi = D.bugInfo(id); return { id: id, name: bi.name, job: bi.job, fam: A.famOf(id) }; }); };
   Game.save = loadSave();
 
   function say(text, who, o) { if (Game.hooks.say) Game.hooks.say(text, who || 'narrator', o || {}); }
@@ -41,13 +45,13 @@
     W = Math.max(200, r.width); H = Math.max(160, r.height); dpr = Math.min(2, root.devicePixelRatio || 1);
     cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
     var vm = { small: 0.82, normal: 1, large: 1.22 }[Game.save.set.view || 'normal'] || 1;
-    S = Math.min(H / 500, W / (W < H ? 460 : 640)) * vm; VW = W / S; VH = H / S;
+    Sbase = Math.min(H / 500, W / (W < H ? 460 : 640)) * vm; applyZoom();
   }
   Game.resize = resize;
   Game.viewSize = function () { return { w: VW, h: VH, W: W, H: H, S: S }; };
 
   /* ---------------- stage setup ---------------- */
-  Game.begin = function (id) {
+  Game.begin = function (id, opts) {
     var def = D.STAGES[id], L = def.build(), sv = Game.save;
     var st = Game.st = {
       id: id, def: def, L: L, mode: sv.mode, t: 0, status: 'play', clearT: 0, b: B.create(),
@@ -69,15 +73,17 @@
     if (L.goal) st.goal = { x: (L.goal.x + 0.5) * T, y: (L.goal.y + 1) * T, type: L.goal.type };
     st.reacts = (L.reacts || []).map(function (r) { return { type: r.type, x: r.x, y: r.y, w: r.w, h: r.h, state: 'idle', anim: 0, swing: 0, swingT: 0, spent: false, ang: 0, spin: 0, spun: 0, done: false, wobble: 0, landX: (r.x + 5) * T, landY: 13 * T + 10, fallH: (14 - r.y - r.h) * T - 10 }; });
     st.cat = L.cat ? { path: L.cat.path, i: 0, x: L.cat.path[0].x * T, y: L.cat.path[0].y * T, face: 1, state: L.cat.path[0].sleep ? 'sleep' : 'sit', t: 0, mv: null, to: 0, trust: 0, calm: 0, bao: true, startle: 0, wait: L.cat.path[0].wait || 0.4, meowT: 7, dropped: false } : null;
-    st.sockT = 0; st.slow = null; st.firstBlastDone = false; st.baoEaten = false; st.hold = 0; st.fizzT = 0; st.hint = null; st.catCheer = 0;
+    ZF = 1; ZT = 1; applyZoom();
+    st.sockT = 0; st.slow = null; st.firstBlastDone = false; st.baoEaten = false; st.vistaT = 0; st.vistaDone = false; st.wobT = 0; st.plateBao = false; st.moment = null; st.camFocus = null; st.hold = 0; st.fizzT = 0; st.hint = null; st.catCheer = 0;
     L.crowds.forEach(function (z) {
       var n = Math.max(2, Math.floor((z.x1 - z.x0) / 2.2));
       for (var i = 0; i < n; i++) st.persons.push({ x: (z.x0 + i * 2.2 + (i % 3) * 0.3) * T, y: (z.y) * T, c: (i * 5 + 1) % 6, s: (i * 3) % 5, h: (i % 4) * 2, ph: i * 1.7, ox: 0, vendor: false });
     });
     Game.paused = false; Game.view = 'stage';
+    if (id === 'home' && st.cat && !(opts && opts.noHeist)) { st.plateBao = true; st.cat.x = 22 * T; st.cat.y = 14 * T; st.cat.bao = false; startMoment('heist', { skipAfter: Game.save.cleared[id] ? 0.4 : 1.2 }); } else st.plateBao = false;
     updateCam(0, true);
     Au.setLayers(0); Au.playSong(def.music);
-    if (def.intro) say(def.intro, 'narrator', { intro: true });
+    if (def.intro && !st.moment) say(def.intro, 'narrator', { intro: true });
   };
   Game.end = function () { Game.view = 'none'; Game.st = null; Au.blastOff(); Au.breatheOff(); };
 
@@ -149,7 +155,9 @@
         if (pt.growth === 0) { pt.growth = 1; pt.anim = 0; pt.bumped = true; }
         else if (!pt.bumped && pt.growth < 3) { pt.growth++; pt.anim = 0.35; pt.bumped = true; }
         else return;
-        Au.sfx('bloom'); st.crowd.cheer = 2.2;
+        Au.sfx('bloom'); Au.sfx('bounce'); st.crowd.cheer = 2.2; st.hold = 0.4; st.shake = Game.save.set.shake ? 5 : 0; pt.pop = 0.5;
+        for (var rg = 0; rg < 3; rg++) part('ring', pt.cx, pt.y * T - 10, 0, 0, 0.6 + rg * 0.15, 8 + rg * 12, rg % 2 ? '#ff9ec0' : '#7be07b', 0);
+        say('Boing! A bounce flower! Jump into it.', 'narrator', { soft: true });
         for (var k = 0; k < 22; k++) part('petal', pt.cx + rnd(-30, 30), pt.y * T - rnd(0, 50), rnd(-110, 110), rnd(-220, -40), rnd(0.8, 1.6), rnd(3, 6), ['#ff7fa8', '#ffd84a', '#7be07b', '#fff'][k % 4], 220);
         var arr = Game.save.gardens[st.id] || (Game.save.gardens[st.id] = []);
         for (var j = 0; j < st.patches.length; j++) arr[j] = st.patches[j].growth;
@@ -236,8 +244,7 @@
     if (id === 'bao') {
       st.baoEaten = true; Au.sfx('fed'); st.crowd.cheer = 4; st.b.boostT = Math.max(st.b.boostT, 4);
       for (var bi = 0; bi < 24; bi++) part('conf', f.x + rnd(-40, 40), f.y - rnd(0, 60), rnd(-90, 90), rnd(-120, -20), rnd(1.5, 2.6), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][bi % 5], 120);
-      say('Bao! Gus shares a bite with Mimi. Purr, purr. Breakfast found!', 'narrator', {});
-      if (st.cat) { st.cat.state = 'purr'; st.cat.t0 = st.t; Au.sfx('purr'); }
+      if (!st.moment) { say('Bao! Gus shares a bite with Mimi. Purr, purr. Breakfast found!', 'narrator', {}); if (st.cat) { st.cat.state = 'purr'; st.cat.t0 = st.t; Au.sfx('purr'); } }
     }
     if (F.pres > 0) { st.fizzT = 1.4; g.tint = { k: 'orange', t: 0.8 }; if (F.kind === 'sugar' || F.kind === 'spice') Au.sfx('fizz'); }
     if (F.vit >= 10) g.tint = { k: 'green', t: 0.8 };
@@ -248,7 +255,7 @@
 
   /* ---------------- Gus ---------------- */
   function updateGus(dt) {
-    var st = Game.st, g = st.g, b = st.b, p = In.p1, L = st.L, set = Game.save.set, s = B.stats(b);
+    var st = Game.st, g = st.g, b = st.b, p = st.moment ? NOIN : In.p1, L = st.L, set = Game.save.set, s = B.stats(b);
     var little = st.mode === 'little' && !st.def.noAuto, check = st.mode === 'check';
     var locked = g.lockT > 0; if (locked) g.lockT -= dt;
     var clear = st.status !== 'play';
@@ -341,7 +348,7 @@
         for (var q = 0; q < 14; q++) part('dust', g.x + rnd(-14, 14), g.y, rnd(-220, 220), rnd(-120, -20), 0.6, rnd(4, 8), 'rgba(235,225,205,.9)', 300);
         if (Game.hooks.event) Game.hooks.event('pound', g);
       } else if (preVy > 300) { Au.sfx('land'); g.sx = 1.25; g.sy = 0.8; for (var m = 0; m < 4; m++) part('dust', g.x + rnd(-10, 10), g.y, rnd(-70, 70), rnd(-40, -5), 0.35, rnd(3, 5), 'rgba(235,225,205,.7)', 100); }
-      st.lan.vel += preVy * 0.0035;
+      st.lan.vel += preVy * 0.0035; if (g.surface === '=' && g.x > 45 * T && g.x < 58 * T) st.wobT = 0.9;
       if (g.surface === 'U') { g.vy = -900; g.boost = true; Au.sfx('bounce'); g.sx = 0.75; g.sy = 1.3; }
     }
     if (g.grounded && !g.pounding) { g.safeX = g.x; g.safeY = g.y; }
@@ -404,15 +411,15 @@
       }
     });
     if (st.lanItem && !st.lanItem.taken && Math.hypot(gcx - st.lanItem.x, gcy - (st.lanItem.y - 20)) < 62) {
-      st.lanItem.taken = true; st.lan.has = true; Au.sfx('bug'); burst(20, st.lanItem.x, st.lanItem.y - 20, 180, 200, '#ffd36b', 1, 5, 120);
+      st.lanItem.taken = true; st.lan.has = true; Au.sfx('bug'); Au.sfx('friend'); st.hold = 0.45; for (var lr = 0; lr < 3; lr++) part('ring', st.lanItem.x, st.lanItem.y - 20, 0, 0, 0.7 + lr * 0.15, 10 + lr * 14, lr % 2 ? '#ffd36b' : '#ee4b3f', 0); burst(20, st.lanItem.x, st.lanItem.y - 20, 180, 200, '#ffd36b', 1, 5, 120);
       say('Popo’s lantern! Gus clips it to his backpack.', 'narrator', { soft: true });
     }
     if (st.goal && st.status === 'play') {
       var go = st.goal;
       if (Math.abs(gcx - go.x) < 40 && Math.abs(g.y - go.y) < 70) {
         if (go.type === 'gate' && !st.lan.has && st.lanItem && !st.lanItem.taken) { st.lanItem.taken = true; st.lan.has = true; say('Oops, Gus nearly forgot Popo’s lantern! A breeze brings it over.', 'narrator', {}); Au.sfx('bug'); }
-        if (go.type === 'gate' && st.cat && !st.baoEaten) { eatFood({ id: 'bao', x: g.x, y: g.y - 30 }, 1); say('Mimi trots over and drops the bao at Gus’s feet. Breakfast found!', 'narrator', {}); }
-        finish();
+        if (go.type === 'gate' && st.cat && !st.baoEaten && !st.moment) { st.cat.dropped = false; startMoment('reunion', { skipAfter: 2.4 }); return; }
+        if (!st.moment) finish();
       }
       st.gate.nag -= dt;
     }
@@ -422,7 +429,7 @@
     st.status = 'clear'; st.clearT = 0; Au.endAll && Au.endAll(); Au.blastOff(); Au.breatheOff(); Au.sfx('clear');
     st.crowd.cheer = 6; if (Game.save.set.flash) st.flash = 0.2;
     for (var i = 0; i < 70; i++) part('conf', st.g.x + rnd(-200, 200), st.g.y - rnd(80, 300), rnd(-60, 60), rnd(20, 90), rnd(2, 3.5), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][i % 5], 60);
-    var res = { id: st.id, zen: st.stats.blowouts === 0, chaos: st.stats.controlled >= 3 && st.stats.chants >= 1, bugs: st.stats.bugs, bugsHere: st.bugs.filter(function (b) { return b.state !== 'trapped'; }).length, bugsTotal: st.bugs.length,
+    var res = { id: st.id, zen: st.stats.blowouts === 0, chaos: st.stats.controlled >= 3 && st.stats.chants >= 1, bugs: st.stats.bugs, bugsAll: Game.bugsRescued(), bugsHere: st.bugs.filter(function (b) { return b.state !== 'trapped'; }).length, bugsTotal: st.bugs.length,
       tears: st.lan.tears, bites: st.stats.bites, newBites: st.stats.newBites, blowouts: st.stats.blowouts, controlled: st.stats.controlled, lantern: st.lan.has, mimi: !!(st.cat && st.cat.trust), baoEaten: st.baoEaten };
     var old = sv.cleared[st.id] || {};
     sv.cleared[st.id] = { clear: true, zen: old.zen || res.zen, chaos: old.chaos || res.chaos, perfect: old.perfect || res.tears === 0 };
@@ -472,26 +479,30 @@
   /* ---------------- camera ---------------- */
   function updateCam(dt, snap) {
     var st = Game.st, g = st.g, L = st.L, c = st.cam;
-    var look = g.face * (Math.abs(g.vx) > 20 ? 80 : 30), tx = g.x - VW * 0.45 + look;
+    var look = g.face * (Math.abs(g.vx) > 20 ? 80 : 30), tx = st.camFocus ? st.camFocus.x - VW / 2 : g.x - VW * 0.45 + look;
     var maxX = Math.max(0, L.w * T - VW); tx = clamp(tx, 0, maxX); if (L.w * T < VW) tx = -(VW - L.w * T) / 2;
-    var ty = g.y - VH * 0.58, maxY = L.h * T - VH; ty = Math.max(-420, Math.min(maxY, ty));
+    var ty = st.camFocus ? st.camFocus.y - VH * 0.6 : g.y - VH * 0.58, maxY = L.h * T - VH; ty = Math.max(-420, Math.min(maxY, ty));
     var k = snap ? 1 : Math.min(1, dt * 6);
     c.x += (tx - c.x) * k; c.y += (ty - c.y) * Math.min(1, snap ? 1 : dt * 5);
   }
 
 
   /* ---------------- Mimi the cat ---------------- */
-  function catMove(c, to, speedMul) {
+  function catMove(c, to, speedMul, extraH) {
     var wp = c.path[to], x1 = wp.x * T, y1 = wp.y * T, dx = x1 - c.x, dy = y1 - c.y, len = Math.max(1, Math.hypot(dx, dy));
-    c.mv = { x0: c.x, y0: c.y, x1: x1, y1: y1, s: 0, len: len, speed: 380 * (speedMul || 1), h: Math.min(120, 34 + len * 0.1 + Math.max(0, c.y - y1) * 0.35) };
-    c.to = to; c.state = 'run'; c.face = dx >= 0 ? 1 : -1;
+    c.mv = { x0: c.x, y0: c.y, x1: x1, y1: y1, s: 0, len: len, speed: 380 * (speedMul || 1), h: Math.min(150, 34 + len * 0.1 + Math.max(0, c.y - y1) * 0.35 + (extraH || 0)) };
+    c.to = to; c.state = 'run'; c.face = dx >= 0 ? 1 : -1; c.hiding = false;
   }
+  function heart(x, y) { part('heart', x, y, rnd(-30, 30), rnd(-90, -50), rnd(0.9, 1.4), rnd(5, 8), '#ff6b8a', -20); }
   function updateCat(dt) {
     var st = Game.st, c = st.cat; if (!c) return; c.t += dt;
+    if (st.moment) return;
+    if (c.sock > 0) c.sock -= dt;
     var g = st.g, gT = g.x / T, wp = c.path[c.i], next = c.path[c.i + 1];
+    var follow = c.trusted;            // a friend walks with Gus: slower, and waits for him less far ahead
     if (c.startle > 0 && !c.mv) {
-      c.startle -= dt; c.state = 'startle';
-      if (c.startle <= 0 && next && !wp.final) { Au.sfx('hiss'); catMove(c, c.i + 1, 1.5); }
+      c.startle -= dt; c.state = 'startle'; c.hiding = false;
+      if (c.startle <= 0 && next && !wp.final) { Au.sfx('hiss'); Au.sfx('bounce'); catMove(c, c.i + 1, 1.6, 40); }
       return;
     }
     if (c.cheerT > 0) { c.cheerT -= dt; if (!c.mv) { c.state = 'cheer'; return; } }
@@ -499,10 +510,12 @@
       var m = c.mv; m.s = Math.min(1, m.s + dt * m.speed / m.len);
       c.x = m.x0 + (m.x1 - m.x0) * m.s; c.y = m.y0 + (m.y1 - m.y0) * m.s - 4 * m.h * m.s * (1 - m.s);
       c.glance = m.s > 0.5 && m.s < 0.72 && Math.abs(gT - c.x / T) > 5; c.face = c.glance ? (gT < c.x / T ? -1 : 1) : (m.x1 >= m.x0 ? 1 : -1);
+      if (follow && Math.random() < dt * 2) heart(c.x, c.y - 30);
       if (m.s >= 1) {
         c.mv = null; c.i = c.to; wp = c.path[c.i]; c.x = m.x1; c.y = m.y1; c.wait = 0.5; c.calm = 0;
         c.state = wp.sleep ? 'sleep' : 'sit'; c.face = gT < wp.x ? -1 : 1;
         if (Math.abs(gT - wp.x) < 18) Au.sfx('meow', { pitch: rnd(0.95, 1.2) });
+        if (wp.hide) { c.hiding = true; say('Mimi dives into the laundry basket! Only her ears show.', 'narrator', { soft: true }); }
         if (wp.sleep) say('Mimi curls up on the sofa. Shh! Gus’s belly is rumbling.', 'narrator', { soft: true });
         if (wp.final) say('Mimi is on the fence with the bao. Hop up the crates!', 'narrator', { soft: true });
       }
@@ -511,26 +524,106 @@
     c.face = gT < c.x / T ? -1 : 1;
     if (wp.final) {
       c.state = c.dropped ? (st.baoEaten ? 'purr' : 'sit') : 'perch';
-      if (!c.dropped && Math.abs(gT - c.x / T) < 3.6 && Math.abs(g.y - c.y) < 4 * T) {
-        c.dropped = true; c.bao = false; Au.sfx('meow', { pitch: 1.3 });
-        st.foods.push({ x: c.x - 14, y: c.y - 34, id: 'bao', respawn: false, taken: false, timer: 0, ph: 0, fall: true, vy: -120, vx: -45, bounced: 0 });
-        say('Mimi drops the bao! Gus, quick!', 'narrator', {});
+      if (!c.dropped && !st.moment && g.grounded && Math.abs(gT - c.x / T) < 3.6 && Math.abs(g.y - c.y) < 3 * T) startMoment('reunion', { skipAfter: 2.4 });
+      return;
+    }
+    if (wp.hide) {
+      c.state = 'sit'; c.hiding = true;
+      var bk = st.reacts.filter(function (r) { return r.type === 'basket'; })[0];
+      if ((bk && bk.state !== 'idle') || gT > wp.x + 7) {
+        c.hiding = false; c.sock = 7; Au.sfx('meow', { pitch: 1.45 }); Au.sfx('sock');
+        for (var q = 0; q < 6; q++) part('sock', c.x + rnd(-14, 14), c.y - 20, rnd(-120, 120), rnd(-420, -200), rnd(1.6, 2.4), rnd(7, 10), ['#e0584a', '#4a90d9', '#58b368', '#f0a53a', '#9b6bd1'][q % 5], 900);
+        catMove(c, c.i + 1, 1.35, 60);
       }
       return;
     }
     if (wp.sleep) {
       c.state = 'sleep'; var d = Math.abs(gT - wp.x); c.alert = (st.b.pres > 40 || st.b.state === 'tight') && d < 9 && !c.trusted;
-      if (d < 6.5 && g.breathing) { c.calm += dt; if (c.calm > 1.4 && !c.trusted) { c.trusted = true; st.cat.trust = 1; Au.sfx('purr'); c.state = 'purr'; c.purrT = 2.2; say('Mimi purrs. She trusts Gus’s calm belly!', 'narrator', { soft: true }); } }
-      if (c.purrT > 0) { c.purrT -= dt; c.state = 'purr'; if (c.purrT <= 0 && next) catMove(c, c.i + 1, 1); return; }
+      if (d < 6.5 && g.breathing) { c.calm += dt; if (c.calm > 1.4 && !c.trusted) { c.trusted = true; st.cat.trust = 1; Au.sfx('purr'); c.state = 'purr'; c.purrT = 2.2; st.hold = 0.45; for (var h2 = 0; h2 < 7; h2++) heart(c.x + rnd(-20, 20), c.y - 24); say('Mimi purrs. She trusts Gus’s calm belly!', 'narrator', { soft: true }); } }
+      if (c.purrT > 0) { c.purrT -= dt; c.state = 'purr'; if (Math.random() < dt * 4) heart(c.x + rnd(-16, 16), c.y - 24); if (c.purrT <= 0 && next) catMove(c, c.i + 1, 0.8); return; }
       var rude = g.blasting && d < 8, loud = st.b.state === 'critical' && d < 6;
       if ((rude || loud) && !c.trusted) { c.startle = 0.9; Au.sfx('hiss'); return; }
       if (gT > wp.x + 3.5 && next) catMove(c, c.i + 1, 1);
       return;
     }
-    c.state = 'sit'; c.wait -= dt; c.meowT -= dt; c.tease = Math.abs(gT - c.x / T) > 4.6 && Math.abs(gT - c.x / T) < 10;
-    var near = Math.abs(gT - c.x / T) < 4.6, passed = gT > c.x / T + 6;
-    if (c.wait <= 0 && next && (near || passed || wp.wait)) { if (!wp.wait || c.t > wp.wait) { wp.wait = 0; catMove(c, c.i + 1, 1); } }
-    else if (c.meowT <= 0 && Math.abs(gT - c.x / T) > 10) { c.meowT = 9; Au.sfx('meow'); }
+    c.state = 'sit'; c.wait -= dt; c.meowT -= dt;
+    var dGus = Math.abs(gT - c.x / T), radius = follow ? 8.5 : 4.6;
+    c.tease = dGus > radius && dGus < 11;
+    var near = dGus < radius, passed = gT > c.x / T + 6;
+    if (c.wait <= 0 && next && (near || passed)) catMove(c, c.i + 1, follow ? 0.75 : 1);
+    else if (c.meowT <= 0 && dGus > 10) { c.meowT = 9; Au.sfx('meow'); }
+  }
+
+  /* ---------------- little scenes: the bao heist at the start, the bao reunion at the end ---------------- */
+  function startMoment(type, o) {
+    var st = Game.st; st.moment = { type: type, t: 0, skipAfter: 1.5 }; for (var k in (o || {})) st.moment[k] = o[k];
+    Au.blastOff(); Au.breatheOff(); st.g.vx = 0; st.g.breathing = false; In.rumble(0, 0, 0);
+  }
+  function finishMoment() {
+    var st = Game.st, m = st.moment, c = st.cat, g = st.g; if (!m) return;
+    if (m.type === 'heist') {
+      st.plateBao = false; Au.duck(false);
+      if (c) { c.bao = true; c.sneak = false; c.x = 8.6 * T; c.y = 14 * T; c.i = 0; c.wait = 0; Au.sfx('meow', { pitch: 1.3 }); catMove(c, 1, 1.7, 30); }
+      st.moment = null; st.camFocus = null; spawnBubble('excited'); say('Hey! That’s my bao!', 'narrator', {});
+    } else if (m.type === 'reunion') {
+      Au.duck(false);
+      if (!st.baoEaten) eatFood({ id: 'bao', x: g.x, y: g.y - 26 }, 1);
+      if (c) { c.dropped = true; c.bao = false; c.state = 'purr'; if (m.tx) { c.x = m.tx; c.y = m.ty; } }
+      st.moment = null; st.camFocus = null;
+    }
+  }
+  function updateMoment(dt) {
+    var st = Game.st, m = st.moment; if (!m) return; var c = st.cat, g = st.g; m.t += dt; var t = m.t;
+    if (m.t > m.skipAfter && (In.p1.jumpP || In.p1.blastP || In.nav.ok || Math.abs(In.p1.mx) > 0.5)) { finishMoment(); return; }
+    if (m.type === 'heist') {
+      st.camFocus = { x: (g.x + c.x) / 2 - 30, y: 12.4 * T }; g.face = 1;
+      if (t > 0.25 && !m.a) { m.a = 1; Au.sfx('gurgle'); say('Gus wakes up with a rumbling belly. Time for breakfast!', 'narrator', {}); }
+      if (t > 0.9 && t < 2.5) { var s = (t - 0.9) / 1.6; c.x = (22 - 13.4 * s) * T; c.y = 14 * T; c.state = 'run'; c.face = -1; c.sneak = true; c.bao = false; }
+      if (t >= 2.5 && !m.b) { m.b = 1; st.plateBao = false; c.bao = true; c.x = 8.6 * T; c.state = 'sit'; c.sneak = false; c.face = -1; Au.sfx('pop'); Au.duck(true); say('Mimi has Gus’s bao! They stare at each other…', 'narrator', {}); }
+      if (t >= 3.9) finishMoment();
+    } else if (m.type === 'reunion') {
+      if (!m.init) {
+        m.init = 1; m.side = c.x >= g.x ? 1 : -1; m.tx = g.x + m.side * 58; m.ty = g.y; m.sx = c.x; m.sy = c.y; m.far = Math.hypot(c.x - m.tx, c.y - m.ty); m.trust = !!c.trusted; c.mv = null; c.hiding = false; g.face = m.side; Au.duck(true);
+        say(m.trust ? 'Mimi trots over with the bao.' : 'Mimi hops over with the bao.', 'narrator', {});
+      }
+      st.camFocus = { x: (g.x + m.tx) / 2, y: g.y - 120 };
+      if (t < 0.8) { var a = t / 0.8; c.x = m.sx + (m.tx - m.sx) * a; c.y = m.sy + (m.ty - m.sy) * a - 4 * Math.min(70, 20 + m.far * 0.1) * a * (1 - a); c.state = 'run'; c.face = (m.tx - m.sx) >= 0 ? 1 : -1; }
+      else if (t < 1.9) {
+        c.x = m.tx; c.y = m.ty; c.face = -m.side; c.state = m.trust ? 'purr' : 'sit';
+        if (!m.set) { m.set = 1; c.bao = false; m.baoX = (g.x + m.tx) / 2; Au.sfx(m.trust ? 'purr' : 'meow'); say(m.trust ? 'She sets the bao down for Gus.' : 'She looks away, then nudges the bao with her paw.', 'narrator', {}); }
+        if (m.trust && Math.random() < dt * 5) heart(c.x, c.y - 30);
+      }
+      if (t >= 1.9 && !m.eat) { m.eat = 1; Au.sfx('eat'); eatFood({ id: 'bao', x: g.x, y: g.y - 26 }, 1); g.relief = 1.4; g.chomp = 0.35; }
+      if (t >= 2.9 && !m.toss) { m.toss = 1; Au.sfx('bounce'); }
+      if (t >= 3.4 && !m.fed) {
+        m.fed = 1; Au.sfx('fed'); c.state = 'purr'; st.hold = 0.3;
+        for (var h = 0; h < 10; h++) heart(c.x + rnd(-24, 24), c.y - 26); for (var i = 0; i < 40; i++) part('conf', g.x + rnd(-120, 120), g.y - rnd(60, 200), rnd(-60, 60), rnd(20, 90), rnd(2, 3.4), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][i % 5], 60);
+        say('Breakfast found!', 'narrator', {});
+      }
+      if (t >= 4.8) finishMoment();
+    }
+  }
+  function drawBaoHalf(x, y, size, left) { cx.save(); cx.beginPath(); cx.rect(x - size / 2 + (left ? 0 : size / 2), y - size / 2 - 2, size / 2, size + 4); cx.clip(); A.drawFood(cx, 'bao', x, y, size); cx.restore(); }
+  function drawMoment(t) {
+    var st = Game.st, m = st.moment; if (!m) return; var c = st.cat, g = st.g;
+    if (m.type === 'heist') {
+      if (m.t > 2.5 && m.t < 3.6) { var pu = 1 + Math.sin(m.t * 14) * 0.12; cx.save(); cx.fillStyle = '#e22b2b'; cx.strokeStyle = '#2b1d14'; cx.lineWidth = 4; cx.font = '700 40px "Luckiest Guy", Fredoka, sans-serif'; cx.textAlign = 'center'; [[g.x, g.y - 84], [c.x, c.y - 66]].forEach(function (pt) { cx.save(); cx.translate(pt[0], pt[1]); cx.scale(pu, pu); cx.strokeText('!', 0, 0); cx.fillText('!', 0, 0); cx.restore(); }); cx.restore(); }
+    } else if (m.type === 'reunion') {
+      var gy = g.y - 14, tt = m.t;
+      if (m.set && tt < 1.9) { var nudge = (!m.trust && tt > 1.5) ? (m.side < 0 ? 12 : -12) * Math.min(1, (tt - 1.5) / 0.3) : 0; var by = gy + Math.sin(tt * 5) * 3; cx.save(); cx.globalAlpha = 0.55; A.p.circ(cx, m.baoX + nudge, by, 26, '#ffe9a0', 0); cx.restore(); A.drawFood(cx, 'bao', m.baoX + nudge, by, 36); m.baoX2 = m.baoX + nudge; }
+      if (m.eat) {
+        var bx = m.baoX2 || m.baoX, mouthX = g.x + g.face * 12, mouthY = g.y - 38;
+        if (tt < 2.25) { var k = (tt - 1.9) / 0.35; drawBaoHalf(bx + (mouthX - bx) * k, gy + (mouthY - gy) * k - Math.sin(k * Math.PI) * 24, 34, true); }
+        if (tt < 2.9) drawBaoHalf(bx, gy, 34, false);
+        else if (tt < 3.4) { var k2 = (tt - 2.9) / 0.5; drawBaoHalf(bx + (c.x - bx) * k2, gy + ((c.y - 28) - gy) * k2 - Math.sin(k2 * Math.PI) * 40, 34, false); }
+      }
+    }
+  }
+  function drawMomentOverlay() {
+    var st = Game.st, m = st.moment; if (!m || m.type !== 'reunion' || m.t < 3.4) return;
+    var k = Math.min(1, (m.t - 3.4) / 0.35), sc = 0.6 + 0.4 * k + Math.sin(Math.min(1, (m.t - 3.4) / 0.6) * Math.PI) * 0.12;
+    cx.save(); cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.translate(W / 2, H * 0.3); cx.scale(sc, sc); cx.textAlign = 'center'; cx.lineJoin = 'round';
+    var fz = Math.max(36, Math.min(W / 9, 84)); cx.font = '400 ' + fz + 'px "Luckiest Guy", Impact, sans-serif'; cx.lineWidth = fz * 0.16; cx.strokeStyle = '#2b1d14'; cx.strokeText('BREAKFAST FOUND!', 0, 0); cx.fillStyle = '#ffcb2f'; cx.fillText('BREAKFAST FOUND!', 0, 0); cx.restore();
   }
 
   /* ---------------- things that react to Gus ---------------- */
@@ -574,7 +667,7 @@
         }
       }
     });
-    if (st.sockT > 0) st.sockT -= dt;
+    if (st.sockT > 0) st.sockT -= dt; if (st.wobT > 0) st.wobT -= dt;
   }
   function updateFalling(dt) {
     var st = Game.st, L = st.L;
@@ -603,10 +696,18 @@
     }
   }
 
+  /* the first time Gus stands on top of the fridge, the camera pulls back so he can see how far he has come */
+  function checkVista(dt) {
+    var st = Game.st, g = st.g; if (st.vistaT > 0) st.vistaT -= dt;
+    if (st.id === 'home' && !st.vistaDone && g.grounded && Math.abs(g.y - 4 * T) < 2 && g.x > 54 * T && g.x < 57 * T) {
+      st.vistaDone = true; st.vistaT = 3.4; Au.sfx('whoosh'); say('What a view! The whole house, and Mimi far away.', 'narrator', {});
+    }
+  }
+
   /* ---------------- update loop ---------------- */
   Game.update = function (dt) {
     var st = Game.st; if (!st) return;
-    dt = Math.min(dt, 0.05) * (Game.save.set.speed / 100);
+    dt = Math.min(dt, 0.05) * (Game.save.set.speed / 100); var rdt = dt;
     if (st.hold > 0) { st.hold -= dt; dt *= 0.18; }
     if (st.slow) { st.slow.t += dt; if (st.slow.t > 6) { st.slow = null; st.firstBlastDone = true; } else dt *= 0.3; }
     st.t += dt;
@@ -615,7 +716,7 @@
       updateGus(dt);
       B.tick(b, dt, { breathing: st.g.breathing });
       handleEvents();
-      updatePickups(dt); updatePrompts(dt); updateTriggers(); updateBubbles(dt); updateStuck(dt); updateCat(dt); updateReacts(dt); updateFalling(dt);
+      updatePickups(dt); if (!st.moment) { updatePrompts(dt); updateTriggers(); updateStuck(dt); } updateBubbles(dt); updateCat(dt); updateReacts(dt); updateFalling(dt); updateMoment(dt); checkVista(dt);
     } else if (st.status === 'clear') {
       st.clearT += dt; updateGus(dt); B.tick(b, dt, {}); b.events = [];
       updatePickups(dt);
@@ -625,7 +726,9 @@
     st.noteT -= dt;
     Au.setBelly(b.vit, b.pres); Au.ladder(st.status === 'play' ? b.state : 'springy', dt);
     st.shake *= Math.pow(0.02, dt); if (st.flash > 0) st.flash -= dt;
-    st.patches.forEach(function (p) { if (p.growth > 0 && p.anim < 1) p.anim = Math.min(1, p.anim + dt * 1.6); if (p.squash > 0) p.squash -= dt; });
+    st.patches.forEach(function (p) { if (p.growth > 0 && p.anim < 1) p.anim = Math.min(1, p.anim + dt * 1.6); if (p.squash > 0) p.squash -= dt; if (p.pop > 0) p.pop -= dt; });
+    ZT = st.moment ? (st.moment.type === 'reunion' ? 1.25 : 1.2) : st.slow ? 1.1 : st.vistaT > 0 ? 0.8 : 1;
+    ZF += (ZT - ZF) * Math.min(1, rdt * 3.5); applyZoom();
     updateCam(dt, false);
   };
 
@@ -661,11 +764,15 @@
   }
   function drawPatch(pt, st) {
     var t = st.t;
-    if (pt.growth === 0) { // sleeping seed: a glint on the soil
-      var x = pt.cx; cx.save(); cx.globalAlpha = 0.5 + 0.4 * Math.sin(t * 3); A.p.circ(cx, x - 14, pt.y * T - 3, 3, '#ffe9a0', 0); A.p.circ(cx, x + 10, pt.y * T - 5, 2.4, '#ffe9a0', 0); cx.restore();
+    if (pt.growth === 0) { // sleeping seed: a glint on the soil, and a target that says where the blast must land
+      var x = pt.cx, near = Math.abs(st.g.x - x) < 14 * T; cx.save(); cx.globalAlpha = 0.5 + 0.4 * Math.sin(t * 3); A.p.circ(cx, x - 14, pt.y * T - 3, 3, '#ffe9a0', 0); A.p.circ(cx, x + 10, pt.y * T - 5, 2.4, '#ffe9a0', 0); cx.restore();
+      if (near) {
+        var bob = Math.sin(t * 4) * 5; cx.save(); cx.globalAlpha = 0.9; cx.strokeStyle = '#ffd93d'; cx.lineWidth = 4; cx.setLineDash([8, 7]); cx.beginPath(); cx.ellipse(x, pt.y * T - 2, pt.w * T / 2 + 6, 9, 0, 0, TAU); cx.stroke(); cx.setLineDash([]);
+        A.p.poly(cx, [x - 12, pt.y * T - 56 + bob, x + 12, pt.y * T - 56 + bob, x + 12, pt.y * T - 44 + bob, x + 20, pt.y * T - 44 + bob, x, pt.y * T - 24 + bob, x - 20, pt.y * T - 44 + bob, x - 12, pt.y * T - 44 + bob], '#ffd93d', 2.5); cx.restore();
+      }
       return;
     }
-    var sq = pt.squash > 0 ? 1 - pt.squash * 0.5 : 1;
+    var sq = pt.squash > 0 ? 1 - pt.squash * 0.5 : 1; if (pt.pop > 0) sq = 1 + Math.sin(pt.pop * 18) * 0.25 * pt.pop;
     cx.save(); cx.translate(pt.cx, pt.y * T); cx.scale(1, sq); A.plant(cx, pt.kind, 0, 0, pt.growth, t, pt.anim); cx.restore();
   }
   function drawFoodItem(f, t) {
@@ -714,7 +821,7 @@
     // back decorations and crowd
     var mood = crowdMood(), i, d;
     var left = cam.x - 80, right = cam.x + VW + 80;
-    for (i = 0; i < L.decor.length; i++) { d = L.decor[i]; if (!A.decorIsFront(d)) A.decor(cx, d, t, { machineOff: st.status === 'clear', tvOn: true }); }
+    for (i = 0; i < L.decor.length; i++) { d = L.decor[i]; if (!A.decorIsFront(d)) A.decor(cx, d, t, { machineOff: st.status === 'clear', tvOn: true, plateBao: st.plateBao }); }
     st.persons.forEach(function (p) { if (p.x > left && p.x < right) A.person(cx, p.x + p.ox, p.y, p, mood, t, Game.save.set.gross === 'max' && st.crowd.scatter > 0); });
     // tiles
     var tx0 = Math.max(0, Math.floor(cam.x / T)), tx1 = Math.min(L.w - 1, Math.ceil((cam.x + VW) / T)), ty0 = Math.max(0, Math.floor(cam.y / T)), ty1 = Math.min(L.h - 1, Math.ceil((cam.y + VH) / T));
@@ -725,7 +832,7 @@
       var above = L.get(tx, ty - 1), top = D.SOLID.indexOf(above) < 0;
       A.tile(cx, (def.id === 'home' && tx >= 92) ? 'commute' : def.theme, ch, tx * T, ty * T, top, (tx * 7 + ty * 3) & 3);
     }
-    for (i = 0; i < L.decor.length; i++) { d = L.decor[i]; if (A.decorIsFront(d)) A.decor(cx, d, t, {}); }
+    for (i = 0; i < L.decor.length; i++) { d = L.decor[i]; if (A.decorIsFront(d)) A.decor(cx, d, t, { wob: st.wobT > 0 ? st.wobT : 0 }); }
     // decals (splats) then plants
     st.particles.forEach(function (p) { if (p.k === 'decal') { cx.globalAlpha = Math.min(1, p.life / 1.2); cx.fillStyle = p.col; cx.beginPath(); cx.ellipse(p.x, p.y - 2, p.size * 1.6, p.size * 0.5, 0, 0, TAU); cx.fill(); cx.globalAlpha = 1; } });
     st.patches.forEach(function (p) { drawPatch(p, st); });
@@ -737,9 +844,11 @@
       else if (bg.state === 'freeing') { var k = bg.t / 0.9; A.bug(cx, bg.x + (g.x - bg.x) * k, bg.y + (g.y - 24 - bg.y) * k - Math.sin(k * Math.PI) * 30, t, bg.fam, { hop: true, r: 13 * (1 - k * 0.5) }); }
       else A.bug(cx, bg.x, bg.y, t, bg.fam, { hop: Math.sin(t * 0.7 + bg.x) > 0.9 });
     });
+    var cc = st.cat, catOpts = cc ? { face: cc.face, state: cc.state, bao: cc.bao, hop: cc.tease || cc.state === 'cheer', alert: cc.alert, sneak: cc.sneak, sock: cc.sock > 0, peek: cc.hiding } : null;
+    if (cc && cc.hiding) A.cat(cx, cc.x, cc.y, t, catOpts);     // she is behind the basket
     st.reacts.forEach(function (r) { A.react(cx, r, t); });
     st.foods.forEach(function (f) { drawFoodItem(f, t); });
-    if (st.cat) A.cat(cx, st.cat.x, st.cat.y, t, { face: st.cat.face, state: st.cat.state, bao: st.cat.bao, hop: st.cat.tease || st.cat.state === 'cheer', alert: st.cat.alert });
+    if (cc && !cc.hiding) A.cat(cx, cc.x, cc.y, t, catOpts);
     // Gus
     A.gus(cx, { x: g.x, y: g.y, face: g.face, sx: g.sx, sy: g.sy, state: b.state, pres: b.pres, vit: b.vit, t: t, run: g.run, vy: g.vy, air: !g.grounded, moving: Math.abs(g.vx) > 20,
       grounded: g.grounded, lan: st.lan.ang, tears: st.lan.tears, hasLantern: st.lan.has, breathing: g.breathing, relief: g.relief > 0 || st.status === 'clear', butterflies: b.butterflies, spin: g.spin, glow: true, sock: st.sockT > 0, dizzy: g.lockT > 0, fizz: st.fizzT > 0, tint: g.tint ? g.tint.k : null, tintA: g.tint ? Math.min(1, g.tint.t / 0.5) : 0, buildup: !!st.slow || (g.blastT > 0.02 && g.blastT < 0.18 && !g.blasting) });
@@ -750,6 +859,7 @@
       if (p.k === 'decal') return;
       cx.globalAlpha = p.k === 'cloud' ? a * 0.8 : a;
       if (p.k === 'conf') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 4); cx.fillStyle = p.col; cx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); cx.restore(); }
+      else if (p.k === 'heart') { cx.save(); cx.translate(p.x, p.y); var hs = p.size / 8; cx.scale(hs, hs); cx.beginPath(); cx.moveTo(0, 3); cx.bezierCurveTo(-9, -4, -5, -11, 0, -5); cx.bezierCurveTo(5, -11, 9, -4, 0, 3); cx.closePath(); cx.fillStyle = p.col; cx.fill(); cx.lineWidth = 1.4; cx.strokeStyle = INK; cx.stroke(); cx.restore(); }
       else if (p.k === 'ring') { cx.strokeStyle = p.col; cx.lineWidth = 4 * a + 1; cx.beginPath(); cx.arc(p.x, p.y, p.size + (1 - a) * 70, 0, TAU); cx.stroke(); }
       else if (p.k === 'sock') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 7); A.p.rr(cx, -3.5, -9, 7, 16, 3, p.col, 1.8); cx.fillStyle = '#fff'; cx.fillRect(-3.5, -3, 7, 3); cx.restore(); }
       else if (p.k === 'petal') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 3); cx.fillStyle = p.col; cx.beginPath(); cx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, TAU); cx.fill(); cx.restore(); }
@@ -759,6 +869,7 @@
     });
     cx.globalAlpha = 1;
     st.bubbles.forEach(function (bu) { A.bubble(cx, D.FEELINGS[bu.kind].icon, bu.x, bu.y, bu.size, bu.t, bu.a); });
+    drawMoment(t);
     drawPrompt(st);
     if (st.hint && st.hint.t > 0) { st.hint.t -= 1 / 60; var by = st.hint.y - 60 - Math.abs(Math.sin(t * 5)) * 14; cx.save(); cx.globalAlpha = Math.min(1, st.hint.t); A.p.poly(cx, [st.hint.x - 16, by - 26, st.hint.x + 16, by - 26, st.hint.x + 16, by - 8, st.hint.x + 26, by - 8, st.hint.x, by + 18, st.hint.x - 26, by - 8, st.hint.x - 16, by - 8], '#ffd93d', 3); cx.restore(); }
     if (st.slow) { var gl = Math.sin(t * 12) * 0.5 + 0.5; cx.save(); cx.globalAlpha = 0.96; A.p.rr(cx, g.x - 96, g.y - 150 - gl * 4, 192, 62, 18, '#fff3d6', 3.5); A.glyph(cx, 'blast', g.x - 52, g.y - 119 - gl * 4, In.kind, 19); cx.fillStyle = '#d9473f'; cx.font = '700 24px "Luckiest Guy", Fredoka, sans-serif'; cx.textAlign = 'left'; cx.fillText('BLAST!', g.x - 24, g.y - 110 - gl * 4); cx.restore(); }
@@ -767,7 +878,8 @@
     cx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);
     if (b.state === 'critical' && st.status === 'play') { var vg = cx.createRadialGradient(VW / 2, VH / 2, VH * 0.35, VW / 2, VH / 2, VH * 0.85); vg.addColorStop(0, 'rgba(255,60,60,0)'); vg.addColorStop(1, 'rgba(255,60,60,' + (0.25 + 0.12 * Math.sin(t * 8)) + ')'); cx.fillStyle = vg; cx.fillRect(0, 0, VW, VH); }
     if (st.flash > 0) { cx.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, st.flash) + ')'; cx.fillRect(0, 0, VW, VH); }
-    drawHUD(st);
+    drawMomentOverlay();
+    if (!st.moment) drawHUD(st);
   };
 
   /* ---------------- main loop ---------------- */
@@ -782,7 +894,7 @@
       // Step mode: between presses the world waits, but only once Gus has come to rest (never freeze him mid-air)
       var gs = Game.st.g, rest = Game.st.status !== 'play' || (gs.grounded && Math.abs(gs.vx) < 30 && Math.abs(gs.vy) < 20 && !(gs.lockT > 0));
       Game.unsettled = rest ? 0 : (Game.unsettled || 0) + dt;
-      var wait = In.stepMode && In.frozen && (rest || Game.unsettled > 5);
+      var wait = In.stepMode && In.frozen && Game.st.status === 'play' && !Game.st.moment && (rest || Game.unsettled > 5);
       Game.waiting = wait;
       if (wait) { Au.blastOff(); Au.breatheOff(); }
       if (!Game.paused && !wait) Game.update(dt);

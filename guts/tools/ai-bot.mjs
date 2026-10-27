@@ -3,8 +3,9 @@
 import { launch } from './cdp.mjs';
 const base = (process.env.GUTS_URL || 'http://localhost:8765/guts/index.html') + '?ai=1';
 const p = await launch({ url: base, w: 1280, h: 800 });
-await p.sleep(2600);
+await p.ready();
 await p.eval('__guts.startLevel()'); await p.sleep(500);
+for (let i = 0; i < 120 && (await p.eval('!!GUTS.Game.st.moment')); i++) await p.sleep(100);   // the opening scene plays by itself
 const tap = (key) => p.eval(`(function(){ var o={key:'${key}', bubbles:true}; window.dispatchEvent(new KeyboardEvent('keydown',o)); window.dispatchEvent(new KeyboardEvent('keyup',o)); })()`);
 async function settle() { await p.sleep(80); for (let i = 0; i < 150; i++) { if (await p.eval('GUTS.Game.waiting === true || GUTS.Game.st.status !== "play"')) return; await p.sleep(30); } }
 const gx = async () => p.eval('GUTS.Game.st.g.x / 32');
@@ -33,6 +34,8 @@ while (actions < 400) {
 }
 const fin = await p.eval('({status: GUTS.Game.st.status, tile: Math.round(GUTS.Game.st.g.x/32), bao: GUTS.Game.st.baoEaten})');
 console.log(JSON.stringify({ actions, seconds: Math.round((Date.now() - t0) / 1000), ...fin, log }));
+for (let i = 0; i < 80 && (await p.eval('GUTS.UI.screen')) !== 'results'; i++) await p.sleep(100);
+console.log('results screen appeared by itself after the exit:', (await p.eval('GUTS.UI.screen')) === 'results', '|', (await p.eval("document.getElementById('results').innerText.replace(/\\s+/g,' ').slice(0,200)")));
 console.log('AI BOT', fin.status === 'clear' ? 'OK: finished the level with single key taps' : 'DID NOT FINISH');
 if (p.logs.length) console.log('page logs', JSON.stringify(p.logs));
 p.close();

@@ -9,7 +9,7 @@
   A.cat = function (ctx, x, y, t, o) {
     o = o || {}; var st = o.state || 'sit', face = o.face || 1, sc = o.scale || 1;
     var fur = '#f29a4a', fur2 = '#ffc27a', dark = '#c86a1e';
-    var hopY = o.hop ? -Math.abs(Math.sin(t * 7)) * 11 : 0;
+    var hopY = (o.hop ? -Math.abs(Math.sin(t * 7)) * 11 : 0) + (o.peek ? 15 : 0);
     ctx.save(); ctx.translate(x, y + hopY); ctx.scale(face * sc, sc);
     var wag = Math.sin(t * (st === 'startle' ? 18 : st === 'purr' ? 5 : 3)) * (st === 'sleep' ? 0.05 : 0.35);
     function tail(bx, by, puffed) {
@@ -33,6 +33,7 @@
       line(ctx, hx + 8, hy + 3, hx + 17, hy + 1, 'rgba(43,29,20,.7)', 1); line(ctx, hx + 8, hy + 4.5, hx + 17, hy + 5.5, 'rgba(43,29,20,.7)', 1);
     }
     function stripes(cx, cy, w) { for (var i = -1; i <= 1; i++) line(ctx, cx + i * 7, cy - 9, cx + i * 7 + 2, cy - 3, dark, 2.2); }
+    function sockHat(hx, hy) { if (!o.sock) return; ctx.save(); ctx.translate(hx - 1, hy - 13); ctx.rotate(-0.55); rr(ctx, -4, -3, 9, 17, 4, '#fff', 2); ctx.fillStyle = '#e0584a'; ctx.fillRect(-3.5, 1, 8, 3); ctx.fillRect(-3.5, 8, 8, 3); ell(ctx, 5, 15, 5, 3.5, '#fff', 2); ctx.restore(); }
     function bao(bx, by) { ell(ctx, bx, by, 6, 5, '#fffaf0', 2); line(ctx, bx, by - 4.5, bx + 2.5, by - 1, 'rgba(150,120,80,.6)', 1); line(ctx, bx, by - 4.5, bx - 2.5, by - 1, 'rgba(150,120,80,.6)', 1); }
     if (st === 'sleep') {
       var br = Math.sin(t * 2) * 1.2;
@@ -43,14 +44,14 @@
       ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.font = '700 ' + (12 + ((t * 2) % 2) * 3) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center';
       var zz = (t * 0.8) % 1; ctx.globalAlpha = 1 - zz; ctx.strokeText('z', 24, -26 - zz * 18); ctx.fillText('z', 24, -26 - zz * 18); ctx.globalAlpha = 1;
     } else if (st === 'run') {
-      var ph = t * 20;
+      var ph = t * (o.sneak ? 9 : 20);
       tail(-18, -22, false);
       line(ctx, -10, -9, -10 + Math.sin(ph) * 9, 0, INK, 6); line(ctx, -10, -9, -10 + Math.sin(ph) * 9, 0, fur, 3);
       line(ctx, 10, -9, 10 - Math.sin(ph) * 9, 0, INK, 6); line(ctx, 10, -9, 10 - Math.sin(ph) * 9, 0, fur, 3);
       ell(ctx, 0, -17 + Math.abs(Math.sin(ph)) * -2, 22, 9, fur, 3); stripes(0, -20, 20);
       line(ctx, -14, -12, -14 - Math.sin(ph + 2) * 8, -2, INK, 6); line(ctx, -14, -12, -14 - Math.sin(ph + 2) * 8, -2, fur, 3);
       line(ctx, 14, -12, 14 + Math.sin(ph + 2) * 8, -2, INK, 6); line(ctx, 14, -12, 14 + Math.sin(ph + 2) * 8, -2, fur, 3);
-      face_(22, -22, 'run'); ears(22, -22);
+      face_(22, -22, 'run'); ears(22, -22); sockHat(22, -22);
       if (o.bao) bao(31, -19);
     } else { // sit, perch, purr, startle
       var puff = st === 'startle';
@@ -58,7 +59,7 @@
       ell(ctx, -4, -4, 9, 5, fur, 3); ell(ctx, 5, -4, 9, 5, fur, 3);                                 // paws
       ell(ctx, 0, -17 + (puff ? -3 : 0), puff ? 14 : 11, puff ? 17 : 15, fur, 3); stripes(0, -20, 14);
       ell(ctx, 3, -14, 6.5, 9, fur2, 0);
-      face_(3, -36 + (puff ? -2 : 0), st === 'startle' ? 'startle' : (st === 'purr' || st === 'cheer') ? 'purr' : 'sit'); ears(3, -36 + (puff ? -2 : 0));
+      face_(3, -36 + (puff ? -2 : 0), st === 'startle' ? 'startle' : (st === 'purr' || st === 'cheer') ? 'purr' : 'sit'); ears(3, -36 + (puff ? -2 : 0)); sockHat(3, -36 + (puff ? -2 : 0));
       if (o.bao) bao(12, -33);
       if (st === 'cheer') { ctx.fillStyle = '#ffd93d'; ctx.strokeStyle = INK; ctx.lineWidth = 1.4; for (var cs = 0; cs < 3; cs++) { var cy2 = -54 - ((t * 1.6 + cs * 0.3) % 1) * 14; poly(ctx, [10 + cs * 9, cy2 - 4, 12 + cs * 9, cy2, 16 + cs * 9, cy2, 13 + cs * 9, cy2 + 3, 14 + cs * 9, cy2 + 8, 10 + cs * 9, cy2 + 5, 6 + cs * 9, cy2 + 8, 7 + cs * 9, cy2 + 3, 4 + cs * 9, cy2, 8 + cs * 9, cy2], '#ffd93d', 1.4); } }
       if (st === 'purr') for (var h = 0; h < 2; h++) { var hz = (t * 0.9 + h * 0.5) % 1; ctx.globalAlpha = 1 - hz; poly(ctx, [14 + h * 8, -46 - hz * 22, 18 + h * 8, -52 - hz * 22, 22 + h * 8, -46 - hz * 22, 18 + h * 8, -40 - hz * 22], '#ff6b8a', 1.4); ctx.globalAlpha = 1; }

@@ -82,7 +82,7 @@
     return true;
   }
   function nextHop() {
-    var st = Game.st; if (!st || Game.view !== 'stage') return null;
+    var st = Game.st; if (!st || Game.view !== 'stage' || st.status !== 'play') return null;
     var path = plan(st); if (!path) return null;
     var gx = st.g.x / T, start = path[0], L = st.L;
     for (var i = 0; i + 1 < path.length; i++) {
@@ -146,10 +146,12 @@
 
   function describe() {
     var st = Game.st;
+    if (G.UI && G.UI.screen === 'results') { var rt = document.getElementById('results'); return 'GUTS results screen: ' + (rt ? rt.innerText.replace(/\s+/g, ' ') : '') + ' Buttons: Next, Play again, Title.'; }
     if (!st || Game.view !== 'stage') return 'GUTS: ' + (G.UI ? 'you are on the "' + G.UI.screen + '" screen.' : 'loading.');
     var s = state(), t = [];
+    if (Game.st.moment) { t.push('A short scene is playing (' + (Game.st.moment.type === 'heist' ? 'Mimi the cat steals Gus’s breakfast bao' : 'Gus and Mimi share the bao') + '). It ends by itself in a few seconds, or press jump or blast to skip it.'); return t.join(' '); }
     t.push('GUTS text view. Level: ' + s.level + ' (' + s.mode + ' mode).' + (s.stepMode ? ' Step mode: the game waits between button presses' + (s.waiting ? ' (waiting now).' : '.') : ''));
-    if (s.status === 'clear') t.push('The level is complete!');
+    if (s.status === 'clear') { t.push('The level is complete! The celebration plays, then the results screen appears by itself.'); t.push('Gus is at tile ' + s.x + '. Bites found: ' + s.bites + '.'); return t.join(' '); }
     t.push('Gus is at tile ' + s.x + ' of ' + s.levelWidth + (s.goalX ? ' (the exit gate is at tile ' + s.goalX + ', ' + tiles(Math.abs(s.goalX - s.x)) + ' away)' : '') + ', ' + (s.onGround ? 'standing' : 'in the air') + ', facing ' + s.facing + '.');
     t.push('Belly: ' + s.belly + ' (pressure ' + s.pressure + '%, vitality ' + s.vitality + '%)' + (s.butterflies ? ', ' + s.butterflies + ' butterflies' : '') + (s.heavy ? ', heavy' : '') + '. ' + (s.pressure < 8 ? 'Not much pressure to blast with: fizzy drinks, sweets and big feelings build it. ' : s.pressure > 85 ? 'About to blow out: breathe or blast now. ' : ''));
     if (s.wall) t.push('Ahead: a wall ' + tiles(s.wall.height) + ' high, ' + tiles(s.wall.dist) + ' away' + (s.wall.height <= 3 ? ' (a jump gets over it).' : s.wall.height <= 5 ? ' (jump from a step, or blast).' : ' (look for steps or shelves, or blast over it).'));

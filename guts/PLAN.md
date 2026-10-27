@@ -1,5 +1,18 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.4 (beta, 2026-10-26): "The Great Bao Heist"
+
+An outside replay called the game a lovable prototype and asked for more density, payoffs and cause-and-effect. 1.4 (all in `game.js`, `art3.js`, `data.js`, `ui.js`):
+- **Scenes** (`startMoment`, `updateMoment`, `drawMoment`): the opening **heist** (Gus wakes, his belly rumbles, Mimi tiptoes in, snatches the bao from the nightstand, they freeze, she bolts) and the closing **reunion** (Mimi brings or nudges the bao over, Gus eats half, tosses her the other half, hearts and confetti, "BREAKFAST FOUND!"). The untrusted version has Mimi look away and push the bao with her paw. Camera zooms in; any button skips after 1.2 s (0.4 s on a replay). The gate also stages the reunion if Gus skipped Mimi.
+- **Mimi** now hides in the laundry basket (only her ears show), launches out in a sock hat when it tips (or when Gus passes), walks beside a Gus she trusts (slower, waits less far ahead, hearts), and cheers, teases and glances back.
+- **Zoom system** (`ZF`): scenes zoom in, the first blast eases in, the first time Gus stands on the fridge the camera pulls back ("What a view!") and the magnets wobble when he lands on shelves; the roof shows above the house.
+- **Flower**: a dashed target and arrow on the sleeping patch, a staged sprout (hit-stop, rings, boing).
+- Celebrations: lantern pickup, Mimi's purr, a freed Gut Bug (1.3). Dex discoveries show the power and say the name in Cantonese.
+- **Gut Village residents** (`D.BUGS`): Pip the drummer, Spice the joke teller, Noodle the builder; tap one to hear its line, hear its sound and watch it hop.
+- Fixes: results screen needed extra Waits in Step mode, route hints after the exit, results now say "this run" and "overall", the zoom notice only shows for a real pinch and closes itself, clearer left/right jump buttons.
+- Checks: `ai-bot.mjs` (single key taps) and `route.mjs` (jumps only, no scene) both pass; 39 tests.
+- Next: watch James play it unprompted (guts-F17), then more blast-centred set pieces and branching routes (guts-F16).
+
 ## 1.3 (beta, 2026-10-26): zoom lock, precise Step mode, a calmer screen
 
 James kept getting a zoomed-in, unplayable screen; a second outside playtest (Step mode only) could not line up the fridge shelves. 1.3:

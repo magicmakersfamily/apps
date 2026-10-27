@@ -27,6 +27,7 @@ export async function launch({ port = 9333, w = 1280, h = 720, url }) {
     async key(type, code, key) { await send('Input.dispatchKeyEvent', { type, code, key: key || code, windowsVirtualKeyCode: 0 }); },
     async resize(w, h) { await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false }); },
     sleep: (ms) => new Promise(r => setTimeout(r, ms)),
+    async ready() { for (let i = 0; i < 100; i++) { try { if (await api.eval('typeof GUTS !== "undefined" && !!GUTS.Game && !!window.__guts')) return true; } catch (e) {} await new Promise(r => setTimeout(r, 150)); } return false; },
     close() { try { ws.close(); } catch (e) {} proc.kill(); }
   };
   if (url) await api.goto(url);

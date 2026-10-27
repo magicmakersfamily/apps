@@ -255,6 +255,8 @@
       case 'sock': note(B, 'sine', 150, t, 0.12, 0.3, { slideTo: 70 }); noise(B, t, 0.1, 0.2, { f: 700, q: 0.6 }); break;
       case 'friend': [523, 659, 784, 1047, 1319].forEach(function (f, i) { note(B, 'triangle', f, t + i * 0.07, 0.5, 0.3); note(B, 'sine', f * 2, t + i * 0.07, 0.35, 0.12); }); break;
       case 'fizz': for (var fi = 0; fi < 9; fi++) note(B, 'sine', 900 + fi * 170 + Math.random() * 120, t + fi * 0.045, 0.07, 0.12, { slideTo: 1500 + fi * 120 }); noise(B, t, 0.5, 0.12, { type: 'highpass', f: 5000, a: 0.05 }); break;
+      case 'drum': [0, 0.16, 0.32, 0.48].forEach(function (d, i) { note(B, 'sine', i % 2 ? 150 : 110, t + d, 0.18, 0.5, { slideTo: 60 }); noise(B, t + d, 0.05, 0.2, { f: 900, q: 1 }); }); break;
+      case 'joke': note(B, 'sine', 120, t, 0.14, 0.5, { slideTo: 55 }); noise(B, t + 0.2, 0.12, 0.45, { f: 1900, q: 0.8 }); noise(B, t + 0.45, 0.45, 0.28, { type: 'highpass', f: 6500, a: 0.01 }); break;
       case 'whirr': note(B, 'triangle', 500, t, 0.5, 0.18, { slideTo: 900, vib: [18, 40] }); break;
       case 'hurt': note(B, 'square', 300, t, 0.18, 0.3, { slideTo: 120 }); break;
       case 'select': note(B, 'triangle', 660, t, 0.08, 0.3); break;

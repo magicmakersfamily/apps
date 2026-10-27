@@ -249,7 +249,7 @@
     panelBg(ctx, w, h, '#3a2a28', '#6a4a3a'); var s = Math.min(w, h) / 300;
     rr(ctx, w * 0.2, h * 0.08, w * 0.6, h * 0.84, 24, '#1a1a22', 5); rr(ctx, w * 0.22, h * 0.11, w * 0.56, h * 0.78, 14, '#ffe9c9', 0);
     A.porpor(ctx, w / 2, h * 0.9, s * 1.25, t);
-    ctx.fillStyle = '#2b1d14'; ctx.font = '700 ' + (16 * s) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Po Po is calling…', w / 2, h * 0.07);
+    ctx.fillStyle = '#2b1d14'; ctx.font = '700 ' + (16 * s) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Popo is calling…', w / 2, h * 0.07);
   };
   PANEL.swallow = function (ctx, w, h, t) {
     panelBg(ctx, w, h, '#ffb1c4', '#c24a74'); var s = Math.min(w, h) / 160; var k = (t * 0.35) % 1;

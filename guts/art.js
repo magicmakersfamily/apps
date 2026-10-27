@@ -56,10 +56,12 @@
     var rx = 13 + pres * 0.085 + Math.sin(t * (o.buildup ? 30 : 11)) * wobAmt, ry = 12 + pres * 0.05 - Math.sin(t * (o.buildup ? 30 : 11)) * wobAmt * 0.5;
     var by2 = -22 + idle * 0.3;
     ell(ctx, 0, by2, rx, ry, '#ffb02e', 3);
+    if (o.tint && o.tintA > 0) { ctx.save(); ctx.globalAlpha = 0.7 * o.tintA; ctx.lineWidth = 6; ctx.strokeStyle = o.tint === 'green' ? '#58e07a' : '#ffa23c'; ctx.beginPath(); ctx.ellipse(0, by2, rx + 5, ry + 5, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
     // belly
     var bellyAmt = st === 'springy' ? 0.7 : 0.95;
     ell(ctx, 4, by2 + 2, rx * bellyAmt * 0.82, ry * 0.88, '#ffcb57', 0);
     if (st !== 'springy') { ctx.beginPath(); ctx.arc(rx * 0.55, by2 + 4, 1.8, 0, TAU); ctx.fillStyle = '#c47a00'; ctx.fill(); }
+    if (o.fizz) { for (var fz = 0; fz < 6; fz++) { var fp = (t * 1.6 + fz * 0.37) % 1; circ(ctx, Math.sin(fz * 2.3 + t * 3) * rx * 0.55 + 3, by2 + ry * 0.6 - fp * ry * 1.5, 1.6 + (fz % 3) * 0.7, 'rgba(255,255,255,.9)', 0); } }
     // butterflies swirling in the belly
     if (o.butterflies) {
       for (var b = 0; b < Math.min(3, o.butterflies); b++) {
@@ -185,7 +187,7 @@
   };
   A.snaxCube = function (ctx, x, y, r, s) { s = s || 18; ctx.save(); ctx.translate(x, y); ctx.rotate(r || 0); rr(ctx, -s / 2, -s / 2, s, s, 4, '#e6d3a8', 2.5); ctx.fillStyle = '#8a7650'; ctx.font = '700 8px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('S', 0, 3); ctx.restore(); };
 
-  /* ---------------- Baron, Po Po, Golem ---------------- */
+  /* ---------------- Baron, Popo, Golem ---------------- */
   A.baron = function (ctx, x, y, s, t, mood) {
     s = s || 1; ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     var bob = Math.sin(t * 3) * 2;

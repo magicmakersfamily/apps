@@ -9,7 +9,8 @@
   A.cat = function (ctx, x, y, t, o) {
     o = o || {}; var st = o.state || 'sit', face = o.face || 1, sc = o.scale || 1;
     var fur = '#f29a4a', fur2 = '#ffc27a', dark = '#c86a1e';
-    ctx.save(); ctx.translate(x, y); ctx.scale(face * sc, sc);
+    var hopY = o.hop ? -Math.abs(Math.sin(t * 7)) * 11 : 0;
+    ctx.save(); ctx.translate(x, y + hopY); ctx.scale(face * sc, sc);
     var wag = Math.sin(t * (st === 'startle' ? 18 : st === 'purr' ? 5 : 3)) * (st === 'sleep' ? 0.05 : 0.35);
     function tail(bx, by, puffed) {
       ctx.beginPath(); ctx.moveTo(bx, by); ctx.bezierCurveTo(bx - 18, by - 4, bx - 26 + wag * 12, by - 24, bx - 14 + wag * 20, by - 40);
@@ -24,6 +25,7 @@
       ell(ctx, hx, hy, 11, 9.5, fur, 3);
       ell(ctx, hx + 2, hy + 3, 6, 4.2, fur2, 0);
       if (mood === 'sleep') { ctx.beginPath(); ctx.arc(hx - 3.5, hy - 1, 2.6, 0.1 * Math.PI, 0.9 * Math.PI); ctx.arc(hx + 4.5, hy - 1, 2.6, 0.1 * Math.PI, 0.9 * Math.PI); ctx.strokeStyle = INK; ctx.lineWidth = 1.8; ctx.stroke(); }
+      else if (mood === 'alert') { ell(ctx, hx - 3.5, hy - 1, 2.6, 0.9, '#9be07b', 1.6); ell(ctx, hx + 4.5, hy - 1, 3.4, 4.2, '#9be07b', 1.6); circ(ctx, hx + 5, hy - 1, 1.1, INK, 0); }
       else if (mood === 'startle') { ell(ctx, hx - 3.5, hy - 1, 3.6, 4.6, '#fff', 1.8); ell(ctx, hx + 4.5, hy - 1, 3.6, 4.6, '#fff', 1.8); circ(ctx, hx - 3, hy - 1, 1.3, INK, 0); circ(ctx, hx + 5, hy - 1, 1.3, INK, 0); }
       else if (mood === 'purr') { ctx.beginPath(); ctx.arc(hx - 3.5, hy - 1, 2.8, 1.1 * Math.PI, 1.9 * Math.PI); ctx.arc(hx + 4.5, hy - 1, 2.8, 1.1 * Math.PI, 1.9 * Math.PI); ctx.strokeStyle = INK; ctx.lineWidth = 1.8; ctx.stroke(); }
       else { var bl = (t * 0.7) % 3 < 0.12; if (bl) { line(ctx, hx - 6, hy - 1, hx - 1, hy - 1, INK, 1.8); line(ctx, hx + 2, hy - 1, hx + 7, hy - 1, INK, 1.8); } else { ell(ctx, hx - 3.5, hy - 1, 3, 3.8, '#9be07a', 1.6); ell(ctx, hx + 4.5, hy - 1, 3, 3.8, '#9be07a', 1.6); ell(ctx, hx - 3, hy - 1, 0.9, 3, INK, 0); ell(ctx, hx + 5, hy - 1, 0.9, 3, INK, 0); } }
@@ -36,7 +38,7 @@
       var br = Math.sin(t * 2) * 1.2;
       tail(-16, -6, false);
       ell(ctx, 0, -9, 21, 10 + br * 0.4, fur, 3); stripes(0, -12, 20);
-      face_(15, -9, 'sleep'); ears(15, -9);
+      face_(15, -9, o.alert ? 'alert' : 'sleep'); ears(15 + (o.alert ? Math.sin(t * 25) * 1.2 : 0), -9);
       if (o.bao) bao(8, -3);
       ctx.fillStyle = '#fff'; ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.font = '700 ' + (12 + ((t * 2) % 2) * 3) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center';
       var zz = (t * 0.8) % 1; ctx.globalAlpha = 1 - zz; ctx.strokeText('z', 24, -26 - zz * 18); ctx.fillText('z', 24, -26 - zz * 18); ctx.globalAlpha = 1;
@@ -56,8 +58,9 @@
       ell(ctx, -4, -4, 9, 5, fur, 3); ell(ctx, 5, -4, 9, 5, fur, 3);                                 // paws
       ell(ctx, 0, -17 + (puff ? -3 : 0), puff ? 14 : 11, puff ? 17 : 15, fur, 3); stripes(0, -20, 14);
       ell(ctx, 3, -14, 6.5, 9, fur2, 0);
-      face_(3, -36 + (puff ? -2 : 0), st === 'startle' ? 'startle' : st === 'purr' ? 'purr' : 'sit'); ears(3, -36 + (puff ? -2 : 0));
+      face_(3, -36 + (puff ? -2 : 0), st === 'startle' ? 'startle' : (st === 'purr' || st === 'cheer') ? 'purr' : 'sit'); ears(3, -36 + (puff ? -2 : 0));
       if (o.bao) bao(12, -33);
+      if (st === 'cheer') { ctx.fillStyle = '#ffd93d'; ctx.strokeStyle = INK; ctx.lineWidth = 1.4; for (var cs = 0; cs < 3; cs++) { var cy2 = -54 - ((t * 1.6 + cs * 0.3) % 1) * 14; poly(ctx, [10 + cs * 9, cy2 - 4, 12 + cs * 9, cy2, 16 + cs * 9, cy2, 13 + cs * 9, cy2 + 3, 14 + cs * 9, cy2 + 8, 10 + cs * 9, cy2 + 5, 6 + cs * 9, cy2 + 8, 7 + cs * 9, cy2 + 3, 4 + cs * 9, cy2, 8 + cs * 9, cy2], '#ffd93d', 1.4); } }
       if (st === 'purr') for (var h = 0; h < 2; h++) { var hz = (t * 0.9 + h * 0.5) % 1; ctx.globalAlpha = 1 - hz; poly(ctx, [14 + h * 8, -46 - hz * 22, 18 + h * 8, -52 - hz * 22, 22 + h * 8, -46 - hz * 22, 18 + h * 8, -40 - hz * 22], '#ff6b8a', 1.4); ctx.globalAlpha = 1; }
       if (puff) { ctx.fillStyle = '#e22b2b'; ctx.font = '700 22px "Luckiest Guy", Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('!', 22, -52); }
     }

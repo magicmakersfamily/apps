@@ -1,5 +1,15 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.3 (beta, 2026-10-26): zoom lock, precise Step mode, a calmer screen
+
+James kept getting a zoomed-in, unplayable screen; a second outside playtest (Step mode only) could not line up the fridge shelves. 1.3:
+- **Zoom**: Ctrl+scroll (a Mac trackpad pinch), Safari gestures, two-finger touch and Ctrl/Cmd +/-/0 are blocked inside the game while playing; the page's own text below stays zoomable. If the page is zoomed anyway (visual viewport scale above 1), touch browsers snap back by briefly capping the viewport tag, and a "Fix the zoom" banner is kept in view (it follows the visual viewport). Settings → Screen size (smaller, normal, larger). Likely cause was a trackpad pinch on a MacBook, but the device is unconfirmed (tracker guts-B5).
+- **Step mode precision**: arrow = one small step (about 1 tile), A / D = run, Q / E = jump left / right that lands at about 1, 3 or 5 tiles (keys 1 2 3, the Distance button or Settings → Tap distance). Hops steer to a target x and brake, so they are exact even against a wall; Tap and Step mode brake in the air. `GUTS.ai.nextHop()` plans the route (same rules as the level tests) and the text view says "walk 3 tiles right, then jump right with distance medium (key 2)…", lists nearby platforms and what reaches them.
+- **Calmer screen**: the text view is one line with a "Look around" toggle, touch controls fade after 4.5 s idle, the Step notice hides after 8 s, the bite count is just an icon and a number.
+- **Game feel**: freeing a Gut Bug has a brief slow-motion, rings and a toast (the basket tip has a short hit-stop too); Mimi glances back, teases, cheers a spectacular blast and twitches an ear when the belly rumbles near her sleep; fizzy food shows bubbles and a coloured glow in Gus's belly; a third soda at the fridge foot; the stuck helper also draws an arrow at the next step.
+- Grandma is **Popo** (one word, said "poh-poh"; TTS is given "Poe poe").
+- Checks: `node guts/tools/ai-bot.mjs` (single key taps only, finishes in ~57 actions) and `route.mjs` (jumps only) both pass; 39 tests.
+
 ## 1.2 (beta, 2026-10-26): the first level rebuilt, "Find the missing breakfast"
 
 The family asked for a rebuild after an outside review and James's play. 1.2 keeps 1.1's never-stuck rules and adds:
@@ -19,7 +29,7 @@ Playtest: James got stuck at the last fence (needed a big blast). An outside AI 
 - a stuck helper: after ~22 s without progress snacks float by with a hint (up to 4 times); the gate hands over a forgotten lantern
 - input: `key` fallback when `code` is missing, every press lasts at least one frame
 - **Tap mode** (one tap keeps going: walk 0.45 s, jump, blast 0.85 s, breathe 2.4 s), **Step mode** (the world waits for Gus to come to rest between presses; N or the Wait button looks around), on-screen buttons with a mouse, a **Text view**, and `GUTS.ai.state()/describe()/press()`. `?ai=1` switches them all on
-- grandma is **Po Po**, spoken "Poh Poh"
+- grandma is **Popo**, spoken "Poh Poh"
 - Next: the first-level rebuild (guts-F7). Ideas from the outside review worth keeping: a funny first blast by accident (laundry basket full of socks that becomes a ramp), a question-shaped goal ("find the missing breakfast"), a world that reacts to Gus, three inventive interactions, one secret, one small character (a family cat), a joyful ending, quick funny recovery, and foods with playful different properties instead of "good/bad" wording. Test with children unprompted.
 
 ## Status (beta 1.0, 2026-10-26): the first level only
@@ -27,7 +37,7 @@ Playtest: James got stuck at the last fence (needed a big blast). An outside AI 
 The family asked for the first level first, to prove the gameplay and mechanics. **Shipped: the Prologue, "Morning at Home"**,
 with everything the brief's Phase 0–1 needs: move, jump, eat, blast, breathe, the sound ladder (gurgle, tuba, foghorn), belly states,
 feelings bubbles and butterflies, compost gardens that persist (bounce flower), the lantern and its tears, the crowd arc, Gut Bugs,
-medals, Food Dex (20 findable bites of 80), Gut Village screen, intro story and Po Po's lines, three modes (Little Guts, Standard, Gut Check),
+medals, Food Dex (20 findable bites of 80), Gut Village screen, intro story and Popo's lines, three modes (Little Guts, Standard, Gut Check),
 Gross-o-Meter, settings, keyboard + PlayStation pad (Gamepad API, standard and raw Sony mapping) + touch, original music (6 songs) and effects.
 
 **Not wired up yet** (built as data or art, not in the engine): the Detroit levels, the Golem boss and The Mouth are *built and path-checked in
@@ -85,7 +95,7 @@ Playable, in order:
 | 4 | Boss: The Assembly Line Golem | Detroit | ground-pound conveyor, blast up, drop tomato on the button, feed don't fight |
 | 5 | Inside 1: The Mouth | inside | chomping teeth, tongue trampolines, meeting Biffy, Gut Village unlocks |
 
-Also in 1.0: story cutscenes, Po Po phone call after the boss, Gut Village hub (3 huts that grow), Food Dex
+Also in 1.0: story cutscenes, Popo phone call after the boss, Gut Village hub (3 huts that grow), Food Dex
 (80 slots, about 19 findable), medals (Zen + Chaos), 3 hidden Gut Bugs per stage, persistent compost gardens,
 lantern with tears, crowd reactions, three modes (Little Guts / Standard / Gut Check), Gross-o-Meter, optional
 co-op Biffy (2nd gamepad or IJKL keys), settings, saves in `localStorage`.
@@ -107,7 +117,7 @@ guts/belly.test.js  node --test balance tests (strategies, see below)
 guts/data.js        Food Dex entries (names, Chinese, Jyutping, facts), feelings, stage list, story scripts,
                     level builders (one function per stage)
 guts/audio.js       music sequencer, original songs, adaptive layers, all SFX
-guts/art.js         every drawing function: Gus, Biffy, Gut Bugs, Baron, Po Po, Golem, Snax Bots, crowd,
+guts/art.js         every drawing function: Gus, Biffy, Gut Bugs, Baron, Popo, Golem, Snax Bots, crowd,
                     food icons, feeling icons, backgrounds per theme, tiles, cutscene panels
 guts/game.js        input (keyboard, gamepads, touch), physics, entities, camera, stage flow, boss, co-op, saves
 guts/cover.png      1200×744, render from index.html#cover
@@ -295,7 +305,7 @@ huts). End-of-beta card.
   controlled blasts (≥ 0.7 s, no blowout). The same fruit vendor appears in every crowd and faints on blowouts.
   Store a crowd fandom value across stages (save) so the default mood shifts from horror to fandom.
 - **Feelings:** thought bubbles with picture icons (no reading): shoes swapped, toy taken, bumped foot, hungry
-  (empty plate), Grandma waiting (clock + Po Po), too high (cliff + scared eyes, adds 2 butterflies),
+  (empty plate), Grandma waiting (clock + Popo), too high (cliff + scared eyes, adds 2 butterflies),
   stop playing (game pad with ✕). Small +7, medium +12, big +22 (× fill). They drift toward Gus; dodge them
   or pop them with Biffy; three small ones creep up rather than spike.
 - **Butterflies:** drawn inside Gus's belly as a swirl when present; breathing lets them out of his mouth.
@@ -323,13 +333,13 @@ advances, a Skip button skips the scene. The game clock waits while the storytel
 Intro (from New game): 1) The Baron's factory: "This is Baron Von Processo. He has never tasted anything real."
 2) Machine squishes foods: "His Snax machines squish every food on Earth into the same beige cube. Crunch. Crunch.
 Boring." 3) Baron: "Tacos? Beige! Noodles? Beige! Soon the whole world will taste like nothing!" 4) Gus's room:
-"Meet Gus. Today he flies to Hong Kong for Grandma's Mid-Autumn feast." 5) "He made a paper lantern for Po Po.
+"Meet Gus. Today he flies to Hong Kong for Grandma's Mid-Autumn feast." 5) "He made a paper lantern for Popo.
 Now he just has to get there." 6) Belly gurgles: "Everything Gus eats, and everything he feels, goes into his
 belly. And his belly makes him move!"
 
 Before 1-1: map flies from home to Eastern Market; Baron on a billboard. Before boss: "I have to stop playing"
 bubble on the way in (biggest bump), Golem reveal. After boss: Golem sneezes coney dogs, colour floods, crowd
-chants; then **Po Po calls** (phone ring, video-call frame): "Gus! Did you eat? … A coney dog. Okay. Did you eat
+chants; then **Popo calls** (phone ring, video-call frame): "Gus! Did you eat? … A coney dog. Okay. Did you eat
 a vegetable? … The onions don't count. 食飯啦! Sik faan laa! Eat your rice!" Personalise from the save: if he ate
 broccoli/carrot, "Broccoli! Good boy." instead of the onions line. Then a last stray Snax flies into his mouth,
 he shrinks (cartoon logic) and is swallowed into his own belly → The Mouth. After The Mouth: Biffy: "Hi! I'm Biffy!
@@ -338,7 +348,7 @@ End card: "Next stop: Mexico! Coming soon." with Ko-fi, Tell a friend and "More 
 
 Voices: browser `speechSynthesis` (no recorded voices in 1.0 — there is no Kokoro venv on this Mac; recording
 the lines is a 1.1 item). Queue lines, advance on `onend` with a gap and a watchdog, never `cancel()` before each
-line. Narrator en-US (prefer an "Enhanced/Premium" voice if present), Po Po: an older en voice + **Cantonese
+line. Narrator en-US (prefer an "Enhanced/Premium" voice if present), Popo: an older en voice + **Cantonese
 phrases with a zh-HK voice** (Cantonese is the family's request in the brief, as in `mid-autumn/`; Traditional
 characters with Jyutping as `<ruby>`), Biffy: higher pitch. Show a small "backup voice" tag (shelf convention).
 Gus never speaks; his face and body carry it.
@@ -383,7 +393,7 @@ Chunky cartoon, thick dark outlines (`#2b1d14`, 3 px at logical scale), warm sat
 - **Gut Bugs:** round blobs in many colours with cilia and eyes; families: Yogurt Bloomers (cream, sleepy),
   Kimchi Crew (red, loud), Natto Stringers (tan, tangled).
 - **Baron Von Processo:** pear-shaped, beige suit, beige top hat, huge beige mustache, monocle, cane. Pompous,
-  never scary. **Po Po:** grey bun, round glasses, red cardigan, jade earrings, phone. **Golem:** boxy car-plant
+  never scary. **Popo:** grey bun, round glasses, red cardigan, jade earrings, phone. **Golem:** boxy car-plant
   robot, hazard stripes, assembly arms, mouth hatch, big red button on its head, LED eyes. **Snax Bot:** beige cube
   on little legs with one grumpy eye and "SNAX" on it. **Snax Drone:** beige blimp with a mustache logo.
 - **Food icons:** each food drawn as a vector icon, cached to small canvases (also used in the Dex via
@@ -488,6 +498,6 @@ fire burp, ground-pound boom. The gurgle → tuba → foghorn ladder must be rea
 4. Systems: compost + persistence, crates, Snax Bots, bubbles + butterflies, checkpoints + colour overlay, goal.
 5. Stages 1–3, then the boss, then The Mouth.
 6. `audio.js`: songs, adaptive layers, SFX.
-7. Story cutscenes, narration queue, Po Po call, Biffy, village, dex, map, results, settings, co-op.
+7. Story cutscenes, narration queue, Popo call, Biffy, village, dex, map, results, settings, co-op.
 8. Polish pass (feel: coyote time 0.1 s, jump buffer 0.12 s, variable jump, landing squash), phone layout, cover,
    shelf entry, test, publish.

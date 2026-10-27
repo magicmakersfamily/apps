@@ -5,7 +5,9 @@
   var G = root.GUTS = root.GUTS || {};
   var keys = {}, latch = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0, wait: 0 }, tlatch = {};
   var clock = 0, until = {}, tprev = {}, aiHold = {}, advUntil = 0;
-  var DUR = { move: 0.45, jump: 0.32, blast: 0.85, breathe: 2.4 };   // how long one tap keeps going in Tap mode
+  var DUR = { move: 0.45, run: 0.6, hop: 0.36, jump: 0.32, blast: 0.85, breathe: 2.4 };   // how long one tap keeps going in Tap / Step mode
+  var HOP = { small: 1, medium: 3, large: 5 };   // how many tiles a jump-left / jump-right travels
+  var STEP = { small: 0.12, medium: 0.32, large: 0.7 };   // one step: about 1, 3 or 6 tiles
   var last = 'kb', padSeen = false, dead = 0.3;
   var prev = {}, rep = {}, listeners = [];
   var I = {
@@ -13,7 +15,7 @@
     p2: { mx: 0, my: 0, feed: false, feedP: false, breathe: false },
     nav: { up: false, down: false, left: false, right: false, ok: false, back: false },
     pauseP: false, anyP: false, kind: 'kb', pads: 0, padName: '', capture: true,
-    tap: false, stepMode: false, frozen: false, active: false
+    tap: false, stepMode: false, frozen: false, active: false, stepSize: 'auto'
   };
 
   function isTextTarget(t) { return t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName); }
@@ -88,13 +90,16 @@
     // ----- player 1
     var p = I.p1, mx = 0, my = 0;
     if (!I.frozen) clock += dt;
-    if (anyK(['ArrowLeft', 'KeyA'])) mx -= 1; if (anyK(['ArrowRight', 'KeyD'])) mx += 1;
+    var stepKeys = I.stepMode;   // in Step mode: arrows = one small step, A / D = run, Q / E = jump left / right
+    if (anyK(stepKeys ? ['ArrowLeft'] : ['ArrowLeft', 'KeyA'])) mx -= 1; if (anyK(stepKeys ? ['ArrowRight'] : ['ArrowRight', 'KeyD'])) mx += 1;
     if (anyK(['ArrowDown', 'KeyS'])) my += 1; if (anyK(['ArrowUp', 'KeyW'])) my -= 1;
     if (a) { mx += a.lx; my += a.ly; }
     mx += tv('right') - tv('left');
     if (ai('right')) mx += 1; if (ai('left')) mx -= 1;
     mx = Math.max(-1, Math.min(1, mx));
-    var jump = anyK(['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || tv('jump') || ai('jump');
+    var runL = (stepKeys && k('KeyA')) || tv('runLeft') || ai('runLeft'), runR = (stepKeys && k('KeyD')) || tv('runRight') || ai('runRight');
+    var hopL = (stepKeys && k('KeyQ')) || tv('jumpLeft') || ai('jumpLeft'), hopR = (stepKeys && k('KeyE')) || tv('jumpRight') || ai('jumpRight');
+    var jump = anyK(['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || tv('jump') || ai('jump') || hopL || hopR;
     var blast = anyK(['KeyX', 'ShiftLeft', 'ShiftRight', 'Period']) || (a && (a.square || a.r1 || a.r2)) || tv('blast') || ai('blast');
     var breatheRaw = anyK(['KeyB', 'KeyC', 'ArrowDown', 'KeyS']) || (a && (a.circle || a.l1)) || tv('breathe') || ai('breathe');
     var pound = (a && a.tri) || (a && a.ly > 0.6) || tv('breathe') || k('ArrowDown') || k('KeyS') || ai('breathe');
@@ -104,11 +109,17 @@
     p.poundP = !!(pound && !prev.pound); p.pound = !!pound;
     prev.jump = jump; prev.blast = blast; prev.breathe = breatheRaw; prev.pound = pound;
     if (I.tap || I.stepMode) {
+      var sz = I.stepSize === 'auto' ? (I.stepMode ? 'small' : 'medium') : I.stepSize;
+      if (edge.Digit1) I.setStepSize('small', true); if (edge.Digit2) I.setStepSize('medium', true); if (edge.Digit3) I.setStepSize('large', true);
+      var md = STEP[sz] || DUR.move; p.hopDist = HOP[sz] || 3;
       var rl = mx < -0.3, rr = mx > 0.3;
-      if (rl && !tprev.l) { until.l = clock + DUR.move; until.r = 0; }
-      if (rr && !tprev.r) { until.r = clock + DUR.move; until.l = 0; }
-      tprev.l = rl; tprev.r = rr;
-      mx = (rl || clock < (until.l || 0) ? -1 : 0) + (rr || clock < (until.r || 0) ? 1 : 0);
+      if (rl && !tprev.l) { until.l = clock + md; until.r = 0; }
+      if (rr && !tprev.r) { until.r = clock + md; until.l = 0; }
+      if (runL && !tprev.runL) { until.l = clock + DUR.run; until.r = 0; }
+      if (runR && !tprev.runR) { until.r = clock + DUR.run; until.l = 0; }
+      p.hopP = (hopL && !tprev.hopL) ? -1 : (hopR && !tprev.hopR) ? 1 : 0;
+      tprev.l = rl; tprev.r = rr; tprev.runL = runL; tprev.runR = runR; tprev.hopL = hopL; tprev.hopR = hopR;
+      mx = (rl || runL || clock < (until.l || 0) ? -1 : 0) + (rr || runR || clock < (until.r || 0) ? 1 : 0);
       jump = lat('jump', jump, DUR.jump); blast = lat('blast', blast, DUR.blast); breatheGround = breatheRaw = lat('breathe', breatheRaw, DUR.breathe);
     }
     p.mx = mx; p.my = Math.max(-1, Math.min(1, my));
@@ -159,6 +170,7 @@
   I.touchUp = function (a) { touch[a] = 0; };
   /* hold an action for `secs` of game time (used by GUTS.ai and by tests) */
   I.press = function (name, secs) { aiHold[name] = clock + (secs || 0.4); last = 'ai'; };
+  I.setStepSize = function (v, announce) { I.stepSize = v || 'auto'; if (announce) I.sizeChanged = v; };
   I.setTap = function (tap, step) { I.tap = !!tap; I.stepMode = !!step; if (!step) I.frozen = false; };
   I.setKind = function (kind) { last = kind; };
   I.onPad = function (fn) { listeners.push(fn); };
@@ -167,6 +179,6 @@
   };
   /* test hook: the headless smoke test sets keys and fake pads through these */
   I._keys = keys;
-  I.durations = DUR;
+  I.durations = DUR; I.HOP = HOP; I.STEP = STEP;
   G.Input = I;
 })(typeof window !== 'undefined' ? window : this);

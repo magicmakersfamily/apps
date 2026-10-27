@@ -80,7 +80,7 @@
     L.food(40, 11, 'candy');
     L.dec('kitchen', 26, 0, { w: 30 });
     L.check(45, 13);
-    L.food(46, 13, 'soda', true); L.food(48, 13, 'candy', true);      // snack counter before the fridge, always refilled
+    L.food(46, 13, 'soda', true); L.food(48, 13, 'candy', true); L.food(51, 13, 'soda', true);      // snack counter before the fridge and one at its foot, always refilled
     L.prompt(45, 'eat:soda', 'Fizzy and sweet fill the belly with bubbles.');
     L.plat(47, 12, 2); L.plat(49, 10, 2); L.plat(51, 8, 2); L.plat(53, 6, 1);   // kitchen shelves: the walking way up
     L.box(54, 4, 3, 10, 'B');                     // fridge: 10 tiles. Climb the shelves, or rocket over it!
@@ -96,7 +96,7 @@
     L.box(76, 12, 4, 2, 'B');                     // coffee table
     L.lantern = { x: 77, y: 11 };
     L.dec('tv', 82, 9, {});
-    L.prompt(74, 'jump', 'Po Po’s lantern is on the coffee table!');
+    L.prompt(74, 'jump', 'Popo’s lantern is on the coffee table!');
     L.food(70, 11, 'blueberries'); L.food(83, 13, 'carrot');
     L.feel(84, 'wait', 'small');
     L.check(86, 13);
@@ -371,7 +371,7 @@
       { panel: 'machine', who: 'narrator', line: 'His Snax machines squish every food on Earth into the same beige cube. Crunch. Crunch. Boring.' },
       { panel: 'baron', who: 'baron', line: 'Tacos? Beige! Noodles? Beige! Soon the whole world will taste like nothing!' },
       { panel: 'room', who: 'narrator', line: 'Meet Gus. Today he flies to Hong Kong for Grandma’s Mid-Autumn feast.' },
-      { panel: 'lantern', who: 'narrator', line: 'He made a paper lantern for Po Po. Now he just has to get there.' },
+      { panel: 'lantern', who: 'narrator', line: 'He made a paper lantern for Popo. Now he just has to get there.' },
       { panel: 'belly', who: 'narrator', line: 'Everything Gus eats, and everything he feels, goes into his belly. And his belly makes him move!' }
     ],
     afterHome: [

@@ -5,6 +5,7 @@ Serve the repo (`python3 -m http.server 8765` from the repo root, or any static 
 ```
 node guts/tools/route.mjs     # plays "Morning at Home" start to gate with real physics, jumps only, at the lowest vitality
 node guts/tools/ai-taps.mjs   # ?ai=1: one key-only tap, one mouse click, Step mode and the text view
+node guts/tools/ai-bot.mjs    # an AI-style helper finishes the level with single key taps, steered by the route hint (GUTS.ai.nextHop)
 ```
 
 `cdp.mjs` launches a throwaway headless Chrome and drives it over the DevTools protocol (`GUTS_URL` overrides the address).

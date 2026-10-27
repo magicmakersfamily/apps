@@ -253,6 +253,8 @@
       case 'purr': for (var pr = 0; pr < 8; pr++) note(B, 'sawtooth', 62 + (pr % 2) * 5, t + pr * 0.085, 0.12, 0.2, { lp: 260 }); break;
       case 'hiss': noise(B, t, 0.5, 0.4, { type: 'highpass', f: 3500, a: 0.04 }); break;
       case 'sock': note(B, 'sine', 150, t, 0.12, 0.3, { slideTo: 70 }); noise(B, t, 0.1, 0.2, { f: 700, q: 0.6 }); break;
+      case 'friend': [523, 659, 784, 1047, 1319].forEach(function (f, i) { note(B, 'triangle', f, t + i * 0.07, 0.5, 0.3); note(B, 'sine', f * 2, t + i * 0.07, 0.35, 0.12); }); break;
+      case 'fizz': for (var fi = 0; fi < 9; fi++) note(B, 'sine', 900 + fi * 170 + Math.random() * 120, t + fi * 0.045, 0.07, 0.12, { slideTo: 1500 + fi * 120 }); noise(B, t, 0.5, 0.12, { type: 'highpass', f: 5000, a: 0.05 }); break;
       case 'whirr': note(B, 'triangle', 500, t, 0.5, 0.18, { slideTo: 900, vib: [18, 40] }); break;
       case 'hurt': note(B, 'square', 300, t, 0.18, 0.3, { slideTo: 120 }); break;
       case 'select': note(B, 'triangle', 660, t, 0.08, 0.3); break;

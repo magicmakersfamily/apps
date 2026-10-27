@@ -35,7 +35,7 @@
       var segs = [text];
       if (canto && text.indexOf(canto) >= 0) { var p = text.split(canto); segs = []; if (p[0].trim()) segs.push(p[0]); segs.push({ canto: canto }); if (p[1] && p[1].replace(/[!.?\s]/g, '')) segs.push(p[1]); else if (p[1]) segs.push(p[1]); }
       var c = Voice.cfg(who), i = 0;
-      segs = segs.map(function (x) { return typeof x === 'string' ? x.replace(/Po Po/g, 'Poh Poh') : x; });
+      segs = segs.map(function (x) { return typeof x === 'string' ? x.replace(/Popo/g, 'Poe poe') : x; });
       Voice.speaking = true; Au.duck(true);
       var est = 1500 + text.length * 75; setTimeout(end, est + 1500);
       var wait = Math.max(0, 200 - (Date.now() - Voice.lastCancel));
@@ -61,7 +61,7 @@
   UI.Voice = Voice;
 
   /* ---------------- captions ---------------- */
-  var WHO = { narrator: '', baron: 'Baron Von Processo', porpor: 'Po Po', biffy: 'Biffy' };
+  var WHO = { narrator: '', baron: 'Baron Von Processo', porpor: 'Popo', biffy: 'Biffy' };
   function rubyFor(str, canto, jyut) {
     if (!canto || str.indexOf(canto) < 0) return esc(str);
     var syl = jyut.split(' '), chars = Array.from(canto), r = '';
@@ -255,6 +255,8 @@
     ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).checked = !!s[k]; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === s.gross)); });
     Array.prototype.forEach.call($('speed').children, function (b) { b.setAttribute('aria-pressed', String(+b.dataset.s === s.speed)); });
+    Array.prototype.forEach.call($('viewsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === (s.view || 'normal'))); });
+    Array.prototype.forEach.call($('stepsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.z === (s.stepsize || 'auto'))); });
     $('set-erase').textContent = 'Erase saved game';
   }
   function setSetting(k, v) { Game.save.set[k] = v; Game.persist(); Game.applySettings(); applyAccess(); }
@@ -262,13 +264,16 @@
   var Q = (function () { var o = {}; try { new URLSearchParams(location.search).forEach(function (v, k) { o[k] = v; }); } catch (e) {} return o; })();
   function flag(k) { return !!(Q.ai === '1' || Q[k] === '1' || Game.save.set[k]); }
   function applyAccess() {
-    In.setTap(flag('tap'), flag('step'));
-    $('stepbadge').hidden = !(flag('step') && UI.screen === 'play');
+    In.setTap(flag('tap'), flag('step')); In.setStepSize(Game.save.set.stepsize || 'auto');
+    var stepOn = flag('step') && UI.screen === 'play';
+    $('stepbadge').hidden = !stepOn; if (stepOn && !stepBadgeSeen) { stepBadgeSeen = true; stepBadgeT = 8; }
     $('tb-wait').hidden = !flag('step');
-    var tv = $('textview'); tv.hidden = !flag('readout'); tv.setAttribute('aria-live', 'off');
+    $('touch').classList.toggle('step', flag('step'));
+    var tv = $('textview'); tv.hidden = !flag('readout');
     var on = (touchDevice || flag('buttons') || flag('step') || flag('tap')) && UI.screen === 'play';
     $('touch').classList.toggle('on', on);
   }
+  var stepBadgeSeen = false, stepBadgeT = 0, lastInput = 0;
   UI.applyAccess = applyAccess;
   var tvT = 0;
 
@@ -282,6 +287,44 @@
     var m = Game.save.mode;
     Array.prototype.forEach.call($('modes').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.mode === m)); });
     $('modeDesc').textContent = MODES[m];
+  }
+  /* The picture must never zoom by accident: a trackpad pinch, two fingers on a tablet, Ctrl/Cmd and +/-.
+     If it does zoom anyway (or the browser's zoom changed), say so and offer a way out. */
+  function protectZoom() {
+    function inStage(t) { return t && t.closest && t.closest('#stage'); }
+    window.addEventListener('wheel', function (e) { if ((e.ctrlKey || e.metaKey) && inStage(e.target)) e.preventDefault(); }, { passive: false });
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (n) { document.addEventListener(n, function (e) { if (inStage(e.target)) e.preventDefault(); }, { passive: false }); });
+    document.addEventListener('touchmove', function (e) { if (e.touches && e.touches.length > 1 && inStage(e.target)) e.preventDefault(); }, { passive: false });
+    root.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && /^[-=+_0]$/.test(e.key) && (UI.screen === 'play' || UI.screen === 'pause')) { e.preventDefault(); UI.toast('Zoom is locked while you play', 'Settings → Screen size changes the picture'); }
+    }, true);
+    var dpr0 = root.devicePixelRatio || 1, dismissed = false, kind = '', tried = 0;
+    var bn = $('zoombanner'); document.body.appendChild(bn); bn.style.position = 'fixed'; bn.style.zIndex = '100000';
+    /* keep the banner on screen and normal-sized even when the page is zoomed in */
+    function place() {
+      var vv = root.visualViewport; if (!vv || bn.hidden) return;
+      var sc = 1 / vv.scale; bn.style.transformOrigin = '0 0'; bn.style.transform = 'scale(' + sc + ')';
+      bn.style.left = (vv.offsetLeft + Math.max(0, (vv.width - bn.offsetWidth * sc) / 2)) + 'px'; bn.style.top = (vv.offsetTop + 10 * sc) + 'px';
+    }
+    /* touch browsers: briefly cap the zoom in the viewport tag, which snaps the page back to normal */
+    function snapBack() {
+      var m = document.querySelector('meta[name=viewport]'); if (!m) return; var orig = m.getAttribute('content');
+      m.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover');
+      setTimeout(function () { m.setAttribute('content', orig); }, 350);
+    }
+    function check() {
+      var vv = root.visualViewport, pinch = vv && vv.scale > 1.04;
+      // browser zoom in: the window's outer width stays put while the page width in CSS pixels shrinks (desktop only; phones skip this)
+      var browser = !touchDevice && root.outerWidth > 600 && root.innerWidth > 0 && root.outerWidth / root.innerWidth > 1.3;
+      if (!(pinch || browser) || dismissed) { bn.hidden = true; tried = 0; return; }
+      if (pinch && tried < 2 && (touchDevice || 'ontouchstart' in root)) { tried++; snapBack(); }
+      kind = pinch ? 'pinch' : 'browser';
+      var mac = /Mac/.test(navigator.platform || '');
+      $('zoomtext').textContent = pinch ? 'The screen is zoomed in. Pinch out with two fingers, or tap the button.' : 'The page zoom changed. Press ' + (mac ? '⌘' : 'Ctrl') + ' + 0 to put it back.';
+      $('zoomfix').textContent = pinch ? 'Fix the zoom' : 'Got it'; bn.hidden = false; place();
+    }
+    $('zoomfix').onclick = function () { if (kind === 'pinch') { snapBack(); setTimeout(function () { if (root.visualViewport && root.visualViewport.scale > 1.04) { try { location.reload(); } catch (e) {} } }, 600); } else { dismissed = true; bn.hidden = true; } };
+    setInterval(check, 1000); if (root.visualViewport) { root.visualViewport.addEventListener('resize', function () { check(); place(); }); root.visualViewport.addEventListener('scroll', place); }
   }
   var isFS = false;
   function toggleFS() {
@@ -313,7 +356,12 @@
       navMenu();
       if (sc === 'pause' && In.pauseP) $('p-resume').click();
     }
-    tvT -= dt; if (tvT <= 0 && !$('textview').hidden && G.ai) { tvT = 0.5; var tx = G.ai.describe(); if (tx !== $('textview').textContent) $('textview').textContent = tx; }
+    var szNow = Game.save.set.stepsize; $('tb-size-l').textContent = ({ small: 'S', medium: 'M', large: 'L' })[szNow] || 'S';
+    if (In.sizeChanged) { var zz = In.sizeChanged; In.sizeChanged = null; Game.save.set.stepsize = zz; Game.persist(); UI.toast('Tap distance: ' + zz, 'Keys 1, 2, 3 change it'); }
+    tvT -= dt; if (tvT <= 0 && !$('textview').hidden && G.ai) { tvT = 0.5; var tx = G.ai.describe(); if (tx !== $('tv-text').textContent) $('tv-text').textContent = tx; }
+    if (stepBadgeT > 0) { stepBadgeT -= dt; if (stepBadgeT <= 0) $('stepbadge').hidden = true; }
+    var nowT = performance.now(); if (In.kind === 'pad' || In.active) lastInput = nowT;
+    $('touch').classList.toggle('idle', sc === 'play' && nowT - lastInput > 4500 && !flag('step') && !In.stepMode);
     if (In.kind === 'touch' && !touchDevice) { touchDevice = true; if (sc === 'play') $('touch').classList.add('on'); }
   };
   Game.hooks.say = UI.say;
@@ -321,6 +369,7 @@
   Game.hooks.dex = function (id) { var e = D.DEX[id]; if (e) UI.toast('New bite! ' + e.name, e.zh + ' · ' + Game.bitesFound() + ' of 80', id); };
   var sproutSaid = false;
   Game.hooks.event = function (name) {
+    if (name === 'bug') { var fam = A.famOf(arguments[1].id), nm = { yogurt: 'a Yogurt Bloomer', kimchi: 'a Kimchi Crew friend', natto: 'a Natto Stringer' }[fam]; UI.toast('New friend!', nm + ' will live in the Gut Village'); return; }
     if (name === 'sprout' && !sproutSaid) { sproutSaid = true; UI.say('It grew! A bounce flower. Jump on it!', 'narrator', { soft: true }); }
   };
   In.onPad(function (kind) { if (kind === 'connect') { UI.toast('Controller ready', 'Press ✕ to start'); $('padhint').hidden = false; } else UI.toast('Controller unplugged'); });
@@ -338,6 +387,7 @@
     $('view').appendChild(sk); sk.onclick = UI.skipScenes;
     $('view').addEventListener('pointerdown', function (e) { try { Au.init(); } catch (x) {} if (UI.screen === 'cutscene' && e.target.id !== 'b-skip') lineNext(); });
     document.addEventListener('keydown', function (e) {
+      lastInput = performance.now();
       try { Au.init(); } catch (x) {}
       if (e.code === 'KeyF' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) toggleFS();
     });
@@ -362,12 +412,17 @@
     ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).onchange = function () { setSetting(k, this.checked); }; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.onclick = function () { setSetting('gross', b.dataset.g); syncSettings(); Au.sfx('toot'); }; });
     Array.prototype.forEach.call($('speed').children, function (b) { b.onclick = function () { setSetting('speed', +b.dataset.s); syncSettings(); }; });
+    Array.prototype.forEach.call($('viewsize').children, function (b) { b.onclick = function () { setSetting('view', b.dataset.v); syncSettings(); Game.resize(); }; });
+    Array.prototype.forEach.call($('stepsize').children, function (b) { b.onclick = function () { setSetting('stepsize', b.dataset.z); syncSettings(); }; });
+    $('tb-size').onclick = function () { var order = ['small', 'medium', 'large'], cur = Game.save.set.stepsize; var nx = order[(order.indexOf(cur) + 1) % 3]; if (order.indexOf(cur) < 0) nx = 'medium'; In.setStepSize(nx, true); lastInput = performance.now(); };
+    $('tv-toggle').onclick = function () { var c = $('textview').classList.toggle('collapsed'); this.setAttribute('aria-expanded', String(!c)); this.textContent = c ? 'Look around' : 'Hide'; };
+    protectZoom();
     var armed = false;
     $('set-erase').onclick = function () { if (!armed) { armed = true; this.textContent = 'Really erase? Tap again'; var me = this; setTimeout(function () { armed = false; me.textContent = 'Erase saved game'; }, 3500); } else { Game.resetSave(); armed = false; syncSettings(); syncMode(); this.textContent = 'Erased'; } };
     // touch buttons
     Array.prototype.forEach.call(document.querySelectorAll('.tb'), function (b) {
       var act = b.dataset.act;
-      function down(e) { e.preventDefault(); touchDevice = true; try { Au.init(); } catch (x) {} In.touchDown(act); b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) {} }
+      function down(e) { e.preventDefault(); touchDevice = true; try { Au.init(); } catch (x) {} In.touchDown(act); lastInput = performance.now(); b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (x) {} }
       function up() { In.touchUp(act); b.classList.remove('down'); }
       b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
       b.addEventListener('contextmenu', function (e) { e.preventDefault(); });

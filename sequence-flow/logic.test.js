@@ -126,6 +126,32 @@ test('repairStarterIds is idempotent and does not modify its input', () => {
   assert.deepStrictEqual(twice.renamed, {});
 });
 
+test('shouldRegisterSW: live pages yes, frozen copies and no-SW browsers no', () => {
+  assert.strictEqual(L.shouldRegisterSW('/apps/sequence-flow/', true), true);
+  assert.strictEqual(L.shouldRegisterSW('/sequence-flow/index.html', true), true);
+  assert.strictEqual(L.shouldRegisterSW('/apps/versions/sequence-flow/2.0/', true), false);
+  assert.strictEqual(L.shouldRegisterSW('/apps/sequence-flow/', false), false);
+  assert.strictEqual(L.shouldRegisterSW('/apps/versions/sequence-flow/2.0/', false), false);
+});
+
+test('sw.js shell files and manifest are consistent', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  const sw = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
+  const cache = sw.match(/const CACHE = '([^']+)'/);
+  assert.ok(cache && cache[1].startsWith('sequence-flow-'));
+  const shell = sw.match(/const SHELL = \[([^\]]*)\]/);
+  assert.ok(shell);
+  const files = [...shell[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  assert.ok(files.length > 0);
+  for (const f of files) assert.ok(fs.existsSync(path.join(__dirname, f)), f + ' exists');
+  const m = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.webmanifest'), 'utf8'));
+  assert.strictEqual(m.start_url, './');
+  assert.strictEqual(m.scope, './');
+  assert.strictEqual(m.display, 'standalone');
+  assert.ok(m.icons.length > 0);
+  for (const i of m.icons) assert.ok(fs.existsSync(path.join(__dirname, i.src)), i.src + ' exists');
+});
+
 test('v14 blocks get the kind they already behaved as', () => {
   assert.strictEqual(L.blockKind({ timerEnabled: true }), 'timer');
   assert.strictEqual(L.blockKind({ timerEnabled: false }), 'tap');

@@ -89,8 +89,10 @@ export async function launch({ browser = process.env.BROWSER || 'chromium', url,
   const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1, isMobile: mobile && browser !== 'firefox', hasTouch: mobile });
   if (seed != null) await ctx.addInitScript(seedScript, seed);
   if (pad) await ctx.addInitScript(padScript, pad === true ? 'standard' : pad);
-  // offline by default: only the local server answers, so runs never depend on the network (Google Fonts fall back)
-  if (offline) await ctx.route((u) => !u.href.startsWith('http://127.0.0.1') && /^https?:/.test(u.href), (r) => r.abort());
+  // offline by default: only the local server (or the live page under test) answers, so runs never depend on the network (Google Fonts fall back)
+  // (a live address passed as url, e.g. GUTS_URL, is its own exception, so the live site can be checked too)
+  const home = url && /^https?:/.test(url) ? new URL(url).origin : 'http://127.0.0.1';
+  if (offline) await ctx.route((u) => !u.href.startsWith('http://127.0.0.1') && !u.href.startsWith(home) && /^https?:/.test(u.href), (r) => r.abort());
   const page = await ctx.newPage();
   const logs = [], errors = [];
   page.on('console', (m) => { const t = m.type() + ': ' + m.text(); logs.push(t); if (m.type() === 'error' && !(offline && OUTSIDE.test(m.text()))) errors.push({ kind: 'console', text: m.text() }); });

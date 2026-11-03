@@ -1,0 +1,6 @@
+{
+  "about": "Browser checks for tools/check.mjs (this smoke test drives Chrome itself and writes no run records).",
+  "records": false,
+  "quick": [],
+  "full": [["blow-up/tests/smoke.mjs", "cwd:blow-up"]]
+}

@@ -2,11 +2,13 @@
 // only walking and jumping (no blasting), along a route found by the same walkability rules as levels.test.js.
 // Every hop is tried with a few start positions and jump timings, so it proves a human has room to succeed.
 import { launch } from './cdp.mjs';
+import { record } from '../../tools/play/harness.mjs';
 const base = process.env.GUTS_URL || 'http://localhost:8765/guts/index.html';
 const stage = process.env.STAGE || 'home';
 const p = await launch({ url: base, w: 1280, h: 800 });
 await p.ready();
-const out = await p.eval(`(function(){
+let out;
+try { out = await p.eval(`(function(){
   var G = GUTS, Game = G.Game, D = G.Data, K = G.Input._keys, T = 32;
   Game.begin('${stage}', { noHeist: true }); var st = Game.st, g = st.g, L = D.STAGES['${stage}'].build();
   function solid(x, y) { return D.SOLID.indexOf(L.get(x, y)) >= 0; }
@@ -55,8 +57,12 @@ const out = await p.eval(`(function(){
   for (var w = 0; w < 240 && st.status === 'play'; w++) { keys(false, true, false); step(); }
   keys(false, false, false);
   var c = st.cat; return { ok: fails === 0 && st.status === 'clear', cat: c ? { waypoint: c.i, dropped: c.dropped, trusted: !!c.trusted } : null, baoEaten: st.baoEaten, helpedBySnacks: st.stats.helped || 0, status: st.status, hops: hops, fails: fails, cells: path.length, gameSeconds: Math.round((st.t - t0) * 10) / 10, atTile: Math.round(g.x / T), log: log };
-})()`);
+})()`); } catch (e) { out = { ok: false, error: 'the game threw: ' + e.message.split('\n')[0], status: 'error', log: [] }; }
 console.log(JSON.stringify(out));
 console.log('PLAYTHROUGH', out.ok ? 'OK: reached the gate with jumps only at vitality 15' : 'FAILED');
 if (p.logs.length) console.log('page logs', JSON.stringify(p.logs));
-p.close();
+const failures = (out.ok ? [] : [{ type: 'progression', where: 'tile ' + out.atTile, text: 'jump-only route failed: ' + ((out.log || []).join('; ') || out.error || out.status) }])
+  .concat(p.errors.map((e) => ({ type: 'error', where: e.kind, text: e.text })));
+record({ game: 'guts', scenario: 'route', browser: p.browserName, status: out.status, gameSeconds: out.gameSeconds, hops: out.hops, failures });
+process.exitCode = failures.length ? 1 : 0;
+await p.close();

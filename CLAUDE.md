@@ -62,7 +62,11 @@ Audio API, started only from a button press. Exception, at the family's request:
    (Chinese name in a `lang="zh-TW"` span), a one-line promise, a short age line, a Play/Open button, and an About
    button that opens a `.detail` block: 2–3 sentence description, topic tags, meta (ages, progress saved, sound) and the
    version line. The newest game may be the featured `.hero` (cover art, "Newest" pill). Keep tile text short.
-6. **Commit and push** (see Git below), then verify the live site before reporting done:
+6. **Check, then commit and push.** Run `node tools/check.mjs` (quick, about 40 s; `--full` before a release adds
+   Firefox, WebKit/Safari and more seeds) and read its report (`tools/play/README.md`). Nothing broken = go. The
+   `.githooks/pre-push` hook runs the quick check by itself once a clone has `git config core.hooksPath .githooks`.
+   Each new playtest report gets an automated check (a test, a bot or a persona) that proves its fix.
+   Then commit and push (see Git below), and verify the live site before reporting done:
    poll `https://magicmakersfamily.github.io/apps/<game>/` until it returns 200 and contains the
    new version string (usually 30–60 seconds after the push).
 

@@ -1,0 +1,32 @@
+#!/bin/sh
+# Before anything is published (a push to main is live on the App Shelf), run the quick play check:
+# every model test plus each game's Chrome checks (node tools/check.mjs, about a minute).
+# Skipped when the push only touches renzi/content/ (the daily story), frozen versions/ or Markdown notes.
+# Turned on per clone with: git config core.hooksPath .githooks
+# In an emergency: git push --no-verify (then run node tools/check.mjs as soon as you can).
+PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+zero=0000000000000000000000000000000000000000
+changed=""
+while read local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ "$remote_sha" = "$zero" ]; then range="$local_sha --not --remotes"; else range="$remote_sha..$local_sha"; fi
+  changed="$changed
+$(git log --name-only --format= $range 2>/dev/null)"
+done
+code=$(printf '%s\n' "$changed" | grep -v -E '^$|^renzi/content/|^versions/|\.md$' | head -1)
+if [ -z "$code" ]; then
+  echo "pre-push: only content, frozen versions or notes changed; skipping the play check."
+  exit 0
+fi
+echo "pre-push: running the quick play check (node tools/check.mjs)..."
+node tools/check.mjs
+status=$?
+if [ $status -eq 2 ]; then
+  echo "pre-push: model tests passed, but the browser harness is not installed, so browser checks were skipped."
+  echo "          Install once: (cd tools/play && npm ci && npx playwright install firefox webkit)"
+  exit 0
+fi
+if [ $status -ne 0 ]; then
+  echo "pre-push: the play check FAILED, so nothing was pushed. Read the report above, fix it, and push again."
+  exit 1
+fi

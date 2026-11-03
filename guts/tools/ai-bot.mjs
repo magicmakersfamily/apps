@@ -1,6 +1,7 @@
 // An "AI helper" that can only tap single keys: it reads the route hint from GUTS.ai.nextHop(), then taps
 // arrows (one small step), A / D (run), Q / E (jump left / right) and Space (jump) in ?ai=1 Step mode.
 import { launch } from './cdp.mjs';
+import { record } from '../../tools/play/harness.mjs';
 const base = (process.env.GUTS_URL || 'http://localhost:8765/guts/index.html') + '?ai=1';
 const p = await launch({ url: base, w: 1280, h: 800 });
 await p.ready();
@@ -38,4 +39,10 @@ for (let i = 0; i < 80 && (await p.eval('GUTS.UI.screen')) !== 'results'; i++) a
 console.log('results screen appeared by itself after the exit:', (await p.eval('GUTS.UI.screen')) === 'results', '|', (await p.eval("document.getElementById('results').innerText.replace(/\\s+/g,' ').slice(0,200)")));
 console.log('AI BOT', fin.status === 'clear' ? 'OK: finished the level with single key taps' : 'DID NOT FINISH');
 if (p.logs.length) console.log('page logs', JSON.stringify(p.logs));
-p.close();
+const resultsShown = (await p.eval('GUTS.UI.screen')) === 'results';
+const failures = (fin.status === 'clear' ? [] : [{ type: 'progression', where: 'tile ' + fin.tile, text: 'single-tap AI helper did not finish: ' + (log.join('; ') || 'ran out of actions') }])
+  .concat(fin.status === 'clear' && !resultsShown ? [{ type: 'flow', where: 'results', text: 'results screen did not appear after the exit' }] : [])
+  .concat(p.errors.map((e) => ({ type: 'error', where: e.kind, text: e.text })));
+record({ game: 'guts', scenario: 'ai-bot', browser: p.browserName, status: fin.status, actions, wallSeconds: Math.round((Date.now() - t0) / 1000), failures });
+process.exitCode = failures.length ? 1 : 0;
+await p.close();

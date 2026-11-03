@@ -41,7 +41,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | guts-F2 | feature | guts | Detroit: Eastern Market, The Coney Commute, People Mover Rooftops and the Assembly Line Golem boss | P1 | planned | family | | The four levels are already built in `guts/data.js` and path-checked by `levels.test.js`; the engine still needs Snax bots, crates, drones, moving platforms and the boss. |
 | guts-F3 | feature | guts | The Mouth, Biffy and two-player co-op | P2 | planned | family | | Level built in `data.js`; chompers, saliva and the molar scene are not wired up. |
 | guts-F4 | feature | guts | Mexico, Japan, Taiwan, Hong Kong and the feast | P3 | idea | family | | See `guts/DESIGN-BRIEF` notes in `guts/PLAN.md`. |
-| guts-B1 | bug | guts | Only tested with simulated PlayStation pads in Chrome; never with a real controller, Safari, Firefox or a phone | P1 | testing | self | | Standard and raw Sony mappings are both coded. |
+| guts-B1 | bug | guts | Only tested with simulated PlayStation pads in Chrome; never with a real controller, Safari, Firefox or a phone | P1 | testing | self | | Standard and raw Sony mappings are both coded. Since 2026-11-03 the simulated pad, the route and the personas also pass in Firefox and WebKit (Safari's engine) via `tools/check.mjs --full`; a real controller, real Safari and a phone are still untested. |
 | guts-F5 | feature | guts | Tune the blast, pressure and breathing numbers after the family plays the first level | P1 | testing | self | | Constants live in `guts/belly.js`; `belly.test.js` guards the balance. |
 | guts-F10 | feature | guts | More reactions and a bigger secret: flour pile, a pigeon that steals a bite, a windmill, a hidden room; a Hong Kong destination built with the family | P2 | idea | AI review | | Keep every required step a plain jump. |
 | guts-F9 | feature | guts | A "where did we get stuck?" list kept on the device, for grown-ups to read and share | P3 | idea | self | | Nothing sent anywhere. |
@@ -52,6 +52,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
 | shelf-F6 | feature | shelf | A detail page per app (screenshots, what kids learn, privacy and storage) | P3 | idea | AI review | | Today the About panel holds this. |
 | shelf-F7 | feature | shelf | Make the shelf installable (Add to Home Screen) | P3 | idea | AI review | | Same work as sequence-flow-F5. |
+| shelf-F8 | feature | shelf | Play checks: one command for every test (`tools/check.mjs`), Chrome / Firefox / WebKit harness, persona bots, a grouped report, a pre-push check | P1 | doing | family | | Phase 1 built (`tools/play/README.md`). Next: record a real playtest and replay it as a test, screenshot comparisons, speed budgets, GitHub checks. |
 
 ## Closed
 

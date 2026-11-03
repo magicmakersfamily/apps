@@ -2,3 +2,5 @@ blow-up/tests/out/
 word-deconstructor/tests/out/
 toothbrush/tools/.cache/
 big-bang/tools/.cache/
+tools/play/node_modules/
+tools/play/out/

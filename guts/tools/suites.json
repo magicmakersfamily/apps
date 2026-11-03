@@ -1,0 +1,20 @@
+{
+  "about": "Browser checks for tools/check.mjs. quick = before every push (about a minute); full = before a release.",
+  "quick": [
+    ["guts/tools/smoke.mjs", "--browser", "chromium"],
+    ["guts/tools/route.mjs"],
+    ["guts/tools/ai-taps.mjs"],
+    ["guts/tools/personas.mjs", "--seeds", "1"]
+  ],
+  "full": [
+    ["guts/tools/smoke.mjs", "--browser", "all"],
+    ["guts/tools/route.mjs"],
+    ["guts/tools/route.mjs", "env:BROWSER=firefox"],
+    ["guts/tools/route.mjs", "env:BROWSER=webkit"],
+    ["guts/tools/ai-taps.mjs"],
+    ["guts/tools/ai-taps.mjs", "env:BROWSER=webkit"],
+    ["guts/tools/ai-bot.mjs"],
+    ["guts/tools/personas.mjs", "--seeds", "3"],
+    ["guts/tools/personas.mjs", "--seed", "1", "--browser", "firefox,webkit"]
+  ]
+}

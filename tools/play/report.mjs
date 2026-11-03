@@ -15,6 +15,8 @@ const pct = (n, d) => (d ? Math.round((n / d) * 100) : 0) + '%';
 export function repro(r) {
   if (r.scenario === 'persona') return `node guts/tools/personas.mjs --persona ${r.persona} --seed ${r.seed} --browser ${r.browser}`;
   if (r.scenario && r.scenario.startsWith('smoke')) return `node ${r.game}/tools/smoke.mjs --browser ${r.browser}`;
+  if (r.scenario === 'replay') return `node ${r.game}/tools/replay.mjs ${r.file || r.persona + '.json'} --browser ${r.browser}`;
+  if (r.scenario === 'record-check') return `node ${r.game}/tools/record-check.mjs --browser ${r.browser}`;
   return `BROWSER=${r.browser} node ${r.game}/tools/${r.scenario}.mjs`;
 }
 

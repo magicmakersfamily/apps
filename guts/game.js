@@ -31,7 +31,12 @@
 
   function say(text, who, o) { if (Game.hooks.say) Game.hooks.say(text, who || 'narrator', o || {}); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function rnd(a, b) { return a + Math.random() * (b - a); }
+  /* gameplay randomness comes from one seeded stream (reseeded by every Game.begin), so a recorded playtest
+     replays exactly; sound and art keep Math.random because they never change what happens */
+  var seedA = 1;
+  function rand() { seedA |= 0; seedA = (seedA + 0x6D2B79F5) | 0; var t = Math.imul(seedA ^ (seedA >>> 15), 1 | seedA); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+  function rnd(a, b) { return a + rand() * (b - a); }
+  Game.rand = rand;
 
   /* ---------------- canvas ---------------- */
   Game.init = function (canvas) {
@@ -53,8 +58,9 @@
   /* ---------------- stage setup ---------------- */
   Game.begin = function (id, opts) {
     var def = D.STAGES[id], L = def.build(), sv = Game.save;
+    var seed = opts && opts.seed != null ? opts.seed >>> 0 : Math.floor(Math.random() * 4294967296) >>> 0; seedA = seed;
     var st = Game.st = {
-      id: id, def: def, L: L, mode: sv.mode, t: 0, status: 'play', clearT: 0, b: B.create(),
+      id: id, def: def, L: L, mode: sv.mode, t: 0, status: 'play', clearT: 0, b: B.create({ rng: rand }), seed: seed,
       foods: [], bugs: [], checks: [], patches: [], particles: [], bubbles: [], persons: [], fired: {}, ps: {},
       stats: { blowouts: 0, controlled: 0, chants: 0, bugs: 0, bites: 0, newBites: 0, falls: 0, blasts: 0, breathes: 0, jumps: 0 },
       lan: { has: false, ang: 0, vel: 0, tears: 0 }, cam: { x: 0, y: 0 }, shake: 0, flash: 0, crowd: { cheer: 0, chant: 0, scatter: 0, tap: 0 },
@@ -63,7 +69,7 @@
     st.g = { x: (L.start.x + 0.5) * T, y: (L.start.y + 1) * T, vx: 0, vy: 0, w: 26, h: 46, face: 1, grounded: false, coyote: 0, jbuf: 0, sx: 1, sy: 1, run: 0,
       blastT: 0, blastTotal: 0, blasting: false, blowDuring: false, pounding: false, lockT: 0, relief: 0, spin: 0, spinV: 0, slippery: false, breathing: false, safeX: (L.start.x + 0.5) * T, safeY: (L.start.y + 1) * T, hurtT: 0, scared: 0, chomp: 0, prevVx: 0 };
     st.respawn = { x: st.g.x, y: st.g.y };
-    L.foods.forEach(function (f) { st.foods.push({ x: (f.x + 0.5) * T, y: (f.y + 0.5) * T, id: f.id, respawn: f.respawn, taken: false, timer: 0, ph: Math.random() * 6 }); });
+    L.foods.forEach(function (f) { st.foods.push({ x: (f.x + 0.5) * T, y: (f.y + 0.5) * T, id: f.id, respawn: f.respawn, taken: false, timer: 0, ph: rand() * 6 }); });
     L.bugs.forEach(function (b) { st.bugs.push({ x: (b.x + 0.5) * T, y: (b.y + 0.5) * T, id: b.id, fam: A.famOf(b.id), state: sv.bugs[b.id] ? 'friend' : 'trapped', t: 0 }); });
     L.checks.forEach(function (c) { st.checks.push({ x: (c.x + 0.5) * T, y: (c.y + 1) * T, lit: false, anim: 0 }); });
     var saved = (sv.gardens[id] || []);
@@ -173,7 +179,7 @@
     var st = Game.st, g = st.g, set = Game.save.set;
     st.stats.blowouts++; g.blowDuring = true;
     if (g.blasting) endBlast(true);
-    g.lockT = 0.9; g.spinV = (Math.random() < 0.5 ? -1 : 1) * 14; g.vx = rnd(-320, 320); g.vy = -560; g.grounded = false;
+    g.lockT = 0.9; g.spinV = (rand() < 0.5 ? -1 : 1) * 14; g.vx = rnd(-320, 320); g.vy = -560; g.grounded = false;
     Au.sfx('blowout'); In.rumble(500, 1, 0.8);
     st.shake = set.shake ? 14 : 0; if (set.flash) st.flash = 0.35;
     var n = set.gross === 'max' ? 70 : 44;
@@ -322,7 +328,7 @@
         g.vx = clamp(g.vx, -s.speed * 1.7, s.speed * 1.7);
         b.pres = Math.max(0, b.pres - s.drain * dt); g.blastTotal += dt; g.grounded = false; g.coyote = 0;
         for (var e2 = 0; e2 < 2; e2++) part(e2 ? 'ex' : 'splat', g.x - tx * 6 + rnd(-6, 6), g.y - 2, -tx * rnd(80, 200) + rnd(-50, 50), rnd(180, 420), rnd(0.3, 0.6), rnd(4, 8), e2 ? '#ffd24a' : grossCol(e2), 700);
-        if (Math.random() < 0.5) part('cloud', g.x - tx * 8, g.y, rnd(-30, 30), rnd(40, 120), 0.55, rnd(9, 15), grossCol(2), 30);
+        if (rand() < 0.5) part('cloud', g.x - tx * 8, g.y, rnd(-30, 30), rnd(40, 120), 0.55, rnd(9, 15), grossCol(2), 30);
         if (set.shake) st.shake = Math.max(st.shake, 1.6);
         if (st.t - st.lastBlastFx > 0.12) { st.lastBlastFx = st.t; In.rumble(60, 0.2, 0.4); }
       } else if (g.blasting && b.pres <= 2) endBlast();
@@ -510,7 +516,7 @@
       var m = c.mv; m.s = Math.min(1, m.s + dt * m.speed / m.len);
       c.x = m.x0 + (m.x1 - m.x0) * m.s; c.y = m.y0 + (m.y1 - m.y0) * m.s - 4 * m.h * m.s * (1 - m.s);
       c.glance = m.s > 0.5 && m.s < 0.72 && Math.abs(gT - c.x / T) > 5; c.face = c.glance ? (gT < c.x / T ? -1 : 1) : (m.x1 >= m.x0 ? 1 : -1);
-      if (follow && Math.random() < dt * 2) heart(c.x, c.y - 30);
+      if (follow && rand() < dt * 2) heart(c.x, c.y - 30);
       if (m.s >= 1) {
         c.mv = null; c.i = c.to; wp = c.path[c.i]; c.x = m.x1; c.y = m.y1; c.wait = 0.5; c.calm = 0;
         c.state = wp.sleep ? 'sleep' : 'sit'; c.face = gT < wp.x ? -1 : 1;
@@ -540,7 +546,7 @@
     if (wp.sleep) {
       c.state = 'sleep'; var d = Math.abs(gT - wp.x); c.alert = (st.b.pres > 40 || st.b.state === 'tight') && d < 9 && !c.trusted;
       if (d < 6.5 && g.breathing) { c.calm += dt; if (c.calm > 1.4 && !c.trusted) { c.trusted = true; st.cat.trust = 1; Au.sfx('purr'); c.state = 'purr'; c.purrT = 2.2; st.hold = 0.45; for (var h2 = 0; h2 < 7; h2++) heart(c.x + rnd(-20, 20), c.y - 24); say('Mimi purrs. She trusts Gus’s calm belly!', 'narrator', { soft: true }); } }
-      if (c.purrT > 0) { c.purrT -= dt; c.state = 'purr'; if (Math.random() < dt * 4) heart(c.x + rnd(-16, 16), c.y - 24); if (c.purrT <= 0 && next) catMove(c, c.i + 1, 0.8); return; }
+      if (c.purrT > 0) { c.purrT -= dt; c.state = 'purr'; if (rand() < dt * 4) heart(c.x + rnd(-16, 16), c.y - 24); if (c.purrT <= 0 && next) catMove(c, c.i + 1, 0.8); return; }
       var rude = g.blasting && d < 8, loud = st.b.state === 'critical' && d < 6;
       if ((rude || loud) && !c.trusted) { c.startle = 0.9; Au.sfx('hiss'); return; }
       if (gT > wp.x + 3.5 && next) catMove(c, c.i + 1, 1);
@@ -591,7 +597,7 @@
       else if (t < 1.9) {
         c.x = m.tx; c.y = m.ty; c.face = -m.side; c.state = m.trust ? 'purr' : 'sit';
         if (!m.set) { m.set = 1; c.bao = false; m.baoX = (g.x + m.tx) / 2; Au.sfx(m.trust ? 'purr' : 'meow'); say(m.trust ? 'She sets the bao down for Gus.' : 'She looks away, then nudges the bao with her paw.', 'narrator', {}); }
-        if (m.trust && Math.random() < dt * 5) heart(c.x, c.y - 30);
+        if (m.trust && rand() < dt * 5) heart(c.x, c.y - 30);
       }
       if (t >= 1.9 && !m.eat) { m.eat = 1; Au.sfx('eat'); eatFood({ id: 'bao', x: g.x, y: g.y - 26 }, 1); g.relief = 1.4; g.chomp = 0.35; }
       if (t >= 2.9 && !m.toss) { m.toss = 1; Au.sfx('bounce'); }
@@ -814,7 +820,7 @@
   Game.render = function () {
     var st = Game.st; if (!st || !cx) return;
     var L = st.L, t = st.t, g = st.g, b = st.b, cam = st.cam, def = st.def;
-    var shx = st.shake > 0.3 ? rnd(-st.shake, st.shake) : 0, shy = st.shake > 0.3 ? rnd(-st.shake, st.shake) : 0;
+    var shx = st.shake > 0.3 ? (Math.random() * 2 - 1) * st.shake : 0, shy = st.shake > 0.3 ? (Math.random() * 2 - 1) * st.shake : 0;   // shake is drawing only: keep it off the gameplay stream
     cx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);
     A.bg(def.theme, cx, { cx: cam.x, cy: cam.y, vw: VW, vh: VH, t: t, groundY: (L.groundRow || 14) * T, lvlW: L.w * T });
     cx.save(); cx.translate(-cam.x + shx, -cam.y + shy);

@@ -11,7 +11,9 @@
 // Usage: node guts/tools/personas.mjs [--persona james,cautious] [--seeds 3 | --seed 7] [--browser chromium,firefox,webkit | all]
 import path from 'node:path';
 import { launch, gutsUrl } from './cdp.mjs';
+import { fileURLToPath } from 'node:url';
 import { record, outDir, BROWSERS } from '../../tools/play/harness.mjs';
+const WATCH = fileURLToPath(new URL('./watch.js', import.meta.url));
 
 export const PERSONAS = {
   james: { mode: 'little', input: 'pad', limit: 240 },
@@ -100,46 +102,20 @@ function play(cfg) {
   };
   var policy = policies[cfg.persona];
 
-  /* ---------- the run ---------- */
-  var failures = [], findings = [], upd = [], rnd = [], frames = Math.round(cfg.limit * FPS);
-  var maxX = g.x, lastGain = 0, falls0 = 0, blow0 = 0, momentT = 0, insideT = 0, overT = 0, visited = {};
-  function tile() { return 'tile ' + Math.round(g.x / T) + ',' + Math.round(g.y / T); }
-  function fail(type, text) { failures.push({ type: type, where: tile(), text: text, t: Math.round(st.t * 10) / 10 }); }
+  /* ---------- the run (checks shared with replay.mjs live in watch.js) ---------- */
+  var w = GUTSWatch({ render: true }), frames = Math.round(cfg.limit * FPS);
   for (var f = 0; f < frames; f++) {
     send(policy());
     var t0 = performance.now();
-    try { Game.step(dt); } catch (e) { fail('exception', 'Game.step threw: ' + e.message); break; }
-    upd.push(performance.now() - t0);
-    if (f % 10 === 0) { var r0 = performance.now(); try { Game.render(); } catch (e) { fail('exception', 'Game.render threw: ' + e.message); break; } rnd.push(performance.now() - r0); }
+    try { Game.step(dt); } catch (e) { w.fail('exception', 'Game.step threw: ' + e.message); break; }
+    w.timeUpdate(performance.now() - t0);
+    if (w.frame(dt) === 'stop') break;
     st = Game.st; g = st.g;
-    // invariants
-    if (!isFinite(g.x) || !isFinite(g.y) || !isFinite(g.vx) || !isFinite(g.vy)) { fail('invariant', 'Gus position or speed is not a number'); break; }
-    if (g.x < -T || g.x > (L.w + 1) * T) { fail('invariant', 'Gus left the level sideways'); break; }
-    // pressure may pass 100 for a frame after a big bite: the blowout fires on the next belly tick
-    var b = st.b; overT = b.pres > 100 ? overT + 1 : 0;
-    if (!(b.vit >= 0 && b.vit <= 100 && b.pres >= 0 && b.pres <= 150) || overT > 3) { fail('invariant', 'belly out of range: vitality ' + Math.round(b.vit) + ', pressure ' + Math.round(b.pres) + (overT > 3 ? ' for ' + overT + ' frames' : '')); break; }
-    if (solid(Math.floor(g.x / T), Math.floor((g.y - 20) / T))) insideT += dt; else insideT = 0;
-    if (insideT > 0.75) { fail('softlock', 'Gus is stuck inside a wall'); break; }
-    if (st.moment) { momentT += dt; if (momentT > 25) { fail('softlock', 'a scene (' + st.moment.type + ') never ended'); break; } } else momentT = 0;
-    // design data
-    visited[Math.floor(g.x / T)] = 1;
-    if (g.x > maxX + T / 2) { maxX = g.x; lastGain = st.t; }
-    if (st.status === 'play' && !st.moment && st.t - lastGain > 20) { findings.push({ type: 'stall', where: 'tile ' + Math.round(maxX / T), text: 'no progress for 20 s', t: Math.round(st.t) }); lastGain = st.t; }
-    if (st.stats.falls > falls0) { falls0 = st.stats.falls; findings.push({ type: 'fall', where: tile(), text: 'fell off the level', t: Math.round(st.t) }); }
-    if (st.stats.blowouts > blow0) { blow0 = st.stats.blowouts; findings.push({ type: 'blowout', where: tile(), text: 'belly blew out', t: Math.round(st.t) }); }
     if (st.status === 'clear' && st.clearT > 1) break;
   }
   send({});
   Game.render();
-  function pct(arr, p) { if (!arr.length) return 0; var s = arr.slice().sort(function (x, y) { return x - y; }); return Math.round(s[Math.min(s.length - 1, Math.floor(s.length * p))] * 100) / 100; }
-  if (st.status !== 'clear' && !failures.length) findings.push({ type: 'no-finish', where: 'tile ' + Math.round(maxX / T), text: 'did not reach the gate in ' + cfg.limit + ' s (furthest point)' });
-  return {
-    status: st.status, gameSeconds: Math.round(st.t * 10) / 10, frames: f, furthestTile: Math.round(maxX / T), levelTiles: L.w,
-    coverage: Math.round(Object.keys(visited).length / L.w * 100), falls: st.stats.falls, blowouts: st.stats.blowouts, jumps: st.stats.jumps, blasts: st.stats.blasts,
-    helperSnacks: st.stats.helped || 0, bao: !!st.baoEaten, lantern: !!st.lan.has, bugsFreed: st.stats.bugs, newBites: st.stats.newBites,
-    updateMs: { p50: pct(upd, 0.5), p95: pct(upd, 0.95), max: pct(upd, 1) }, renderMs: { p50: pct(rnd, 0.5), p95: pct(rnd, 0.95), max: pct(rnd, 1) },
-    failures: failures, findings: findings
-  };
+  return w.result('did not reach the gate in ' + cfg.limit + ' s (furthest point)');
 }
 
 export async function runPersona({ persona, seed, browser }) {
@@ -149,6 +125,7 @@ export async function runPersona({ persona, seed, browser }) {
   let res;
   try {
     if (!(await p.ready())) throw new Error('the game never finished loading');
+    await p.page.addScriptTag({ path: WATCH });
     res = await p.page.evaluate(play, cfg);
   } catch (e) {
     res = { status: 'error', failures: [{ type: 'exception', where: 'harness', text: e.message.split('\n')[0] }], findings: [] };

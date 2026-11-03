@@ -1,5 +1,15 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.5 (beta, 2026-11-03): playtest recording (guts-F18)
+
+- `playtest.js` (loaded last): `?playtest=1` records each try for an exact replay; REC tag + Pause menu save the file,
+  key M marks a moment. Grown-up guide: `PLAYTEST.md`. Replay and report: `tools/replay.mjs`; saved tests in
+  `tests/playtests/` run in `node tools/check.mjs`.
+- `game.js`: gameplay randomness is one seeded stream (`Game.rand`, `st.seed`, `Game.begin(id, { seed })`), the belly
+  gets the same stream; screen shake moved to `Math.random` because drawing must not use the gameplay stream.
+- First real use: record James playing unprompted (guts-F17) and replay it. Persona runs point at the fridge
+  (around tile 55) as the place most players get stuck.
+
 ## 1.4 (beta, 2026-10-26): "The Great Bao Heist"
 
 An outside replay called the game a lovable prototype and asked for more density, payoffs and cause-and-effect. 1.4 (all in `game.js`, `art3.js`, `data.js`, `ui.js`):

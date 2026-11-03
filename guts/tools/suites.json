@@ -4,7 +4,9 @@
     ["guts/tools/smoke.mjs", "--browser", "chromium"],
     ["guts/tools/route.mjs"],
     ["guts/tools/ai-taps.mjs"],
-    ["guts/tools/personas.mjs", "--seeds", "1"]
+    ["guts/tools/personas.mjs", "--seeds", "1"],
+    ["guts/tools/record-check.mjs"],
+    ["guts/tools/replay.mjs", "--tests"]
   ],
   "full": [
     ["guts/tools/smoke.mjs", "--browser", "all"],
@@ -15,6 +17,10 @@
     ["guts/tools/ai-taps.mjs", "env:BROWSER=webkit"],
     ["guts/tools/ai-bot.mjs"],
     ["guts/tools/personas.mjs", "--seeds", "3"],
-    ["guts/tools/personas.mjs", "--seed", "1", "--browser", "firefox,webkit"]
+    ["guts/tools/personas.mjs", "--seed", "1", "--browser", "firefox,webkit"],
+    ["guts/tools/record-check.mjs"],
+    ["guts/tools/record-check.mjs", "--browser", "firefox"],
+    ["guts/tools/record-check.mjs", "--browser", "webkit"],
+    ["guts/tools/replay.mjs", "--tests"]
   ]
 }

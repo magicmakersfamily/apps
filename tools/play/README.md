@@ -25,6 +25,13 @@ and `~/Library/Caches/ms-playwright`, both outside git.
 - `../../.githooks/pre-push`: runs the quick check before a push (skipped for `renzi/content/`, `versions/` and
   Markdown-only pushes). Turn it on per clone: `git config core.hooksPath .githooks`.
 
+## Real playtests (GUTS)
+
+A grown-up records a child's session with `?playtest=1` (`guts/PLAYTEST.md`), and `guts/tools/replay.mjs` replays it
+exactly and reports where they got stuck, with pictures. `--save` keeps it in `guts/tests/playtests/` with an
+`expect` (reach a tile, finish, no stall near a tile), and the check replays every saved one.
+`guts/tools/record-check.mjs` proves on every check that recording and replay still match exactly.
+
 ## Broken vs. design data
 
 - **Broken** fails the check: page errors, exceptions, impossible states (NaN position, Gus inside a wall, belly

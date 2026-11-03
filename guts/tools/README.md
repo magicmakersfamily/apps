@@ -10,7 +10,16 @@ node guts/tools/route.mjs                 # plays "Morning at Home" start to gat
 node guts/tools/ai-taps.mjs               # ?ai=1: on-screen buttons by mouse, single key taps through the first room
 node guts/tools/ai-bot.mjs                # an AI-style helper finishes the level with single key taps, steered by GUTS.ai.nextHop
 node guts/tools/personas.mjs              # four play styles x 3 seeds; --persona james --seed 7 --browser webkit replays one run
+node guts/tools/replay.mjs <file>|--latest  # replay a real playtest recording (see ../PLAYTEST.md), report with pictures
+node guts/tools/replay.mjs --tests        # replay every saved playtest in guts/tests/playtests/ and check its "expect"
+node guts/tools/record-check.mjs          # records a real-time session with ?playtest=1, saves it, replays it: must be exact
 ```
+
+**Recordings** (`guts/playtest.js`, on with `?playtest=1`) keep, per try, the frame times (to 0.1 ms), the inputs the
+game reads in each update (`GUTS.playtest.inputRow`), the seed and a copy of the save. Gameplay randomness comes from
+`Game.rand`, one seeded stream reseeded by every `Game.begin` (sound, art and screen shake keep `Math.random`), so a
+replay is exact; checkpoints every 30 frames detect drift. Recordings replay exactly across Chrome, Firefox and
+WebKit. `watch.js` holds the per-frame checks that personas and replays share.
 
 **Personas** are behaviour policies, not children: `james` (Little Guts, PlayStation pad, mashes jump, wanders back,
 gets distracted), `explorer` (roams, pokes things, heads for the gate late), `speedrunner` (holds right, jumps

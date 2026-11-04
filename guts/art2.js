@@ -103,6 +103,38 @@
     repeat(o, 0.2, 240, function (x, i) { for (var k = 0; k < 6; k++) { ell(ctx, x + 20 + k * 36, gy - 50 - hash(i * 7 + k) * 100, 12, 60 + hash(i + k) * 40, 'rgba(255,130,160,.5)', 0); } });
     ctx.fillStyle = '#ffb6a8'; ctx.fillRect(0, gy, o.vw, o.vh);
   };
+  /* Gus's Gym: a park on a bright morning, in layers that scroll at different speeds (far = slower, paler, hazier) */
+  BG.gym = function (ctx, o) {
+    var gy = o.groundY - o.cy;
+    sky(ctx, o, [[0, '#7cc4ff'], [0.55, '#c9e9ff'], [0.85, '#fff1cf'], [1, '#ffe0b0']]);
+    var sx = o.vw * 0.8, sy = Math.max(60, gy - 330);   // the sun with a soft glow
+    var gl = ctx.createRadialGradient(sx, sy, 10, sx, sy, 150); gl.addColorStop(0, 'rgba(255,246,200,.9)'); gl.addColorStop(1, 'rgba(255,246,200,0)');
+    ctx.fillStyle = gl; ctx.fillRect(sx - 150, sy - 150, 300, 300); circ(ctx, sx, sy, 34, '#fff6c8', 0);
+    repeat(o, 0.04, 520, function (x, i) {   // clouds drift by themselves
+      var cx = x + ((o.t * 9) % 520), cy = gy - 300 - hash(i) * 120, k = 0.7 + hash(i + 4) * 0.6;
+      ell(ctx, cx, cy, 70 * k, 22 * k, 'rgba(255,255,255,.85)', 0); ell(ctx, cx + 40 * k, cy - 14 * k, 44 * k, 24 * k, 'rgba(255,255,255,.85)', 0); ell(ctx, cx - 36 * k, cy - 8 * k, 34 * k, 18 * k, 'rgba(255,255,255,.85)', 0);
+    });
+    function hills(par, period, h, col, seed) {
+      repeat(o, par, period, function (x, i) { ell(ctx, x + period / 2, gy + 10, period * 0.75, h + hash(i + seed) * h * 0.5, col, 0); });
+    }
+    hills(0.08, 420, 170, '#b9d8ee', 1);    // far hills, almost sky-coloured
+    hills(0.18, 340, 120, '#9fd29b', 7);    // middle hills
+    repeat(o, 0.18, 340, function (x, i) { if (hash(i + 30) > 0.45) { var hx = x + 120 + hash(i) * 80, hy = gy - 92 - hash(i + 2) * 30; rr(ctx, hx, hy, 34, 24, 2, ['#f2c4a8', '#f5e0a8', '#c9d8f0'][Math.abs(i) % 3], 0); poly(ctx, [hx - 4, hy, hx + 17, hy - 16, hx + 38, hy], '#c8705a', 0); } });
+    repeat(o, 0.32, 230, function (x, i) {  // trees
+      var tx = x + 40 + hash(i) * 120, r = 34 + hash(i + 3) * 22;
+      rr(ctx, tx - 5, gy - 70, 10, 72, 3, '#8a5a30', 0); circ(ctx, tx, gy - 84, r, '#5fb872', 0); circ(ctx, tx - r * 0.5, gy - 70, r * 0.6, '#6cc47e', 0); circ(ctx, tx + r * 0.55, gy - 74, r * 0.55, '#57ad69', 0);
+    });
+    repeat(o, 0.32, 700, function (x, i) {  // a kite or two on the wind
+      var kx = x + 300 + Math.sin(o.t * 0.7 + i) * 30, ky = gy - 260 + Math.cos(o.t * 0.9 + i) * 18;
+      poly(ctx, [kx, ky - 22, kx + 16, ky, kx, ky + 24, kx - 16, ky], ['#ff6b6b', '#6aa7ff', '#ffd93d'][Math.abs(i) % 3], 0);
+      ctx.strokeStyle = 'rgba(80,60,40,.45)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(kx, ky + 24); ctx.quadraticCurveTo(kx - 40, ky + 120, kx - 20, gy); ctx.stroke();
+    });
+    repeat(o, 0.6, 96, function (x) {       // a picket fence close behind the play area
+      for (var k = 0; k < 4; k++) { rr(ctx, x + k * 24, gy - 44, 14, 44, 4, '#fbf3e4', 0); }
+      ctx.fillStyle = '#efe2c8'; ctx.fillRect(x, gy - 34, 96, 6); ctx.fillRect(x, gy - 16, 96, 6);
+    });
+    ctx.fillStyle = '#7ccf6e'; ctx.fillRect(0, gy, o.vw, o.vh);
+  };
   A.bg = function (theme, ctx, o) { (BG[theme] || BG.market)(ctx, o); };
 
   /* ---------------- tiles (cached 64px sprites drawn at 32) ---------------- */
@@ -117,6 +149,7 @@
     village: { top: '#ffb6a8', body: '#f09890', edge: '#c06a68', blk: '#e8a0a0' }
   };
   function tileSprite(theme, ch, top, seed) {
+    if (theme === 'gym') theme = 'commute';   // the Gym uses the park's grass and earth
     var key = theme + ch + (top ? 1 : 0) + (seed & 1), hit = tileCache[key]; if (hit) return hit;
     var cv = document.createElement('canvas'); cv.width = cv.height = 64; var c = cv.getContext('2d'); c.scale(2, 2);
     var t = TH[theme] || TH.market;

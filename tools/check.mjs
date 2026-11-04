@@ -62,7 +62,7 @@ for (const f of files.filter((f) => f.endsWith(path.join('tools', 'suites.json')
       else if (a.startsWith('cwd:')) o.cwd = path.join(REPO, a.slice(4));
       else o.argv.push(a);
     }
-    o.name = [path.basename(o.script, '.mjs'), ...o.argv.filter((a) => !a.startsWith('--')), ...Object.values(o.env)].join('-');
+    o.name = [path.basename(o.script, '.mjs'), ...o.argv.map((a) => a.replace(/^--/, '')).filter((a) => !['browser', 'seed', 'seeds', 'stage', 'tests'].includes(a)), ...Object.values(o.env)].join('-');
     suites.push(o);
   }
 }

@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
   var G = root.GUTS, B = G.Belly, D = G.Data, A = G.Art, Au = G.Audio, In = G.Input;
-  var T = 32, PH = B.PHYS, TAU = Math.PI * 2;
+  var T = 32, PH = B.PHYS, TAU = Math.PI * 2, RUN = 1.45, SKY = -8 * 32;   // SKY: thin air starts 8 tiles above the level top (new controls)   // RUN: top speed while running (new controls)
   var cv, cx, dpr = 1, S = 1, VW = 640, VH = 576, W = 640, H = 576;
   var Game = G.Game = { st: null, view: 'none', save: null, hooks: {}, paused: false, override: null, panelT: 0 };
   var KEY = 'guts:1';
@@ -64,8 +64,11 @@
       foods: [], bugs: [], checks: [], patches: [], particles: [], bubbles: [], persons: [], fired: {}, ps: {},
       stats: { blowouts: 0, controlled: 0, chants: 0, bugs: 0, bites: 0, newBites: 0, falls: 0, blasts: 0, breathes: 0, jumps: 0 },
       lan: { has: false, ang: 0, vel: 0, tears: 0 }, cam: { x: 0, y: 0 }, shake: 0, flash: 0, crowd: { cheer: 0, chant: 0, scatter: 0, tap: 0 },
-      noteT: 0, ladT: 0, msgT: 0, restoredX: 0, lanItem: null, gate: { open: 0, nag: 0 }, goal: null, hungryT: 0, lastBlastFx: 0
+      noteT: 0, ladT: 0, msgT: 0, restoredX: 0, lanItem: null, gate: { open: 0, nag: 0 }, goal: null, hungryT: 0, lastBlastFx: 0,
+      // the new controls (VISION.md): the Gym, Settings -> Controls, or ?controls=2 (passed in as opts.v2 so a recording replays the same)
+      v2: !!(def.v2 || (opts && opts.v2) || sv.set.controls === 'new'), lapT: 0, laps: []
     };
+    In.setV2(st.v2);
     st.g = { x: (L.start.x + 0.5) * T, y: (L.start.y + 1) * T, vx: 0, vy: 0, w: 26, h: 46, face: 1, grounded: false, coyote: 0, jbuf: 0, sx: 1, sy: 1, run: 0,
       blastT: 0, blastTotal: 0, blasting: false, blowDuring: false, pounding: false, lockT: 0, relief: 0, spin: 0, spinV: 0, slippery: false, breathing: false, safeX: (L.start.x + 0.5) * T, safeY: (L.start.y + 1) * T, hurtT: 0, scared: 0, chomp: 0, prevVx: 0 };
     st.respawn = { x: st.g.x, y: st.g.y };
@@ -102,6 +105,13 @@
     if (e.x < e.w / 2) { e.x = e.w / 2; e.vx = 0; } if (e.x > L.w * T - e.w / 2) { e.x = L.w * T - e.w / 2; e.vx = 0; }
     l = e.x - e.w / 2; r = e.x + e.w / 2; t = e.y - e.h; b = e.y;
     tx0 = Math.floor(l / T); tx1 = Math.floor((r - 0.001) / T); ty0 = Math.floor(t / T); ty1 = Math.floor((b - 0.001) / T);
+    if (e.nudge && e.vx && !e.grounded) {   // feet just below a ledge's top (up to 12 px) and room above it: step onto it
+      var nx = e.vx > 0 ? tx1 : tx0, fy = ty1;
+      if (isSolidCh(L.get(nx, fy)) && b - fy * T <= 12 && e.vy > -120) {
+        var room = true; for (var yy = Math.floor((fy * T - e.h) / T); yy < fy; yy++) for (var xx = tx0; xx <= tx1; xx++) if (isSolidCh(L.get(xx, yy))) room = false;
+        if (room) { e.y = fy * T; if (e.vy > 0) e.vy = 0; b = e.y; t = e.y - e.h; ty0 = Math.floor(t / T); ty1 = Math.floor((b - 0.001) / T); }
+      }
+    }
     for (ty = ty0; ty <= ty1; ty++) for (tx = tx0; tx <= tx1; tx++) {
       ch = L.get(tx, ty);
       if (isSolidCh(ch)) {
@@ -122,6 +132,11 @@
           if (b > ty * T) { e.y = ty * T; e.vy = 0; e.grounded = true; e.groundCh = ch; b = e.y; }
         }
       } else if (isSolidCh(ch) && prevT >= (ty + 1) * T - 6) {
+        if (e.nudge) {   // the head clips a corner by up to 9 px: slide past it instead of bonking
+          var ovL = (tx + 1) * T - l, ovR = r - tx * T;
+          if (ovL > 0 && ovL <= 9 && !isSolidCh(L.get(tx + 1, ty))) { e.x += ovL + 0.01; l = e.x - e.w / 2; r = e.x + e.w / 2; continue; }
+          if (ovR > 0 && ovR <= 9 && !isSolidCh(L.get(tx - 1, ty))) { e.x -= ovR + 0.01; l = e.x - e.w / 2; r = e.x + e.w / 2; continue; }
+        }
         e.y = (ty + 1) * T + e.h; e.vy = 0; e.head = true; t = e.y - e.h;
       }
     }
@@ -262,7 +277,8 @@
   /* ---------------- Gus ---------------- */
   function updateGus(dt) {
     var st = Game.st, g = st.g, b = st.b, p = st.moment ? NOIN : In.p1, L = st.L, set = Game.save.set, s = B.stats(b);
-    var little = st.mode === 'little' && !st.def.noAuto, check = st.mode === 'check';
+    var little = st.mode === 'little' && !st.def.noAuto, check = st.mode === 'check', v2 = st.v2;
+    g.airT = g.grounded ? 0 : (g.airT || 0) + dt;
     var locked = g.lockT > 0; if (locked) g.lockT -= dt;
     var clear = st.status !== 'play';
     var wantX = clear ? 0 : p.mx;
@@ -285,7 +301,9 @@
     g.wasBreathing = breathing;
 
     g.slippery = g.grounded && g.surface === '~';
-    var target = wantX * s.speed * (little ? (g.grounded ? 0.8 : 0.5) : 1), acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
+    var running = v2 && p.run && Math.abs(wantX) > 0.3;
+    if (running && g.grounded) st.stats.runT = (st.stats.runT || 0) + dt;
+    var target = wantX * s.speed * (running ? RUN : 1) * (little ? (g.grounded ? 0.8 : 0.5) : 1), acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
     if (Math.abs(wantX) > 0.05) {
       var step = acc * dt, dv = target - g.vx; g.vx += clamp(dv, -step, step);
       g.face = wantX > 0 ? 1 : -1;
@@ -296,7 +314,13 @@
 
     // jump with coyote time and a buffer
     g.coyote = g.grounded ? PH.coyote : Math.max(0, g.coyote - dt);
-    g.jbuf = (p.jumpP && !clear) ? PH.jumpBuffer : Math.max(0, g.jbuf - dt);
+    // new controls: a jump press in the air boosts (a toot hop; keep holding for a rocket), unless Gus is about to
+    // land (then it is a remembered jump) or, in Little Guts, still rising fast (mashing jump should not boost)
+    var boostPress = !!(v2 && p.jumpP && !clear && !locked && !g.grounded && g.coyote <= 0 && g.airT > 0.1 &&
+      !(g.vy > 0 && groundBelow(g, 30)) && !(little && g.vy < -200));
+    if (boostPress) g.boostHeld = true;
+    if (g.boostHeld && (!p.jump || g.grounded)) g.boostHeld = false;
+    g.jbuf = (p.jumpP && !clear && !boostPress) ? PH.jumpBuffer : Math.max(0, g.jbuf - dt);
     if (g.jbuf > 0 && g.coyote > 0 && !locked) {
       g.vy = -s.jumpV * (s.heavy ? 0.88 : 1); g.coyote = 0; g.jbuf = 0; g.grounded = false; g.sx = 0.8; g.sy = 1.25; st.stats.jumps++;
       Au.sfx('jump'); for (var d = 0; d < 6; d++) part('dust', g.x + rnd(-8, 8), g.y, rnd(-60, 60), rnd(-50, -10), 0.4, rnd(3, 6), 'rgba(235,225,205,.8)', 80);
@@ -305,17 +329,26 @@
     // blast: tap = toot hop, hold = rocket
     var aim = 0;
     if (check) aim = clamp(p.aimX * 0.95, -1.05, 1.05);
-    if (st.slow && p.blastP) { st.slow = null; st.firstBlastDone = true; }
-    var holdBlast = p.blast && !clear && !locked;
-    if (p.blastP && !clear && !locked) {
+    // the Belly Band (new controls): Up / Down step the note; every boost in the air plays it
+    if (v2 && !clear) {
+      if (g.note == null) g.note = 4;
+      if (p.upP && g.note < 9) { g.note++; st.bandShow = 1.4; }
+      if (p.downP && g.note > 0) { g.note--; st.bandShow = 1.4; }
+      if (st.bandShow > 0) st.bandShow -= dt;
+      if (g.grounded) g.flight = null;
+    }
+    var blastP = p.blastP || boostPress;
+    if (st.slow && blastP) { st.slow = null; st.firstBlastDone = true; }
+    var holdBlast = (p.blast || g.boostHeld) && !clear && !locked;
+    if (blastP && !clear && !locked) {
       g.blastT = 0; g.blastTotal = 0; g.blowDuring = false;
       if (b.pres >= 4) {
         var spent = Math.min(7, b.pres), v = b.vit / 100; b.pres -= spent;
         g.vy = Math.min(g.vy, -(380 + 120 * v) * spent / 7); g.grounded = false; g.coyote = 0; st.stats.blasts++;
-        Au.sfx('toot', { pitch: rnd(0.9, 1.15) });
+        if (boostPress) bandNote(st, g, true); else Au.sfx('toot', { pitch: rnd(0.9, 1.15) });
         for (var i = 0; i < 8; i++) part('ex', g.x + rnd(-5, 5), g.y - 4, rnd(-70, 70), rnd(120, 280), 0.5, rnd(4, 8), '#ffb347', 500);
         for (var j = 0; j < 3; j++) part('cloud', g.x - g.face * 8, g.y - 10, rnd(-50, 50), rnd(20, 70), 0.6, rnd(8, 13), grossCol(j), 40);
-      } else { Au.sfx('puff'); for (var k = 0; k < 4; k++) part('cloud', g.x - g.face * 10, g.y - 14, rnd(-20, 20), rnd(-10, 20), 0.4, rnd(4, 7), 'rgba(220,210,190,.8)', 30); }
+      } else { if (boostPress) bandNote(st, g, false); else Au.sfx('puff'); for (var k = 0; k < 4; k++) part('cloud', g.x - g.face * 10, g.y - 14, rnd(-20, 20), rnd(-10, 20), 0.4, rnd(4, 7), 'rgba(220,210,190,.8)', 30); }
     }
     if (holdBlast) {
       g.blastT += dt;
@@ -340,13 +373,22 @@
     if (up) gr = (p.jump || g.jumpHold > 0 || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55; else gr = PH.G;
     if (!up || g.grounded) g.boost = false;
     gr *= s.gravMul;
+    if (v2 && !g.grounded && p.jump && Math.abs(g.vy) < 110 && !g.blasting) gr *= 0.55;   // a slight hang at the top of a held jump
     if (g.pounding) gr = 0;
     g.vy = Math.min(PH.maxFall, g.vy + gr * dt);
     // ground-pound
     if (s.heavy && !g.grounded && p.poundP && !clear && !locked && !g.pounding && g.vy > -200) { g.pounding = true; g.vy = 1300; g.vx *= 0.3; endBlast(); }
 
     var wasGround = g.grounded, preVy = g.vy;
+    updateFlight(st, g, dt, clear);
+    if (v2 && g.vy < 0 && g.y < SKY) g.vy *= Math.max(0, 1 - (SKY - g.y) / (1.5 * T));   // thin air: the climb fades out above the sky line, so Gus stays on screen
+    g.nudge = v2;   // edge nudges (moveBody): a jump that barely misses a ledge slides onto it; a head that clips a corner slides past
     moveBody(g, dt, st);
+    if (v2 && g.grounded && !clear) {   // dust while running, a skid puff when turning at speed
+      g.dustT = (g.dustT || 0) - dt;
+      var skid = wantX && Math.sign(wantX) !== Math.sign(g.vx) && Math.abs(g.vx) > s.speed * 0.9;
+      if ((Math.abs(g.vx) > s.speed * 1.12 || skid) && g.dustT <= 0) { g.dustT = skid ? 0.04 : 0.09; part('dust', g.x - Math.sign(g.vx) * 10, g.y, -Math.sign(g.vx) * rnd(20, 70), rnd(-45, -10), 0.35, rnd(3, skid ? 7 : 5), 'rgba(235,225,205,.75)', 60); }
+    }
     if (g.head && g.blasting) g.vy = 0;
     if (g.grounded && !wasGround) {
       if (g.pounding) {
@@ -380,6 +422,46 @@
     var ln = st.lan; ln.vel += (-34 * Math.sin(ln.ang) - 2.4 * ln.vel - ax * 0.0012 * g.face) * dt; ln.ang = clamp(ln.ang + ln.vel * dt, -1.2, 1.2);
     // fell off the world
     if (g.y > (L.h + 4) * T) fall();
+  }
+  /* one Belly Band note: plays the ladder note, floats a ♪, and scores the flight (notes since leaving the ground).
+     Bonuses: 5, 8 and 12 notes in one flight; 5 notes climbing or falling the ladder; and the secret: the first five
+     notes of the Gym's own song (up one, then down three), anywhere on the ladder. */
+  var BAND_COL = ['#ff6b6b', '#ff9f43', '#ffd93d', '#9be15d', '#3fe0a0', '#3fc8e0', '#6aa7ff', '#8f7bff', '#c48bff', '#ff8ad5'];
+  function bandNote(st, g, loud) {
+    Au.band(g.note, loud); st.bandShow = 1.4;
+    var f = g.flight || (g.flight = { notes: [], got: {} }); f.notes.push(g.note);
+    var n = f.notes.length, pts = 10 * n; st.stats.band = (st.stats.band || 0) + pts; st.stats.notes = (st.stats.notes || 0) + 1;
+    part('note', g.x - g.face * 10, g.y - 30, rnd(-40, 40) - g.face * 30, -90, 1.3, 7 + Math.min(5, n * 0.4), BAND_COL[g.note], -30);
+    function bonus(key, title, add) { if (f.got[key]) return; f.got[key] = true; st.stats.band += add; Au.sfx('dex'); burst(12, g.x, g.y - 40, 120, 150, BAND_COL[g.note], 0.7, 4, 120); if (Game.hooks.band) Game.hooks.band(title, '+' + add + ' band points'); }
+    if (n >= 12) bonus('12', 'Sky symphony! 12 notes in the air', 400); else if (n >= 8) bonus('8', 'Air band! 8 notes in the air', 150); else if (n >= 5) bonus('5', 'Toot tune! 5 notes in the air', 50);
+    if (n >= 5) {
+      var last = f.notes.slice(-5), up = true, down = true, tune = [1, -1, -1, -1], song = true;
+      for (var i = 1; i < 5; i++) { var d = last[i] - last[i - 1]; if (d !== 1) up = false; if (d !== -1) down = false; if (d !== tune[i - 1]) song = false; }
+      if (up) bonus('up', 'Up the ladder!', 100); if (down) bonus('down', 'Down the ladder!', 100);
+      if (song) bonus('song', 'You played Gus’s song!', 500);
+    }
+  }
+  /* Let the boy fly: high enough above whatever is below him (5 tiles) for a second, Gus is flying: the camera pulls
+     back, the flying song plays, and sparkles trail behind him; a moment on the ground ends it. */
+  function updateFlight(st, g, dt, clear) {
+    var L = st.L, h = 0, x = Math.floor(g.x / T);
+    for (var y = Math.floor(g.y / T); y < L.h + 2 && h < 12; y++, h++) { var c = L.get(x, y); if (isSolidCh(c) || c === '=') break; }
+    if (!g.grounded && h >= 5 && !clear) st.flyT = (st.flyT || 0) + dt; else if (g.grounded) st.flyT = 0;
+    if (!st.flying && st.flyT > 0.9) {
+      st.flying = true; st.landT = 0; st.stats.flights = (st.stats.flights || 0) + 1; Au.sfx('liftoff'); Au.playSong('sky');
+      if (!st.flownOnce) { st.flownOnce = true; if (Game.hooks.band) Game.hooks.band('Gus is flying!', 'Tap to boost, grab fizz to keep going'); }
+    }
+    if (st.flying) {
+      st.stats.flyT = (st.stats.flyT || 0) + dt;
+      if (rand() < dt * 18) part('conf', g.x - g.face * 12 + rnd(-6, 6), g.y - rnd(10, 40), -g.face * rnd(20, 60), rnd(10, 50), rnd(0.6, 1.1), rnd(3, 5), BAND_COL[Math.floor(rand() * 10)], 20);
+      st.landT = g.grounded ? st.landT + dt : 0;
+      if (st.landT > 0.8 || clear) { st.flying = false; st.flyT = 0; Au.playSong(st.def.music); }
+    }
+  }
+  function groundBelow(g, px) {   // is there something to land on within px below Gus's feet?
+    var L = Game.st.L, ty = Math.floor((g.y + px) / T);
+    for (var x = Math.floor((g.x - g.w / 2) / T); x <= Math.floor((g.x + g.w / 2 - 0.001) / T); x++) for (var y = Math.floor(g.y / T); y <= ty; y++) { var c = L.get(x, y); if (isSolidCh(c) || c === '=') return true; }
+    return false;
   }
   function fall() {
     var st = Game.st, g = st.g, L = st.L; st.stats.falls++;
@@ -422,6 +504,14 @@
     }
     if (st.goal && st.status === 'play') {
       var go = st.goal;
+      if (go.type === 'lap' && gcx > go.x - 40) {   // the Gym's finish arch: time the lap, cheer, and start again
+        var secs = Math.round((st.t - st.lapT) * 10) / 10, best = st.laps.length ? Math.min.apply(null, st.laps) : null;
+        st.laps.push(secs); st.lapT = st.t; Au.sfx('clear'); st.crowd.cheer = 3;
+        for (var ci = 0; ci < 40; ci++) part('conf', g.x + rnd(-160, 160), g.y - rnd(80, 260), rnd(-60, 60), rnd(20, 90), rnd(1.5, 2.5), rnd(4, 7), ['#ff6b6b', '#ffd93d', '#6bdc8a', '#6aa7ff', '#c48bff'][ci % 5], 60);
+        if (Game.hooks.lap) Game.hooks.lap(secs, best == null || secs < best, st.laps.length);
+        g.x = (st.L.start.x + 0.5) * T; g.y = (st.L.start.y + 1) * T; g.vx = g.vy = 0; st.respawn = { x: g.x, y: g.y }; updateCam(0, true);
+        return;
+      }
       if (Math.abs(gcx - go.x) < 40 && Math.abs(g.y - go.y) < 70) {
         if (go.type === 'gate' && !st.lan.has && st.lanItem && !st.lanItem.taken) { st.lanItem.taken = true; st.lan.has = true; say('Oops, Gus nearly forgot Popo’s lantern! A breeze brings it over.', 'narrator', {}); Au.sfx('bug'); }
         if (go.type === 'gate' && st.cat && !st.baoEaten && !st.moment) { st.cat.dropped = false; startMoment('reunion', { skipAfter: 2.4 }); return; }
@@ -451,12 +541,13 @@
       ps.near = near;
       if (!near) continue;
       ps.t += dt;
-      if (!ps.said) { ps.said = true; ps.base = { b: st.stats.bites, bl: st.stats.blasts, br: st.stats.breathes, j: st.stats.jumps, x: g.x }; say(p.line, 'narrator', { prompt: true }); }
+      if (!ps.said) { ps.said = true; ps.base = { b: st.stats.bites, bl: st.stats.blasts, br: st.stats.breathes, j: st.stats.jumps, x: g.x, rt: st.stats.runT || 0 }; say(p.line, 'narrator', { prompt: true }); }
       var ic = p.icon, done = false;
       if (ps.t > 2.5) {
         if (ic === 'move') done = Math.abs(g.x - ps.base.x) > 2.5 * T;
         else if (ic === 'jump') done = st.stats.jumps > ps.base.j;
-        else if (ic === 'blast') done = st.stats.blasts > ps.base.bl || g.blastTotal > 0.5;
+        else if (ic === 'blast' || ic === 'boost') done = st.stats.blasts > ps.base.bl || g.blastTotal > 0.5;
+        else if (ic === 'run') done = (st.stats.runT || 0) > ps.base.rt + 1;
         else if (ic === 'breathe') done = st.stats.breathes > ps.base.br;
         else if (ic.indexOf('eat') === 0) done = st.stats.bites > ps.base.b;
         else done = ps.t > 5;
@@ -733,7 +824,7 @@
     Au.setBelly(b.vit, b.pres); Au.ladder(st.status === 'play' ? b.state : 'springy', dt);
     st.shake *= Math.pow(0.02, dt); if (st.flash > 0) st.flash -= dt;
     st.patches.forEach(function (p) { if (p.growth > 0 && p.anim < 1) p.anim = Math.min(1, p.anim + dt * 1.6); if (p.squash > 0) p.squash -= dt; if (p.pop > 0) p.pop -= dt; });
-    ZT = st.moment ? (st.moment.type === 'reunion' ? 1.25 : 1.2) : st.slow ? 1.1 : st.vistaT > 0 ? 0.8 : 1;
+    ZT = st.moment ? (st.moment.type === 'reunion' ? 1.25 : 1.2) : st.slow ? 1.1 : st.vistaT > 0 ? 0.8 : st.flying ? 0.82 : 1;
     ZF += (ZT - ZF) * Math.min(1, rdt * 3.5); applyZoom();
     updateCam(dt, false);
   };
@@ -808,9 +899,11 @@
       var ps = st.ps[i]; if (!ps || !ps.near) continue;
       var p = L.prompts[i], g = st.g, kind = In.kind, x = g.x, y = g.y - 96 - Math.sin(st.t * 4) * 3;
       var act = p.icon.indexOf('eat') === 0 ? 'eat' : p.icon;
+      if (st.v2 && act === 'blast') act = 'boost';   // with the new controls a blast is jump, then jump again
       cx.save(); cx.globalAlpha = 0.95;
       if (act === 'eat') { var id = p.icon.split(':')[1]; A.p.rr(cx, x - 30, y - 22, 60, 44, 14, 'rgba(255,255,255,.92)', 2.5); A.drawFood(cx, id, x, y, 36); }
       else if (act === 'move') { A.p.rr(cx, x - 52, y - 22, 104, 44, 14, 'rgba(255,255,255,.92)', 2.5); A.glyph(cx, 'move', x, y, kind, 15); }
+      else if (act === 'boost' || act === 'run') { A.p.rr(cx, x - 74, y - 22, 148, 44, 14, 'rgba(255,255,255,.92)', 2.5); A.glyph(cx, act, x, y, kind, 15); }
       else { A.p.rr(cx, x - 44, y - 22, 88, 44, 14, 'rgba(255,255,255,.92)', 2.5); A.glyph(cx, act, x, y, kind, 15); }
       cx.restore();
       return;
@@ -866,6 +959,7 @@
       cx.globalAlpha = p.k === 'cloud' ? a * 0.8 : a;
       if (p.k === 'conf') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 4); cx.fillStyle = p.col; cx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); cx.restore(); }
       else if (p.k === 'heart') { cx.save(); cx.translate(p.x, p.y); var hs = p.size / 8; cx.scale(hs, hs); cx.beginPath(); cx.moveTo(0, 3); cx.bezierCurveTo(-9, -4, -5, -11, 0, -5); cx.bezierCurveTo(5, -11, 9, -4, 0, 3); cx.closePath(); cx.fillStyle = p.col; cx.fill(); cx.lineWidth = 1.4; cx.strokeStyle = INK; cx.stroke(); cx.restore(); }
+      else if (p.k === 'note') { cx.font = '700 ' + Math.round(p.size * 4.4) + 'px Fredoka, sans-serif'; cx.textAlign = 'center'; cx.lineJoin = 'round'; cx.strokeStyle = '#fff'; cx.lineWidth = 6; cx.strokeText('♪', p.x, p.y); cx.strokeStyle = 'rgba(43,29,20,.85)'; cx.lineWidth = 2; cx.strokeText('♪', p.x, p.y); cx.fillStyle = p.col; cx.fillText('♪', p.x, p.y); }
       else if (p.k === 'ring') { cx.strokeStyle = p.col; cx.lineWidth = 4 * a + 1; cx.beginPath(); cx.arc(p.x, p.y, p.size + (1 - a) * 70, 0, TAU); cx.stroke(); }
       else if (p.k === 'sock') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 7); A.p.rr(cx, -3.5, -9, 7, 16, 3, p.col, 1.8); cx.fillStyle = '#fff'; cx.fillRect(-3.5, -3, 7, 3); cx.restore(); }
       else if (p.k === 'petal') { cx.save(); cx.translate(p.x, p.y); cx.rotate(p.rot + p.life * 3); cx.fillStyle = p.col; cx.beginPath(); cx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, TAU); cx.fill(); cx.restore(); }
@@ -874,11 +968,17 @@
       else { cx.fillStyle = p.col; cx.beginPath(); cx.arc(p.x, p.y, p.size * (p.k === 'splat' ? 1 : (0.4 + a * 0.6)), 0, TAU); cx.fill(); }
     });
     cx.globalAlpha = 1;
+    if (st.v2 && st.bandShow > 0 && g.note != null) {   // the note ladder beside Gus: ten rungs, the current note lit
+      var lx = g.x + g.face * 30, la = Math.min(1, st.bandShow * 2); cx.save(); cx.globalAlpha = la;
+      A.p.rr(cx, lx - 13, g.y - 106, 26, 100, 13, 'rgba(30,24,44,.45)', 0);
+      for (var nr = 0; nr < 10; nr++) { var ly = g.y - 14 - nr * 9; A.p.rr(cx, lx - (nr === g.note ? 9 : 5), ly - 3, nr === g.note ? 18 : 10, 6, 3, nr === g.note ? BAND_COL[nr] : 'rgba(255,255,255,.75)', nr === g.note ? 2 : 1); }
+      cx.restore();
+    }
     st.bubbles.forEach(function (bu) { A.bubble(cx, D.FEELINGS[bu.kind].icon, bu.x, bu.y, bu.size, bu.t, bu.a); });
     drawMoment(t);
     drawPrompt(st);
     if (st.hint && st.hint.t > 0) { st.hint.t -= 1 / 60; var by = st.hint.y - 60 - Math.abs(Math.sin(t * 5)) * 14; cx.save(); cx.globalAlpha = Math.min(1, st.hint.t); A.p.poly(cx, [st.hint.x - 16, by - 26, st.hint.x + 16, by - 26, st.hint.x + 16, by - 8, st.hint.x + 26, by - 8, st.hint.x, by + 18, st.hint.x - 26, by - 8, st.hint.x - 16, by - 8], '#ffd93d', 3); cx.restore(); }
-    if (st.slow) { var gl = Math.sin(t * 12) * 0.5 + 0.5; cx.save(); cx.globalAlpha = 0.96; A.p.rr(cx, g.x - 96, g.y - 150 - gl * 4, 192, 62, 18, '#fff3d6', 3.5); A.glyph(cx, 'blast', g.x - 52, g.y - 119 - gl * 4, In.kind, 19); cx.fillStyle = '#d9473f'; cx.font = '700 24px "Luckiest Guy", Fredoka, sans-serif'; cx.textAlign = 'left'; cx.fillText('BLAST!', g.x - 24, g.y - 110 - gl * 4); cx.restore(); }
+    if (st.slow) { var gl = Math.sin(t * 12) * 0.5 + 0.5; cx.save(); cx.globalAlpha = 0.96; A.p.rr(cx, g.x - 96, g.y - 150 - gl * 4, 192, 62, 18, '#fff3d6', 3.5); A.glyph(cx, st.v2 ? 'boost' : 'blast', g.x - 52, g.y - 119 - gl * 4, In.kind, 19); cx.fillStyle = '#d9473f'; cx.font = '700 24px "Luckiest Guy", Fredoka, sans-serif'; cx.textAlign = 'left'; cx.fillText('BLAST!', g.x - 24, g.y - 110 - gl * 4); cx.restore(); }
     cx.restore();
     // screen effects
     cx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);

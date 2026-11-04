@@ -197,17 +197,18 @@
   UI.skipScenes = function () { if (cut) { clearTimeout(cut.timer); cut.token++; endScenes(); } };
 
   /* ---------------- level flow ---------------- */
-  function startLevel() {
-    returnTo = 'title';
+  var stageNow = 'home';
+  function startLevel(id) {
+    returnTo = 'title'; if (typeof id === 'string') stageNow = id;
     Voice.stop(); UI.clearCaption();
-    Game.begin('home'); show('play');
-    Au.playSong(D.STAGES.home.music);
+    Game.begin(stageNow, { v2: Q.controls === '2' }); show('play');   // ?controls=2 tries the new controls (passed in, so recordings replay the same)
+    Au.playSong(D.STAGES[stageNow].music);
   }
   function playFromTitle() {
     Au.init();
     if (!Game.save.seenIntro) {
-      runScenes(D.STORY.intro, function () { Game.save.seenIntro = true; Game.persist(); startLevel(); }, { song: 'map' });
-    } else startLevel();
+      runScenes(D.STORY.intro, function () { Game.save.seenIntro = true; Game.persist(); startLevel('home'); }, { song: 'map' });
+    } else startLevel('home');
   }
   function showResults(r) {
     var medal = function (on, name, text, svg) { return '<div class="medal' + (on ? ' on' : '') + '">' + svg + '<b>' + name + '</b><small>' + text + '</small></div>'; };
@@ -262,6 +263,7 @@
     ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).checked = !!s[k]; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === s.gross)); });
     Array.prototype.forEach.call($('speed').children, function (b) { b.setAttribute('aria-pressed', String(+b.dataset.s === s.speed)); });
+    Array.prototype.forEach.call($('controls').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === (s.controls || 'classic'))); });
     Array.prototype.forEach.call($('viewsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === (s.view || 'normal'))); });
     Array.prototype.forEach.call($('stepsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.z === (s.stepsize || 'auto'))); });
     $('set-erase').textContent = 'Erase saved game';
@@ -279,6 +281,7 @@
     var tv = $('textview'); tv.hidden = !flag('readout');
     var on = (touchDevice || flag('buttons') || flag('step') || flag('tap')) && UI.screen === 'play';
     $('touch').classList.toggle('on', on);
+    $('touch').classList.toggle('v2', !!In.v2);
   }
   var stepBadgeSeen = false, stepBadgeT = 0, lastInput = 0;
   UI.applyAccess = applyAccess;
@@ -399,6 +402,10 @@
       if (e.code === 'KeyF' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) toggleFS();
     });
     $('b-play').onclick = playFromTitle;
+    $('b-gym').onclick = function () { Au.init(); startLevel('gym'); };
+    Game.hooks.lap = function (secs, best, n) { UI.toast('Lap ' + n + ': ' + secs + ' seconds', (best && n > 1 ? 'Your best lap! ' : '') + (Game.st.stats.band ? 'Band points: ' + Game.st.stats.band : 'Go again?')); };
+    Game.hooks.band = function (title, sub) { UI.toast(title, sub, null, 2200); };
+    Array.prototype.forEach.call($('controls').children, function (b) { b.onclick = function () { setSetting('controls', b.dataset.c); syncSettings(); }; });
     $('b-village').onclick = function () { returnTo = 'title'; show('village'); };
     $('b-dex').onclick = function () { returnTo = 'title'; show('dex'); };
     $('b-settings').onclick = function () { returnTo = 'title'; show('settings'); };
@@ -434,6 +441,23 @@
       b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('lostpointercapture', up);
       b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     });
+    // the new controls' drag stick: drag sideways to move (further = run), swipe up or down to step the note
+    (function () {
+      var zone = $('tzone'), knob = $('tknob'), id = null, x0 = 0, y0 = 0, yStep = 0;
+      function move(e) {
+        if (e.pointerId !== id) return;
+        var dx = e.clientX - x0, dy = e.clientY - y0, v = Math.abs(dx) < 10 ? 0 : Math.sign(dx) * Math.min(1, (Math.abs(dx) - 10) / 60);
+        In.touchStick(v); knob.style.setProperty('--kx', Math.max(-52, Math.min(52, dx)) + 'px'); knob.style.setProperty('--ky', Math.max(-52, Math.min(52, dy)) + 'px');
+        var st = Math.round(-dy / 38); if (st !== yStep) { In.touchPitch(st > yStep ? 1 : -1); yStep = st; }
+      }
+      function end(e) { if (e.pointerId !== id) return; id = null; In.touchStick(0); knob.classList.remove('on'); }
+      zone.addEventListener('pointerdown', function (e) {
+        e.preventDefault(); touchDevice = true; try { Au.init(); } catch (x) {} id = e.pointerId; x0 = e.clientX; y0 = e.clientY; yStep = 0; lastInput = performance.now();
+        var r = zone.getBoundingClientRect(); knob.style.left = (x0 - r.left) + 'px'; knob.style.top = (y0 - r.top) + 'px'; knob.style.setProperty('--kx', '0px'); knob.style.setProperty('--ky', '0px'); knob.classList.add('on');
+        try { zone.setPointerCapture(id); } catch (x) {}
+      });
+      zone.addEventListener('pointermove', move); zone.addEventListener('pointerup', end); zone.addEventListener('pointercancel', end); zone.addEventListener('lostpointercapture', end);
+    })();
     window.addEventListener('touchstart', function () { touchDevice = true; In.setKind('touch'); }, { passive: true, once: true });
     if (window.matchMedia && matchMedia('(pointer: coarse)').matches) touchDevice = true;
     document.addEventListener('visibilitychange', function () { if (document.hidden && UI.screen === 'play') show('pause'); });

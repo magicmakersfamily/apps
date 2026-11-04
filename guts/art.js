@@ -386,6 +386,8 @@
     pad: { jump: 'x', blast: 'sq', breathe: 'o', pound: 'tri' }
   };
   A.glyphName = function (action, kind) {
+    if (action === 'boost') return kind === 'pad' ? 'Cross, then Cross again in the air' : kind === 'touch' ? 'Jump, then Jump again in the air' : 'Space, then Space again in the air';
+    if (action === 'run') return kind === 'pad' ? 'Push the stick all the way' : kind === 'touch' ? 'Drag further' : 'Keep holding the arrow';
     if (kind === 'pad') { return { jump: 'Cross', blast: 'Square', breathe: 'Circle', pound: 'Triangle', move: 'Left stick' }[action]; }
     if (kind === 'touch') return { jump: 'Jump button', blast: 'Blast button', breathe: 'Breathe button', pound: 'Breathe button in the air', move: 'Arrow buttons' }[action];
     return { jump: 'Space', blast: 'X', breathe: 'B', pound: 'Down', move: 'Arrow keys' }[action];
@@ -393,9 +395,12 @@
   /* draw a prompt glyph; returns width. kind: kb | pad | touch */
   A.glyph = function (ctx, action, x, y, kind, r) {
     r = r || 14;
+    // the new controls' two moves: boost = jump, then jump again in the air; run = keep holding the direction
+    if (action === 'boost' && kind === 'pad') { padSym(ctx, 'x', x - r * 1.15, y, r * 0.9); padSym(ctx, 'x', x + r * 1.15, y, r * 0.9); return r * 4.4; }
+    if (action === 'run' && kind === 'pad') { circ(ctx, x - r * 0.7, y, r, 'rgba(20,24,40,.92)', 1.6); circ(ctx, x - r * 0.2, y, r * 0.45, '#cfd6f5', 0); ctx.font = '700 ' + (r * 1.1) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = INK; ctx.fillText('»', x + r * 1.1, y + r * 0.4); return r * 3.6; }
     if (kind === 'pad' && GLYPH.pad[action]) { padSym(ctx, GLYPH.pad[action], x, y, r); return r * 2; }
     if (kind === 'pad' && action === 'move') { circ(ctx, x, y, r, 'rgba(20,24,40,.92)', 1.6); circ(ctx, x, y, r * 0.45, '#cfd6f5', 0); return r * 2; }
-    var label = kind === 'touch' ? { jump: 'JUMP', blast: 'BLAST', breathe: 'CALM', pound: 'CALM', move: '◀ ▶' }[action] : GLYPH.kb[action];
+    var label = kind === 'touch' ? { jump: 'JUMP', blast: 'BLAST', breathe: 'CALM', pound: 'CALM', move: '◀ ▶', boost: 'JUMP ×2', run: 'DRAG ▶▶' }[action] : (GLYPH.kb[action] || { boost: 'SPACE ×2', run: 'HOLD →' }[action]);
     ctx.font = '700 ' + (r * 0.95) + 'px Fredoka, sans-serif'; ctx.textAlign = 'center';
     var w = Math.max(r * 2, ctx.measureText(label).width + r * 0.9);
     rr(ctx, x - w / 2, y - r, w, r * 2, r * 0.45, 'rgba(250,250,250,.96)', 2.5);

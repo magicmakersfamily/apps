@@ -133,6 +133,14 @@ input[type=range] { width: 160px; accent-color: #ff8a3d; height: 30px; }
 #tb-left { left: 14px; bottom: 18px; } #tb-right { left: 104px; bottom: 18px; }
 #tb-jump { right: 14px; bottom: 18px; width: 86px; height: 86px; } #tb-blast { right: 112px; bottom: 18px; } #tb-breathe { right: 22px; bottom: 116px; }
 #touch.little #tb-left, #touch.little #tb-right { display: none; }
+/* new controls on touch: drag anywhere on the left half to move (drag further to run, swipe up or down for the note), Jump and Calm on the right */
+#tzone { position: absolute; left: 0; bottom: 0; width: 50%; height: 70%; pointer-events: auto; touch-action: none; display: none; }
+#touch.v2 #tzone { display: block; }
+#touch.v2 #tb-left, #touch.v2 #tb-right, #touch.v2 #tb-blast { display: none; }
+#touch.v2 #tb-breathe { right: 116px; bottom: 18px; }
+#tknob { position: absolute; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%; border: 3px solid rgba(43,29,20,.5); background: rgba(255,243,214,.3); display: none; pointer-events: none; }
+#tknob::after { content: ''; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px; border-radius: 50%; background: rgba(255,176,46,.85); transform: translate(var(--kx, 0px), var(--ky, 0px)); }
+#tknob.on { display: block; }
 
 .stepbadge { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 6; background: rgba(90,200,255,.95); color: #0b2433; font-weight: 600; font-size: 13px; border-radius: 99px; padding: 4px 14px; max-width: 94%; text-align: center; }
 .textview { padding: 8px 16px; background: #0f0e1a; color: #e9e4ff; font-size: 13px; line-height: 1.4; max-height: 22vh; overflow: auto; border-top: 2px solid #3a3558; }
@@ -187,6 +195,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <button class="ibtn" id="b-fs" title="Full screen (F)" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div id="touch" aria-label="Touch controls">
+      <div id="tzone" aria-hidden="true"><div id="tknob"></div></div>
       <button class="tb" id="tb-left" data-act="left" aria-label="Move left"><svg viewBox="0 0 24 24"><path d="M15 4 6 12l9 8z"/></svg></button>
       <button class="tb" id="tb-right" data-act="right" aria-label="Move right"><svg viewBox="0 0 24 24"><path d="M9 4l9 8-9 8z"/></svg></button>
       <button class="tb" id="tb-breathe" data-act="breathe" aria-label="Breathe"><svg viewBox="0 0 24 24"><path d="M4 9c4-3 7 3 11 0s5-1 5-1M4 15c4-3 7 3 11 0s5-1 5-1" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span>CALM</span></button>
@@ -213,7 +222,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
         <div class="row" style="margin-top:14px"><div class="seg" id="modes" role="group" aria-label="Mode">
           <button data-mode="little" aria-pressed="false">Little Guts</button><button data-mode="standard" aria-pressed="true">Standard</button><button data-mode="check" aria-pressed="false">Gut Check</button></div></div>
         <p class="modeDesc" id="modeDesc"></p>
-        <div class="row"><button class="btn small" id="b-village">Gut Village</button><button class="btn small" id="b-dex">Food Dex</button><button class="btn small" id="b-settings">Settings</button><button class="btn small" id="b-fs2">Full screen</button></div>
+        <div class="row"><button class="btn small" id="b-gym">Gus’s Gym <span class="beta">NEW</span></button><button class="btn small" id="b-village">Gut Village</button><button class="btn small" id="b-dex">Food Dex</button><button class="btn small" id="b-settings">Settings</button><button class="btn small" id="b-fs2">Full screen</button></div>
         <p class="soundhint" id="soundhint">Press any key or click to turn the sound on.</p>
         <p class="padhint" id="padhint" hidden>PlayStation controller ready</p>
       </div>
@@ -238,7 +247,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <div class="panel"><h2>To be continued…</h2>
         <p>You finished the first level of <b>GUTS</b>. Next stop: <b>Eastern Market</b> in Detroit, then Mexico, Japan, Taiwan and Hong Kong, where Grandma’s feast is waiting.</p>
         <p class="sub">This beta only has Morning at Home so far. We would love to know what felt fun and what felt confusing.</p>
-        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.5" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
+        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.6" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
         <div class="row"><button class="btn primary" id="e-again" data-first>Play again</button><button class="btn" id="e-title" data-back>Title</button></div>
         <p class="links"><a href="../">More from the App Shelf</a><a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake: Ko-fi</a></p>
         <p class="sub" id="e-status" aria-live="polite"></p>
@@ -267,6 +276,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
         <div class="field"><label for="set-shake">Screen shake</label><input class="switch" type="checkbox" id="set-shake"></div>
         <div class="field"><label for="set-flash">Flashes</label><input class="switch" type="checkbox" id="set-flash"></div>
         <div class="field"><label for="set-cb">Colour-blind friendly meters</label><input class="switch" type="checkbox" id="set-cb"></div>
+        <div class="field"><span class="lab">Controls<small>New: jump, then jump again in the air to boost (Up and Down change the note); hold a direction to run. Starts with the next level.</small></span><div class="seg" id="controls"><button data-c="new">New (try it)</button><button data-c="classic">Classic</button></div></div>
         <div class="field"><span class="lab">Game speed</span><div class="seg" id="speed"><button data-s="100">Normal</button><button data-s="80">Slower</button><button data-s="60">Slowest</button></div></div>
         <div class="field"><span class="lab">Screen size<small>Make the picture smaller or larger inside the game.</small></span><div class="seg" id="viewsize"><button data-v="small">Smaller</button><button data-v="normal">Normal</button><button data-v="large">Larger</button></div></div>
         <div class="field"><label for="set-tap">Tap mode<small>One tap keeps going for a moment: walk, jump, blast, breathe. No holding needed.</small></label><input class="switch" type="checkbox" id="set-tap"></div>
@@ -303,7 +313,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
 </div>
 
 <footer class="about">
-  <span>Version 1.5 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.5">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.5&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
+  <span>Version 1.6 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.6">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.6&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
   <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
   <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
 </footer>

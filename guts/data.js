@@ -43,6 +43,53 @@
     catPath: function (list) { this.cat = { path: list }; return this; }
   };
 
+  /* ---------- Gus's Gym: a practice playground for the new controls (VISION.md, phase A). Not part of the story. */
+  function buildGym() {
+    var L = new Lvl(106, 18, 'gym');
+    L.ground(0, 106, 14);
+    L.start = { x: 3, y: 13 };
+    // 1. a long runway: hold to walk, keep holding to run
+    L.prompt(2, 'move', 'Hold the arrow to walk.');
+    L.prompt(10, 'run', 'Keep holding and Gus runs!');
+    L.food(14, 13, 'banana');
+    // 2. a crate: jump, and hold the button for a higher jump
+    L.box(22, 12, 2, 2, 'B');
+    L.prompt(19, 'jump', 'Jump! Hold the button to jump higher.');
+    L.check(26, 13);
+    // 3. a big gap with a soft landing pit: run, then jump to clear it
+    L.clear(30, 14, 6, 2);
+    L.prompt(28, 'run', 'Big gap! Run, then jump.');
+    L.food(33, 10, 'cherries');
+    // 4. the fizzy fountain and a high shelf: jump, then jump again in the air to boost (hold it to rocket)
+    L.food(39, 13, 'soda', true); L.food(41, 13, 'soda', true);
+    L.prompt(40, 'boost', 'Drink fizz, then jump and jump again in the air to boost. Hold it to rocket!');
+    L.plat(43, 6, 6); L.food(45, 5, 'blueberries'); L.food(47, 5, 'cherries');
+    L.prompt(46, 'boost', 'In the air, press up or down to change the note. Can you play Gus’s song? Up one, then down three.');
+    // 4b. a sky trail: fizz floating ever higher. Tap boosts to stay up, grab each can to refuel, and fly to the cloud
+    [[44, 8], [48, 7], [52, 6], [56, 5], [60, 4], [64, 4], [68, 3], [72, 3], [76, 2], [80, 2]].forEach(function (c, i) { L.food(c[0], c[1], i % 3 === 2 ? 'blueberries' : 'soda', true); });
+    L.plat(84, 3, 8); L.food(86, 2, 'cherries'); L.food(88, 2, 'blueberries'); L.food(90, 2, 'cherries');
+    L.check(50, 13);
+    // 5. tiny pillars: land near an edge and Gus steps up onto it
+    L.box(53, 12, 1, 2, 'B'); L.box(56, 11, 1, 3, 'B'); L.box(59, 10, 1, 4, 'B'); L.box(62, 11, 1, 3, 'B');
+    L.prompt(52, 'jump', 'Tiny pillars! Land close to the edge and Gus steps up.');
+    L.food(59, 9, 'apple');
+    // 6. narrow zig-zag shelves (like the ones by the fridge), with a treat at the top
+    L.plat(67, 11, 2); L.plat(70, 9, 2); L.plat(67, 7, 2); L.plat(70, 5, 3);
+    L.prompt(66, 'jump', 'Zig-zag up the little shelves.');
+    L.food(71, 4, 'cherries'); L.food(72, 4, 'banana');
+    L.check(77, 13);
+    // 7. the calm corner: sweets fill the belly, CALM lets the bubbles out, a blast over the dirt grows a bounce flower
+    L.food(79, 13, 'candy', true); L.food(87, 13, 'water', true);
+    L.prompt(80, 'breathe', 'Hold CALM to breathe the bubbles out.');
+    L.patch(83, 13, 3, 'flower');
+    L.prompt(84, 'boost', 'Boost over the dirt and see what grows!');
+    // 8. two steps up to the finish arch: every lap is timed, then you start again
+    L.box(92, 12, 2, 2, 'B'); L.box(95, 11, 3, 3, 'B');
+    L.food(96, 10, 'carrot');
+    L.goal = { x: 102, y: 13, type: 'lap' };
+    return L;
+  }
+
   /* ---------- the stages ---------- */
   var VEG = ['broccoli', 'carrot'];
 
@@ -324,6 +371,9 @@
               intro: 'Inside Gus. Watch the teeth!', next: null }
   };
   var ORDER = ['home', 'market', 'commute', 'rooftops', 'golem', 'mouth'];
+  // practice rooms: reachable from the title screen, never part of the story
+  STAGES.gym = { id: 'gym', n: 'Gym', name: 'Gus’s Gym', zh: '練習場', world: 'detroit', theme: 'gym', music: 'home', build: buildGym, beige: false, v2: true, practice: true,
+    intro: 'Welcome to the Gym! Try the new moves. Each lap of the playground is timed.' };
 
   var LOCKED_WORLDS = [
     { id: 'mexico', name: 'Mexico', zh: '墨西哥', color: '#e2574c' },

@@ -1,5 +1,31 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.6 (beta, 2026-11-03): phase A of GUTS 2.0, "The Toy" (guts-F22; vision in `VISION.md`)
+
+- **New controls** (opt-in: the Gym, Settings -> Controls -> New, or `?controls=2`; passed to `Game.begin` as
+  `opts.v2` so recordings replay the same; the live level is unchanged with Classic): one Jump button (a second press
+  in the air boosts, hold it to rocket; not while still rising fast in Little Guts, so mashing doesn't boost), one Calm
+  button (in the air it ground-pounds), hold a direction to walk and keep holding (0.55 s), double-tap, push the stick
+  all the way or hold Shift to run (`RUN` = 1.45x). Up / Down no longer jump; they step the note.
+- **Forgiving feel** (`st.v2`): a slight hang at the top of a held jump, edge nudges in `moveBody` (feet up to 12 px
+  below a ledge top step onto it; a head clipping a corner by up to 9 px slides past), run dust and skid puffs.
+- **The Belly Band** (`bandNote`): each boost in the air plays a note on a major pentatonic ladder in the song's key
+  (`Au.band`), Up / Down step it (a ladder shows beside Gus), ♪ particles; points grow with each note in a flight;
+  bonuses for 5 / 8 / 12 notes, 5 notes up or down the ladder, and the secret "Gus's song" (up one, down three).
+- **Let the boy fly** (`updateFlight`): 5+ tiles above whatever is below for 0.9 s = flying: lift-off swoosh, the
+  camera pulls back, the original `sky` song plays (late-60s psychedelic rock sound: swirling organ, fuzz bass, open
+  hats, I-bVII-IV; the family asked for "Magic Carpet Ride", which we can't copy), sparkles; thin air above 8 tiles over
+  the level top (`SKY`).
+- **Gus's Gym** (`buildGym`, theme `gym` with a layered park background): runway (walk, run), crate, a big gap
+  (run-jump), fizzy fountain and high shelf (boost), music sign, a sky trail of fizz to a cloud, tiny pillars (edge
+  nudges), zig-zag shelves, a calm corner with a flower patch, a timed lap arch. Title -> Gus's Gym.
+- **Touch** (`#touch.v2`): drag anywhere on the left half (further = run, swipe up or down = note), CALM and JUMP on
+  the right.
+- **Checks:** `tools/gym.mjs` (each mechanic, plus a pilot that flies the sky trail to the cloud), `record-check.mjs
+  --gym` (exact replay with the new inputs), personas `--stage gym`; all in Chrome, Firefox and WebKit.
+- **Next:** James plays the Gym (`?playtest=1`); tune `RUN`, the boost guard, apex hang and the sky trail from his
+  recording; then phase B (VISION.md).
+
 ## 1.5 (beta, 2026-11-03): playtest recording (guts-F18)
 
 - `playtest.js` (loaded last): `?playtest=1` records each try for an exact replay; REC tag + Pause menu save the file,

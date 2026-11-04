@@ -43,6 +43,12 @@
     inside: { bpm: 92, style: 'squelch', lead: 'marimba',
       chords: ['Em', 'G', 'C', 'B'],
       mel: 'e5/3 g5/1 b5/4 a5/2 g5/2 f#5/4 | g5/3 b5/1 d6/4 c6/2 b5/2 a5/4 | c6/4 e6/4 d6/2 c6/2 b5/4 | a5/2 f#5/2 d#5/4 b4/8' },
+    // flying (VISION.md: let the boy fly): an original soaring tune in G, so the Belly Band notes fit right over it
+    // flying (VISION.md: let the boy fly): an original tune with a late-60s psychedelic rock sound (swirling organ, fuzz
+    // bass, open hats, the I-bVII-IV chord move), in G so the Belly Band notes fit over it. Not a copy of any song.
+    sky: { bpm: 116, style: 'psych', lead: 'psychorgan',
+      chords: ['G', 'F', 'C', 'G', 'G', 'F', ['C', 'G'], ['D', 'G']],
+      mel: 'd5/4 g5/4 b5/6 a5/2 | a5/4 f5/4 c6/8 | e6/4 d6/2 c6/2 g5/4 c6/4 | b5/6 a5/2 g5/8 | g5/2 b5/2 d6/4 g6/8 | f6/4 e6/2 d6/2 c6/8 | e6/4 g6/4 d6/4 b5/4 | a5/6 f#5/2 g5/8' },
     village: { bpm: 84, style: 'village', lead: 'uke',
       chords: ['C', 'F', 'G', 'C', 'Am', 'F', 'G', 'C'],
       mel: 'e5/4 g5/4 c6/6 -/2 | a5/4 f5/4 c5/6 -/2 | b4/2 d5/2 g5/4 f5/2 e5/2 d5/4 | c5/8 -/8 | e5/2 a5/2 c6/4 b5/2 a5/2 e5/4 | f5/2 a5/2 c6/4 a5/4 f5/4 | d5/2 g5/2 b5/4 a5/2 g5/2 d5/4 | c5/4 e5/4 c5/8' }
@@ -124,6 +130,10 @@
     accordion: function (f, t, d, v) { note(musicBus, 'sawtooth', f, t, d, v * 0.2, { lp: f * 3, a: 0.05, music: 1, detune: -6, hold: 0.8 }); note(musicBus, 'sawtooth', f, t, d, v * 0.2, { lp: f * 3, a: 0.05, music: 1, detune: 6, hold: 0.8 }); },
     bass: function (f, t, d, v) { note(musicBus, 'triangle', f, t, d, v * 0.9, { a: 0.008, music: 1, hold: 0.5 }); note(musicBus, 'sine', f / 2, t, d, v * 0.5, { a: 0.01, music: 1 }); },
     wobble: function (f, t, d, v) { note(musicBus, 'sawtooth', f, t, d, v * 0.55, { lp: f * 1.2, lpTo: f * 5, lpT: d * 0.5, q: 7, a: 0.01, music: 1, hold: 0.6 }); },
+    // a swirling 60s organ: fast, deep vibrato (like a spinning speaker) and a filter that opens as the note sounds
+    psychorgan: function (f, t, d, v) { note(musicBus, 'sawtooth', f, t, d, v * 0.32, { lp: f * 2, lpTo: f * 7, lpT: 0.12, a: 0.015, vib: [6.6, 24], music: 1, hold: 0.85 }); note(musicBus, 'square', f * 2, t, d, v * 0.12, { lp: f * 4, a: 0.02, vib: [7.1, 30], music: 1, hold: 0.8 }); note(musicBus, 'sine', f / 2, t, d, v * 0.25, { a: 0.01, music: 1, hold: 0.85 }); },
+    // fuzz bass: a hot, slightly growly low end
+    fuzz: function (f, t, d, v) { note(musicBus, 'sawtooth', f, t, d, v * 0.5, { lp: 900, q: 3, a: 0.004, music: 1, hold: 0.55 }); note(musicBus, 'square', f / 2, t, d, v * 0.3, { lp: 300, a: 0.004, music: 1, hold: 0.55 }); },
     tuba: function (f, t, d, v) { note(musicBus, 'sawtooth', f, t, d, v, { lp: 520, a: 0.05, vib: [4, 12], music: 1, hold: 0.6 }); }
   };
   var DR = {
@@ -163,6 +173,12 @@
       if (bs !== undefined) INS.bass(hz(root + bs), t, sx * 2.4, 0.8 * mv);
       if (s === 2 || s === 6 || s === 10 || s === 14) tri.forEach(function (m) { INS.organ(hz(m), t, sx * 1.5, soft ? 0.32 : 0.24); });
       if (soft && s === 0) tri.forEach(function (m) { INS.organ(hz(m - 12), t, sx * 15, 0.22); });
+    } else if (stl === 'psych') {   // late-60s rock: kick 1 and the "and" of 2, big snare on 2 and 4, open hats, driving fuzz eighths, swirling organ chords
+      if (s === 0 || s === 6 || s === 8) DR.kick(t, 1); if (s === 4 || s === 12) { DR.snare(t, 1); DR.clap(t, 0.5); }
+      if (s % 2 === 0) DR.hat(t, 0.65, s % 4 === 2); if (s % 4 === 2) DR.tamb(t, 0.7);
+      if (s % 2 === 0) INS.fuzz(hz(root + (s === 6 || s === 14 ? 12 : 0)), t, sx * 1.7, 0.85);
+      if (s === 0) tri.forEach(function (m) { INS.psychorgan(hz(m - 12), t, sx * 15, 0.2); });
+      if (s === 7 || s === 15) tri.forEach(function (m) { INS.psychorgan(hz(m), t, sx * 1.2, 0.22); });
     } else if (stl === 'uke') {
       if ([0, 3, 6, 8, 11, 14].indexOf(s) >= 0) tri.forEach(function (m, i) { INS.uke(hz(m), t + i * 0.012, sx * 2, 0.34); });
       if (s === 0 || s === 8) INS.bass(hz(root), t, sx * 4, 0.6);
@@ -218,6 +234,7 @@
     if (!ctx || vol.sfx <= 0) return; o = o || {};
     var t = ctx.currentTime + 0.002, B = sfxBus, p = o.pitch || 1;
     switch (name) {
+      case 'liftoff': noise(B, t, 1.1, 0.35, { type: 'bandpass', f: 300, fTo: 5000, q: 1.2 }); note(B, 'sawtooth', 196, t, 1.0, 0.22, { slideTo: 784, lp: 2400, vib: [7, 30] }); note(B, 'sine', 392, t + 0.15, 0.9, 0.18, { slideTo: 1568 }); break;
       case 'jump': note(B, 'triangle', 190 * p, t, 0.13, 0.35, { slideTo: 520 * p }); break;
       case 'land': note(B, 'sine', 110, t, 0.12, 0.45, { slideTo: 50 }); noise(B, t, 0.05, 0.12, { f: 400 }); break;
       case 'toot': note(B, 'sawtooth', 200 * p, t, 0.14, 0.3, { slideTo: 120, lp: 700 }); note(B, 'square', 70, t, 0.1, 0.15, { lp: 300 }); break;
@@ -323,7 +340,24 @@
     else if (state === 'critical' && lad.t > 1.7) { lad.t = 0; sfx('foghorn'); }
   }
 
+  /* the Belly Band: one toot-note on a major pentatonic ladder (any order sounds good) in the current song's key.
+     Degree 0 is the key note; 5 steps make an octave; the ladder goes 0..9 (two octaves). */
+  var PENTA = [0, 2, 4, 7, 9], PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function bandFreq(deg) {
+    var song = SONGS[(cur && cur.name) || 'home'] || SONGS.home, c0 = song.chords[0]; if (Array.isArray(c0)) c0 = c0[0];
+    var pc = PC[c0[0]] + (c0[1] === '#' ? 1 : c0[1] === 'b' ? -1 : 0), oct = Math.floor(deg / 5), midi = 55 + ((pc + 5) % 12) + 12 * oct + PENTA[((deg % 5) + 5) % 5];
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+  function band(deg, loud) {
+    if (!ctx || vol.sfx <= 0) return;
+    var t = ctx.currentTime + 0.002, f = bandFreq(deg), v = loud ? 0.34 : 0.16;
+    note(sfxBus, 'sawtooth', f, t, 0.26, v, { lp: f * 2.4, lpTo: f * 5, lpT: 0.05, a: 0.008, vib: [6, 9], hold: 0.55 });
+    note(sfxBus, 'square', f / 2, t, 0.16, v * 0.35, { lp: 600 });
+    noise(sfxBus, t, 0.05, v * 0.3, { f: 900 });
+  }
+
   G.Audio = {
+    band: band, bandFreq: bandFreq,
     init: init, playSong: playSong, stopSong: stopSong, sfx: sfx, blastOn: blastOn, blastOff: blastOff, breatheOn: breatheOn, breatheOff: breatheOff, ladder: ladder,
     setVolumes: function (m, s) { vol.music = m; vol.sfx = s; applyMusicVol(); if (ctx) sfxBus.gain.setTargetAtTime(s, ctx.currentTime, 0.05); if (s <= 0) { blastOff(); breatheOff(); } },
     setGross: function (g) { gross = g; },

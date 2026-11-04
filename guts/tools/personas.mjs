@@ -9,6 +9,9 @@
 //                      a wall, belly numbers out of range (pressure over 100 for more than 3 frames), a scene that never ends
 //   findings (design data, never fail): stalls (no progress for 20 s), falls, blowouts, no finish, helper snacks
 // Usage: node guts/tools/personas.mjs [--persona james,cautious] [--seeds 3 | --seed 7] [--browser chromium,firefox,webkit | all]
+//        [--mode little|standard|check] (override each persona's mode) [--record] (also save each run as a playtest recording)
+//        [--stage gym] (play another stage, e.g. Gus's Gym with the new controls)
+import fs from 'node:fs';
 import path from 'node:path';
 import { launch, gutsUrl } from './cdp.mjs';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +34,7 @@ function play(cfg) {
   function between(lo, hi) { return lo + rand() * (hi - lo); }
 
   Game.save.mode = cfg.mode; Game.save.seenIntro = true;
-  window.__guts.startLevel();
+  window.__guts.startLevel(cfg.stage || 'home');
   Game.paused = true;   // the page's own animation loop stops updating; only this loop moves the game
   var st = Game.st, g = st.g, L = st.L;
   var goalX = st.goal ? st.goal.x : L.w * T;
@@ -65,6 +68,7 @@ function play(cfg) {
       else act.jump = held('j', chance(0.4), between(0.05, 0.3));
       act.blast = held('b', chance(0.35), rand() < 0.3 ? between(0.5, 1.5) : 0.1);
       act.left = held('l', chance(0.12), between(0.3, 1.2));                // Little Guts runs by itself; left walks back
+      if (cfg.mode !== 'little' && !act.left) act.right = true;             // other modes: he holds right like any kid
       act.breathe = held('br', chance(0.05), between(0.5, 2));
       return act;
     },
@@ -81,7 +85,9 @@ function play(cfg) {
     },
     speedrunner: function () {
       var ah = look(1), act = { right: true };
-      act.jump = held('j', ah.wall <= 2 || ah.gap <= 1, 0.4);
+      // a fresh press for every jump: let go once airborne, press again once landed (a held button only jumps once)
+      if (!g.grounded) m.jumped = true; else if (m.jumped) { m.jumped = false; m.hold.j = -0.1; }
+      act.jump = held('j', g.grounded && (m.hold.j || 0) < -0.08 && (ah.wall <= 2 || ah.gap <= 1), 0.25);
       act.blast = held('b', ah.wall <= 2 && ah.wallH > 3 && st.b.pres > 10, 0.6);
       return act;
     },
@@ -118,20 +124,23 @@ function play(cfg) {
   return w.result('did not reach the gate in ' + cfg.limit + ' s (furthest point)');
 }
 
-export async function runPersona({ persona, seed, browser }) {
-  const cfg = { ...PERSONAS[persona], persona, seed, salt: Object.keys(PERSONAS).indexOf(persona) + 1 };
+export async function runPersona({ persona, seed, browser, mode, recordTo, stage }) {
+  const cfg = { ...PERSONAS[persona], persona, seed, stage, salt: Object.keys(PERSONAS).indexOf(persona) + 1 };
+  if (mode) cfg.mode = mode;
   const t0 = Date.now();
-  const p = await launch({ url: await gutsUrl(), browser, seed, pad: cfg.input === 'pad' ? 'standard' : false });
+  // --record: the run is also saved as a playtest recording, so replay.mjs can show it with pictures
+  const p = await launch({ url: await gutsUrl(recordTo ? '?playtest=1' : ''), browser, seed, pad: cfg.input === 'pad' ? 'standard' : false });
   let res;
   try {
     if (!(await p.ready())) throw new Error('the game never finished loading');
     await p.page.addScriptTag({ path: WATCH });
     res = await p.page.evaluate(play, cfg);
+    if (recordTo) { fs.mkdirSync(path.dirname(recordTo), { recursive: true }); fs.writeFileSync(recordTo, await p.eval('JSON.stringify(GUTS.playtest.session())')); res.recording = recordTo; }
   } catch (e) {
     res = { status: 'error', failures: [{ type: 'exception', where: 'harness', text: e.message.split('\n')[0] }], findings: [] };
   }
   res.failures.push(...p.errors.map((e) => ({ type: 'error', where: e.kind, text: e.text })));
-  const rec = { game: 'guts', scenario: 'persona', persona, browser: p.browserName, seed, mode: cfg.mode, input: cfg.input, wallSeconds: Math.round((Date.now() - t0) / 100) / 10, ...res };
+  const rec = { game: 'guts', scenario: 'persona', stage: stage || 'home', persona, browser: p.browserName, seed, mode: cfg.mode, input: cfg.input, wallSeconds: Math.round((Date.now() - t0) / 100) / 10, ...res };
   if (res.failures.length) rec.screenshot = await p.shot(path.join(outDir(), 'shots', ['guts', persona, p.browserName, seed].join('_') + '.png')).catch(() => null);
   record(rec);
   await p.close();
@@ -144,7 +153,7 @@ if (import.meta.url === 'file://' + process.argv[1]) {
   const personas = arg('persona', Object.keys(PERSONAS).join(',')).split(',');
   const seeds = arg('seed') ? [Number(arg('seed'))] : Array.from({ length: Number(arg('seeds', 3)) }, (_, i) => i + 1);
   const bl = arg('browser', process.env.BROWSER || 'chromium'); const browsers = bl === 'all' ? BROWSERS : bl.split(',');
-  const jobs = []; for (const b of browsers) for (const pe of personas) for (const s of seeds) jobs.push({ persona: pe, seed: s, browser: b });
+  const jobs = []; for (const b of browsers) for (const pe of personas) for (const s of seeds) jobs.push({ persona: pe, seed: s, browser: b, mode: arg('mode'), stage: arg('stage'), recordTo: process.argv.includes('--record') ? path.join(outDir(), 'recordings', ['persona', pe, arg('mode') || PERSONAS[pe].mode, b, s].join('_') + '.json') : null });
   let bad = 0; const par = Number(arg('parallel', 3)); let next = 0;
   async function worker() {
     while (next < jobs.length) {

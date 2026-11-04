@@ -3,7 +3,8 @@
 (function (root) {
   'use strict';
   var G = root.GUTS = root.GUTS || {};
-  var keys = {}, latch = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0, wait: 0 }, tlatch = {};
+  var keys = {}, latch = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0, wait: 0, stick: 0, pitch: 0 }, tlatch = {};
+  var runSt = { dir: 0, t: 0, lastDir: 0, relT: -9, dbl: false };   // new controls: hold to walk, keep holding (or double-tap) to run
   var clock = 0, until = {}, tprev = {}, aiHold = {}, advUntil = 0;
   var DUR = { move: 0.45, run: 0.6, hop: 0.36, jump: 0.32, blast: 0.85, breathe: 2.4 };   // how long one tap keeps going in Tap / Step mode
   var HOP = { small: 1, medium: 3, large: 5 };   // how many tiles a jump-left / jump-right travels
@@ -15,7 +16,7 @@
     p2: { mx: 0, my: 0, feed: false, feedP: false, breathe: false },
     nav: { up: false, down: false, left: false, right: false, ok: false, back: false },
     pauseP: false, anyP: false, kind: 'kb', pads: 0, padName: '', capture: true,
-    tap: false, stepMode: false, frozen: false, active: false, stepSize: 'auto'
+    tap: false, stepMode: false, frozen: false, active: false, stepSize: 'auto', v2: false
   };
 
   function isTextTarget(t) { return t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName); }
@@ -94,15 +95,17 @@
     if (anyK(stepKeys ? ['ArrowLeft'] : ['ArrowLeft', 'KeyA'])) mx -= 1; if (anyK(stepKeys ? ['ArrowRight'] : ['ArrowRight', 'KeyD'])) mx += 1;
     if (anyK(['ArrowDown', 'KeyS'])) my += 1; if (anyK(['ArrowUp', 'KeyW'])) my -= 1;
     if (a) { mx += a.lx; my += a.ly; }
-    mx += tv('right') - tv('left');
+    mx += tv('right') - tv('left') + (touch.stick || 0);
     if (ai('right')) mx += 1; if (ai('left')) mx -= 1;
     mx = Math.max(-1, Math.min(1, mx));
     var runL = (stepKeys && k('KeyA')) || tv('runLeft') || ai('runLeft'), runR = (stepKeys && k('KeyD')) || tv('runRight') || ai('runRight');
     var hopL = (stepKeys && k('KeyQ')) || tv('jumpLeft') || ai('jumpLeft'), hopR = (stepKeys && k('KeyE')) || tv('jumpRight') || ai('jumpRight');
-    var jump = anyK(['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || tv('jump') || ai('jump') || hopL || hopR;
-    var blast = anyK(['KeyX', 'ShiftLeft', 'ShiftRight', 'Period']) || (a && (a.square || a.r1 || a.r2)) || tv('blast') || ai('blast');
+    // new controls: Up and Down step the note in the air instead of jumping (and Calm in the air ground-pounds)
+    var jump = anyK(I.v2 ? ['Space', 'KeyZ'] : ['Space', 'KeyZ', 'ArrowUp', 'KeyW']) || (a && a.cross) || tv('jump') || ai('jump') || hopL || hopR;
+    var blast = anyK(I.v2 ? ['KeyX', 'Period'] : ['KeyX', 'ShiftLeft', 'ShiftRight', 'Period']) || (a && (a.square || a.r1 || a.r2)) || tv('blast') || ai('blast');
     var breatheRaw = anyK(['KeyB', 'KeyC', 'ArrowDown', 'KeyS']) || (a && (a.circle || a.l1)) || tv('breathe') || ai('breathe');
-    var pound = (a && a.tri) || (a && a.ly > 0.6) || tv('breathe') || k('ArrowDown') || k('KeyS') || ai('breathe');
+    var pound = I.v2 ? ((a && (a.tri || a.circle || a.l1)) || tv('breathe') || anyK(['KeyB', 'KeyC']) || ai('breathe'))
+      : ((a && a.tri) || (a && a.ly > 0.6) || tv('breathe') || k('ArrowDown') || k('KeyS') || ai('breathe'));
     var breatheGround = breatheRaw;
     // presses (edges) come from the raw buttons, so a tap is still a tap in Tap mode
     p.jumpP = !!(jump && !prev.jump); p.blastP = !!(blast && !prev.blast); p.breatheP = !!(breatheRaw && !prev.breathe);
@@ -122,7 +125,24 @@
       mx = (rl || runL || clock < (until.l || 0) ? -1 : 0) + (rr || runR || clock < (until.r || 0) ? 1 : 0);
       jump = lat('jump', jump, DUR.jump); blast = lat('blast', blast, DUR.blast); breatheGround = breatheRaw = lat('breathe', breatheRaw, DUR.breathe);
     }
+    /* new controls: hold a direction to walk; keep holding (about half a second), double-tap, push the stick all the
+       way, drag the touch stick far, or hold Shift, and Gus runs. Jump, then jump again in the air, boosts (game.js). */
+    p.run = false;
+    if (I.v2 && !I.tap && !I.stepMode) {
+      var dir = mx > 0.3 ? 1 : mx < -0.3 ? -1 : 0;
+      if (dir && dir === runSt.dir) runSt.t += dt;
+      else {
+        if (!dir && runSt.dir) { runSt.lastDir = runSt.dir; runSt.relT = clock; runSt.dbl = false; }
+        else if (dir) runSt.dbl = dir === runSt.lastDir && clock - runSt.relT < 0.28;
+        runSt.dir = dir; runSt.t = 0;
+      }
+      var full = (a && Math.abs(a.lx) > 0.85 && !a.left && !a.right) || Math.abs(touch.stick || 0) >= 0.99;
+      p.run = !!dir && (runSt.t > 0.55 || runSt.dbl || full || anyK(['ShiftLeft', 'ShiftRight']));
+    }
     p.mx = mx; p.my = Math.max(-1, Math.min(1, my));
+    // a press up or down (keys, d-pad, stick, a touch swipe): steps the Belly Band note
+    var upNow = p.my < -0.5, downNow = p.my > 0.5;
+    p.upP = !!((upNow && !prev.up) || touch.pitch > 0); p.downP = !!((downNow && !prev.down) || touch.pitch < 0); prev.up = upNow; prev.down = downNow; touch.pitch = 0;
     p.aimX = a ? a.lx : p.mx; p.aimY = a ? a.ly : p.my;
     p.jump = !!jump; p.blast = !!blast; p.breathe = !!breatheRaw; p.breatheGround = !!breatheGround;
     // Step mode: the game only moves while an action is going, or for a moment after "wait"
@@ -168,6 +188,10 @@
   I.touch = touch;
   I.touchDown = function (a) { touch[a] = 1; tlatch[a] = 1; last = 'touch'; };
   I.touchUp = function (a) { touch[a] = 0; };
+  /* the new touch layout's drag stick: -1 (left) to 1 (right) */
+  I.touchStick = function (v) { touch.stick = Math.max(-1, Math.min(1, v)); if (v) last = 'touch'; };
+  I.setV2 = function (on) { I.v2 = !!on; };
+  I.touchPitch = function (d) { touch.pitch = d; last = 'touch'; };
   /* hold an action for `secs` of game time (used by GUTS.ai and by tests) */
   I.press = function (name, secs) { aiHold[name] = clock + (secs || 0.4); last = 'ai'; };
   I.setStepSize = function (v, announce) { I.stepSize = v || 'auto'; if (announce) I.sizeChanged = v; };

@@ -65,7 +65,7 @@ function reach(L) {
   return seen;
 }
 
-for (const id of D.ORDER) {
+for (const id of [...D.ORDER, 'gym']) {
   test('stage ' + id + ': the goal is reachable by a conservative player', () => {
     const L = build(id);
     const seen = reach(L);

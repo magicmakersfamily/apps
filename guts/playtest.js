@@ -9,7 +9,7 @@
   'use strict';
   var G = root.GUTS, Game = G.Game, In = G.Input;
   var KEY = 'guts:playtest', LAST = 'guts:playtest:last';
-  var BITS = ['jump', 'blast', 'breathe', 'jumpP', 'blastP', 'breatheP', 'poundP', 'pound', 'breatheGround'];
+  var BITS = ['jump', 'blast', 'breathe', 'jumpP', 'blastP', 'breatheP', 'poundP', 'pound', 'breatheGround', 'run', 'upP', 'downP'];   // add new inputs at the end only
   var on = false;
   try {
     var q = new URLSearchParams(root.location.search).get('playtest');

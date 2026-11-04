@@ -6,7 +6,9 @@
     ["guts/tools/ai-taps.mjs"],
     ["guts/tools/personas.mjs", "--seeds", "1"],
     ["guts/tools/record-check.mjs"],
-    ["guts/tools/replay.mjs", "--tests"]
+    ["guts/tools/replay.mjs", "--tests"],
+    ["guts/tools/gym.mjs"],
+    ["guts/tools/record-check.mjs", "--gym"]
   ],
   "full": [
     ["guts/tools/smoke.mjs", "--browser", "all"],
@@ -21,6 +23,12 @@
     ["guts/tools/record-check.mjs"],
     ["guts/tools/record-check.mjs", "--browser", "firefox"],
     ["guts/tools/record-check.mjs", "--browser", "webkit"],
-    ["guts/tools/replay.mjs", "--tests"]
+    ["guts/tools/replay.mjs", "--tests"],
+    ["guts/tools/gym.mjs"],
+    ["guts/tools/gym.mjs", "--browser", "firefox"],
+    ["guts/tools/gym.mjs", "--browser", "webkit"],
+    ["guts/tools/record-check.mjs", "--gym"],
+    ["guts/tools/record-check.mjs", "--gym", "--browser", "webkit"],
+    ["guts/tools/personas.mjs", "--stage", "gym", "--seeds", "2"]
   ]
 }

@@ -13,6 +13,8 @@ node guts/tools/personas.mjs              # four play styles x 3 seeds; --person
 node guts/tools/replay.mjs <file>|--latest  # replay a real playtest recording (see ../PLAYTEST.md), report with pictures
 node guts/tools/replay.mjs --tests        # replay every saved playtest in guts/tests/playtests/ and check its "expect"
 node guts/tools/record-check.mjs          # records a real-time session with ?playtest=1, saves it, replays it: must be exact
+node guts/tools/gym.mjs                   # the new controls in Gus's Gym: run, boost, notes, Gus's song, edge nudge, Little Guts guard, lap, flight
+node guts/tools/record-check.mjs --gym    # the same exact-replay check with the new controls
 ```
 
 **Recordings** (`guts/playtest.js`, on with `?playtest=1`) keep, per try, the frame times (to 0.1 ms), the inputs the

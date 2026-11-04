@@ -30,7 +30,7 @@ try {
     place(3, 13); var tx0 = g.x; for (var qt = 0; qt < 5; qt++) { step(5, { ArrowRight: true }); step(6); } step(30); out.fiveTaps = Math.round((g.x - tx0) / T * 10) / 10;
     // 3. jump, then jump again in the air: a boost (a note), with pressure
     place(10, 13); st.b.pres = 60; var bl0 = st.stats.blasts, notes0 = st.stats.notes || 0;
-    tap('Space', {}); step(1, { Space: true }); step(14); var vyBefore = g.vy; tap('Space'); step(2);
+    tap('Space', {}); step(13, { Space: true }); step(4); var vyBefore = g.vy; tap('Space'); step(2);
     out.boost = { blasts: st.stats.blasts - bl0, notes: (st.stats.notes || 0) - notes0, liftedFrom: Math.round(vyBefore), vyAfter: Math.round(g.vy) };
     // 4. up and down step the note in the air
     var n0 = g.note; tap('ArrowUp'); var n1 = g.note; tap('ArrowDown'); tap('ArrowDown'); out.notes = [n0, n1, g.note];
@@ -42,7 +42,7 @@ try {
     out.song = { flight: g.flight ? g.flight.notes.slice() : null, got: g.flight ? Object.keys(g.flight.got) : [], bandPoints: (st.stats.band || 0) - band0 };
     step(120);
     // 6. a jump that barely misses a pillar top slides onto it (feet 8 px below the top, moving into it)
-    place(54, 13); g.x = 55 * T + 13 - 4; g.y = 11 * T + 8; g.vx = 120; g.vy = 10; g.grounded = false; step(6, { ArrowRight: true });
+    place(54, 13); g.x = 55 * T + 13 - 4; g.y = 11 * T + 4; g.vx = 120; g.vy = 10; g.grounded = false; step(6, { ArrowRight: true });
     out.nudge = { onTop: g.grounded && Math.abs(g.y - 11 * T) < 1, tileX: Math.floor(g.x / T), y: Math.round(g.y) };
     // 7. Little Guts: mashing jump right after take-off does not boost
     st.mode = 'little'; place(5, 13); st.b.pres = 60; var b1 = st.stats.blasts; tap('Space'); step(2); tap('Space'); step(2); tap('Space'); out.littleMash = st.stats.blasts - b1; st.mode = Game.save.mode;
@@ -78,7 +78,7 @@ try {
   want(r.boost.blasts === 1 && r.boost.notes === 1 && r.boost.vyAfter < r.boost.liftedFrom, 'boost', 'jump then jump again in the air should boost and play one note: ' + JSON.stringify(r.boost));
   want(r.notes[1] === r.notes[0] + 1 && r.notes[2] === r.notes[0] - 1, 'band', 'up and down should step the note: ' + r.notes.join(' -> '));
   want(r.song.got.includes('song') && r.song.bandPoints >= 500, 'band', 'Gus’s song should give the secret bonus: ' + JSON.stringify(r.song));
-  want(r.nudge.onTop, 'nudge', 'a jump 8 px short of a pillar top should step onto it: ' + JSON.stringify(r.nudge));
+  want(r.nudge.onTop, 'nudge', 'a jump 4 px short of a pillar top should step onto it: ' + JSON.stringify(r.nudge));
   want(r.littleMash === 0, 'little', 'in Little Guts, mashing jump right after take-off should not boost (boosted ' + r.littleMash + ' times)');
   want(r.fullBelly.blowouts === 0 && !r.fullBelly.lockT && !r.fullBelly.spin && r.fullBelly.pressure === 100 && r.fullBelly.gasPerBoost <= 3, 'gas', 'a full belly should stay full with no blowout, and a boost should cost little gas: ' + JSON.stringify(r.fullBelly));
   want(r.fly.onCloud && r.fly.flew && r.fly.blowouts === 0, 'fly', 'a tap-when-low pilot should fly the sky trail to the cloud: ' + JSON.stringify(r.fly));

@@ -97,7 +97,7 @@ a { color: var(--accent); }
 .dexdetail h3 { margin: 0; font-size: 22px; }
 .dexdetail .zh { font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif; font-size: 22px; color: #b3432e; }
 .dexdetail ruby rt { font-size: 11px; color: #8a6a3a; font-family: "Fredoka", sans-serif; }
-.field { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 0; border-bottom: 2px dashed #d9cdb4; }
+.field { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; justify-content: space-between; padding: 8px 0; border-bottom: 2px dashed #d9cdb4; }
 .field:last-of-type { border-bottom: 0; }
 .field label, .field .lab { font-weight: 600; }
 .field small { display: block; font-weight: 400; color: #6b5a48; }
@@ -247,7 +247,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
       <div class="panel"><h2>To be continued…</h2>
         <p>You finished the first level of <b>GUTS</b>. Next stop: <b>Eastern Market</b> in Detroit, then Mexico, Japan, Taiwan and Hong Kong, where Grandma’s feast is waiting.</p>
         <p class="sub">This beta only has Morning at Home so far. We would love to know what felt fun and what felt confusing.</p>
-        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.7" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
+        <div class="row"><a class="btn small" id="e-feedback" href="../feedback/?game=guts&amp;v=1.8" style="text-decoration:none">Share your thoughts</a><button class="btn small" id="e-tell">Tell a friend</button></div>
         <div class="row"><button class="btn primary" id="e-again" data-first>Play again</button><button class="btn" id="e-title" data-back>Title</button></div>
         <p class="links"><a href="../">More from the App Shelf</a><a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Buy us a mooncake: Ko-fi</a></p>
         <p class="sub" id="e-status" aria-live="polite"></p>
@@ -298,10 +298,10 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
   <p>Gus is a round little kid with a very expressive belly, and this morning Mimi the cat steals his breakfast bao right in front of him! A short scene plays at the start and end of the level; press any button to skip it. <b>Whatever Gus eats and feels becomes motion.</b> Crunchy greens and fruit make him bouncy. Fizzy, sweet and greasy things, and big feelings, fill his belly with pressure you can blast like a rocket. Breathe to let the pressure out slowly and stay in control. Touch things and see what happens: baskets tip, fruit shakes loose, pinwheels spin.</p>
   <table class="keys">
     <tr><th>Action</th><th>Keyboard</th><th>PlayStation controller</th><th>Touch</th></tr>
-    <tr><td>Move</td><td>Arrow keys or A / D</td><td>Left stick or d-pad</td><td>Arrow buttons</td></tr>
-    <tr><td>Jump</td><td>Space, Z or ↑</td><td>✕ Cross</td><td>Jump</td></tr>
-    <tr><td>Blast (tap to hop, hold to rocket)</td><td>X or Shift</td><td>□ Square, R1 or R2</td><td>Blast</td></tr>
-    <tr><td>Breathe (stand still)</td><td>B, C or ↓</td><td>○ Circle or L1</td><td>Calm</td></tr>
+    <tr><td>Walk (hold) · run (tap twice and hold)</td><td>Arrow keys or A / D · Shift also runs</td><td>Left stick or d-pad · push the stick all the way to run</td><td>Drag on the left half · drag further to run</td></tr>
+    <tr><td>Jump (hold to jump higher)</td><td>Space or Z</td><td>✕ Cross</td><td>Jump</td></tr>
+    <tr><td>Boost: jump again in the air (hold to rocket). Up / Down change the note.</td><td>Space again · ↑ ↓</td><td>✕ again · stick up / down</td><td>Jump again · swipe up / down</td></tr>
+    <tr><td>Calm (breathe out gas; in the air, ground-pound)</td><td>C or B</td><td>○ Circle or L1</td><td>Calm</td></tr>
     <tr><td>Pause</td><td>Esc or P</td><td>Options</td><td>Pause button</td></tr>
   </table>
   <p>Press a button on a plugged-in or Bluetooth PlayStation controller once and the game finds it. In Gut Check mode the stick aims your blast.</p>
@@ -313,7 +313,7 @@ footer.about .linkish { font: inherit; color: var(--accent); background: none; b
 </div>
 
 <footer class="about">
-  <span>Version 1.7 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.7">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.7&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
+  <span>Version 1.8 (beta) · Launched <time datetime="2026-10-26">October 26, 2026</time> · Made for James and friends · <a href="https://magicmakersfamily.github.io/apps/">The App Shelf</a> · <a href="../feedback/?game=guts&amp;v=1.8">Share your thoughts</a> · <a href="../feedback/?game=guts&amp;v=1.8&amp;kind=bug">Report a bug</a> · <button class="linkish" id="tellBtn" type="button">Know someone who might like this? Tell a friend</button> <span id="tellStatus"></span></span>
   <span>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></span>
   <span>These apps don’t collect any information. Saved progress stays in your own browser.</span>
 </footer>

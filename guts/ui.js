@@ -176,7 +176,7 @@
     lineStart();
   }
   function lineStart() {
-    var s = cut.list[cut.i], tok = ++cut.token; cut.ready = false;
+    var s = cut.list[cut.i], tok = ++cut.token; cut.ready = false; cut.lineAt = performance.now();
     Game.override = function (ctx, w, h, t) { A.panel(s.panel, ctx, w, h, t); };
     Game.panelT = 0;
     var text = s.line, canto = s.canto, jyut = s.jyut, veg = Game.save.eaten.broccoli || Game.save.eaten.carrot;
@@ -185,8 +185,9 @@
     if (s.panel === 'call') Au.sfx('ring');
     Voice.speak(text, s.who, function () { if (!cut || tok !== cut.token) return; cut.ready = true; cut.timer = setTimeout(function () { if (cut && tok === cut.token) lineNext(); }, Voice.can() ? 900 : 1200); }, canto);
   }
-  function lineNext() {
-    if (!cut) return; clearTimeout(cut.timer); Voice.stop(); cut.i++;
+  function lineNext(manual) {
+    if (!cut) return; if (manual && cut.lineAt && performance.now() - cut.lineAt < 1400) return;   // a mashing child must hear each line a moment first
+    clearTimeout(cut.timer); Voice.stop(); cut.i++;
     if (cut.i >= cut.list.length) return endScenes();
     lineStart();
   }
@@ -292,9 +293,9 @@
 
   /* ---------------- misc ---------------- */
   var MODES = {
-    little: 'Little Guts: Gus runs by himself. You just jump, blast and breathe. Falling off an edge bounces you back.',
-    standard: 'Standard: move, jump, blast and breathe, all yours.',
-    check: 'Gut Check: aim your blast with the stick, meters on, a tougher belly.'
+    little: 'Little Guts: a little slower, every jump is a full jump, and falling off an edge bounces you back. Gus only moves when you do.',
+    standard: 'Standard: walk, run, jump and boost, all yours.',
+    check: 'Gut Check: aim your boosts with the stick, meters on.'
   };
   function syncMode() {
     var m = Game.save.mode;
@@ -364,7 +365,7 @@
     if (sc === 'play') {
       if (In.pauseP) { show('pause'); }
     } else if (sc === 'cutscene') {
-      if (In.nav.ok || In.nav.back) { lineNext(); }
+      if (In.nav.ok || In.nav.back) { lineNext(true); }
     } else if (sc === 'results' || sc === 'end' || sc === 'title' || sc === 'pause' || sc === 'dex' || sc === 'village' || sc === 'settings') {
       navMenu();
       if (sc === 'pause' && In.pauseP) $('p-resume').click();
@@ -398,7 +399,7 @@
     // skip button for story scenes
     var sk = document.createElement('button'); sk.id = 'b-skip'; sk.className = 'btn small'; sk.textContent = 'Skip'; sk.hidden = true; sk.style.cssText = 'position:absolute;left:12px;top:12px;z-index:7';
     $('view').appendChild(sk); sk.onclick = UI.skipScenes;
-    $('view').addEventListener('pointerdown', function (e) { try { Au.init(); } catch (x) {} if (UI.screen === 'cutscene' && e.target.id !== 'b-skip') lineNext(); });
+    $('view').addEventListener('pointerdown', function (e) { try { Au.init(); } catch (x) {} if (UI.screen === 'cutscene' && e.target.id !== 'b-skip') lineNext(true); });
     document.addEventListener('keydown', function (e) {
       lastInput = performance.now();
       try { Au.init(); } catch (x) {}

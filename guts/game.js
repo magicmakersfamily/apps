@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
   var G = root.GUTS, B = G.Belly, D = G.Data, A = G.Art, Au = G.Audio, In = G.Input;
-  var T = 32, PH = B.PHYS, TAU = Math.PI * 2, RUN = 1.45, SKY = -8 * 32, GAS_TAP = 2.5;   // GAS_TAP: gas per boost with the new controls (classic: up to 7)   // SKY: thin air starts 8 tiles above the level top (new controls)   // RUN: top speed while running (new controls)
+  var T = 32, PH = B.PHYS, TAU = Math.PI * 2, RUN = 1.45, SKY = -8 * 32, GAS_TAP = 2.5, FALL = 1.34;   // GAS_TAP: gas per boost with the new controls (classic: up to 7)   // SKY: thin air starts 8 tiles above the level top (new controls)   // RUN: top speed while running (new controls)
   var cv, cx, dpr = 1, S = 1, VW = 640, VH = 576, W = 640, H = 576;
   var Game = G.Game = { st: null, view: 'none', save: null, hooks: {}, paused: false, override: null, panelT: 0 };
   var KEY = 'guts:1';
@@ -29,7 +29,12 @@
   Game.residents = function () { return Object.keys(Game.save.bugs).map(function (id) { var bi = D.bugInfo(id); return { id: id, name: bi.name, job: bi.job, fam: A.famOf(id) }; }); };
   Game.save = loadSave();
 
-  function say(text, who, o) { if (Game.hooks.say) Game.hooks.say(text, who || 'narrator', o || {}); }
+  /* with the new controls there is no Blast button: spoken lines say what to press now */
+  function newWords(t) {
+    return t.replace(/Tap BLAST!/g, 'Jump, then jump again!').replace(/hold BLAST to rocket over the fridge!/g, 'jump, then jump again and hold to rocket over the fridge!')
+      .replace(/\bBlast over\b/g, 'Jump, then jump again, over').replace(/\bblast over\b/g, 'jump, then jump again, over').replace(/\ba big blast\b/g, 'a big boost').replace(/\ba huge blast\b/g, 'a huge boost').replace(/\bBLAST\b/g, 'boost');
+  }
+  function say(text, who, o) { if (Game.hooks.say) Game.hooks.say(Game.st && Game.st.v2 ? newWords(text) : text, who || 'narrator', o || {}); }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   /* gameplay randomness comes from one seeded stream (reseeded by every Game.begin), so a recorded playtest
      replays exactly; sound and art keep Math.random because they never change what happens */
@@ -107,7 +112,7 @@
     l = e.x - e.w / 2; r = e.x + e.w / 2; t = e.y - e.h; b = e.y;
     tx0 = Math.floor(l / T); tx1 = Math.floor((r - 0.001) / T); ty0 = Math.floor(t / T); ty1 = Math.floor((b - 0.001) / T);
     if (e.nudge && e.vx && !e.grounded) {   // feet just below a ledge's top (up to 12 px) and room above it: step onto it
-      var nx = e.vx > 0 ? tx1 : tx0, fy = ty1;
+      var nx = e.vx > 0 ? Math.floor((r + 0.5) / T) : Math.floor((l - 0.5) / T), fy = ty1;
       if (isSolidCh(L.get(nx, fy)) && b - fy * T <= 12 && e.vy > -120) {
         var room = true; for (var yy = Math.floor((fy * T - e.h) / T); yy < fy; yy++) for (var xx = tx0; xx <= tx1; xx++) if (isSolidCh(L.get(xx, yy))) room = false;
         if (room) { e.y = fy * T; if (e.vy > 0) e.vy = 0; b = e.y; t = e.y - e.h; ty0 = Math.floor(t / T); ty1 = Math.floor((b - 0.001) / T); }
@@ -279,6 +284,7 @@
   /* ---------------- Gus ---------------- */
   function updateGus(dt) {
     var st = Game.st, g = st.g, b = st.b, p = st.moment ? NOIN : In.p1, L = st.L, set = Game.save.set, s = B.stats(b);
+    if (st.v2 && s.gravMul < 1) s.gravMul = 1;   // new controls: a full belly never changes gravity (moon gravity at 85+ gas made every jump 2.6x taller)
     var little = st.mode === 'little' && !st.def.noAuto, check = st.mode === 'check', v2 = st.v2;
     g.airT = g.grounded ? 0 : (g.airT || 0) + dt;
     var locked = g.lockT > 0; if (locked) g.lockT -= dt;
@@ -321,11 +327,11 @@
     g.coyote = g.grounded ? PH.coyote : Math.max(0, g.coyote - dt);
     // new controls: a jump press in the air boosts (a toot hop; keep holding for a rocket), unless Gus is about to
     // land (then it is a remembered jump) or, in Little Guts, still rising fast (mashing jump should not boost)
-    var boostPress = !!(v2 && p.jumpP && !clear && !locked && !g.grounded && g.coyote <= 0 && g.airT > 0.1 &&
-      !(g.vy > 0 && groundBelow(g, 30)) && !(little && g.vy < -200));
+    var boostPress = !!(v2 && p.jumpP && !clear && !locked && !g.grounded && g.coyote <= 0 && g.airT > 0.06 &&
+      !(g.vy > 0 && groundBelow(g, Math.max(30, g.vy * PH.jumpBuffer * 1.2))) && !(little && g.vy < -200));
     if (boostPress) g.boostHeld = true;
     if (g.boostHeld && (!p.jump || g.grounded)) g.boostHeld = false;
-    g.jbuf = (p.jumpP && !clear && !boostPress) ? PH.jumpBuffer : Math.max(0, g.jbuf - dt);
+    g.jbuf = (p.jumpP && !clear) ? PH.jumpBuffer : Math.max(0, g.jbuf - dt);   // every press is remembered, a boost press too (it still jumps if Gus lands within the buffer)
     if (g.jbuf > 0 && g.coyote > 0 && !locked) {
       g.vy = -s.jumpV * (s.heavy ? 0.88 : 1); g.coyote = 0; g.jbuf = 0; g.grounded = false; g.sx = 0.8; g.sy = 1.25; st.stats.jumps++;
       Au.sfx('jump'); for (var d = 0; d < 6; d++) part('dust', g.x + rnd(-8, 8), g.y, rnd(-60, 60), rnd(-50, -10), 0.4, rnd(3, 6), 'rgba(235,225,205,.8)', 80);
@@ -381,7 +387,8 @@
     // gravity
     var up = g.vy < 0, gr;
     if (little && p.jumpP) g.jumpHold = 0.32; if (g.jumpHold > 0) g.jumpHold -= dt;      // Little Guts: any tap is a full jump
-    if (up) gr = (p.jump || g.jumpHold > 0 || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55; else gr = PH.G;
+    var GF = v2 ? FALL : 1;   // new controls: a snappier fall (Mario-like) so short hops stay short
+    if (up) gr = (p.jump || g.jumpHold > 0 || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55 * GF; else gr = PH.G * GF;
     if (!up || g.grounded) g.boost = false;
     gr *= s.gravMul;
     if (v2 && !g.grounded && p.jump && Math.abs(g.vy) < 70 && !g.blasting) gr *= 0.72;   // a slight hang at the top of a held jump
@@ -523,7 +530,7 @@
         g.x = (st.L.start.x + 0.5) * T; g.y = (st.L.start.y + 1) * T; g.vx = g.vy = 0; st.respawn = { x: g.x, y: g.y }; updateCam(0, true);
         return;
       }
-      if (Math.abs(gcx - go.x) < 40 && Math.abs(g.y - go.y) < 70) {
+      if ((go.type === 'gate' ? gcx > go.x - 40 : Math.abs(gcx - go.x) < 40) && Math.abs(g.y - go.y) < 70) {
         if (go.type === 'gate' && !st.lan.has && st.lanItem && !st.lanItem.taken) { st.lanItem.taken = true; st.lan.has = true; say('Oops, Gus nearly forgot Popo’s lantern! A breeze brings it over.', 'narrator', {}); Au.sfx('bug'); }
         if (go.type === 'gate' && st.cat && !st.baoEaten && !st.moment) { st.cat.dropped = false; startMoment('reunion', { skipAfter: 2.4 }); return; }
         if (!st.moment) finish();

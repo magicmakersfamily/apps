@@ -1,5 +1,14 @@
 # GUTS: Around the World in 80 Bites: handoff
 
+## 1.8 (beta, 2026-11-04): fixes from the 1.7 team playtest (guts-B11, `TEAM-REPORT-1.7.md`)
+
+Gate: anything right of the gate counts (flying past it no longer pins Gus). Gravity stays constant at a full belly with the
+new controls, and the fall is 1.34x snappier (`FALL`). Early jump presses are buffered for the real landing speed and a
+quick second press (0.06 s) still boosts. Only a real tap (under 0.25 s) arms the run, so a walker's brief pause never runs.
+Mashing can't skip a story line in its first 1.4 s. Spoken lines use new-controls words (`newWords`), the "How to play" table,
+the mode descriptions and the touch glyphs describe the new controls, Settings rows wrap, ledge step-up works flush against
+a wall. `tools/regress.mjs` guards these in Chrome, Firefox and WebKit.
+
 ## 1.7 (beta, 2026-11-03): the family's first reaction to 1.6 (guts-B10)
 
 The family played 1.6 on the first level, where the old controls still ran: Little Guts auto-ran ("walks way too much

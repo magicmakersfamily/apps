@@ -132,8 +132,8 @@
       var dir = mx > 0.3 ? 1 : mx < -0.3 ? -1 : 0;
       if (dir && dir === runSt.dir) runSt.t += dt;
       else {
-        if (!dir && runSt.dir) { runSt.lastDir = runSt.dir; runSt.relT = clock; runSt.dbl = false; }
-        else if (dir) runSt.dbl = dir === runSt.lastDir && clock - runSt.relT < 0.3;   // the second press of a double-tap
+        if (!dir && runSt.dir) { runSt.lastDir = runSt.dir; runSt.relT = clock; runSt.dbl = false; runSt.lastHold = runSt.t; }
+        else if (dir) runSt.dbl = dir === runSt.lastDir && clock - runSt.relT < 0.3 && (runSt.lastHold || 0) < 0.25;   // only a real tap counts: walkers who pause briefly don't run   // the second press of a double-tap
         runSt.dir = dir; runSt.t = 0;
       }
       var full = (a && Math.abs(a.lx) > 0.85 && !a.left && !a.right) || Math.abs(touch.stick || 0) >= 0.99;

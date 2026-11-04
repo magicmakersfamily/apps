@@ -4,7 +4,7 @@
   'use strict';
   var G = root.GUTS = root.GUTS || {};
   var keys = {}, latch = {}, edge = {}, touch = { left: 0, right: 0, jump: 0, blast: 0, breathe: 0, down: 0, wait: 0, stick: 0, pitch: 0 }, tlatch = {};
-  var runSt = { dir: 0, t: 0, lastDir: 0, relT: -9, dbl: false };   // new controls: hold to walk, keep holding (or double-tap) to run
+  var runSt = { dir: 0, t: 0, lastDir: 0, relT: -9, dbl: false };   // new controls: hold to walk; tap, then tap again and hold, to run
   var clock = 0, until = {}, tprev = {}, aiHold = {}, advUntil = 0;
   var DUR = { move: 0.45, run: 0.6, hop: 0.36, jump: 0.32, blast: 0.85, breathe: 2.4 };   // how long one tap keeps going in Tap / Step mode
   var HOP = { small: 1, medium: 3, large: 5 };   // how many tiles a jump-left / jump-right travels
@@ -125,19 +125,19 @@
       mx = (rl || runL || clock < (until.l || 0) ? -1 : 0) + (rr || runR || clock < (until.r || 0) ? 1 : 0);
       jump = lat('jump', jump, DUR.jump); blast = lat('blast', blast, DUR.blast); breatheGround = breatheRaw = lat('breathe', breatheRaw, DUR.breathe);
     }
-    /* new controls: hold a direction to walk; keep holding (about half a second), double-tap, push the stick all the
-       way, drag the touch stick far, or hold Shift, and Gus runs. Jump, then jump again in the air, boosts (game.js). */
+    /* new controls: hold a direction to walk; tap, then tap again and keep holding, to run (also: push the stick all the
+       way, drag the touch stick far, or hold Shift). Jump, then jump again in the air, boosts (game.js). */
     p.run = false;
     if (I.v2 && !I.tap && !I.stepMode) {
       var dir = mx > 0.3 ? 1 : mx < -0.3 ? -1 : 0;
       if (dir && dir === runSt.dir) runSt.t += dt;
       else {
         if (!dir && runSt.dir) { runSt.lastDir = runSt.dir; runSt.relT = clock; runSt.dbl = false; }
-        else if (dir) runSt.dbl = dir === runSt.lastDir && clock - runSt.relT < 0.28;
+        else if (dir) runSt.dbl = dir === runSt.lastDir && clock - runSt.relT < 0.3;   // the second press of a double-tap
         runSt.dir = dir; runSt.t = 0;
       }
       var full = (a && Math.abs(a.lx) > 0.85 && !a.left && !a.right) || Math.abs(touch.stick || 0) >= 0.99;
-      p.run = !!dir && (runSt.t > 0.55 || runSt.dbl || full || anyK(['ShiftLeft', 'ShiftRight']));
+      p.run = !!dir && (runSt.dbl || full || anyK(['ShiftLeft', 'ShiftRight']));   // holding alone only walks; game.js builds a run up gradually, so quick taps never run off
     }
     p.mx = mx; p.my = Math.max(-1, Math.min(1, my));
     // a press up or down (keys, d-pad, stick, a touch swipe): steps the Belly Band note

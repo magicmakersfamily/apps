@@ -22,11 +22,12 @@ try {
     function tap(k, o) { var h = Object.assign({}, o || {}); h[k] = true; step(1, h); step(1, o); }
     function place(tx, ty) { st = Game.st; g = st.g; g.x = (tx + 0.5) * T; g.y = (ty + 1) * T; g.vx = g.vy = 0; step(10); }
     var speed = G.Belly.stats(st.b).speed;
-    // 1. hold right: walk first, then a run
-    place(3, 13); step(12, { ArrowRight: true }); out.walkVx = Math.round(g.vx);
-    step(60, { ArrowRight: true }); out.runVx = Math.round(g.vx); out.speed = Math.round(speed);
-    // 2. double-tap runs at once
-    place(3, 13); step(3, { ArrowRight: true }); step(3); step(10, { ArrowRight: true }); out.doubleTapVx = Math.round(g.vx);
+    // 1. holding right only walks, however long
+    place(3, 13); step(40, { ArrowRight: true }); out.walkVx = Math.round(g.vx); out.speed = Math.round(speed);
+    // 2. tap, then tap again and hold: a run that builds up (Mario-style)
+    place(3, 13); step(4, { ArrowRight: true }); step(4); step(8, { ArrowRight: true }); out.runStartVx = Math.round(g.vx); step(52, { ArrowRight: true }); out.runVx = Math.round(g.vx);
+    // 2b. quick taps never run off: five taps move Gus only a little
+    place(3, 13); var tx0 = g.x; for (var qt = 0; qt < 5; qt++) { step(5, { ArrowRight: true }); step(6); } step(30); out.fiveTaps = Math.round((g.x - tx0) / T * 10) / 10;
     // 3. jump, then jump again in the air: a boost (a note), with pressure
     place(10, 13); st.b.pres = 60; var bl0 = st.stats.blasts, notes0 = st.stats.notes || 0;
     tap('Space', {}); step(1, { Space: true }); step(14); var vyBefore = g.vy; tap('Space'); step(2);
@@ -48,10 +49,15 @@ try {
     step(90);
     // 8. the finish arch times a lap and starts again
     place(100, 13); for (var lf = 0; lf < 60 && !st.laps.length; lf++) step(1, { ArrowRight: true }); out.lap = { laps: st.laps.slice(), backAtStart: Math.abs(g.x / T - (st.L.start.x + 0.5)) < 1 };
+    // 8b. a full belly never explodes and Gus keeps his gas: it stays at 100; a full tank gives about 40 boosts
+    place(25, 13); st.b.pres = 130; var bo0 = st.stats.blowouts; step(3);
+    out.fullBelly = { blowouts: st.stats.blowouts - bo0, lockT: Math.round(g.lockT * 100) / 100, spin: g.spinV, pressure: Math.round(st.b.pres) };
+    var gas0 = st.b.pres; tap('Space'); step(14, { Space: true }); step(4); tap('Space'); out.fullBelly.gasPerBoost = Math.round((gas0 - st.b.pres) * 10) / 10;
+    step(60);
     // 9. let the boy fly: from the fizzy fountain, a pilot that taps a boost only when below the next can flies the
     //    sky trail and lands on the cloud; the flying song plays on the way
     st.foods.forEach(function (fd) { if (fd.respawn) { fd.taken = false; fd.timer = 0; } });   // earlier checks may have eaten the fizz
-    place(36, 13); g.lockT = 0; g.spinV = 0; st.b.pres = 30; step(40, { ArrowRight: true }); step(13, { ArrowRight: true, Space: true });   // start before the fountain: settling at 40 would drink it
+    place(34, 13); g.lockT = 0; g.spinV = 0; st.b.pres = 30; step(4, { ArrowRight: true }); step(4); step(52, { ArrowRight: true }); step(13, { ArrowRight: true, Space: true });   // tap, tap and hold to run, then jump   // start before the fountain: settling at 40 would drink it
     var cans = st.foods.filter(function (fd) { return fd.respawn && fd.x > 43 * T && fd.y < 9 * T; }), tap = 0, flew = false, song = null, peak = 0, blow0 = st.stats.blowouts, ff;
     function target() { var nx = cans.filter(function (fd) { return fd.x > g.x + 8; })[0]; return nx ? Math.floor(nx.y / T) + 0.6 : 2.2; }
     for (ff = 0; ff < 60 * 12; ff++) {
@@ -66,14 +72,15 @@ try {
   })()`);
   Object.assign(m, r);
   const want = (ok, where, text) => { if (!ok) failures.push({ type: 'input', where, text }); };
-  want(r.walkVx > 0 && r.walkVx <= r.speed * 1.05, 'run', `a short hold should walk (vx ${r.walkVx}, walk speed ${r.speed})`);
-  want(r.runVx > r.speed * 1.3, 'run', `holding right for a second should run (vx ${r.runVx}, walk speed ${r.speed})`);
-  want(r.doubleTapVx > r.speed * 1.05, 'run', `a double-tap should start a run at once (vx ${r.doubleTapVx})`);
+  want(r.walkVx > r.speed * 0.9 && r.walkVx <= r.speed * 1.05, 'run', `holding right should walk, not run (vx ${r.walkVx}, walk speed ${r.speed})`);
+  want(r.runVx > r.speed * 1.3 && r.runStartVx < r.runVx, 'run', `tap, tap and hold should build up to a run (vx ${r.runStartVx} then ${r.runVx}, walk speed ${r.speed})`);
+  want(r.fiveTaps > 0.3 && r.fiveTaps < 4, 'run', `five quick taps should move Gus a little (${r.fiveTaps} tiles)`);
   want(r.boost.blasts === 1 && r.boost.notes === 1 && r.boost.vyAfter < r.boost.liftedFrom, 'boost', 'jump then jump again in the air should boost and play one note: ' + JSON.stringify(r.boost));
   want(r.notes[1] === r.notes[0] + 1 && r.notes[2] === r.notes[0] - 1, 'band', 'up and down should step the note: ' + r.notes.join(' -> '));
   want(r.song.got.includes('song') && r.song.bandPoints >= 500, 'band', 'Gus’s song should give the secret bonus: ' + JSON.stringify(r.song));
   want(r.nudge.onTop, 'nudge', 'a jump 8 px short of a pillar top should step onto it: ' + JSON.stringify(r.nudge));
   want(r.littleMash === 0, 'little', 'in Little Guts, mashing jump right after take-off should not boost (boosted ' + r.littleMash + ' times)');
+  want(r.fullBelly.blowouts === 0 && !r.fullBelly.lockT && !r.fullBelly.spin && r.fullBelly.pressure === 100 && r.fullBelly.gasPerBoost <= 3, 'gas', 'a full belly should stay full with no blowout, and a boost should cost little gas: ' + JSON.stringify(r.fullBelly));
   want(r.fly.onCloud && r.fly.flew && r.fly.blowouts === 0, 'fly', 'a tap-when-low pilot should fly the sky trail to the cloud: ' + JSON.stringify(r.fly));
   if (r.fly.song !== 'sky') m.flySongNote = 'flying song did not report (audio may be off in this browser): ' + r.fly.song;
   want(r.lap.laps.length === 1 && r.lap.backAtStart, 'lap', 'the finish arch should time a lap and go back to the start: ' + JSON.stringify(r.lap));
@@ -87,5 +94,5 @@ failures.push(...p.errors.map((e) => ({ type: 'error', where: e.kind, text: e.te
 await p.close();
 record({ game: 'guts', scenario: 'gym', browser, ...m, failures });
 console.log(JSON.stringify(m));
-console.log('GYM', failures.length ? 'FAILED: ' + failures.map((f) => f.text).join('; ') : 'OK: run, boost, notes, Gus’s song, edge nudge, Little Guts guard, lap, flight to the cloud');
+console.log('GYM', failures.length ? 'FAILED: ' + failures.map((f) => f.text).join('; ') : 'OK: walk, tap-tap run, boost, notes, Gus’s song, edge nudge, Little Guts guard, lap, full belly keeps its gas, flight to the cloud');
 process.exitCode = failures.length ? 1 : 0;

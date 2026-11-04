@@ -1,6 +1,25 @@
 # GUTS: Around the World in 80 Bites: handoff
 
-## 1.6 (beta, 2026-11-03): phase A of GUTS 2.0, "The Toy" (guts-F22; vision in `VISION.md`)
+## 1.7 (beta, 2026-11-03): the family's first reaction to 1.6 (guts-B10)
+
+The family played 1.6 on the first level, where the old controls still ran: Little Guts auto-ran ("walks way too much
+with a single tap"), X blasts and blowouts looked like explosions, and the new controls they had asked for only lived in
+the Gym. Asked for: Mario-like controls everywhere; one press jumps, a second press in the air boosts; hold left/right
+walks, tap again (and hold) runs; no explosions; gas that accumulates and is never lost, to fly around more.
+- The new controls are the **default everywhere** (Settings -> Controls -> Classic, or `?controls=classic`, brings the
+  old ones back; a recording stores which it used in `opts.v2`, and recordings from before 1.7 replay as classic).
+- **No auto-run** with the new controls (Little Guts is only a bit slower, 0.85x, with full jumps and bounce-back falls).
+- **Run = tap, then tap again and hold** (within 0.3 s), or a full stick push / far drag / Shift; holding alone only
+  walks. The run builds up over 0.8 s (`g.runRamp`), so quick taps never run off (five taps = about 2 tiles).
+- **Gas:** a full belly stays full (`b.keepGas`: no blowout, no big toot), falls never take gas away, a boost costs 2.5
+  (`GAS_TAP`, about 40 boosts per full belly; a soda is about 9) with a full lift, the rocket drains at 35 %. The red
+  "about to burst" glow, the foghorn warnings and the music's tuba swell are classic-only.
+- Boosts draw soft pastel puffs instead of orange sparks and splats. The apex hang is gentler (0.72x gravity under
+  70 px/s), because the stronger one made the fridge's narrow shelves overshoot (`route.mjs` caught it).
+- Tap / Step mode come only from the address with the new controls (a remembered Tap mode made one tap walk 3 tiles),
+  and the AI testers' arrow buttons stay when they are on.
+
+, "The Toy" (guts-F22; vision in `VISION.md`)
 
 - **New controls** (opt-in: the Gym, Settings -> Controls -> New, or `?controls=2`; passed to `Game.begin` as
   `opts.v2` so recordings replay the same; the live level is unchanged with Classic): one Jump button (a second press

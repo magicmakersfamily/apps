@@ -30,6 +30,7 @@ function replayAttempt(a) {
   var ev = {}; a.events.forEach(function (e) { (ev[e[0]] = ev[e[0]] || []).push(e); });
   var kind0 = a.events.filter(function (e) { return e[1] === 'kind'; })[0]; In.kind = kind0 ? kind0[2] : 'kb';
   var opts = {}; for (var k in a.opts || {}) opts[k] = a.opts[k]; opts.seed = a.seed;
+  if (opts.v2 == null) opts.v2 = a.stage === 'gym';   // recordings from before 1.7 never stored it: they used the classic controls (except the Gym)
   (P ? P.begin : Game.begin).call(Game, a.stage, opts);
   if (window.__guts) window.__guts.show('play');
   Game.paused = true;   // only this loop moves the game

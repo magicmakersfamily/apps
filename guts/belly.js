@@ -163,8 +163,8 @@
     b.hungerT += dt;
     if (b.hungerT >= 35) { b.hungerT = 0; emit(b, 'hungry'); }
     if (b.pres >= 100) {
-      b.pres = 18; b.butterflies = 0; b.blowouts++;
-      emit(b, 'blowout');
+      if (b.keepGas) b.pres = 100;   // new controls: a full belly just stays full (no blowout), and Gus keeps his gas
+      else { b.pres = 18; b.butterflies = 0; b.blowouts++; emit(b, 'blowout'); }
     }
     var s = stateOf(b);
     if (s !== b.state) { var prev = b.state; b.state = s; emit(b, 'state', { from: prev, to: s }); }

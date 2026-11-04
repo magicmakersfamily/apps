@@ -64,6 +64,7 @@
       finish('restart');
       var saveCopy = JSON.parse(JSON.stringify(Game.save)), o = {}; for (var k in (opts || {})) o[k] = opts[k];
       origBegin.call(Game, id, opts);
+      o.v2 = !!Game.st.v2;   // which controls this try used, so the replay uses the same
       var vs = Game.viewSize();
       cur = { stage: id, opts: o, seed: Game.st.seed, save: saveCopy, view: { W: vs.W, H: vs.H, innerW: root.innerWidth, innerH: root.innerHeight },
         startedAt: new Date().toISOString(), n: 0, dt: [], input: [], checks: [], events: [] };

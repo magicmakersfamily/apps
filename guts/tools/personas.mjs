@@ -67,8 +67,8 @@ function play(cfg) {
       if (m.burst > 0) { m.burst -= dt; act.jump = (Math.floor(st.t * between(5, 9)) % 2) === 0; }
       else act.jump = held('j', chance(0.4), between(0.05, 0.3));
       act.blast = held('b', chance(0.35), rand() < 0.3 ? between(0.5, 1.5) : 0.1);
-      act.left = held('l', chance(0.12), between(0.3, 1.2));                // Little Guts runs by itself; left walks back
-      if (cfg.mode !== 'little' && !act.left) act.right = true;             // other modes: he holds right like any kid
+      act.left = held('l', chance(0.12), between(0.3, 1.2));                // now and then he walks back
+      if (!act.left) act.right = true;                                      // he holds right like any kid (Gus never runs by himself now)
       act.breathe = held('br', chance(0.05), between(0.5, 2));
       return act;
     },

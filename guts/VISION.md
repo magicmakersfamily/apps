@@ -41,7 +41,10 @@ are both valid ways to play, and kids learn self-regulation by feel, not by bein
 
 - One **Jump** button: press to jump (hold for higher); a second press in the air **boosts** (hold for a rocket).
 - One **Calm** button: hold to breathe.
-- **Hold to walk**, building smoothly into a run; double-tap or a full stick push runs at once.
+- **Hold to walk; tap, then tap again and hold, to run** (the speed builds up Mario-style, so quick taps never run off);
+  a full stick push, dragging further on touch, or Shift also run. Gus never moves by himself (no auto-run).
+- No explosions, and gas is never lost: a full belly just stays full, each boost costs a little (about 40 per full belly),
+  and only boosting or breathing on purpose lets gas out.
 - Forgiving underneath: a moment of grace after running off a ledge, early presses remembered just before landing,
   a slight hang at the top of a jump, and edge nudging (a jump that barely misses a ledge slides onto it).
 - The same feel on a controller (stick, ✕ jump, ○ calm), a keyboard (arrows, Space, C) and an iPad (drag anywhere on

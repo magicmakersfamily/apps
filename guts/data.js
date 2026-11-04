@@ -50,7 +50,7 @@
     L.start = { x: 3, y: 13 };
     // 1. a long runway: hold to walk, keep holding to run
     L.prompt(2, 'move', 'Hold the arrow to walk.');
-    L.prompt(10, 'run', 'Keep holding and Gus runs!');
+    L.prompt(10, 'run', 'Tap twice and hold to run!');
     L.food(14, 13, 'banana');
     // 2. a crate: jump, and hold the button for a higher jump
     L.box(22, 12, 2, 2, 'B');

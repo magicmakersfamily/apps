@@ -201,7 +201,7 @@
   function startLevel(id) {
     returnTo = 'title'; if (typeof id === 'string') stageNow = id;
     Voice.stop(); UI.clearCaption();
-    Game.begin(stageNow, { v2: Q.controls === '2' }); show('play');   // ?controls=2 tries the new controls (passed in, so recordings replay the same)
+    Game.begin(stageNow, Q.controls === 'classic' ? { v2: false } : {}); show('play');   // ?controls=classic tries the old controls
     Au.playSong(D.STAGES[stageNow].music);
   }
   function playFromTitle() {
@@ -263,7 +263,7 @@
     ['voice', 'meters', 'shake', 'flash', 'cb', 'tap', 'step', 'buttons', 'readout'].forEach(function (k) { $('set-' + k).checked = !!s[k]; });
     Array.prototype.forEach.call($('gross').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === s.gross)); });
     Array.prototype.forEach.call($('speed').children, function (b) { b.setAttribute('aria-pressed', String(+b.dataset.s === s.speed)); });
-    Array.prototype.forEach.call($('controls').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === (s.controls || 'classic'))); });
+    Array.prototype.forEach.call($('controls').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === (s.controls === 'classic' ? 'classic' : 'new'))); });
     Array.prototype.forEach.call($('viewsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === (s.view || 'normal'))); });
     Array.prototype.forEach.call($('stepsize').children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.z === (s.stepsize || 'auto'))); });
     $('set-erase').textContent = 'Erase saved game';
@@ -273,7 +273,10 @@
   var Q = (function () { var o = {}; try { new URLSearchParams(location.search).forEach(function (v, k) { o[k] = v; }); } catch (e) {} return o; })();
   function flag(k) { return !!(Q.ai === '1' || Q[k] === '1' || Game.save.set[k]); }
   function applyAccess() {
-    In.setTap(flag('tap'), flag('step')); In.setStepSize(Game.save.set.stepsize || 'auto');
+    // with the new controls, Tap and Step mode only come from the address (?ai=1, ?tap=1, ?step=1): a remembered
+    // Tap mode made one tap walk three tiles
+    var keepTS = !In.v2 || Q.ai === '1';
+    In.setTap(keepTS ? flag('tap') : Q.tap === '1', keepTS ? flag('step') : Q.step === '1'); In.setStepSize(Game.save.set.stepsize || 'auto');
     var stepOn = flag('step') && UI.screen === 'play';
     $('stepbadge').hidden = !stepOn; if (stepOn && !stepBadgeSeen) { stepBadgeSeen = true; stepBadgeT = 8; }
     $('tb-wait').hidden = !flag('step');
@@ -281,7 +284,7 @@
     var tv = $('textview'); tv.hidden = !flag('readout');
     var on = (touchDevice || flag('buttons') || flag('step') || flag('tap')) && UI.screen === 'play';
     $('touch').classList.toggle('on', on);
-    $('touch').classList.toggle('v2', !!In.v2);
+    $('touch').classList.toggle('v2', !!In.v2 && !In.tap && !In.stepMode);   // AI testers and switch players (Tap / Step mode) keep the arrow buttons
   }
   var stepBadgeSeen = false, stepBadgeT = 0, lastInput = 0;
   UI.applyAccess = applyAccess;

@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
   var G = root.GUTS, B = G.Belly, D = G.Data, A = G.Art, Au = G.Audio, In = G.Input;
-  var T = 32, PH = B.PHYS, TAU = Math.PI * 2, RUN = 1.45, SKY = -8 * 32;   // SKY: thin air starts 8 tiles above the level top (new controls)   // RUN: top speed while running (new controls)
+  var T = 32, PH = B.PHYS, TAU = Math.PI * 2, RUN = 1.45, SKY = -8 * 32, GAS_TAP = 2.5;   // GAS_TAP: gas per boost with the new controls (classic: up to 7)   // SKY: thin air starts 8 tiles above the level top (new controls)   // RUN: top speed while running (new controls)
   var cv, cx, dpr = 1, S = 1, VW = 640, VH = 576, W = 640, H = 576;
   var Game = G.Game = { st: null, view: 'none', save: null, hooks: {}, paused: false, override: null, panelT: 0 };
   var KEY = 'guts:1';
@@ -66,9 +66,10 @@
       lan: { has: false, ang: 0, vel: 0, tears: 0 }, cam: { x: 0, y: 0 }, shake: 0, flash: 0, crowd: { cheer: 0, chant: 0, scatter: 0, tap: 0 },
       noteT: 0, ladT: 0, msgT: 0, restoredX: 0, lanItem: null, gate: { open: 0, nag: 0 }, goal: null, hungryT: 0, lastBlastFx: 0,
       // the new controls (VISION.md): the Gym, Settings -> Controls, or ?controls=2 (passed in as opts.v2 so a recording replays the same)
-      v2: !!(def.v2 || (opts && opts.v2) || sv.set.controls === 'new'), lapT: 0, laps: []
+      // the new controls are the default; Settings -> Controls -> Classic brings the old ones back. A recording passes its own choice in opts.v2
+      v2: opts && opts.v2 != null ? !!opts.v2 : !!(def.v2 || sv.set.controls !== 'classic'), lapT: 0, laps: []
     };
-    In.setV2(st.v2);
+    In.setV2(st.v2); st.b.keepGas = st.v2;
     st.g = { x: (L.start.x + 0.5) * T, y: (L.start.y + 1) * T, vx: 0, vy: 0, w: 26, h: 46, face: 1, grounded: false, coyote: 0, jbuf: 0, sx: 1, sy: 1, run: 0,
       blastT: 0, blastTotal: 0, blasting: false, blowDuring: false, pounding: false, lockT: 0, relief: 0, spin: 0, spinV: 0, slippery: false, breathing: false, safeX: (L.start.x + 0.5) * T, safeY: (L.start.y + 1) * T, hurtT: 0, scared: 0, chomp: 0, prevVx: 0 };
     st.respawn = { x: st.g.x, y: st.g.y };
@@ -190,6 +191,7 @@
   }
 
   /* ---------------- belly events ---------------- */
+  var PUFF = ['rgba(214,246,200,.85)', 'rgba(255,255,255,.9)', 'rgba(226,236,255,.85)'];
   function blowout() {
     var st = Game.st, g = st.g, set = Game.save.set;
     st.stats.blowouts++; g.blowDuring = true;
@@ -282,7 +284,7 @@
     var locked = g.lockT > 0; if (locked) g.lockT -= dt;
     var clear = st.status !== 'play';
     var wantX = clear ? 0 : p.mx;
-    if (little && !clear) {
+    if (little && !clear && !v2) {   // classic Little Guts auto-runs; the new controls never move Gus by themselves (Mario-style)
       wantX = (p.breatheGround && g.grounded) ? 0 : (p.mx < -0.3 ? -1 : 1);   // auto-runs forward; steer left to go back and try again
       // a safety rail: Little Guts stops at the edge of a drop of 2 or more tiles, so you choose when to jump
       if (g.grounded && wantX) { var ex = Math.floor((g.x + 22) / T), fr = Math.round(g.y / T), has = false; for (var er = fr; er <= fr + 1; er++) { var ec = L.get(ex, er); if (D.SOLID.indexOf(ec) >= 0 || ec === '=') { has = true; break; } } if (!has) wantX = 0; }
@@ -303,7 +305,10 @@
     g.slippery = g.grounded && g.surface === '~';
     var running = v2 && p.run && Math.abs(wantX) > 0.3;
     if (running && g.grounded) st.stats.runT = (st.stats.runT || 0) + dt;
-    var target = wantX * s.speed * (running ? RUN : 1) * (little ? (g.grounded ? 0.8 : 0.5) : 1), acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
+    // Mario-style: holding on, Gus builds up from a walk to a run over about 0.8 s, and eases back when you let go
+    g.runRamp = running ? Math.min(1, (g.runRamp || 0) + dt / 0.8) : Math.max(0, (g.runRamp || 0) - dt * 3);
+    var speedMul = v2 ? (1 + (RUN - 1) * g.runRamp) * (little ? 0.85 : 1) : (little ? (g.grounded ? 0.8 : 0.5) : 1);
+    var target = wantX * s.speed * speedMul, acc = g.grounded ? (g.slippery ? 240 : PH.groundAccel) : PH.airAccel * s.air;
     if (Math.abs(wantX) > 0.05) {
       var step = acc * dt, dv = target - g.vx; g.vx += clamp(dv, -step, step);
       g.face = wantX > 0 ? 1 : -1;
@@ -342,12 +347,15 @@
     var holdBlast = (p.blast || g.boostHeld) && !clear && !locked;
     if (blastP && !clear && !locked) {
       g.blastT = 0; g.blastTotal = 0; g.blowDuring = false;
-      if (b.pres >= 4) {
-        var spent = Math.min(7, b.pres), v = b.vit / 100; b.pres -= spent;
-        g.vy = Math.min(g.vy, -(380 + 120 * v) * spent / 7); g.grounded = false; g.coyote = 0; st.stats.blasts++;
+      if (b.pres >= (v2 ? GAS_TAP : 4)) {   // new controls: a boost costs a little gas (GAS_TAP) and always gives a full lift
+        var spent = v2 ? GAS_TAP : Math.min(7, b.pres), v = b.vit / 100; b.pres -= spent;
+        g.vy = Math.min(g.vy, -(380 + 120 * v) * (v2 ? 1 : spent / 7)); g.grounded = false; g.coyote = 0; st.stats.blasts++;
         if (boostPress) bandNote(st, g, true); else Au.sfx('toot', { pitch: rnd(0.9, 1.15) });
+        if (v2) { for (var pz = 0; pz < 5; pz++) part('cloud', g.x - g.face * 6 + rnd(-6, 6), g.y - 4, rnd(-60, 60), rnd(60, 140), 0.7, rnd(9, 15), PUFF[pz % 3], -20); }   // soft toot puffs, never sparks
+        else {
         for (var i = 0; i < 8; i++) part('ex', g.x + rnd(-5, 5), g.y - 4, rnd(-70, 70), rnd(120, 280), 0.5, rnd(4, 8), '#ffb347', 500);
         for (var j = 0; j < 3; j++) part('cloud', g.x - g.face * 8, g.y - 10, rnd(-50, 50), rnd(20, 70), 0.6, rnd(8, 13), grossCol(j), 40);
+        }
       } else { if (boostPress) bandNote(st, g, false); else Au.sfx('puff'); for (var k = 0; k < 4; k++) part('cloud', g.x - g.face * 10, g.y - 14, rnd(-20, 20), rnd(-10, 20), 0.4, rnd(4, 7), 'rgba(220,210,190,.8)', 30); }
     }
     if (holdBlast) {
@@ -359,10 +367,13 @@
         g.vx += tx * s.thrust * dt * 0.7; g.vy += ty * s.thrust * dt;
         if (g.vy < -s.maxRise) g.vy = -s.maxRise;
         g.vx = clamp(g.vx, -s.speed * 1.7, s.speed * 1.7);
-        b.pres = Math.max(0, b.pres - s.drain * dt); g.blastTotal += dt; g.grounded = false; g.coyote = 0;
+        b.pres = Math.max(0, b.pres - s.drain * dt * (v2 ? 0.35 : 1)); g.blastTotal += dt; g.grounded = false; g.coyote = 0;
+        if (v2) { if (rand() < 0.6) part('cloud', g.x - tx * 8 + rnd(-5, 5), g.y, rnd(-30, 30), rnd(60, 150), 0.6, rnd(8, 14), PUFF[Math.floor(rand() * 3)], -20); }   // a soft puff trail
+        else {
         for (var e2 = 0; e2 < 2; e2++) part(e2 ? 'ex' : 'splat', g.x - tx * 6 + rnd(-6, 6), g.y - 2, -tx * rnd(80, 200) + rnd(-50, 50), rnd(180, 420), rnd(0.3, 0.6), rnd(4, 8), e2 ? '#ffd24a' : grossCol(e2), 700);
         if (rand() < 0.5) part('cloud', g.x - tx * 8, g.y, rnd(-30, 30), rnd(40, 120), 0.55, rnd(9, 15), grossCol(2), 30);
         if (set.shake) st.shake = Math.max(st.shake, 1.6);
+        }
         if (st.t - st.lastBlastFx > 0.12) { st.lastBlastFx = st.t; In.rumble(60, 0.2, 0.4); }
       } else if (g.blasting && b.pres <= 2) endBlast();
     } else if (g.blasting) endBlast();
@@ -373,7 +384,7 @@
     if (up) gr = (p.jump || g.jumpHold > 0 || g.blasting || g.boost) ? PH.Grise : PH.G * 1.55; else gr = PH.G;
     if (!up || g.grounded) g.boost = false;
     gr *= s.gravMul;
-    if (v2 && !g.grounded && p.jump && Math.abs(g.vy) < 110 && !g.blasting) gr *= 0.55;   // a slight hang at the top of a held jump
+    if (v2 && !g.grounded && p.jump && Math.abs(g.vy) < 70 && !g.blasting) gr *= 0.72;   // a slight hang at the top of a held jump
     if (g.pounding) gr = 0;
     g.vy = Math.min(PH.maxFall, g.vy + gr * dt);
     // ground-pound
@@ -468,7 +479,7 @@
     if (st.mode === 'little') { g.x = g.safeX; g.y = g.safeY - 4; g.vx = 0; g.vy = -760; Au.sfx('bounce'); return; }
     g.x = st.respawn.x; g.y = st.respawn.y; g.vx = g.vy = 0;
     if (st.lan.has) { st.lan.tears = Math.min(3, st.lan.tears + 1); Au.sfx('tear'); }
-    st.b.pres = Math.min(st.b.pres, 20);
+    if (!st.v2) st.b.pres = Math.min(st.b.pres, 20);   // the new controls never take gas away
   }
 
   /* ---------------- pickups, checkpoints, goal ---------------- */
@@ -821,7 +832,8 @@
     }
     updateCrowd(dt); updateParticles(dt);
     st.noteT -= dt;
-    Au.setBelly(b.vit, b.pres); Au.ladder(st.status === 'play' ? b.state : 'springy', dt);
+    // with the new controls a full belly is normal, so the music's tuba layer and the belly sounds stop at 'round' (no foghorn warnings)
+    Au.setBelly(b.vit, st.v2 ? Math.min(b.pres, 45) : b.pres); Au.ladder(st.status === 'play' ? (st.v2 && (b.state === 'tight' || b.state === 'critical') ? 'round' : b.state) : 'springy', dt);
     st.shake *= Math.pow(0.02, dt); if (st.flash > 0) st.flash -= dt;
     st.patches.forEach(function (p) { if (p.growth > 0 && p.anim < 1) p.anim = Math.min(1, p.anim + dt * 1.6); if (p.squash > 0) p.squash -= dt; if (p.pop > 0) p.pop -= dt; });
     ZT = st.moment ? (st.moment.type === 'reunion' ? 1.25 : 1.2) : st.slow ? 1.1 : st.vistaT > 0 ? 0.8 : st.flying ? 0.82 : 1;
@@ -982,7 +994,8 @@
     cx.restore();
     // screen effects
     cx.setTransform(dpr * S, 0, 0, dpr * S, 0, 0);
-    if (b.state === 'critical' && st.status === 'play') { var vg = cx.createRadialGradient(VW / 2, VH / 2, VH * 0.35, VW / 2, VH / 2, VH * 0.85); vg.addColorStop(0, 'rgba(255,60,60,0)'); vg.addColorStop(1, 'rgba(255,60,60,' + (0.25 + 0.12 * Math.sin(t * 8)) + ')'); cx.fillStyle = vg; cx.fillRect(0, 0, VW, VH); }
+    // the red 'about to burst' glow (classic only: nothing bursts with the new controls)
+    if (b.state === 'critical' && st.status === 'play' && !st.v2) { var vg = cx.createRadialGradient(VW / 2, VH / 2, VH * 0.35, VW / 2, VH / 2, VH * 0.85); vg.addColorStop(0, 'rgba(255,60,60,0)'); vg.addColorStop(1, 'rgba(255,60,60,' + (0.25 + 0.12 * Math.sin(t * 8)) + ')'); cx.fillStyle = vg; cx.fillRect(0, 0, VW, VH); }
     if (st.flash > 0) { cx.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, st.flash) + ')'; cx.fillRect(0, 0, VW, VH); }
     drawMomentOverlay();
     if (!st.moment) drawHUD(st);

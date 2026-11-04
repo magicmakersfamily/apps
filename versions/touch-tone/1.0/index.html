@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<script>/* Frozen copy: keep this version's saved games separate. */
+(function(){try{var P='touch-tone@1.0:',S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;
+S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};
+S.removeItem=function(k){return r.call(this,P+k)}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Touch Tone 筆音 · The App Shelf</title>
+<meta name="description" content="Trace Chinese characters and hear music follow your hand. A separate button speaks the Cantonese word. Nothing is marked wrong, and your drawing stays on this device.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Touch Tone 筆音 · The App Shelf">
+<meta property="og:description" content="Trace Chinese characters and hear music follow your hand. A separate button speaks the Cantonese word.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/touch-tone/cover.png">
+<meta name="theme-color" content="#eaf0f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M12 44c10-16 16-20 26-16 8 3 9 12 16 5' fill='none' stroke='%2338bdf8' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M46 18c4 1 5 5 2 7-3 1-6-2-5-5 1-2 2-2 3-2z' fill='%237dd3fc'/%3E%3Cpath d='M48 25v10' stroke='%237dd3fc' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&amp;display=swap">
+<script>if (location.hash === '#cover') document.documentElement.classList.add('cover-mode');</script>
+<style>
+  :root {
+    --bg: #eaf0f4;
+    --card: #ffffff;
+    --line: #d3dde4;
+    --text: #13202b;
+    --muted: #5c6e7c;
+    --accent: #0284c7;
+    --accent-hover: #0369a1;
+    --accent-ink: #ffffff;
+    --green: #047857;
+    --green-bg: rgba(4, 120, 87, 0.1);
+    --green-line: rgba(4, 120, 87, 0.35);
+    --stage: #0b1220;
+    --stage-line: #334155;
+    --ink: #38bdf8;
+    --guide: rgba(255, 255, 255, 0.22);
+    --chip: #e7eef3;
+    --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --line: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --accent-ink: #041018;
+      --green: #34d399;
+      --green-bg: rgba(16, 185, 129, 0.15);
+      --green-line: rgba(16, 185, 129, 0.45);
+      --stage: #090d16;
+      --stage-line: #334155;
+      --chip: #0f172a;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  header, .main-container, .shelf-foot { width: min(100%, 640px); }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+  .back-link:hover { color: var(--text); }
+  .app-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .app-title .zh {
+    font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+    letter-spacing: 0;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1.25rem;
+  }
+  .beta {
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    color: #6c4b8c;
+    border: 1px solid #6c4b8c;
+    border-radius: 999px;
+    padding: 2px 7px;
+    vertical-align: middle;
+  }
+  @media (prefers-color-scheme: dark) {
+    .beta { color: #d6c4ea; border-color: #d6c4ea; }
+  }
+  .main-container {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 22px 20px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .char-carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    width: 100%;
+    padding: 2px 2px 12px;
+    margin-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    overscroll-behavior-x: contain;
+  }
+  .char-btn {
+    background: var(--chip);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    width: 64px;
+    height: 68px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font: inherit;
+    padding: 4px;
+  }
+  .char-btn .zh {
+    font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    color: inherit;
+  }
+  .char-btn small { font-size: 0.68rem; margin-top: 2px; font-weight: 600; }
+  .char-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .canvas-wrapper {
+    position: relative;
+    width: min(100%, 440px);
+    aspect-ratio: 1;
+    container-type: size;
+    background: var(--stage);
+    border: 2px dashed var(--stage-line);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 8px 0 16px;
+    touch-action: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 18px 40px rgba(0, 0, 0, 0.28);
+  }
+  .canvas-wrapper.is-drawing { border-style: solid; border-color: var(--accent); }
+  .canvas-wrapper.is-replaying { border-style: solid; border-color: var(--green); }
+  .character-guide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+    font-weight: 500;
+    font-size: 220px;
+    font-size: 74cqmin;
+    line-height: 1;
+    color: var(--guide);
+    pointer-events: none;
+    z-index: 1;
+  }
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .canvas-wrapper.is-replaying canvas { cursor: progress; }
+  .word-info { text-align: center; margin-bottom: 8px; }
+  .word-pinyin {
+    font-size: 1.05rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .word-meaning { font-size: 1.2rem; font-weight: 600; margin-top: 2px; }
+  .tone-note { margin: 4px 0 0; color: var(--muted); font-size: 0.82rem; }
+  .layers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    justify-content: center;
+    width: 100%;
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+  .layers span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 99px; display: inline-block; }
+  .dot.music { background: var(--ink); }
+  .dot.voice { background: var(--green); }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    background: var(--chip);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 14px;
+    font: inherit;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 150px;
+    min-height: 48px;
+    justify-content: center;
+  }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+  .btn:hover { border-color: var(--muted); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn-primary[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent-ink); }
+  .btn-replay { background: var(--green-bg); border-color: var(--green-line); color: var(--green); }
+  .btn-replay.is-stop { background: color-mix(in srgb, var(--green) 24%, transparent); }
+  .status-badge {
+    margin-top: 14px;
+    font-size: 0.86rem;
+    color: var(--muted);
+    min-height: 1.3em;
+    text-align: center;
+  }
+  .hint {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+    text-align: center;
+    max-width: 46ch;
+    line-height: 1.45;
+  }
+  .shelf-foot {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+  .shelf-foot p { margin: 0 0 8px; }
+  .shelf-foot a { color: var(--text); }
+  .linkish {
+    font: inherit;
+    color: var(--text);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  #selftest-out {
+    position: fixed;
+    z-index: 20;
+    left: 8px;
+    top: 8px;
+    max-width: min(92vw, 560px);
+    max-height: 70vh;
+    overflow: auto;
+    margin: 0;
+    padding: 10px;
+    background: #fff;
+    color: #111;
+    font: 12px/1.45 ui-monospace, monospace;
+    border-radius: 8px;
+  }
+  @media (max-height: 860px) {
+    .canvas-wrapper { width: min(100%, 440px, max(200px, calc(100dvh - 430px))); }
+  }
+  @media (max-width: 520px) {
+    header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .app-title { font-size: 1.02rem; letter-spacing: 0.03em; }
+    .layers { flex-direction: column; align-items: center; gap: 4px; }
+    .toolbar { flex-direction: column; }
+    .btn { flex: 1 1 auto; width: 100%; }
+    .main-container { padding: 16px 12px 14px; border-radius: 18px; }
+    .canvas-wrapper { width: min(100%, 86vw, 340px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn:hover { transform: none; }
+  }
+  html.cover-mode .shelf-foot,
+  html.cover-mode .hint,
+  html.cover-mode .char-carousel,
+  html.cover-mode .status-badge,
+  html.cover-mode .tone-note { display: none !important; }
+  html.cover-mode body { justify-content: center; }
+  html.cover-mode .canvas-wrapper { width: min(100%, 420px); }
+</style>
+</head>
+<body>
+<div style="font:13px/1.4 system-ui,sans-serif;background:#2b2140;color:#f3eefc;padding:6px 12px;text-align:center">Old version 1.0, kept so we can compare. Saved games here are separate. <a style="color:#d9c8ff" href="../../../touch-tone/">Play the current version</a> · <a style="color:#d9c8ff" href="../../">All versions</a></div>
+  <header>
+    <a class="back-link" href="../../../">← All apps</a>
+    <div class="app-title">TOUCH TONE <span class="zh" lang="zh-HK">筆音</span> <span class="beta" title="Beta: still being tested with kids and improved">Beta</span></div>
+  </header>
+
+  <main class="main-container">
+    <div class="char-carousel" id="charCarousel" role="group" aria-label="Characters"></div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <div class="character-guide zh" id="charGuide" lang="zh-HK" aria-hidden="true">一</div>
+      <canvas id="drawCanvas" width="640" height="640" aria-label="Drawing pad. A faint character sits behind your ink. Draw anywhere and the music follows your hand."></canvas>
+    </div>
+
+    <div class="word-info">
+      <div class="word-pinyin" id="wordPinyin">jat1 · Cantonese</div>
+      <div class="word-meaning" id="wordMeaning">One</div>
+      <p class="tone-note">The number is the Cantonese tone.</p>
+    </div>
+
+    <p class="layers" id="layers">
+      <span><i class="dot music" aria-hidden="true"></i> Drawing plays music</span>
+      <span><i class="dot voice" aria-hidden="true"></i> Hear Word speaks Cantonese</span>
+    </p>
+
+    <div class="toolbar">
+      <button class="btn btn-primary" id="speakBtn" type="button" aria-pressed="false" aria-describedby="layers">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6L8 10H4z"/><path d="M16 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18.5 7.5a6.5 6.5 0 0 1 0 9"/></svg>
+        Hear Word
+      </button>
+      <button class="btn btn-replay" id="replayBtn" type="button" disabled aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>
+        <span id="replayLabel">Replay Concert</span>
+      </button>
+      <button class="btn" id="clearBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v5h5"/></svg>
+        Clear
+      </button>
+    </div>
+
+    <div class="status-badge" id="statusBadge" role="status" aria-live="polite">Tap and trace anywhere. The music follows your hand.</div>
+    <p class="hint">Up is a high note. Left and right move the music between your ears. Trace the character, or draw anywhere you like. Headphones make the left and right easier to hear.</p>
+    <noscript><p class="hint">Turn on JavaScript to draw and hear the music.</p></noscript>
+  </main>
+
+  <footer class="shelf-foot">
+    <p><b>Version 1.0 (beta)</b> · Launched <time datetime="2026-11-04">November 4, 2026</time> · Made for James and friends · <a href="../../../">The App Shelf</a> · <a href="../../../feedback/?game=touch-tone&amp;v=1.0">Share your thoughts</a> · <a href="../../../feedback/?game=touch-tone&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
+    <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+    <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
+    <p>The drawing music is generated on this device. Hear Word uses a speaking voice already on this device. Romanization on screen is Jyutping.</p>
+    <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/touch-tone/" data-text="Trace Chinese characters and hear them as music: Touch Tone 筆音">Tell a friend</button></p>
+  </footer>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'touch-tone:v1';
+  const MAX_POINTS = 8000;
+  const COVER = location.hash === '#cover';
+  const SELFTEST = location.hash === '#selftest';
+  const pageErrors = [];
+  window.addEventListener('error', (e) => pageErrors.push(String(e.message || e)));
+
+  const characters = [
+    { char: '一', jyutping: 'jat1', meaning: 'One', short: 'One' },
+    { char: '二', jyutping: 'ji6', meaning: 'Two', short: 'Two' },
+    { char: '三', jyutping: 'saam1', meaning: 'Three', short: 'Three' },
+    { char: '水', jyutping: 'seoi2', meaning: 'Water', short: 'Water' },
+    { char: '火', jyutping: 'fo2', meaning: 'Fire', short: 'Fire' },
+    { char: '日', jyutping: 'jat6', meaning: 'Sun / Day', short: 'Sun' },
+    { char: '月', jyutping: 'jyut6', meaning: 'Moon', short: 'Moon' },
+    { char: '車', jyutping: 'ce1', meaning: 'Car / Vehicle', short: 'Car' },
+    { char: '貓', jyutping: 'maau1', meaning: 'Cat', short: 'Cat' },
+    { char: '大', jyutping: 'daai6', meaning: 'Big', short: 'Big' }
+  ];
+
+  function clamp01(v) {
+    return Math.min(1, Math.max(0, v));
+  }
+
+  // Top of the pad is A5 (880 Hz). Bottom is A3 (220 Hz). Pitch is exponential
+  // so each equal step up the pad is one even musical step, across two octaves.
+  function yToFrequency(ny) {
+    const n = 1 - clamp01(ny);
+    return 220 * Math.pow(2, n * 2);
+  }
+
+  function panForX(nx) {
+    return Math.max(-1, Math.min(1, clamp01(nx) * 2 - 1));
+  }
+
+  function gainForSpeed(pxPerMs) {
+    const s = Math.max(0, pxPerMs);
+    return Math.min(0.22, 0.07 + Math.sqrt(s) * 0.08);
+  }
+
+  function widthForSpeed(pxPerMs) {
+    const t = Math.min(1, Math.max(0, pxPerMs) / 1.4);
+    return 16 - t * 9;
+  }
+
+  function soundAt(nx, ny, speed, pressure, pointerType) {
+    let g = gainForSpeed(speed);
+    let w = widthForSpeed(speed);
+    if (pointerType === 'pen') {
+      const pen = Math.max(0, Math.min(1, Number(pressure) || 0));
+      g = Math.min(0.24, g * (0.6 + pen * 0.8));
+      w = w * (0.7 + pen * 0.55);
+    }
+    return {
+      f: Math.round(yToFrequency(ny) * 10) / 10,
+      p: Math.round(panForX(nx) * 1000) / 1000,
+      g: Math.round(g * 1000) / 1000,
+      w: Math.round(w * 10) / 10
+    };
+  }
+
+  // Off the character, on the character, a scribble: every point is music.
+  function acceptPoint() { return true; }
+
+  function nextSample(stroke, sample, smooth, cssW, cssH) {
+    const prev = stroke.length ? stroke[stroke.length - 1] : null;
+    let sm = smooth;
+    if (prev) {
+      const dt = Math.max(1, sample.t - prev.t);
+      const dist = Math.hypot((sample.x - prev.x) * cssW, (sample.y - prev.y) * cssH);
+      sm = sm * 0.55 + (dist / dt) * 0.45;
+    }
+    const sound = soundAt(sample.x, sample.y, prev ? sm : 0, sample.pressure || 0, sample.pointerType || 'mouse');
+    let t = sample.t;
+    if (prev && t <= prev.t) t = prev.t + 1;
+    return {
+      point: {
+        t: t,
+        x: clamp01(sample.x),
+        y: clamp01(sample.y),
+        f: sound.f,
+        p: sound.p,
+        g: sound.g,
+        w: sound.w
+      },
+      smooth: prev ? sm : 0
+    };
+  }
+
+  // Replay reads the frequency, pan and gain that were heard, even if the
+  // formula later changes. It does not invent a new pitch from x and y.
+  function audibleOf(point) {
+    return { f: point.f, p: point.p, g: point.g };
+  }
+
+  function takeDue(strokes, cursor, elapsed) {
+    const due = [];
+    let si = cursor.si;
+    let pi = cursor.pi;
+    while (si < strokes.length) {
+      const stroke = strokes[si];
+      if (!stroke || pi >= stroke.length) {
+        si += 1;
+        pi = 0;
+        continue;
+      }
+      const point = stroke[pi];
+      if (point.t > elapsed) break;
+      due.push({
+        si: si,
+        pi: pi,
+        point: point,
+        strokeStart: pi === 0,
+        strokeEnd: pi === stroke.length - 1
+      });
+      pi += 1;
+    }
+    return { due: due, cursor: { si: si, pi: pi } };
+  }
+
+  function packStrokes(strokes) {
+    return strokes.map(stroke => stroke.map(pt => [
+      Math.round(pt.t),
+      Math.round(pt.x * 1000),
+      Math.round(pt.y * 1000),
+      Math.round(pt.f * 10) / 10,
+      Math.round(pt.p * 1000) / 1000,
+      Math.round(pt.g * 1000) / 1000,
+      Math.round(pt.w * 10) / 10
+    ]));
+  }
+
+  function unpackStrokes(packed) {
+    if (!Array.isArray(packed)) return [];
+    const strokes = [];
+    packed.forEach(stroke => {
+      if (!Array.isArray(stroke)) return;
+      const next = [];
+      stroke.forEach(row => {
+        if (!Array.isArray(row) || row.length < 7) return;
+        const pt = {
+          t: +row[0], x: +row[1] / 1000, y: +row[2] / 1000,
+          f: +row[3], p: +row[4], g: +row[5], w: +row[6]
+        };
+        if ([pt.t, pt.x, pt.y, pt.f, pt.p, pt.g, pt.w].every(Number.isFinite)) next.push(pt);
+      });
+      if (next.length) strokes.push(next);
+    });
+    return strokes;
+  }
+
+  function canReplay(strokes) {
+    return strokes.some(stroke => stroke.length > 0);
+  }
+
+  function pointCount(strokes) {
+    return strokes.reduce((n, stroke) => n + stroke.length, 0);
+  }
+
+  let currentIndex = 0;
+  let isDrawing = false;
+  let isReplaying = false;
+  let sounding = false;
+  let speaking = false;
+  let audioFailed = false;
+  let warnedVoice = false;
+  let cappedNote = false;
+  let activePointer = null;
+  let smoothSpeed = 0;
+  let recordOrigin = 0;
+  let recordedStrokes = [];
+  let currentStroke = null;
+  let audioCtx = null;
+  let master = null;
+  let voice = null;
+  let voices = [];
+  let replayRaf = 0;
+  let replayCursor = { si: 0, pi: 0 };
+  let replayStart = 0;
+  let replayHiddenAt = 0;
+  let state = { v: 1, last: 0, byChar: {} };
+
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+  const charCarousel = document.getElementById('charCarousel');
+  const charGuide = document.getElementById('charGuide');
+  const wordPinyin = document.getElementById('wordPinyin');
+  const wordMeaning = document.getElementById('wordMeaning');
+  const speakBtn = document.getElementById('speakBtn');
+  const replayBtn = document.getElementById('replayBtn');
+  const replayLabel = document.getElementById('replayLabel');
+  const clearBtn = document.getElementById('clearBtn');
+  const statusBadge = document.getElementById('statusBadge');
+  const canvasWrapper = document.getElementById('canvasWrapper');
+
+  function status(text) {
+    statusBadge.textContent = text;
+  }
+
+  function cssSize() {
+    const rect = canvas.getBoundingClientRect();
+    return { w: Math.max(1, rect.width), h: Math.max(1, rect.height), rect: rect };
+  }
+
+  function normFromEvent(e) {
+    const rect = cssSize().rect;
+    return {
+      x: clamp01((e.clientX - rect.left) / rect.width),
+      y: clamp01((e.clientY - rect.top) / rect.height)
+    };
+  }
+
+  function fitCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(1, Math.round(rect.width * dpr));
+    const h = Math.max(1, Math.round(rect.height * dpr));
+    if (canvas.width === w && canvas.height === h) return;
+    canvas.width = w;
+    canvas.height = h;
+    redrawAll();
+  }
+
+  function drawSeg(a, b) {
+    if (!canvas.width || !canvas.height) return;
+    const ax = a.x * canvas.width;
+    const ay = a.y * canvas.height;
+    const bx = b.x * canvas.width;
+    const by = b.y * canvas.height;
+    const scale = canvas.width / cssSize().w;
+    const w = Math.max(1.5, (b.w || 8) * scale);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
+    ctx.lineWidth = w * 2.15;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+  }
+
+  function redrawAll() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    recordedStrokes.forEach(stroke => {
+      for (let i = 1; i < stroke.length; i++) drawSeg(stroke[i - 1], stroke[i]);
+    });
+  }
+
+  function timelineEnd() {
+    let t = 0;
+    recordedStrokes.forEach(stroke => {
+      if (stroke.length) t = Math.max(t, stroke[stroke.length - 1].t);
+    });
+    return t;
+  }
+
+  function ensureAudio() {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) throw new Error('no-audio');
+    if (!audioCtx) {
+      audioCtx = new Ctx();
+      master = audioCtx.createGain();
+      master.gain.value = 0.8;
+      const comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -18;
+      comp.knee.value = 16;
+      comp.ratio.value = 3.2;
+      comp.attack.value = 0.004;
+      comp.release.value = 0.16;
+      master.connect(comp);
+      comp.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+
+  function stopSynth() {
+    const node = voice;
+    voice = null;
+    sounding = false;
+    if (!node || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    try {
+      node.gain.gain.cancelScheduledValues(now);
+      const current = Math.max(0.0001, node.gain.gain.value || 0.0001);
+      node.gain.gain.setValueAtTime(current, now);
+      node.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+      node.osc.stop(now + 0.1);
+      node.osc2.stop(now + 0.1);
+      node.osc3.stop(now + 0.1);
+    } catch (e) { /* already stopped */ }
+    setTimeout(() => {
+      try {
+        node.osc.disconnect();
+        node.osc2.disconnect();
+        node.osc3.disconnect();
+        node.gain.disconnect();
+        if (node.panner) node.panner.disconnect();
+        node.filter.disconnect();
+      } catch (err) { /* already disconnected */ }
+    }, 180);
+  }
+
+  function buildVoice(s) {
+    ensureAudio();
+    const now = audioCtx.currentTime;
+    const f = Math.max(40, s.f || 440);
+    const osc = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const osc3 = audioCtx.createOscillator();
+    const harm2 = audioCtx.createGain();
+    const harm3 = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    const gainNode = audioCtx.createGain();
+    const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+    osc.type = 'sine';
+    osc2.type = 'sine';
+    osc3.type = 'sine';
+    osc2.detune.value = 6;
+    harm2.gain.value = 0.12;
+    harm3.gain.value = 0.045;
+    filter.type = 'lowpass';
+    filter.Q.value = 0.7;
+    osc.frequency.setValueAtTime(f, now);
+    osc2.frequency.setValueAtTime(f * 2, now);
+    osc3.frequency.setValueAtTime(f * 1.5, now);
+    filter.frequency.setValueAtTime(Math.min(4800, f * 4.5), now);
+    gainNode.gain.setValueAtTime(0.0001, now);
+    osc.connect(filter);
+    osc2.connect(harm2);
+    harm2.connect(filter);
+    osc3.connect(harm3);
+    harm3.connect(filter);
+    if (panner) {
+      panner.pan.setValueAtTime(Math.max(-1, Math.min(1, s.p || 0)), now);
+      filter.connect(panner);
+      panner.connect(gainNode);
+    } else {
+      filter.connect(gainNode);
+    }
+    gainNode.connect(master);
+    osc.start(now);
+    osc2.start(now);
+    osc3.start(now);
+    voice = { osc: osc, osc2: osc2, osc3: osc3, filter: filter, gain: gainNode, panner: panner };
+    gainNode.gain.exponentialRampToValueAtTime(Math.max(0.0002, s.g || 0.07), now + 0.05);
+    sounding = true;
+  }
+
+  function beginNote(s) {
+    stopSynth();
+    claimAudiator();
+    try {
+      buildVoice(audibleOf(s));
+    } catch (e) {
+      sounding = false;
+      audioFailed = true;
+    }
+  }
+
+  function slideNote(s) {
+    const heard = audibleOf(s);
+    if (!voice || !audioCtx) {
+      beginNote(s);
+      return;
+    }
+    try {
+      const now = audioCtx.currentTime;
+      const f = Math.max(40, heard.f || 440);
+      voice.osc.frequency.setTargetAtTime(f, now, 0.03);
+      voice.osc2.frequency.setTargetAtTime(f * 2, now, 0.03);
+      voice.osc3.frequency.setTargetAtTime(f * 1.5, now, 0.03);
+      if (voice.panner) voice.panner.pan.setTargetAtTime(Math.max(-1, Math.min(1, heard.p || 0)), now, 0.04);
+      voice.filter.frequency.setTargetAtTime(Math.min(4800, f * 4.5), now, 0.05);
+      voice.gain.gain.setTargetAtTime(Math.max(0.0002, heard.g || 0.07), now, 0.04);
+      sounding = true;
+    } catch (e) {
+      sounding = false;
+      audioFailed = true;
+    }
+  }
+
+  function stopSpeech() {
+    speaking = false;
+    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) { /* no speech */ }
+    if (speakBtn) speakBtn.setAttribute('aria-pressed', 'false');
+  }
+
+  function claimAudiator() {
+    if (speaking) stopSpeech();
+    speaking = false;
+    sounding = true;
+  }
+
+  function loadVoices() {
+    try { voices = window.speechSynthesis ? (window.speechSynthesis.getVoices() || []) : []; }
+    catch (e) { voices = []; }
+  }
+  function cantoneseVoice() {
+    loadVoices();
+    return voices.find(v => /yue|zh[-_]HK/i.test(v.lang || ''))
+      || voices.find(v => /cantonese|hong kong|sinji/i.test(v.name || ''));
+  }
+  function mandarinVoice() {
+    loadVoices();
+    return voices.find(v => /zh[-_](TW|Hant)/i.test(v.lang || ''))
+      || voices.find(v => /zh[-_]CN/i.test(v.lang || ''))
+      || voices.find(v => /^zh/i.test(v.lang || '') && !/HK|yue/i.test(v.lang || ''));
+  }
+  try { loadVoices(); if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) { /* no speech */ }
+
+  function saveCurrent() {
+    if (COVER || SELFTEST) return;
+    const ch = characters[currentIndex].char;
+    if (canReplay(recordedStrokes)) state.byChar[ch] = packStrokes(recordedStrokes);
+    else delete state.byChar[ch];
+    state.last = currentIndex;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      status('Could not save on this device. Replay still works until you leave the page.');
+    }
+  }
+
+  function strokesFor(ch) {
+    return unpackStrokes(state.byChar[ch] || []);
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || data.v !== 1 || typeof data.byChar !== 'object' || !data.byChar) return;
+      state = { v: 1, last: data.last | 0, byChar: data.byChar };
+      if (state.last < 0 || state.last >= characters.length) state.last = 0;
+      currentIndex = state.last;
+      recordedStrokes = strokesFor(characters[currentIndex].char);
+    } catch (e) {
+      state = { v: 1, last: 0, byChar: {} };
+    }
+  }
+
+  function setReplayEnabled() {
+    const on = canReplay(recordedStrokes) && !isReplaying;
+    replayBtn.disabled = !canReplay(recordedStrokes);
+    if (!isReplaying) {
+      replayLabel.textContent = 'Replay Concert';
+      replayBtn.classList.remove('is-stop');
+      replayBtn.setAttribute('aria-pressed', 'false');
+    }
+    replayBtn.title = replayBtn.disabled ? 'Draw something first' : 'Play your drawing and its music again';
+    return on;
+  }
+
+  function renderCharacter() {
+    const item = characters[currentIndex];
+    charGuide.textContent = item.char;
+    wordPinyin.textContent = item.jyutping + ' · Cantonese';
+    wordMeaning.textContent = item.meaning;
+    charCarousel.querySelectorAll('.char-btn').forEach((btn, i) => {
+      const on = i === currentIndex;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (on) btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'auto' });
+    });
+    if (!isReplaying) redrawAll();
+    setReplayEnabled();
+  }
+
+  function buildCarousel() {
+    charCarousel.textContent = '';
+    characters.forEach((item, index) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'char-btn';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', item.char + ', ' + item.meaning);
+      const zh = document.createElement('span');
+      zh.className = 'zh';
+      zh.lang = 'zh-HK';
+      zh.textContent = item.char;
+      const small = document.createElement('small');
+      small.textContent = item.short;
+      btn.append(zh, small);
+      btn.addEventListener('click', () => selectCharacter(index));
+      charCarousel.appendChild(btn);
+    });
+  }
+
+  function selectCharacter(index) {
+    const next = (index + characters.length) % characters.length;
+    if (next === currentIndex && !isReplaying && !isDrawing) {
+      renderCharacter();
+      return;
+    }
+    if (isReplaying) finishReplay(false, true);
+    if (isDrawing) onUp(null, true);
+    else stopSynth();
+    stopSpeech();
+    saveCurrent();
+    currentIndex = next;
+    recordedStrokes = strokesFor(characters[currentIndex].char);
+    recordOrigin = 0;
+    cappedNote = false;
+    currentStroke = null;
+    renderCharacter();
+    const item = characters[currentIndex];
+    status(item.char + ' · ' + item.meaning + '. Draw anywhere you like.');
+  }
+
+  function addSample(ev, now, isStart, force) {
+    if (!currentStroke) return;
+    const pos = ev ? normFromEvent(ev) : { x: currentStroke[currentStroke.length - 1].x, y: currentStroke[currentStroke.length - 1].y };
+    if (!acceptPoint(pos.x, pos.y)) return;
+    const size = cssSize();
+    const built = nextSample(currentStroke, {
+      x: pos.x,
+      y: pos.y,
+      t: Math.round(now - recordOrigin),
+      pressure: ev && ev.pressure,
+      pointerType: ev && ev.pointerType
+    }, smoothSpeed, size.w, size.h);
+    const prev = currentStroke[currentStroke.length - 1];
+    if (!force && !isStart && prev) {
+      const dist = Math.hypot((built.point.x - prev.x) * size.w, (built.point.y - prev.y) * size.h);
+      if (built.point.t - prev.t < 8 && dist < 0.4) {
+        slideNote(built.point);
+        smoothSpeed = built.smooth;
+        return;
+      }
+    }
+    if (pointCount(recordedStrokes) >= MAX_POINTS) {
+      slideNote(built.point);
+      smoothSpeed = built.smooth;
+      if (!cappedNote) {
+        cappedNote = true;
+        status('This concert is full. The music keeps going, and the replay keeps the earlier part.');
+      }
+      return;
+    }
+    currentStroke.push(built.point);
+    smoothSpeed = built.smooth;
+    if (isStart || !prev) beginNote(built.point);
+    else {
+      drawSeg(prev, built.point);
+      slideNote(built.point);
+    }
+  }
+
+  function onDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (isDrawing) return;
+    if (isReplaying) return;
+    if (!acceptPoint(0, 0)) return;
+    e.preventDefault();
+    stopSpeech();
+    const now = performance.now();
+    if (!recordOrigin) {
+      const end = timelineEnd();
+      recordOrigin = now - end - (end > 0 ? 320 : 0);
+    }
+    currentStroke = [];
+    recordedStrokes.push(currentStroke);
+    smoothSpeed = 0;
+    isDrawing = true;
+    activePointer = e.pointerId;
+    canvasWrapper.classList.add('is-drawing');
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+    addSample(e, now, true, true);
+    status(audioFailed
+      ? 'This browser cannot play the drawing music. You can still trace.'
+      : 'Music is following your hand.');
+  }
+
+  function onMove(e) {
+    if (!isDrawing || e.pointerId !== activePointer) return;
+    e.preventDefault();
+    const now = performance.now();
+    const list = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    const step = 8 / Math.max(1, list.length);
+    list.forEach((ev, i) => {
+      addSample(ev, now - (list.length - 1 - i) * step, false, false);
+    });
+  }
+
+  function onUp(e, quiet) {
+    if (!isDrawing) return;
+    if (e && e.pointerId != null && activePointer != null && e.pointerId !== activePointer) return;
+    let now = performance.now();
+    if (currentStroke && currentStroke.length) {
+      const held = now - recordOrigin - currentStroke[0].t;
+      if (held < 80) now = recordOrigin + currentStroke[0].t + 80;
+    }
+    if (e && e.clientX != null) addSample(e, now, false, true);
+    else if (currentStroke && currentStroke.length) {
+      const last = currentStroke[currentStroke.length - 1];
+      currentStroke.push(Object.assign({}, last, { t: Math.max(last.t + 1, Math.round(now - recordOrigin)) }));
+    }
+    if (currentStroke && currentStroke.length === 0) recordedStrokes.pop();
+    isDrawing = false;
+    activePointer = null;
+    currentStroke = null;
+    canvasWrapper.classList.remove('is-drawing');
+    stopSynth();
+    setReplayEnabled();
+    saveCurrent();
+    if (!quiet && !cappedNote) status('Saved on this device. Replay Concert plays it back.');
+  }
+
+  function resetReplayButton() {
+    isReplaying = false;
+    canvasWrapper.classList.remove('is-replaying');
+    replayLabel.textContent = 'Replay Concert';
+    replayBtn.classList.remove('is-stop');
+    replayBtn.setAttribute('aria-pressed', 'false');
+    setReplayEnabled();
+  }
+
+  function finishReplay(done, quiet) {
+    isReplaying = false;
+    cancelAnimationFrame(replayRaf);
+    stopSynth();
+    resetReplayButton();
+    if (!done) redrawAll();
+    if (!quiet) {
+      status(done
+        ? 'Concert finished. You can play it again, or keep drawing.'
+        : 'Concert stopped. Your drawing is still here.');
+    }
+  }
+
+  function startReplay() {
+    if (!canReplay(recordedStrokes) || isReplaying) return;
+    if (isDrawing) onUp(null, true);
+    stopSpeech();
+    stopSynth();
+    isReplaying = true;
+    replayCursor = { si: 0, pi: 0 };
+    replayHiddenAt = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    replayStart = performance.now();
+    canvasWrapper.classList.add('is-replaying');
+    replayLabel.textContent = 'Stop Concert';
+    replayBtn.classList.add('is-stop');
+    replayBtn.disabled = false;
+    replayBtn.setAttribute('aria-pressed', 'true');
+    status('Playing your concert.');
+    replayRaf = requestAnimationFrame(replayFrame);
+  }
+
+  function replayFrame(now) {
+    if (!isReplaying) return;
+    if (document.hidden) {
+      if (!replayHiddenAt) {
+        replayHiddenAt = now;
+        stopSynth();
+      }
+      replayRaf = requestAnimationFrame(replayFrame);
+      return;
+    }
+    if (replayHiddenAt) {
+      replayStart += now - replayHiddenAt;
+      replayHiddenAt = 0;
+    }
+    const step = takeDue(recordedStrokes, replayCursor, now - replayStart);
+    replayCursor = step.cursor;
+    let last = null;
+    step.due.forEach(item => {
+      const heard = audibleOf(item.point);
+      if (item.strokeStart) beginNote(heard);
+      if (item.pi > 0) drawSeg(recordedStrokes[item.si][item.pi - 1], item.point);
+      last = item;
+      if (item.strokeEnd) stopSynth();
+    });
+    if (last && !last.strokeEnd) slideNote(last.point);
+    if (replayCursor.si >= recordedStrokes.length) finishReplay(true);
+    else replayRaf = requestAnimationFrame(replayFrame);
+  }
+
+  function speakCurrent() {
+    if (isDrawing) onUp(null, true);
+    if (isReplaying) finishReplay(false, true);
+    stopSynth();
+    speaking = true;
+    sounding = false;
+    const item = characters[currentIndex];
+    if (!window.speechSynthesis) {
+      speaking = false;
+      status('This browser has no speaking voice. The Jyutping is on the screen: ' + item.jyutping + '.');
+      return;
+    }
+    const pending = window.speechSynthesis.speaking || window.speechSynthesis.pending;
+    try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+    const utter = new SpeechSynthesisUtterance(item.char);
+    const yue = cantoneseVoice();
+    const cmn = mandarinVoice();
+    if (yue) {
+      utter.voice = yue;
+      utter.lang = yue.lang || 'zh-HK';
+    } else if (cmn) {
+      utter.voice = cmn;
+      utter.lang = cmn.lang || 'zh-TW';
+      if (!warnedVoice) {
+        warnedVoice = true;
+        status('This device is speaking Mandarin. A Cantonese voice sounds closer when one is installed.');
+      }
+    } else {
+      utter.lang = 'zh-HK';
+    }
+    utter.rate = 0.88;
+    utter.onstart = () => speakBtn.setAttribute('aria-pressed', 'true');
+    utter.onend = () => {
+      speaking = false;
+      speakBtn.setAttribute('aria-pressed', 'false');
+      if (!warnedVoice || yue) status('That was the Cantonese word. Trace to play music.');
+    };
+    utter.onerror = () => {
+      speaking = false;
+      speakBtn.setAttribute('aria-pressed', 'false');
+      status('The speaking voice did not start. The Jyutping is on the screen: ' + item.jyutping + '.');
+    };
+    const go = () => {
+      try { window.speechSynthesis.speak(utter); }
+      catch (e) {
+        speaking = false;
+        status('The speaking voice did not start. The Jyutping is on the screen: ' + item.jyutping + '.');
+      }
+    };
+    if (pending) setTimeout(go, 80);
+    else go();
+    speakBtn.setAttribute('aria-pressed', 'true');
+  }
+
+  function clearPage() {
+    stopSpeech();
+    if (isReplaying) {
+      cancelAnimationFrame(replayRaf);
+      resetReplayButton();
+    }
+    if (isDrawing) {
+      isDrawing = false;
+      activePointer = null;
+      currentStroke = null;
+      canvasWrapper.classList.remove('is-drawing');
+    }
+    stopSynth();
+    recordedStrokes = [];
+    recordOrigin = 0;
+    cappedNote = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setReplayEnabled();
+    saveCurrent();
+    status('Cleared. Trace anywhere you like.');
+  }
+
+  function demoInk() {
+    const stroke = [];
+    let smooth = 0;
+    const n = 96;
+    for (let i = 0; i < n; i++) {
+      const u = i / (n - 1);
+      const x = 0.16 + u * 0.68;
+      const y = 0.74 - Math.sin(u * Math.PI) * 0.44 + Math.sin(u * 6.2) * 0.03;
+      const built = nextSample(stroke, { x: x, y: y, t: i * 18, pressure: 0.62, pointerType: 'pen' }, smooth, 360, 360);
+      stroke.push(built.point);
+      smooth = built.smooth;
+    }
+    return [stroke];
+  }
+
+  canvas.addEventListener('pointerdown', onDown, { passive: false });
+  canvas.addEventListener('pointermove', onMove, { passive: false });
+  canvas.addEventListener('pointerup', onUp);
+  canvas.addEventListener('pointercancel', onUp);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  window.addEventListener('blur', () => { if (isDrawing) onUp(null); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && isDrawing) onUp(null); });
+
+  speakBtn.addEventListener('click', speakCurrent);
+  replayBtn.addEventListener('click', () => {
+    if (replayBtn.disabled) return;
+    if (isReplaying) finishReplay(false);
+    else startReplay();
+  });
+  clearBtn.addEventListener('click', clearPage);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      stopSpeech();
+      if (isDrawing) onUp(null);
+      if (isReplaying) finishReplay(false);
+      else stopSynth();
+    }
+    if (e.target && e.target.closest && e.target.closest('button, a')) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); selectCharacter(currentIndex + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); selectCharacter(currentIndex - 1); }
+  });
+
+  document.querySelectorAll('[data-tell]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = btn.getAttribute('data-tell');
+      const text = btn.getAttribute('data-text') || document.title;
+      const old = btn.textContent;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: document.title, text: text, url: url });
+          return;
+        }
+        await navigator.clipboard.writeText(text + ' ' + url);
+        btn.textContent = 'Link copied. Paste it in a message.';
+        setTimeout(() => { btn.textContent = old; }, 2500);
+      } catch (e) { /* cancelled share */ }
+    });
+  });
+
+  function runSelfTest() {
+    const lines = [];
+    let failed = false;
+    function check(name, cond) {
+      lines.push((cond ? 'ok  ' : 'FAIL') + ' ' + name);
+      if (!cond) failed = true;
+    }
+    check('top is 880', yToFrequency(0) === 880);
+    check('bottom is 220', yToFrequency(1) === 220);
+    check('middle is 440', yToFrequency(0.5) === 440);
+    check('pan left', panForX(0) === -1);
+    check('pan center', panForX(0.5) === 0);
+    check('pan right', panForX(1) === 1);
+    check('still is quiet but present', gainForSpeed(0) === 0.07);
+    check('fast is louder', gainForSpeed(1) > gainForSpeed(0));
+    check('gain caps', gainForSpeed(100) === 0.22);
+    check('slow brush is thicker', widthForSpeed(0) > widthForSpeed(1.4));
+    const heavy = soundAt(0.5, 0.5, 0.4, 1, 'pen');
+    const light = soundAt(0.5, 0.5, 0.4, 0.1, 'pen');
+    const mouse = soundAt(0.5, 0.5, 0.4, 1, 'mouse');
+    check('pen pressure thickens', heavy.w > light.w && heavy.g > light.g);
+    check('mouse ignores pressure', mouse.w === soundAt(0.5, 0.5, 0.4, 0.1, 'mouse').w);
+    check('off path is accepted', acceptPoint(0.01, 0.99) === true && acceptPoint(0.5, 0.5) === true);
+    check('replay uses stored pitch', audibleOf({ t: 0, x: 0, y: 0, f: 123.4, p: 0.2, g: 0.1, w: 8 }).f === 123.4);
+
+    const stroke = [];
+    let sm = 0;
+    const up = nextSample(stroke, { x: 0, y: 1, t: 0, pointerType: 'mouse' }, sm, 320, 320);
+    stroke.push(up.point);
+    const top = nextSample(stroke, { x: 1, y: 0, t: 100, pointerType: 'mouse' }, up.smooth, 320, 320);
+    check('pitch rises as the hand goes up', top.point.f > up.point.f);
+    check('pan moves right', top.point.p > up.point.p);
+    check('times stay in order', top.point.t > up.point.t);
+
+    const back = nextSample([top.point], { x: 0.2, y: 0.2, t: 5, pointerType: 'mouse' }, 0, 320, 320);
+    check('time cannot run backward', back.point.t > top.point.t);
+
+    const concert = [
+      [
+        { t: 0, x: 0, y: 1, f: 220, p: -1, g: 0.07, w: 16 },
+        { t: 20, x: 0.5, y: 0.5, f: 440, p: 0, g: 0.1, w: 10 },
+        { t: 40, x: 1, y: 0, f: 880, p: 1, g: 0.12, w: 8 }
+      ],
+      [{ t: 200, x: 0.2, y: 0.2, f: 700, p: -0.6, g: 0.08, w: 14 }]
+    ];
+    let cursor = { si: 0, pi: 0 };
+    let step = takeDue(concert, cursor, 0);
+    check('replay starts the first point', step.due.length === 1 && step.due[0].strokeStart && !step.due[0].strokeEnd);
+    step = takeDue(concert, step.cursor, 40);
+    check('replay reaches the pen lift', step.due.length === 2 && step.due[1].strokeEnd && step.due[1].point.f === 880);
+    const parked = step.cursor;
+    step = takeDue(concert, parked, 100);
+    check('gap between strokes stays quiet', step.due.length === 0 && step.cursor.si === parked.si && step.cursor.pi === parked.pi);
+    step = takeDue(concert, step.cursor, 200);
+    check('next stroke starts after the gap', step.due.length === 1 && step.due[0].strokeStart && step.due[0].strokeEnd && step.due[0].point.f === 700);
+    check('replay finishes', step.cursor.si === concert.length);
+
+    const packed = packStrokes(concert);
+    const round = unpackStrokes(packed);
+    check('save round trip', round.length === 2 && round[0][2].f === 880 && Math.abs(round[0][2].x - 1) < 0.002 && round[1][0].p === -0.6);
+    check('bad save is ignored', unpackStrokes('nope').length === 0 && unpackStrokes([[{ t: 1 }]]).length === 0);
+    check('empty concert cannot replay', canReplay([]) === false && canReplay(concert) === true);
+    check('traditional car', characters.find(c => c.short === 'Car').char === '\u8eca');
+    check('traditional cat', characters.find(c => c.short === 'Cat').char === '\u8c93');
+    check('one is jat1', characters[0].jyutping === 'jat1');
+    check('sun is jat6', characters[5].jyutping === 'jat6');
+    check('moon is jyut6', characters[6].jyutping === 'jyut6');
+
+    claimAudiator();
+    check('drawing layer is only music', sounding === true && speaking === false);
+    stopSynth();
+    speaking = true;
+    claimAudiator();
+    check('drawing silences speech', sounding === true && speaking === false);
+    stopSynth();
+    stopSpeech();
+    check('both layers can be quiet', sounding === false && speaking === false);
+
+    try {
+      const key = 'touch-tone:selftest';
+      localStorage.setItem(key, '{"ok":1}');
+      check('local save', JSON.parse(localStorage.getItem(key)).ok === 1);
+      localStorage.removeItem(key);
+    } catch (e) {
+      check('local save', false);
+    }
+
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      check('audio context exists', !!Ctx);
+      if (Ctx) {
+        const ac = new Ctx();
+        const osc = ac.createOscillator();
+        const g = ac.createGain();
+        g.gain.value = 0;
+        const panner = ac.createStereoPanner ? ac.createStereoPanner() : null;
+        if (panner) { osc.connect(panner); panner.connect(g); }
+        else osc.connect(g);
+        g.connect(ac.destination);
+        osc.frequency.value = 440;
+        osc.start();
+        osc.stop(ac.currentTime + 0.05);
+        check('audio graph starts', true);
+        ac.close();
+      }
+    } catch (e) {
+      check('audio graph starts', false);
+    }
+
+    fitCanvas();
+    const before = pointCount(recordedStrokes);
+    drawSeg({ x: 0.15, y: 0.5, w: 16 }, { x: 0.85, y: 0.5, w: 16 });
+    let ink = false;
+    try {
+      const px = ctx.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data;
+      ink = px[3] > 10;
+    } catch (e) { ink = false; }
+    check('ink lands on the pad (' + canvas.width + 'x' + canvas.height + ')', ink);
+    check('pixel test did not record a stroke', pointCount(recordedStrokes) === before);
+
+    const rect = canvas.getBoundingClientRect();
+    function fakePointer(x, y) {
+      return {
+        pointerId: 7,
+        pointerType: 'mouse',
+        button: 0,
+        clientX: rect.left + x * Math.max(rect.width, 1),
+        clientY: rect.top + y * Math.max(rect.height, 1),
+        pressure: 0.4,
+        preventDefault() {},
+        getCoalescedEvents() { return [this]; }
+      };
+    }
+    onDown(fakePointer(0.1, 0.85));
+    onMove(fakePointer(0.5, 0.45));
+    onUp(fakePointer(0.9, 0.12), true);
+    const drawn = recordedStrokes[recordedStrokes.length - 1] || [];
+    check('handler records a stroke', drawn.length >= 2 && !isDrawing && !sounding);
+    check('handler pitch rises', drawn.length >= 2 && drawn[drawn.length - 1].f > drawn[0].f);
+    check('handler pan moves right', drawn.length >= 2 && drawn[drawn.length - 1].p > drawn[0].p);
+    const walked = takeDue(recordedStrokes, { si: recordedStrokes.length - 1, pi: 0 }, 999999);
+    check('replay reads the stored pitch', walked.due.length === drawn.length && walked.due[walked.due.length - 1].point.f === drawn[drawn.length - 1].f);
+    check('pen up ends the note', walked.due.length > 0 && walked.due[walked.due.length - 1].strokeEnd);
+    check('no page errors', pageErrors.length === 0);
+
+    const pre = document.createElement('pre');
+    pre.id = 'selftest-out';
+    pre.textContent = (failed ? 'SELFTEST FAIL' : 'SELFTEST PASS') + '\n' + lines.join('\n') + (pageErrors.length ? '\n' + pageErrors.join('\n') : '');
+    document.body.prepend(pre);
+  }
+
+  buildCarousel();
+  if (COVER) {
+    currentIndex = Math.max(0, characters.findIndex(c => c.char === '月'));
+    recordedStrokes = demoInk();
+  } else if (!SELFTEST) {
+    loadState();
+  }
+  renderCharacter();
+  if (window.ResizeObserver) new ResizeObserver(() => fitCanvas()).observe(canvasWrapper);
+  else window.addEventListener('resize', fitCanvas);
+  fitCanvas();
+  if (COVER) status('Trace a character. The music follows your hand.');
+  if (SELFTEST) runSelfTest();
+})();
+</script>
+</body>
+</html>

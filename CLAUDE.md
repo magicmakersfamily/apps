@@ -80,7 +80,7 @@ Audio API, started only from a button press. Exception, at the family's request:
   Shelf" in `versions/index.html`. Frozen copies are never edited.
 - Rolling the shelf back: take `versions/shelf/<X.Y>/index.html`, remove the `../../../` link prefixes, the noindex
   meta and the old-version strip, put it at the repo root, and release it as a new shelf version (never reuse a number).
-- Shelf versions so far: **1.0** (Sep 25, 2026, one long page of cards, frozen), **2.0** (Oct 18, 2026, tabs and icon tiles).
+- Shelf versions so far: **1.0** (Sep 25, 2026, one long page of cards, frozen), **2.0** (Oct 18, 2026, tabs and icon tiles, frozen), **2.1** (Nov 4, 2026, Touch Tone added).
 
 ## Versions: every release stays playable
 
@@ -170,6 +170,8 @@ Audio API, started only from a button press. Exception, at the family's request:
 - Exception, at the family's request: `mid-autumn/` speaks Cantonese by default (zh-HK / yue voice,
   Jyutping over the characters) with a button to switch to Mandarin and pinyin. Other games stay Mandarin
   unless the user asks otherwise.
+- Exception, at the family's request: `touch-tone/` (Touch Tone 筆音) speaks each character in Cantonese
+  (a zh-HK or yue voice, Jyutping on screen). The drawing music is a separate sound and never plays at the same time.
 - Double-check every word: Traditional forms (龜 not 龟, 觀察 not 观察), and Chinese words rather
   than Japanese ones (氮 not 窒素, 光合作用 not 光合成).
 

@@ -70,6 +70,15 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| marble-run-F10 | feature | marble-run | Pick a piece to move, flip, or erase; a switch paddle; save a copy | P2 | done | playtest | 1.1 | Each tube can release its own marble. Save a copy keeps the original track. |
+| marble-run-F9 | feature | marble-run | Slow motion, pause, try again, and show a stopped marble | P1 | done | playtest | 1.1 | Show me where highlights a marble that has stopped. Try again uses the same launch. |
+| marble-run-F8 | feature | marble-run | Replay stores the track and the starting view | P1 | done | playtest | 1.1 | Playback shows the first marble before the camera moves, and still plays after an edit. |
+| marble-run-F7 | feature | marble-run | Drop giant marble can join the little ones | P1 | done | playtest | 1.1 | Clear marbles first stays off unless the box is ticked. |
+| marble-run-F6 | feature | marble-run | Fit the whole track; Follow marble is separate from Center view | P1 | done | playtest | 1.1 | The buttons sit under the track. Follow starts off. |
+| marble-run-F5 | feature | marble-run | Starter track with one gap and a finish bell | P1 | done | playtest | 1.1 | Filling the gap drops one marble. Five little marbles and the giant can ring the bell. |
+| marble-run-F4 | feature | marble-run | Ghost piece and snap highlight before placing | P1 | done | playtest | 1.1 | The empty starter gap stays highlighted until it is filled. |
+| marble-run-F3 | feature | marble-run | Undo for place, erase, clear, flip, and move | P1 | done | playtest | 1.1 | Undo button and the Z key. |
+| marble-run-F2 | feature | marble-run | Sample, Starter, and named copies open as their own tracks | P0 | done | playtest | 1.1 | Opening one track never wipes another. A saved 1.0 track opens as My track. |
 | marble-run-F1 | feature | marble-run | Build a marble track, drop marbles, and replay a run | P1 | done | family | 1.0 | Ramps, curves, a funnel, a booster and a bouncer. The big marble clears the others. The track is saved on the device. A sideways roll is not slowed by a bounce. |
 | touch-tone-F1 | feature | touch-tone | Trace characters with drawing music, a separate Cantonese voice, and concert replay | P1 | done | family | 1.0 | Audiator follows the hand. Hear Word uses a device voice (zh-HK, else Mandarin). Replay uses the recorded pitch, pan and volume. |
 | guts-B10 | bug | guts | 1.6 kept the old controls on the first level: Little Guts auto-ran, blasts and blowouts looked like explosions, and the asked-for controls only ran in the Gym | P0 | done | family | 1.7 | New controls everywhere, no auto-run, tap-tap-hold to run (Mario-style build-up), gas that is never lost and lasts about 40 boosts, no explosions; `guts/PLAN.md`. |

@@ -70,6 +70,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| marble-run-F12 | feature | marble-run | Musical machine slice: scoring clarity, replay exit, starter reset, chimes, orchestra showcase | P0 | done | playtest | 1.3 | Gap says Put a ramp here. Home reads N of 5 · Giant home/missed. Watch again / Back to build. Tuned chimes and The Marble Orchestra. |
 | marble-run-F11 | feature | marble-run | Epic looping theme and velocity-aware SFX with unlock-on-gesture | P0 | done | playtest | 1.2 | Theme bed lifts when marbles run. Drop, clack, booster, bouncer, funnel, switch, giant, bell + success sting, UI clicks. Sound stays silent until the first tap. |
 | marble-run-F10 | feature | marble-run | Pick a piece to move, flip, or erase; a switch paddle; save a copy | P2 | done | playtest | 1.1 | Each tube can release its own marble. Save a copy keeps the original track. |
 | marble-run-F9 | feature | marble-run | Slow motion, pause, try again, and show a stopped marble | P1 | done | playtest | 1.1 | Show me where highlights a marble that has stopped. Try again uses the same launch. |

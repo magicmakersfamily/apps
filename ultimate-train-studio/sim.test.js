@@ -1,149 +1,185 @@
-/* Track model. Run with `node --test`. */
+/* Tabletop loop. Run with `node --test`. */
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const S = require('./sim.js');
 
-test('preset loop is one closed lap with no reverse', function () {
-  const built = S.buildLoop(14, 9);
-  const lap = S.lap(built.grid, built.start.col, built.start.row, 'E');
-  assert.equal(lap.reversed, false);
-  assert.equal(lap.closed, true);
-  assert.equal(lap.steps, built.perimeter);
+test('the camera looks down at a board, and the track is not in the sky', function () {
+  const proof = S.cameraProof();
+  assert.equal(proof.camera, 'tabletop-three-quarter');
+  assert.equal(proof.threeQuarter, true);
+  assert.equal(proof.frontLowerThanBack, true);
+  assert.equal(proof.heightGoesUp, true);
+  assert.equal(proof.boardHasWidth, true);
+  assert.equal(proof.trackOnBoard, true);
+  assert.equal(proof.boardThick, true);
+  assert.equal(proof.skyFloat, false);
+  assert.equal(S.trackZ(), S.BOARD.thick);
+  assert.equal(S.sceneryOnBoard(), true);
 });
 
-test('the same loop also closes counterclockwise', function () {
-  const built = S.buildLoop(14, 9);
-  const lap = S.lap(built.grid, built.start.col, built.start.row, 'W');
-  assert.equal(lap.reversed, false);
-  assert.equal(lap.closed, true);
-  assert.equal(lap.steps, built.perimeter);
-});
-
-test('a dead end turns the train around on the same tile', function () {
-  const grid = S.emptyGrid(5, 5);
-  grid[2][2] = { type: 'straight-h' };
-  const n = S.step(grid, 2, 2, 'E', {});
-  assert.equal(n.event, 'reverse');
-  assert.equal(n.col, 2);
-  assert.equal(n.row, 2);
-  assert.equal(n.dir, 'W');
-});
-
-test('a thrown switch sends the train up the siding and back the way it came', function () {
-  const built = S.buildLoop(14, 9);
-  let sw = null;
-  for (let r = 0; r < built.rows; r++) {
-    for (let c = 0; c < built.cols; c++) {
-      if (built.grid[r][c] && built.grid[r][c].type === 'switch') sw = { c: c, r: r, tile: built.grid[r][c] };
-    }
+test('a board point projects and unprojects back to itself', function () {
+  const z = S.trackZ();
+  const samples = [[40, 40], [900, 200], [1400, 1100], [220, 320]];
+  for (const [x, y] of samples) {
+    const p = S.project(x, y, z);
+    const back = S.unproject(p.x, p.y, z);
+    assert.ok(Math.abs(back.x - x) < 0.01, 'x ' + x);
+    assert.ok(Math.abs(back.y - y) < 0.01, 'y ' + y);
   }
-  assert.ok(sw);
-  sw.tile.state = 1;
-  const mem = {};
-  const onto = S.step(built.grid, sw.c + 1, sw.r, 'W', mem);
-  assert.equal(onto.col, sw.c);
-  assert.equal(onto.row, sw.r);
-  assert.equal(onto.dir, 'N');
-  assert.equal(mem.rejoin, 'W');
-  let col = onto.col, row = onto.row, dir = onto.dir;
-  let back = null;
-  for (let i = 0; i < 12; i++) {
-    const n = S.step(built.grid, col, row, dir, mem);
-    if (n.event === 'reverse') { dir = n.dir; continue; }
-    col = n.col; row = n.row; dir = n.dir;
-    if (col === sw.c && row === sw.r && dir === 'W') { back = n; break; }
+});
+
+test('clockwise travel along the home straight moves west', function () {
+  const a = S.pointAt(S.HOME_DIST);
+  const b = S.pointAt(S.HOME_DIST + 24);
+  assert.ok(b.x < a.x - 10, 'home straight heads west, clockwise');
+});
+
+test('the guided eight pieces close one loop and the other way around too', function () {
+  let placed = S.emptyPlaced();
+  assert.equal(S.loopClosed(placed), false);
+  assert.equal(S.nextTool(placed), 'station');
+  assert.equal(S.place(placed, 'nw', 'straight').ok, false);
+  let guard = 0;
+  while (!S.loopClosed(placed) && guard++ < 10) {
+    const tool = S.nextTool(placed);
+    const id = S.suggested(placed, tool);
+    assert.ok(id, 'a slot for ' + tool);
+    const res = S.place(placed, id, tool);
+    assert.equal(res.ok, true);
+    placed = res.placed;
   }
-  assert.ok(back, 'train should rejoin the main line going west');
-  const straight = S.step(built.grid, sw.c, sw.r, 'W', mem);
-  assert.equal(straight.dir, 'W');
-  assert.equal(straight.row, sw.r);
+  assert.equal(S.loopClosed(placed), true);
+  assert.equal(guard, 8);
+  const grid = S.toGrid(placed);
+  const cw = S.lap(grid, 1, 2, 'W');
+  const ccw = S.lap(grid, 1, 2, 'E');
+  assert.equal(cw.closed, true);
+  assert.equal(cw.reversed, false);
+  assert.equal(cw.steps, 8);
+  assert.equal(ccw.closed, true);
+  assert.equal(ccw.reversed, false);
+  assert.equal(ccw.steps, 8);
+  const home = S.cellRect(S.SLOTS.find((s) => s.id === 'home'));
+  const hit = S.slotAt(home.x + home.w / 2, home.y + home.h / 2);
+  assert.equal(hit.id, 'home');
 });
 
-test('a straight switch stays on the main line', function () {
-  const built = S.buildLoop(14, 9);
-  const lap = S.lap(built.grid, built.start.col, built.start.row, 'E');
-  assert.equal(lap.steps, built.perimeter);
+test('undo lifts the last piece and opens the loop', function () {
+  const session = S.createSession();
+  session.confirmPaint();
+  while (!session.state().loop) {
+    assert.equal(session.placeSuggested().ok, true);
+  }
+  assert.equal(session.state().loop, true);
+  session.undo();
+  assert.equal(session.state().loop, false);
+  assert.equal(session.state().placedCount, 7);
+  session.placeSuggested();
+  assert.equal(session.state().loop, true);
 });
 
-test('speed tile reports a speed event and still connects', function () {
-  const grid = S.emptyGrid(4, 3);
-  grid[1][1] = { type: 'straight-h' };
-  grid[1][2] = { type: 'speed' };
-  const n = S.step(grid, 1, 1, 'E', {});
-  assert.equal(n.event, 'speed');
-  assert.equal(n.col, 2);
-  assert.equal(n.dir, 'E');
-});
-
-test('curve tool cycles corners, and the same piece erases', function () {
-  const grid = S.emptyGrid(3, 3);
-  assert.equal(S.placePiece(grid, 1, 1, 'curve-1'), 'curve-tl');
-  assert.equal(S.placePiece(grid, 1, 1, 'curve-1'), 'curve-tr');
-  assert.equal(S.placePiece(grid, 1, 1, 'curve-1'), 'curve-br');
-  assert.equal(S.placePiece(grid, 1, 1, 'curve-1'), 'curve-bl');
-  assert.equal(S.placePiece(grid, 1, 1, 'station'), 'station');
-  assert.equal(S.placePiece(grid, 1, 1, 'station'), null);
-  assert.equal(grid[1][1], null);
-});
-
-test('boarding waits until the train is stopped at the station', function () {
-  const moving = S.boardAll(0, [{}, {}, {}, {}], true, true, 120);
-  assert.equal(moving.boarded, 0);
-  assert.equal(moving.count, 0);
-  assert.equal(moving.waiting.length, 4);
-  const away = S.boardAll(0, [{}, {}], true, false, 0);
-  assert.equal(away.boarded, 0);
-  assert.equal(away.waiting.length, 2);
-  const shut = S.boardAll(1, [{}, {}], false, true, 0);
-  assert.equal(shut.count, 1);
-  assert.equal(shut.boarded, 0);
-  const stopped = S.boardAll(0, [{}, {}, {}, {}], true, true, 0);
-  assert.equal(stopped.boarded, 4);
-  assert.equal(stopped.count, 4);
-  assert.equal(stopped.waiting.length, 0);
-  assert.equal(S.canBoard(true, true, 120), false);
+test('boarding waits until the train is stopped at home with the doors open', function () {
   assert.equal(S.canBoard(true, true, 0), true);
+  assert.equal(S.canBoard(true, true, 40), false);
+  assert.equal(S.canBoard(false, true, 0), false);
+  assert.equal(S.canBoard(true, false, 0), false);
 });
 
-test('the lantern festival is one missing curve away from the hill', function () {
-  const built = S.buildFestival();
-  const gap = S.firstGap(built.grid);
-  assert.ok(gap);
-  assert.equal(gap.col, built.gap.col);
-  assert.equal(gap.row, built.gap.row);
-  assert.equal(gap.type, 'curve-tr');
-  assert.equal(S.obviousCurve(built.grid, gap.row, gap.col), 'curve-tr');
-  assert.equal(S.gaps(built.grid).length, 1);
-  assert.equal(S.reaches(built.grid, built.start.col, built.start.row, 'E', built.festival.col, built.festival.row), false);
-  const ends = S.openEnds(built.grid);
-  assert.ok(ends.some(function (end) { return end.col === 5 && end.row === 1 && end.dir === 'E'; }));
-  assert.ok(ends.some(function (end) { return end.col === 6 && end.row === 2 && end.dir === 'N'; }));
-  assert.equal(S.placePiece(built.grid, gap.row, gap.col, 'curve-1'), 'curve-tr');
-  assert.equal(S.firstGap(built.grid), null);
-  assert.equal(S.reaches(built.grid, built.start.col, built.start.row, 'E', built.pickup.col, built.pickup.row), true);
-  assert.equal(S.reaches(built.grid, built.start.col, built.start.row, 'E', built.festival.col, built.festival.row), true);
-  const stop = S.nextStation(built.grid, built.start.col, built.start.row, 'E', function (tile) {
-    return tile.role !== 'festival';
-  });
-  assert.equal(stop.col, built.pickup.col);
-  assert.equal(stop.row, built.pickup.row);
-  const fest = S.nextStation(built.grid, built.pickup.col, built.pickup.row, 'W', function (tile) {
-    return tile.role === 'festival';
-  });
-  assert.equal(fest.col, built.festival.col);
-  assert.equal(fest.row, built.festival.row);
+test('lights are go, slow, and stop — never a speed number', function () {
+  assert.equal(S.lightsFor(0, false), 'stop');
+  assert.equal(S.lightsFor(40, false), 'slow');
+  assert.equal(S.lightsFor(260, false), 'go');
+  assert.equal(S.lightsFor(260, true), 'slow');
+  for (const speed of [0, 12, 100, 260]) {
+    const name = S.lightsFor(speed, false);
+    assert.equal(typeof name, 'string');
+    assert.equal(/\d/.test(name), false);
+  }
 });
 
-test('a loose curve in open space still places when nothing asks for it', function () {
-  const grid = S.emptyGrid(5, 5);
-  assert.equal(S.obviousCurve(grid, 2, 2), null);
-  assert.equal(S.placePiece(grid, 2, 2, 'curve-1'), 'curve-tl');
-  assert.equal(S.firstGap(grid), null);
+function buildDrive() {
+  const session = S.createSession();
+  session.paint('bullet', 'rainbow');
+  session.confirmPaint();
+  assert.equal(session.state().phase, 'build');
+  assert.equal(session.state().style, 'bullet');
+  assert.equal(session.state().color, 'rainbow');
+  let guard = 0;
+  while (!session.state().loop && guard++ < 10) {
+    session.setTool(session.nextTool());
+    assert.equal(session.placeSuggested().ok, true);
+  }
+  session.confirmBuild();
+  assert.equal(session.state().phase, 'drive');
+  assert.equal(session.state().loop, true);
+  return session;
+}
+
+test('doors while moving stay shut', function () {
+  const session = buildDrive();
+  session.doors();
+  assert.equal(session.state().boarded, 4);
+  assert.equal(session.state().waiting, 0);
+  session.go();
+  let guard = 0;
+  while (session.state().speed < 20 && guard++ < 40) session.tick(0.1);
+  assert.ok(session.state().speed >= 20);
+  session.doors();
+  assert.equal(session.state().doors, false);
+  assert.equal(session.state().doorRejected, true);
+  assert.equal(session.state().boarded, 4);
 });
 
-test('the preset loop has no hole between two open ends', function () {
-  const built = S.buildLoop(14, 9);
-  assert.equal(S.firstGap(built.grid), null);
-  assert.equal(S.obviousCurve(built.grid, 0, 0), null);
+test('paint, a chunky loop, then a festival stop celebrates before the end card', function () {
+  const session = buildDrive();
+  session.doors();
+  assert.equal(session.state().waiting, 0);
+  session.stopAtStation();
+  let guard = 0;
+  while (!session.state().celebration && guard++ < 500) session.tick(0.1);
+  assert.equal(session.state().celebration, true, 'in-world celebration');
+  assert.equal(session.state().endCard, false, 'the card waits');
+  assert.ok(session.state().alight < 1);
+  guard = 0;
+  while (!session.state().endCard && guard++ < 40) session.tick(0.1);
+  assert.equal(session.state().endCard, true);
+  assert.equal(session.state().celebration, true);
+  assert.equal(session.state().alight, 1);
+  session.rideAgain();
+  const again = session.state();
+  assert.equal(again.endCard, false);
+  assert.equal(again.celebration, false);
+  assert.equal(again.loop, true);
+  assert.equal(again.phase, 'drive');
+  assert.equal(again.waiting, 4);
+  assert.equal(again.boarded, 0);
+  assert.equal(again.lights, 'stop');
+});
+
+test('kid GO with friends aboard also reaches the festival', function () {
+  const session = buildDrive();
+  session.go();
+  assert.equal(session.state().nudgeDoors, true);
+  assert.ok(session.state().speed < 1);
+  session.doors();
+  session.go();
+  let guard = 0;
+  while (!session.state().celebration && guard++ < 500) session.tick(0.1);
+  assert.equal(session.state().celebration, true);
+  assert.equal(session.state().endCard, false);
+});
+
+test('an empty arrival does not throw the end card', function () {
+  const session = buildDrive();
+  session.stopAtStation();
+  let guard = 0;
+  while (session.state().speed > 0 || guard < 5) {
+    session.tick(0.1);
+    if (session.state().speed === 0 && guard > 8) break;
+    if (++guard > 500) break;
+  }
+  assert.equal(session.state().celebration, false);
+  assert.equal(session.state().endCard, false);
+  assert.equal(session.state().boarded, 0);
 });

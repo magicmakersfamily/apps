@@ -84,9 +84,9 @@ touch-tone/         Touch Tone 筆音 (beta): trace a character, hear drawing mu
 marble-run/         James’s Marble Run 彈珠軌道 (beta): fill one gap, ring the bell, then build your own
   index.html        the whole app (track builder, physics, bell, recorder)
   cover.png         1200×744 card image (render with index.html#cover)
-ultimate-train-studio/  Ultimate Train Studio 火車工作室 (beta): paint a train, fill the gap, light the lantern festival
-  index.html        the whole app (festival first drive, workshop, track builder, conductor)
-  sim.js            the track model (loops, curves, gaps, boarding)
+ultimate-train-studio/  Ultimate Train Studio 火車工作室 (beta): paint the engine, snap a chunky loop, drive the tabletop to the lantern festival
+  index.html        the whole app (paint, chunky loop, tabletop drive)
+  sim.js            the track model (board camera, loop, boarding)
   sim.test.js       track tests (node --test)
   cover.png         1200×744 card image (render with index.html#cover)
 versions/           past releases, still playable (versions/<game>/<X.Y>/), see versions/index.html
@@ -110,7 +110,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | GUTS 大肚仔歷險 (beta) | `guts/` | 1.8 | 2026-10-26 |
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
 | James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.3 | 2026-11-04 |
-| Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 1.2 | 2026-11-05 |
+| Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
 
 The shelf is versioned too: **The App Shelf 2.4** (2026-11-05). Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at
 `versions/shelf/2.3/`. Version 2.2, the shelf when Marble Run 1.0 joined, is frozen at

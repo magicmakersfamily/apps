@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Paint a train, lay a track, and drive it. Honk the horn, open the doors, and let people hop on. Kid Mode talks you through it.">
+<meta name="description" content="Snap the missing curve, paint the engine, and ride the last train to the Lantern Festival. Kid Mode talks you through it.">
 <meta property="og:title" content="Ultimate Train Studio 火車工作室 · The App Shelf">
-<meta property="og:description" content="Paint a train, lay a track, and drive it. Honk the horn, open the doors, and tap the people to hop aboard.">
+<meta property="og:description" content="The first ride is Last Train to the Lantern Festival. Paint the engine, pick up four friends with paper lanterns, and watch the hillside light up.">
 <meta property="og:image" content="https://magicmakersfamily.github.io/apps/ultimate-train-studio/cover.png">
 <meta property="og:type" content="website">
 <title>Ultimate Train Studio · The App Shelf</title>
@@ -34,7 +34,7 @@
     min-height: 100dvh;
     height: 100dvh;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
     background: var(--bg);
     color: var(--ink);
     font: 500 16px/1.35 Fredoka, "Trebuchet MS", sans-serif;
@@ -51,24 +51,26 @@
   ruby { ruby-position: under; }
   rt { font-family: Fredoka, sans-serif; font-size: 0.42em; color: var(--muted); }
 
-  .back { color: var(--muted); text-decoration: none; padding: 8px 12px 0; font-size: 0.95rem; min-width: 0; }
+  .back { color: var(--muted); text-decoration: none; padding: 6px 12px 0; font-size: 0.95rem; flex: none; }
   .back:hover { color: var(--ink); }
   header {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
-    gap: 8px 12px;
-    padding: 6px 12px 8px;
+    gap: 8px;
+    padding: 6px 10px 8px;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
     z-index: 5;
     min-width: 0;
     max-width: 100%;
+    flex: none;
   }
-  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .mark { width: 42px; height: 42px; flex: none; }
-  h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.01em; }
-  h1 .zh { display: block; font-size: 0.82rem; color: #fb7185; }
+  .brand { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
+  .mark { width: 40px; height: 40px; flex: none; }
+  h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; min-width: 0; }
+  h1 .title-words { white-space: nowrap; }
+  h1 .zh { display: block; font-size: 0.78rem; color: #fb7185; white-space: nowrap; }
   .beta {
     display: inline-block;
     margin-left: 6px;
@@ -80,34 +82,41 @@
     letter-spacing: 0.04em;
     vertical-align: 2px;
   }
-  .head-actions { display: flex; gap: 8px; margin-left: auto; }
-  .icon-btn, .mode-btn, .text-btn, .choice, .go, .horn, .door, .small {
+  .modes { display: flex; gap: 6px; flex: 1 1 auto; min-width: 0; }
+  .head-actions { display: flex; gap: 8px; align-items: center; flex: none; }
+  .icon-btn, .mode-btn, .text-btn, .choice, .go, .horn, .door, .small, .brake, .stop-at, .diff button, .tod button {
     border-radius: 14px;
     border: 2px solid transparent;
-    min-height: 48px;
-    padding: 8px 12px;
+    min-height: 44px;
+    padding: 6px 10px;
   }
-  .icon-btn {
-    width: 48px;
+  .icon-btn, .tod button {
+    width: 44px;
     background: #1e293b;
     color: #e2e8f0;
     border-color: #334155;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
-  .icon-btn[aria-pressed="true"] { color: #fbbf24; border-color: #f59e0b; }
-  .kid-toggle {
-    background: rgba(245, 158, 11, 0.18);
-    color: #fcd34d;
-    border-color: rgba(245, 158, 11, 0.45);
+  .icon-btn[aria-pressed="true"], .tod button[aria-pressed="true"] { color: #fbbf24; border-color: #f59e0b; }
+  .diff {
+    display: flex;
+    border: 2px solid #334155;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #1e293b;
+  }
+  .diff button {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #cbd5e1;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
   }
-  @media (prefers-color-scheme: light) {
-    header { color: #0f172a; }
-    .icon-btn { background: #fff; color: #0f172a; }
-    .kid-toggle { color: #9a3412; background: #ffedd5; }
-    h1 .zh { color: #be123c; }
-  }
-  .modes { display: flex; gap: 6px; flex: 1 1 280px; min-width: 0; max-width: 100%; }
+  .diff button[aria-checked="true"] { background: #f59e0b; color: #1c1917; }
   .mode-btn {
     flex: 1 1 0;
     min-width: 0;
@@ -115,44 +124,80 @@
     color: #cbd5e1;
     border-color: #334155;
     font-weight: 700;
+    white-space: nowrap;
   }
   .mode-btn[aria-pressed="true"] { background: #2563eb; color: #fff; border-color: #2563eb; }
-  .mode-btn .emo { display: block; font-size: 1.15rem; line-height: 1; }
-  body.kid .mode-btn { min-height: 58px; font-size: 1.05rem; }
+  .mode-btn .emo, .diff .emo { font-size: 1.05rem; line-height: 1; }
+  .mode-btn .long { display: none; }
+  @media (min-width: 1100px) {
+    body:not(.kid) .mode-btn .long { display: inline; }
+    body:not(.kid) .mode-btn .short { display: none; }
+  }
+  @media (max-width: 1040px) {
+    h1 { font-size: 1rem; }
+    .mode-btn, .diff button { padding: 6px 7px; font-size: 0.92rem; }
+  }
+  @media (prefers-color-scheme: light) {
+    header { color: #0f172a; }
+    .icon-btn, .tod button { background: #fff; color: #0f172a; }
+    .diff { background: #fff; border-color: #d5dee8; }
+    .diff button { color: #334155; }
+    .diff button[aria-checked="true"] { background: #f59e0b; color: #1c1917; }
+    .mode-btn { background: #fff; color: #0f172a; border-color: #d5dee8; }
+    h1 .zh { color: #be123c; }
+  }
 
-  main { position: relative; flex: 1; min-height: 0; min-width: 0; max-width: 100%; }
-  canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  main { position: relative; flex: 1; min-height: 0; min-width: 0; max-width: 100%; overflow: hidden; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; z-index: 0; }
 
-  .panel {
+  .panel, .tray {
     position: absolute;
     z-index: 3;
-    top: 10px;
-    left: 10px;
-    bottom: 10px;
-    width: min(320px, calc(100% - 20px));
-    overflow: auto;
-    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
     background: var(--card);
     color: #f8fafc;
     border: 1px solid rgba(148, 163, 184, 0.35);
     border-radius: 18px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
   }
-  .panel h2 { margin: 0 0 8px; font-size: 1.05rem; color: #fbbf24; }
-  .panel h3 { margin: 12px 0 6px; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #94a3b8; }
-  .hint { margin: 0 0 8px; color: #cbd5e1; font-size: 0.92rem; }
+  #workshopPanel {
+    top: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: min(300px, calc(100% - 20px));
+    overflow: hidden;
+  }
+  .panel-scroll, .tray-scroll { overflow: auto; min-height: 0; flex: 1 1 auto; }
+  .tray-scroll { flex: 1 1 auto; }
+  #toTrack, #toDrive { flex: none; }
+  #trackPanel {
+    z-index: 4;
+    top: auto;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 46%;
+    overflow: hidden;
+  }
+  .panel h2, .tray h2 { margin: 0 0 4px; font-size: 1.02rem; color: #fbbf24; }
+  .hint { margin: 0 0 8px; color: #cbd5e1; font-size: 0.88rem; }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tool-row, .theme-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
   .choice {
     background: #1e293b;
     border-color: #334155;
     color: #f8fafc;
     font-weight: 700;
     font-size: 0.82rem;
+    flex: 0 0 auto;
   }
   .choice[aria-pressed="true"] { border-color: #60a5fa; background: #1d4ed8; }
-  .choice .emo { display: block; font-size: 1.35rem; line-height: 1.1; }
-  body.kid .choice { min-height: 62px; font-size: 0.95rem; }
+  .choice .emo { display: block; font-size: 1.2rem; line-height: 1.1; }
   .colors { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .swatch { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; padding: 0; min-height: 0; }
   body.kid .swatch { width: 48px; height: 48px; }
@@ -168,72 +213,83 @@
   }
   .row { display: flex; gap: 8px; }
   .row > * { flex: 1; }
-  .text-btn { background: #1e293b; border-color: #334155; color: #f8fafc; font-weight: 700; }
-  .text-btn.wide { width: 100%; margin-top: 12px; background: #2563eb; border-color: #2563eb; }
-  #trackPanel .text-btn.wide { background: #059669; border-color: #059669; }
+  .text-btn, .tray-actions button {
+    background: #1e293b;
+    border: 2px solid #334155;
+    color: #f8fafc;
+    font-weight: 700;
+    border-radius: 14px;
+    min-height: 44px;
+  }
+  .text-btn.wide, #toTrack {
+    width: 100%;
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+  }
+  .tray-actions { display: flex; gap: 6px; flex: none; }
+  .tray-actions button { flex: 1; padding: 6px 8px; }
+  #undoBtn:disabled { opacity: 0.55; }
+  #toDrive, .test-drive {
+    width: 100%;
+    background: #059669;
+    border: 0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-height: 52px;
+  }
   .count { color: #7dd3fc; font-weight: 700; }
+  .time-line { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .time-line input, .throttle input { width: 100%; height: 32px; accent-color: #38bdf8; }
 
   .hud {
     position: absolute;
     z-index: 4;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: stretch;
-    pointer-events: none;
-  }
-  .pad, .horn, .go, .door, .small { pointer-events: auto; }
-  .pad {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 10px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
     background: var(--card);
-    border: 1px solid rgba(148, 163, 184, 0.35);
-    border-radius: 18px;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
     color: #f8fafc;
   }
-  .throttle { display: flex; flex-direction: column; gap: 4px; min-width: 140px; font-size: 0.78rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-  .throttle input { width: 160px; height: 36px; accent-color: #38bdf8; }
-  .speed { font-variant-numeric: tabular-nums; color: #67e8f9; font-weight: 700; font-size: 1rem; }
+  .drive-row { display: flex; gap: 6px; align-items: stretch; }
+  .drive-row > * { flex: 1; min-width: 0; }
+  .throttle { display: flex; flex-direction: column; gap: 2px; font-size: 0.75rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .speed { font-variant-numeric: tabular-nums; color: #67e8f9; font-weight: 700; font-size: 1rem; text-transform: none; letter-spacing: 0; }
   .go {
     border: 0;
     color: #fff;
     font-weight: 700;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     background: linear-gradient(90deg, #dc2626, #f97316 55%, #f59e0b);
-    min-width: 148px;
+    width: 100%;
+    min-height: 52px;
   }
-  .go.hot { box-shadow: 0 0 0 3px #fecaca, 0 0 24px #ef4444; }
-  .horn {
-    border: 0;
-    color: #1c1917;
-    font-weight: 700;
-    font-size: 1.25rem;
-    background: linear-gradient(#fde68a, #f59e0b);
-    min-width: 150px;
-  }
-  body.kid .horn.hint { animation: hint 1.1s ease-in-out infinite; }
-  @keyframes hint {
-    50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.35); }
-  }
+  .go.hot { box-shadow: inset 0 0 0 3px #fecaca; }
+  .horn { border: 0; color: #1c1917; font-weight: 700; background: linear-gradient(#fde68a, #f59e0b); }
+  .brake { background: #b45309; color: #fff; border-color: #b45309; font-weight: 700; }
   .door { background: #7e22ce; color: #fff; font-weight: 700; border-color: #7e22ce; }
   .door.open { background: #e11d48; border-color: #e11d48; }
   .small { background: #1e293b; border-color: #334155; color: #e9d5ff; font-weight: 700; }
-  .badge { font-size: 0.85rem; color: #e9d5ff; font-weight: 700; }
-  body.kid .go, body.kid .horn, body.kid .door, body.kid .small { min-height: 64px; font-size: 1.2rem; }
-
+  .stop-at { background: #0369a1; color: #fff; border-color: #0369a1; font-weight: 700; font-size: 1.05rem; width: 100%; }
+  body:not(.kid) #stopStationBtn { display: none !important; }
+  body.kid .stop-at, body.kid .go, body.kid .horn { min-height: 60px; font-size: 1.15rem; }
+  .badge { display: flex; align-items: center; justify-content: center; font-size: 0.95rem; color: #e9d5ff; font-weight: 700; }
+  .challenge { margin: 0; text-align: center; color: #fde68a; font-size: 0.92rem; font-weight: 700; }
+  .tod { position: absolute; z-index: 4; top: 8px; right: 8px; display: flex; gap: 6px; }
   .banner {
     position: absolute;
     z-index: 6;
-    top: 12px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
     max-width: min(92%, 520px);
-    padding: 10px 16px;
+    padding: 8px 14px;
     border-radius: 999px;
     background: rgba(15, 23, 42, 0.92);
     color: #fde68a;
@@ -242,13 +298,52 @@
     text-align: center;
     pointer-events: none;
   }
+  .scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    background: rgba(2, 6, 23, 0.4);
+    display: grid;
+    place-items: center;
+    padding: 12px;
+  }
+  .end-card {
+    width: min(440px, 100%);
+    max-height: 100%;
+    overflow: auto;
+    padding: 18px 16px 14px;
+    border-radius: 20px;
+    background: rgba(15, 23, 42, 0.96);
+    color: #fff7ed;
+    text-align: center;
+    border: 1px solid rgba(251, 191, 36, 0.65);
+  }
+  .end-card h2 { margin: 0 0 4px; font-size: 1.45rem; color: #fde68a; }
+  .end-card .zh { font-size: 1.3rem; color: #fecdd3; }
+  .end-card .big {
+    width: 100%;
+    margin-top: 10px;
+    min-height: 58px;
+    border: 0;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+    background: #0369a1;
+  }
+  .end-card .big.alt { background: #7c3aed; }
+  .end-links { margin: 12px 0 0; font-size: 0.85rem; color: #cbd5e1; }
   .shelf-foot {
-    padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+    padding: 6px 12px max(8px, env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
     background: var(--paper);
     color: var(--muted);
     font-size: 0.75rem;
-    line-height: 1.45;
+    line-height: 1.4;
+    flex: none;
+  }
+  @media (max-height: 760px) {
+    .shelf-foot { max-height: 16vh; overflow: auto; }
   }
   .shelf-foot p { margin: 2px 0; }
   .linkish {
@@ -266,7 +361,7 @@
     z-index: 20;
     left: 8px;
     top: 8px;
-    max-width: min(92vw, 640px);
+    max-width: min(92vw, 720px);
     max-height: 70vh;
     overflow: auto;
     margin: 0;
@@ -277,37 +372,33 @@
     border-radius: 8px;
     user-select: text;
   }
-  @media (max-width: 860px) {
-    body { height: auto; min-height: 100dvh; overflow: auto; }
-    h1 { font-size: 1.05rem; }
-    header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; width: 100%; }
-    .brand { min-width: 0; }
-    h1 { overflow: hidden; }
-    .head-actions { margin-left: 0; }
-    .modes { grid-column: 1 / -1; flex: none; width: 100%; max-width: 100%; justify-content: stretch; }
-    .mode-btn { padding: 8px 4px; font-size: 0.95rem; }
-    .go, .horn, .door, .small { font-size: 1rem; padding: 8px 6px; }
-    .hud .pad, .door, .small { min-width: 0; }
-    main { min-height: 70dvh; flex: none; }
-    .panel { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; height: min(42dvh, 300px); }
-    .hud { left: 8px; right: 8px; display: grid; grid-template-columns: 1fr 1fr; }
-    .hud .pad:first-child { grid-column: 1 / -1; flex-wrap: wrap; }
-    .throttle { flex: 1; min-width: 0; }
-    .throttle input { width: 100%; }
-    .horn, .go { min-width: 0; width: 100%; }
-    .go { flex: 1; }
+  @media (max-width: 760px) {
+    header { flex-wrap: wrap; }
+    .modes { order: 3; flex: 1 0 100%; }
+    .diff .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    h1 { font-size: 0.95rem; }
+    #workshopPanel {
+      top: auto;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      width: auto;
+      height: auto;
+      max-height: 48%;
+    }
+    .mark { width: 32px; height: 32px; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    body.kid .horn.hint { animation: none; }
-  }
-  html.cover-mode, html.cover-mode body { height: 100%; overflow: hidden; background: #431407; }
-  html.cover-mode main { position: fixed; inset: 0; min-height: 0; }
+  html.cover-mode, html.cover-mode body { height: 100%; overflow: hidden; background: #1c1917; }
+  html.cover-mode main { position: fixed; inset: 0; }
   html.cover-mode .back,
   html.cover-mode header,
   html.cover-mode footer,
   html.cover-mode .panel,
+  html.cover-mode .tray,
   html.cover-mode .hud,
+  html.cover-mode .tod,
   html.cover-mode .banner,
+  html.cover-mode .scrim,
   html.cover-mode #selftest-out { display: none !important; }
 </style>
 </head>
@@ -323,109 +414,136 @@
       <circle cx="32" cy="48" r="5" fill="#0f172a"/>
       <rect x="42" y="34" width="16" height="10" rx="3" fill="#fde68a"/>
     </svg>
-    <h1>Ultimate Train Studio <span class="beta">beta</span>
+    <h1>
+      <span class="title-words">Ultimate Train Studio <span class="beta">beta</span></span>
       <span class="zh" lang="zh-TW"><ruby>火<rt>huǒ</rt>車<rt>chē</rt>工<rt>gōng</rt>作<rt>zuò</rt>室<rt>shì</rt></ruby></span>
     </h1>
   </div>
   <div class="modes" role="tablist" aria-label="Studio">
-    <button class="mode-btn" id="tabWorkshop" type="button" role="tab" aria-pressed="false"><span class="emo" aria-hidden="true">🎨</span><span class="tab-label">Paint</span></button>
-    <button class="mode-btn" id="tabTrack" type="button" role="tab" aria-pressed="false"><span class="emo" aria-hidden="true">🛤️</span><span class="tab-label">Tracks</span></button>
-    <button class="mode-btn" id="tabDrive" type="button" role="tab" aria-pressed="true"><span class="emo" aria-hidden="true">🚂</span><span class="tab-label">Drive</span></button>
+    <button class="mode-btn" id="tabWorkshop" type="button" role="tab" aria-pressed="false" aria-label="Paint"><span class="emo" aria-hidden="true">🎨</span><span class="short">Paint</span><span class="long">Workshop</span></button>
+    <button class="mode-btn" id="tabTrack" type="button" role="tab" aria-pressed="false" aria-label="Tracks"><span class="emo" aria-hidden="true">🛤️</span><span class="short">Tracks</span><span class="long">Track Builder</span></button>
+    <button class="mode-btn" id="tabDrive" type="button" role="tab" aria-pressed="false" aria-label="Drive"><span class="emo" aria-hidden="true">🚂</span><span class="short">Drive</span><span class="long">Conductor</span></button>
   </div>
   <div class="head-actions">
-    <button class="kid-toggle" id="modeDifficultyBtn" type="button" aria-pressed="true"><span id="diffLabel">Kid Mode</span></button>
+    <div class="diff" role="radiogroup" aria-label="Play style">
+      <button type="button" id="kidPick" role="radio" aria-checked="true"><span class="emo" aria-hidden="true">🧒</span><span class="lbl">Kid</span></button>
+      <button type="button" id="advPick" role="radio" aria-checked="false"><span class="emo" aria-hidden="true">🎛</span><span class="lbl">Advanced</span></button>
+    </div>
     <button class="icon-btn" id="musicToggleBtn" type="button" aria-pressed="false" aria-label="Theme music" title="Theme music">♪</button>
   </div>
 </header>
 
 <main>
   <canvas id="gameCanvas" width="800" height="500" aria-label="Train world"></canvas>
+  <div class="tod" id="todQuick">
+    <button type="button" id="todDay" aria-label="Day" aria-pressed="false">☀️</button>
+    <button type="button" id="todNight" aria-label="Night" aria-pressed="true">🌙</button>
+  </div>
 
   <aside class="panel" id="workshopPanel" hidden>
-    <h2>🎨 Paint the train</h2>
-    <p class="hint">Pick an engine, a color, and how many cars.</p>
-    <h3>Engine</h3>
-    <div class="grid3">
-      <button class="choice" id="btnEngSteam" type="button" aria-pressed="true"><span class="emo" aria-hidden="true">💨</span>Steam</button>
-      <button class="choice" id="btnEngBullet" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">⚡</span>Bullet</button>
-      <button class="choice" id="btnEngMetro" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">🚇</span>City</button>
-    </div>
-    <h3>Wheels</h3>
-    <div class="grid3">
-      <button class="choice" id="btnWheelClassic" type="button" aria-pressed="true">Heavy</button>
-      <button class="choice" id="btnWheelSleek" type="button" aria-pressed="false">Sleek</button>
-      <button class="choice" id="btnWheelUrban" type="button" aria-pressed="false">Plain</button>
-    </div>
-    <h3>Color</h3>
-    <div class="colors" id="colorPalette"></div>
-    <p style="height:8px"></p>
-    <button class="rainbow" id="rainbowBtn" type="button">Rainbow</button>
-    <h3>Cars <span class="count" id="carriageCount">2</span></h3>
-    <div class="row">
-      <button class="text-btn" id="addCar" type="button">＋ Add a car</button>
-      <button class="text-btn" id="removeCar" type="button">− Take a car</button>
-    </div>
-    <button class="text-btn wide" id="toTrack" type="button">Next: lay the track →</button>
-  </aside>
-
-  <aside class="panel" id="trackPanel" hidden>
-    <h2>🛤️ Lay the track</h2>
-    <p class="hint">Tap the world to place a piece. Tap a corner again to turn it. Tap the same straight piece to pick it up.</p>
-    <div class="grid2" id="toolBox">
-      <button class="choice" id="toolStraightH" type="button" data-tool="straight-h" aria-pressed="true"><span class="emo" aria-hidden="true">↔️</span>Across</button>
-      <button class="choice" id="toolStraightV" type="button" data-tool="straight-v" aria-pressed="false"><span class="emo" aria-hidden="true">↕️</span>Up-down</button>
-      <button class="choice" id="toolCurve1" type="button" data-tool="curve-1" aria-pressed="false"><span class="emo" aria-hidden="true">↩️</span>Corner</button>
-      <button class="choice" id="toolSwitch" type="button" data-tool="switch" aria-pressed="false"><span class="emo" aria-hidden="true">🔀</span>Switch</button>
-      <button class="choice" id="toolStation" type="button" data-tool="station" aria-pressed="false"><span class="emo" aria-hidden="true">🚉</span>Station</button>
-      <button class="choice" id="toolSpeed" type="button" data-tool="speed" aria-pressed="false"><span class="emo" aria-hidden="true">⏩</span>Fast bit</button>
-      <button class="choice" id="toolErase" type="button" data-tool="erase" aria-pressed="false"><span class="emo" aria-hidden="true">✕</span>Erase</button>
-    </div>
-    <h3>Place</h3>
-    <div class="grid3">
-      <button class="choice" id="themeFall" type="button" aria-pressed="true">🍁 Leaves</button>
-      <button class="choice" id="themeJapan" type="button" aria-pressed="false">🌸 Sakura</button>
-      <button class="choice" id="themeGermany" type="button" aria-pressed="false">🏰 Castle</button>
-    </div>
-    <h3>Time of day <span class="count" id="timeLabel">Sunset</span></h3>
-    <input id="timeSlider" type="range" min="0" max="24" value="17" aria-label="Time of day">
-    <div class="row" style="margin-top:10px">
-      <button class="text-btn" id="clearBtn" type="button">Clear</button>
-      <button class="text-btn" id="presetBtn" type="button">Loop again</button>
-    </div>
-    <button class="text-btn wide" id="toDrive" type="button">Drive the train →</button>
-  </aside>
-
-  <div class="hud" id="conductorHUD">
-    <div class="pad">
-      <label class="throttle">Throttle
-        <input id="speedLever" type="range" min="0" max="100" value="40" aria-label="Throttle">
-        <span class="speed" id="speedValueDisplay">40 km/h</span>
-      </label>
-      <button class="go" id="turboBtn" type="button">GO-GO-GO!</button>
-    </div>
-    <button class="horn hint" id="hornBtn" type="button">📣 HONK HORN!</button>
-    <div class="pad">
-      <div>
-        <div class="badge" id="passengerCountBadge">Train: 0</div>
-        <div class="row" style="margin-top:6px">
-          <button class="door" id="doorToggleBtn" type="button" aria-pressed="false"><span id="doorBtnLabel">🚪 Open doors</span></button>
-          <button class="small" id="boardBtn" type="button">All aboard</button>
-        </div>
+    <div class="panel-scroll">
+      <h2>🎨 Paint the train</h2>
+      <p class="hint" id="workshopHint">This is your train, on the tracks.</p>
+      <h3 class="hint">Engine</h3>
+      <div class="grid3">
+        <button class="choice" id="btnEngSteam" type="button" aria-pressed="true"><span class="emo" aria-hidden="true">💨</span>Steam</button>
+        <button class="choice" id="btnEngBullet" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">⚡</span>Bullet</button>
+        <button class="choice" id="btnEngMetro" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">🚇</span>City</button>
+      </div>
+      <h3 class="hint">Wheels</h3>
+      <div class="grid3">
+        <button class="choice" id="btnWheelClassic" type="button" aria-pressed="true">Heavy</button>
+        <button class="choice" id="btnWheelSleek" type="button" aria-pressed="false">Sleek</button>
+        <button class="choice" id="btnWheelUrban" type="button" aria-pressed="false">Plain</button>
+      </div>
+      <h3 class="hint">Color</h3>
+      <div class="colors" id="colorPalette"></div>
+      <p style="height:8px"></p>
+      <button class="rainbow" id="rainbowBtn" type="button">🌈 Rainbow</button>
+      <h3 class="hint">Cars <span class="count" id="carriageCount">2</span></h3>
+      <div class="row">
+        <button class="text-btn" id="addCar" type="button">＋ Add a car</button>
+        <button class="text-btn" id="removeCar" type="button">− Take a car</button>
       </div>
     </div>
+    <button class="text-btn wide" id="toTrack" type="button">Next: lay the track</button>
+  </aside>
+
+  <aside class="tray" id="trackPanel" hidden>
+    <div class="tray-scroll">
+      <h2>🛤️ Lay the track</h2>
+      <p class="hint" id="trackHint">Tap the map. A corner turns itself when there is one way it fits.</p>
+      <div class="tool-row" id="toolBox">
+        <button class="choice" id="toolStraightH" type="button" data-tool="straight-h" aria-pressed="true"><span class="emo" aria-hidden="true">↔️</span>Across</button>
+        <button class="choice" id="toolStraightV" type="button" data-tool="straight-v" aria-pressed="false"><span class="emo" aria-hidden="true">↕️</span>Up-down</button>
+        <button class="choice" id="toolCurve1" type="button" data-tool="curve-1" aria-pressed="false"><span class="emo" aria-hidden="true">↩️</span>Corner</button>
+        <button class="choice" id="toolSwitch" type="button" data-tool="switch" aria-pressed="false"><span class="emo" aria-hidden="true">🔀</span>Switch</button>
+        <button class="choice" id="toolStation" type="button" data-tool="station" aria-pressed="false"><span class="emo" aria-hidden="true">🚉</span>Station</button>
+        <button class="choice" id="toolSpeed" type="button" data-tool="speed" aria-pressed="false"><span class="emo" aria-hidden="true">⏩</span>Fast bit</button>
+        <button class="choice" id="toolErase" type="button" data-tool="erase" aria-pressed="false"><span class="emo" aria-hidden="true">✕</span>Erase</button>
+      </div>
+      <div class="theme-row">
+        <button class="choice" id="themeLantern" type="button" aria-pressed="true">🏮 Festival</button>
+        <button class="choice" id="themeFall" type="button" aria-pressed="false">🍁 Leaves</button>
+        <button class="choice" id="themeJapan" type="button" aria-pressed="false">🌸 Sakura</button>
+        <button class="choice" id="themeGermany" type="button" aria-pressed="false">🏰 Castle</button>
+      </div>
+      <label class="time-line">Time of day <span class="count" id="timeLabel">Night</span>
+        <input id="timeSlider" type="range" min="0" max="24" value="21" aria-label="Time of day">
+      </label>
+    </div>
+    <div class="tray-actions">
+      <button id="undoBtn" type="button">↩ <span class="lbl">Undo</span></button>
+      <button id="clearBtn" type="button">Clear</button>
+      <button id="presetBtn" type="button">Loop</button>
+      <button id="festivalBtn" type="button">Festival</button>
+    </div>
+    <button class="test-drive" id="toDrive" type="button">🚂 <span class="lbl">Test Drive</span></button>
+  </aside>
+
+  <div class="hud" id="conductorHUD" hidden>
+    <p class="challenge" id="challengeHint" hidden>Can you bring everyone to the festival in two trips?</p>
+    <div class="drive-row">
+      <label class="throttle">Throttle
+        <input id="speedLever" type="range" min="0" max="100" value="0" aria-label="Throttle">
+        <span class="speed" id="speedValueDisplay">0 km/h</span>
+      </label>
+    </div>
+    <div class="drive-row">
+      <button class="brake" id="brakeBtn" type="button">🛑 <span class="lbl">Brake</span></button>
+      <button class="horn" id="hornBtn" type="button">📣 <span class="lbl">Horn</span></button>
+      <button class="door" id="doorToggleBtn" type="button" aria-pressed="false"><span id="doorBtnLabel">🚪 Doors</span></button>
+    </div>
+    <button class="stop-at" id="stopStationBtn" type="button">🚉 <span class="lbl">Stop at Station</span></button>
+    <div class="drive-row">
+      <button class="small" id="boardBtn" type="button">👥 <span class="lbl">All aboard</span></button>
+      <div class="badge" id="passengerCountBadge">Train: 0</div>
+    </div>
+    <button class="go" id="turboBtn" type="button">GO</button>
   </div>
 
   <div class="banner" id="announcementBanner" role="status" aria-live="polite" hidden>
     <span id="announcementText"></span>
   </div>
+
+  <div class="scrim" id="festivalScrim" hidden>
+    <div class="end-card" id="festivalEnd" role="dialog" aria-labelledby="festivalTitle">
+      <h2 id="festivalTitle">The lanterns are lit</h2>
+      <p class="zh" lang="zh-TW"><ruby>燈<rt>dēng</rt>會<rt>huì</rt></ruby></p>
+      <button class="big" id="rideAgain" type="button">🔁 Ride Again</button>
+      <button class="big alt" id="buildOwn" type="button">🛠️ Build Your Own Route</button>
+      <p class="end-links">Like this? <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a> · <a href="../">More from the App Shelf</a></p>
+      <p class="end-links"><button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/ultimate-train-studio/" data-text="Ride the last train to the Lantern Festival: Ultimate Train Studio">Tell a friend</button></p>
+    </div>
+  </div>
 </main>
 
 <footer class="shelf-foot">
-  <p><b>Version 1.0 (beta)</b> · Launched <time datetime="2026-11-05">November 5, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
+  <p><b>Version 1.1 (beta)</b> · Launched <time datetime="2026-11-05">November 5, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
   <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
   <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
   <p>The horn, the chugs, and the theme song are made on this device. Kid Mode uses your device’s voice. Your train stays on this device.</p>
-  <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/ultimate-train-studio/" data-text="Paint a train, lay the track, and honk the horn: Ultimate Train Studio">Tell a friend</button></p>
+  <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/ultimate-train-studio/" data-text="Ride the last train to the Lantern Festival: Ultimate Train Studio">Tell a friend</button></p>
 </footer>
 <noscript><p class="shelf-foot">Turn on JavaScript to build a train and drive it.</p></noscript>
 <pre id="selftest-out" hidden></pre>
@@ -435,8 +553,12 @@
 (function () {
   const COLS = 14;
   const ROWS = 9;
-  const KEY = 'ultimate-train-studio:v1';
+  const KEY = 'ultimate-train-studio:v2';
   const COLORS = ['#ef4444', '#f97316', '#eab308', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6'];
+  const LANTERN_SPOTS = [
+    [0.1, 0.07], [0.2, 0.12], [0.31, 0.06], [0.42, 0.11],
+    [0.54, 0.06], [0.65, 0.12], [0.77, 0.07], [0.88, 0.11]
+  ];
   const COVER = document.documentElement.classList.contains('cover-mode');
   const SELFTEST = location.hash === '#selftest';
   const NO_SAVE = COVER || SELFTEST;
@@ -455,31 +577,45 @@
     boarded: 0
   };
 
-  let mode = 'drive';
+  let mode = 'track';
   let kid = true;
-  let theme = 'fall';
-  let hour = 17;
-  let tool = 'straight-h';
+  let theme = 'lantern';
+  let hour = 21;
+  let tool = 'curve-1';
   let grid = [];
-  let col = 6, row = 1, dir = 'E', progress = 0.4;
+  let col = 3, row = 1, dir = 'E', progress = 0.2;
   let mem = {};
-  let throttle = reduceMotion ? 0 : 40;
-  let currentSpeed = throttle;
+  let throttle = 0;
+  let currentSpeed = 0;
   let boostUntil = 0;
-  let userDrove = !reduceMotion;
+  let braking = false;
+  let userDrove = false;
   let wheelSpin = 0;
   let trail = [];
   let waiting = [];
+  let walkers = [];
+  let platformPeople = [];
   let nextPid = 1;
   let hover = null;
+  let pressCell = null;
   let drag = null;
-  let pointerDown = null;
   let originX = 0, originY = 0, tile = 48, viewW = 800, viewH = 500;
   let doorAnim = 0;
   let welcomed = false;
   let bannerTimer = 0;
   let smokeClock = 0;
   let leafClock = 0;
+  let story = 'festival';
+  let beat = 'gap';
+  let painted = false;
+  let arrived = 0;
+  let lanternsLit = 0;
+  let alighting = false;
+  let saidGoFestival = false;
+  let autoTarget = null;
+  let gapFlash = null;
+  let undoStack = [];
+  let bootstrapping = true;
   const puffs = [];
   const leaves = Array.from({ length: 10 }, (_, i) => ({
     x: (i + 1) / 11, y: (i * 0.17) % 1, s: 0.4 + (i % 3) * 0.2, v: 0.04 + (i % 4) * 0.02
@@ -677,12 +813,14 @@
 
   function speak(text, lang) {
     if (!kid || COVER || !window.speechSynthesis || !text) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang || 'en-US';
-    u.rate = lang && lang.indexOf('zh') === 0 ? 0.86 : 0.95;
-    if (lang && lang.indexOf('zh') === 0 && zhVoice) u.voice = zhVoice;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || 'en-US';
+      u.rate = lang && lang.indexOf('zh') === 0 ? 0.86 : 0.95;
+      if (lang && lang.indexOf('zh') === 0 && zhVoice) u.voice = zhVoice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
   }
 
   function pickZhVoice() {
@@ -699,36 +837,75 @@
 
   function announce(show, say) {
     const banner = $('announcementBanner');
+    if (!banner) return;
     $('announcementText').textContent = show;
     banner.hidden = false;
     clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(function () { banner.hidden = true; }, 2600);
+    bannerTimer = setTimeout(function () { banner.hidden = true; }, 2800);
     if (say) speak(say);
   }
 
+  function isNight() { return hour >= 21 || hour < 5; }
+  function isDark() { return hour >= 19 || hour < 6; }
+
   function goalSpeed() {
-    if (COVER) return 62;
+    if (COVER) return 0;
+    if (train.doorsOpen || walkers.length || alighting) return 0;
+    if (autoTarget) {
+      if (col === autoTarget.col && row === autoTarget.row) return 0;
+      return 28;
+    }
     if (performance.now() < boostUntil) return 120;
     return throttle;
   }
 
   function refreshSpeed() {
-    const turbo = performance.now() < boostUntil;
-    $('speedValueDisplay').textContent = Math.round(currentSpeed) + ' km/h' + (turbo ? ' · GO!' : '');
-    $('turboBtn').classList.toggle('hot', turbo);
-    $('speedLever').value = String(throttle);
+    const turbo = performance.now() < boostUntil && currentSpeed > 100;
+    const el = $('speedValueDisplay');
+    if (el) el.textContent = Math.round(currentSpeed) + ' km/h' + (turbo ? ' · GO!' : '');
+    const go = $('turboBtn');
+    if (go) go.classList.toggle('hot', turbo);
   }
 
   function refreshDoor() {
     const btn = $('doorToggleBtn');
-    $('doorBtnLabel').textContent = train.doorsOpen ? '🚪 Close doors' : '🚪 Open doors';
+    if (!btn) return;
+    $('doorBtnLabel').textContent = train.doorsOpen ? '🚪 Doors open' : '🚪 Doors';
     btn.classList.toggle('open', train.doorsOpen);
     btn.setAttribute('aria-pressed', train.doorsOpen ? 'true' : 'false');
   }
 
   function refreshBadge() {
-    $('passengerCountBadge').textContent = 'Train: ' + train.boarded;
-    $('carriageCount').textContent = String(train.cars);
+    const badge = $('passengerCountBadge');
+    if (badge) badge.textContent = 'Train: ' + train.boarded;
+    const cars = $('carriageCount');
+    if (cars) cars.textContent = String(train.cars);
+  }
+
+  function refreshUndo() {
+    const btn = $('undoBtn');
+    if (btn) btn.disabled = undoStack.length === 0;
+  }
+
+  function updateChallenge() {
+    const hint = $('challengeHint');
+    if (!hint) return;
+    hint.hidden = !(story === 'festival' && mode === 'drive' && beat !== 'celebrate');
+  }
+
+  function refreshHints() {
+    const hint = $('trackHint');
+    if (hint) {
+      if (story === 'festival' && beat === 'gap') hint.textContent = 'One corner is missing. Tap the glowing piece.';
+      else hint.textContent = kid ? 'Tap the map to put a piece down.' : 'Tap the map. A corner turns to fit when there is one way.';
+    }
+    const next = $('toTrack');
+    if (next) {
+      if (story === 'festival' && (beat === 'paint' || beat === 'ride')) next.textContent = '🚂 Drive down the hill';
+      else next.textContent = kid ? '🛤️ Tracks' : 'Next: lay the track';
+    }
+    const wh = $('workshopHint');
+    if (wh) wh.textContent = story === 'festival' && beat === 'paint' ? 'Paint the engine. Rainbow is a good one.' : 'This is your train, on the tracks.';
   }
 
   function pressGroup(ids, on) {
@@ -740,7 +917,8 @@
 
   function setEngine(type) {
     train.engine = type;
-    pressGroup(['btnEngSteam', 'btnEngBullet', 'btnEngMetro'], 'btnEng' + type.charAt(0).toUpperCase() + type.slice(1));
+    const id = type === 'steam' ? 'btnEngSteam' : type === 'bullet' ? 'btnEngBullet' : 'btnEngMetro';
+    pressGroup(['btnEngSteam', 'btnEngBullet', 'btnEngMetro'], id);
     save();
   }
   function setWheels(type) {
@@ -749,11 +927,20 @@
     pressGroup(Object.values(map), map[type]);
     save();
   }
-  function setPaint(color) {
+  function paintButtons(color) {
     train.paint = color;
     document.querySelectorAll('.swatch').forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.color === color ? 'true' : 'false');
     });
+  }
+  function setPaint(color) {
+    paintButtons(color);
+    painted = true;
+    if (story === 'festival' && beat === 'paint') {
+      beat = 'ride';
+      announce('Drive down the hill.', 'Drive down the hill. Stop for the friends with lanterns.');
+      refreshHints();
+    }
     save();
   }
   function addCarriage() {
@@ -776,13 +963,19 @@
   }
   function setHour(h) {
     hour = Math.max(0, Math.min(24, h));
-    $('timeLabel').textContent = timeName(hour);
-    $('timeSlider').value = String(hour);
+    const label = $('timeLabel');
+    if (label) label.textContent = timeName(hour);
+    const slider = $('timeSlider');
+    if (slider) slider.value = String(Math.round(hour));
+    const day = $('todDay');
+    const night = $('todNight');
+    if (day) day.setAttribute('aria-pressed', hour >= 8 && hour < 16 ? 'true' : 'false');
+    if (night) night.setAttribute('aria-pressed', isNight() ? 'true' : 'false');
     save();
   }
   function setTheme(name) {
     theme = name;
-    const map = { fall: 'themeFall', japan: 'themeJapan', germany: 'themeGermany' };
+    const map = { lantern: 'themeLantern', fall: 'themeFall', japan: 'themeJapan', germany: 'themeGermany' };
     pressGroup(Object.values(map), map[name]);
     save();
   }
@@ -802,9 +995,14 @@
     $('workshopPanel').hidden = mode !== 'workshop';
     $('trackPanel').hidden = mode !== 'track';
     $('conductorHUD').hidden = mode !== 'drive';
+    document.body.classList.toggle('mode-drive', mode === 'drive');
+    updateChallenge();
+    refreshHints();
     if (!silent && kid) {
       if (mode === 'workshop') announce('Paint your train.', 'Paint your train. Tap a color.');
-      else if (mode === 'track') announce('Lay the track.', 'Tap the grass to lay track.');
+      else if (mode === 'track' && story === 'festival' && beat === 'gap') announce('Tap the glowing corner.', 'Tap the glowing corner.');
+      else if (mode === 'track') announce('Lay the track.', 'Tap the map to lay track.');
+      else if (story === 'festival' && beat === 'ride') announce('Drive down the hill.', 'Drive down the hill. Stop for the friends with lanterns.');
       else announce('You are the conductor.', 'You are the conductor. Tap the horn.');
     }
     save();
@@ -812,26 +1010,63 @@
 
   function applyKid() {
     document.body.classList.toggle('kid', kid);
-    $('diffLabel').textContent = kid ? 'Kid Mode' : 'Advanced';
-    $('modeDifficultyBtn').setAttribute('aria-pressed', kid ? 'true' : 'false');
-    $('tabWorkshop').querySelector('.tab-label').textContent = kid ? 'Paint' : 'Workshop';
-    $('tabTrack').querySelector('.tab-label').textContent = kid ? 'Tracks' : 'Track Builder';
-    $('tabDrive').querySelector('.tab-label').textContent = kid ? 'Drive' : 'Conductor';
+    $('kidPick').setAttribute('aria-checked', kid ? 'true' : 'false');
+    $('advPick').setAttribute('aria-checked', kid ? 'false' : 'true');
+    $('tabWorkshop').setAttribute('aria-label', kid ? 'Paint' : 'Workshop');
+    $('tabTrack').setAttribute('aria-label', kid ? 'Tracks' : 'Track Builder');
+    $('tabDrive').setAttribute('aria-label', kid ? 'Drive' : 'Conductor');
+    const go = $('turboBtn');
+    if (go) go.textContent = kid ? 'GO' : 'Turbo';
     if (!kid && window.speechSynthesis) window.speechSynthesis.cancel();
+    refreshHints();
   }
 
-  function toggleDifficulty() {
-    kid = !kid;
+  function setKid(next) {
+    if (kid === next) return;
+    kid = next;
     applyKid();
-    announce(kid ? 'Kid Mode. Big buttons.' : 'Advanced mode.', kid ? 'Kid mode. I will talk you through it.' : '');
+    if (kid) announce('Kid mode.', 'Kid mode. I will talk you through it.');
+    else announce('Advanced mode.', '');
     save();
   }
 
+  function cloneGrid(source) {
+    return source.map(function (line) {
+      return line.map(function (cell) {
+        if (!cell) return null;
+        return { type: cell.type, state: cell.state || 0, name: cell.name || '', role: cell.role || '', lanterns: !!cell.lanterns };
+      });
+    });
+  }
+
+  function snapshot() {
+    if (bootstrapping) return;
+    undoStack.push(cloneGrid(grid));
+    if (undoStack.length > 40) undoStack.shift();
+    refreshUndo();
+  }
+
+  function undo() {
+    if (!undoStack.length) {
+      announce('Nothing to undo.', kid ? 'Nothing to undo.' : '');
+      return;
+    }
+    grid = undoStack.pop();
+    mem = {};
+    afterEdit();
+  }
+
   function syncPassengers() {
+    if (beat === 'celebrate') {
+      waiting = [];
+      refreshBadge();
+      return;
+    }
     const keys = {};
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        if (grid[r][c] && grid[r][c].type === 'station') keys[c + ',' + r] = true;
+        const piece = grid[r][c];
+        if (piece && piece.type === 'station' && piece.role !== 'festival') keys[c + ',' + r] = piece;
       }
     }
     waiting = waiting.filter(function (p) { return keys[p.key]; });
@@ -839,6 +1074,7 @@
       if (waiting.some(function (p) { return p.key === key; })) return;
       const parts = key.split(',');
       const c = +parts[0], r = +parts[1];
+      const piece = keys[key];
       for (let i = 0; i < 4; i++) {
         waiting.push({
           id: nextPid++,
@@ -846,6 +1082,7 @@
           col: c,
           row: r,
           color: COLORS[i % COLORS.length],
+          lantern: !!piece.lanterns,
           ox: (i - 1.5) * 14,
           oy: (i % 2) * 8
         });
@@ -854,40 +1091,156 @@
     refreshBadge();
   }
 
+  function resetRideBits() {
+    walkers = [];
+    platformPeople = [];
+    alighting = false;
+    arrived = 0;
+    lanternsLit = 0;
+    saidGoFestival = false;
+    autoTarget = null;
+    gapFlash = null;
+    train.boarded = 0;
+    train.doorsOpen = false;
+    braking = false;
+    boostUntil = 0;
+    throttle = 0;
+    currentSpeed = 0;
+    mem = {};
+    trail = [];
+    const scrim = $('festivalScrim');
+    if (scrim) scrim.hidden = true;
+  }
+
+  function startFestival(keep) {
+    const paint = train.paint, engine = train.engine, wheels = train.wheels, cars = train.cars;
+    const wasPainted = painted;
+    if (!bootstrapping) snapshot();
+    const built = TrainSim.buildFestival(COLS, ROWS);
+    grid = built.grid;
+    col = built.start.col;
+    row = built.start.row;
+    dir = built.dir;
+    progress = 0.2;
+    story = 'festival';
+    beat = 'gap';
+    theme = 'lantern';
+    tool = 'curve-1';
+    mode = 'track';
+    if (!keep) hour = 21;
+    resetRideBits();
+    waiting = [];
+    if (keep) {
+      train.paint = paint;
+      train.engine = engine;
+      train.wheels = wheels;
+      train.cars = cars;
+      painted = wasPainted;
+    }
+    syncPassengers();
+  }
+
   function loadLoop() {
+    if (!bootstrapping) snapshot();
     const built = TrainSim.buildLoop(COLS, ROWS);
     grid = built.grid;
     col = built.start.col;
     row = built.start.row;
     dir = 'E';
     progress = 0.35;
-    mem = {};
-    trail = [];
+    story = 'free';
+    beat = 'free';
+    resetRideBits();
     waiting = [];
     syncPassengers();
     save();
   }
 
   function clearTracks() {
+    snapshot();
     grid = TrainSim.emptyGrid(COLS, ROWS);
+    story = 'free';
+    beat = 'free';
+    resetRideBits();
     waiting = [];
-    mem = {};
-    refreshBadge();
     announce('Track cleared.', kid ? 'The track is clear.' : '');
+    afterEdit();
+  }
+
+  function festivalCell() {
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const piece = grid[r][c];
+        if (piece && piece.role === 'festival') return { col: c, row: r };
+      }
+    }
+    return null;
+  }
+
+  function afterEdit() {
+    syncPassengers();
+    if (story === 'festival' && beat !== 'celebrate') {
+      const gap = TrainSim.firstGap(grid);
+      const fest = festivalCell();
+      const connected = !fest || TrainSim.reaches(grid, col, row, dir, fest.col, fest.row) || TrainSim.reaches(grid, col, row, TrainSim.OPP[dir], fest.col, fest.row);
+      if (gap || !connected) beat = 'gap';
+      else if (beat === 'gap') {
+        beat = painted ? 'ride' : 'paint';
+        announce('The track is whole. Paint your engine.', 'The track is whole. Paint your engine.');
+        applyMode('workshop', true);
+      }
+    }
+    refreshUndo();
+    refreshHints();
     save();
   }
 
   function placeAt(c, r) {
-    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return;
-    TrainSim.placePiece(grid, r, c, tool);
-    syncPassengers();
-    save();
+    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return null;
+    snapshot();
+    const placed = TrainSim.placePiece(grid, r, c, tool);
+    afterEdit();
+    return placed;
   }
 
   function cellOf(p) {
     return {
       c: Math.floor((p.x - originX) / tile),
       r: Math.floor((p.y - originY) / tile)
+    };
+  }
+
+  function personPos(person) {
+    if (person.drag) return { x: person.drag.x, y: person.drag.y };
+    return {
+      x: originX + (person.col + 0.5) * tile + person.ox,
+      y: originY + (person.row + 0.42) * tile + person.oy
+    };
+  }
+
+  function trainPoint() {
+    const x = originX + (col + 0.5) * tile;
+    const y = originY + (row + 0.5) * tile;
+    const v = TrainSim.VEC[dir];
+    const along = (progress - 0.5) * tile;
+    return { x: x + v[0] * along, y: y + v[1] * along };
+  }
+
+  function doorPoint() {
+    const p = trainPoint();
+    return { x: p.x, y: p.y - tile * 0.02 };
+  }
+
+  function platformSpot(c, r, i) {
+    const ox = (i - 1.5) * 16;
+    const oy = -tile * 0.28;
+    return {
+      col: c,
+      row: r,
+      ox: ox,
+      oy: oy,
+      x: originX + (c + 0.5) * tile + ox,
+      y: originY + (r + 0.42) * tile + oy
     };
   }
 
@@ -901,66 +1254,392 @@
     return found;
   }
 
-  function personPos(person) {
-    if (person.drag) return { x: person.drag.x, y: person.drag.y };
-    return {
-      x: originX + (person.col + 0.5) * tile + person.ox,
-      y: originY + (person.row + 0.42) * tile + person.oy
-    };
-  }
-
   function nearTrain(p) {
-    const spots = [{ x: trainPoint().x, y: trainPoint().y }];
-    for (let i = 0; i < train.cars; i++) spots.push(carPose(i));
-    return spots.some(function (s) { return Math.hypot(s.x - p.x, s.y - p.y) < tile * 1.05; });
+    const here = trainPoint();
+    if (Math.hypot(here.x - p.x, here.y - p.y) < tile * 1.05) return true;
+    for (let i = 0; i < train.cars; i++) {
+      const s = carPose(i);
+      if (Math.hypot(s.x - p.x, s.y - p.y) < tile * 1.05) return true;
+    }
+    return false;
   }
 
-  function boardPerson(person, quiet) {
+  function stationHere() {
+    const piece = grid[row] && grid[row][col];
+    return piece && piece.type === 'station' ? piece : null;
+  }
+
+  function peopleAt(c, r) {
+    return waiting.some(function (p) { return p.col === c && p.row === r; });
+  }
+
+  function walkPerson(person) {
+    const from = personPos(person);
     waiting = waiting.filter(function (p) { return p.id !== person.id; });
-    train.boarded++;
+    walkers.push({
+      kind: 'board',
+      color: person.color,
+      lantern: !!person.lantern,
+      t: 0,
+      delay: 0,
+      from: from,
+      to: doorPoint()
+    });
+  }
+
+  function beginBoarding() {
+    if (alighting) return 0;
+    const piece = stationHere();
+    const at = !!piece;
+    if (!TrainSim.canBoard(true, at, currentSpeed)) {
+      if (currentSpeed >= 1) announce('Stop the train first.', kid ? 'Stop the train first.' : '');
+      else announce('Pull up to a station.', kid ? 'Stop at the station.' : '');
+      return 0;
+    }
+    train.doorsOpen = true;
+    refreshDoor();
+    const here = waiting.filter(function (p) { return p.col === col && p.row === row; });
+    if (!here.length) {
+      if (piece && piece.role === 'festival' && train.boarded > 0) beginAlighting();
+      else announce('Nobody is waiting.', kid ? 'Nobody is waiting.' : '');
+      return 0;
+    }
+    here.forEach(function (person, i) {
+      const from = personPos(person);
+      walkers.push({
+        kind: 'board',
+        color: person.color,
+        lantern: !!person.lantern,
+        t: 0,
+        delay: i * 0.16,
+        from: from,
+        to: doorPoint()
+      });
+    });
+    const ids = {};
+    here.forEach(function (p) { ids[p.id] = true; });
+    waiting = waiting.filter(function (p) { return !ids[p.id]; });
+    announce('Hop on!', 'Hop on!');
     refreshBadge();
-    if (!quiet) announce('Hop on!', 'Hop on!');
+    save();
+    return here.length;
+  }
+
+  function beginAlighting() {
+    if (alighting || walkers.length || train.boarded <= 0) return;
+    if (currentSpeed >= 1) return;
+    alighting = true;
+    train.doorsOpen = true;
+    refreshDoor();
+    const n = train.boarded;
+    for (let i = 0; i < n; i++) {
+      const spot = platformSpot(col, row, i);
+      walkers.push({
+        kind: 'alight',
+        color: COLORS[i % COLORS.length],
+        lantern: true,
+        t: 0,
+        delay: i * 0.18,
+        from: doorPoint(),
+        to: { x: spot.x, y: spot.y },
+        platform: spot
+      });
+    }
+    announce('The festival stop.', 'The lantern festival!');
+    if (kid) setTimeout(function () { speak('燈會', 'zh-TW'); }, 1400);
+  }
+
+  function showCelebrate() {
+    if (beat === 'celebrate') return;
+    beat = 'celebrate';
+    lanternsLit = Math.max(lanternsLit, 8);
+    waiting = [];
+    const scrim = $('festivalScrim');
+    if (scrim) scrim.hidden = false;
+    updateChallenge();
+    announce('The lanterns are lit.', 'The lanterns are lit. Ride again, or build your own route.');
     save();
   }
 
-  function toggleDoors(silent) {
-    train.doorsOpen = !train.doorsOpen;
-    refreshDoor();
-    if (!silent) {
-      announce(train.doorsOpen ? 'Doors open. Tap a friend.' : 'Doors closed.',
-        train.doorsOpen ? 'Doors open. Tap a friend to hop on.' : 'Doors closed.');
+  function maybeCelebrate() {
+    if (story !== 'festival') return;
+    if (walkers.length || alighting) return;
+    if (arrived >= 4 && waiting.length === 0 && train.boarded === 0) showCelebrate();
+    else if (arrived > 0 && waiting.length > 0) {
+      announce('Some friends are still at the stop.', 'Go back for the others.');
     }
+  }
+
+  function updateWalkers(dt) {
+    for (let i = walkers.length - 1; i >= 0; i--) {
+      const w = walkers[i];
+      if (w.delay > 0) {
+        w.delay -= dt;
+        continue;
+      }
+      if (!w.started) {
+        w.started = true;
+        if (w.kind === 'alight' && train.boarded > 0) {
+          train.boarded--;
+          refreshBadge();
+        }
+      }
+      w.t += dt / 0.85;
+      if (w.t < 1) continue;
+      if (w.kind === 'board') {
+        train.boarded++;
+        refreshBadge();
+      } else {
+        arrived++;
+        lanternsLit = Math.min(8, arrived * 2);
+        platformPeople.push({
+          col: w.platform.col,
+          row: w.platform.row,
+          ox: w.platform.ox,
+          oy: w.platform.oy,
+          color: w.color,
+          lantern: true
+        });
+      }
+      walkers.splice(i, 1);
+    }
+    if (!walkers.length && alighting) {
+      alighting = false;
+      maybeCelebrate();
+    }
+    if (!walkers.length && !alighting && story === 'festival' && train.boarded > 0 && waiting.length === 0 && !saidGoFestival) {
+      const piece = stationHere();
+      if (!piece || piece.role !== 'festival') {
+        saidGoFestival = true;
+        announce('All aboard. Next stop, the festival.', 'All aboard. Next stop, the festival.');
+      }
+    }
+  }
+
+  function chooseStop() {
+    const wantPeople = function (tile, c, r) { return tile.role !== 'festival' && peopleAt(c, r); };
+    let hit = TrainSim.nextStation(grid, col, row, dir, wantPeople)
+      || TrainSim.nextStation(grid, col, row, TrainSim.OPP[dir], wantPeople);
+    if (hit) return hit;
+    if (train.boarded > 0 || story === 'festival') {
+      const fest = function (tile) { return tile.role === 'festival'; };
+      hit = TrainSim.nextStation(grid, col, row, dir, fest)
+        || TrainSim.nextStation(grid, col, row, TrainSim.OPP[dir], fest);
+      if (hit) return hit;
+    }
+    const any = function (tile) { return tile.type === 'station'; };
+    return TrainSim.nextStation(grid, col, row, dir, any)
+      || TrainSim.nextStation(grid, col, row, TrainSim.OPP[dir], any);
+  }
+
+  function finishStop() {
+    autoTarget = null;
+    braking = false;
+    currentSpeed = 0;
+    throttle = 0;
+    boostUntil = 0;
+    progress = 0.5;
+    const piece = stationHere();
+    train.doorsOpen = true;
+    refreshDoor();
+    refreshSpeed();
+    if (piece && piece.role === 'festival' && train.boarded > 0) beginAlighting();
+    else beginBoarding();
+    save();
+  }
+
+  function showHole(cell, say, speech) {
+    if (cell) {
+      const c = Math.max(0, Math.min(COLS - 1, cell.col));
+      const r = Math.max(0, Math.min(ROWS - 1, cell.row));
+      gapFlash = { col: c, row: r };
+    }
+    applyMode('track', true);
+    announce(say, speech || say);
+  }
+
+  function tryDrive() {
+    const gap = TrainSim.firstGap(grid);
+    if (gap) {
+      showHole(gap, 'A piece is missing.', 'A piece is missing. Tap the glowing corner.');
+      return;
+    }
+    if (story === 'festival' && beat !== 'celebrate') {
+      const fest = festivalCell();
+      const okReach = !fest || TrainSim.reaches(grid, col, row, dir, fest.col, fest.row) || TrainSim.reaches(grid, col, row, TrainSim.OPP[dir], fest.col, fest.row);
+      if (!okReach) {
+        const hole = TrainSim.firstHole(grid, col, row, dir);
+        showHole(hole, 'The track does not reach the festival yet.', 'The track is not finished.');
+        return;
+      }
+      if (beat === 'gap' || beat === 'paint') beat = 'ride';
+    }
+    gapFlash = null;
+    applyMode('drive');
+  }
+
+  function stopAtStation() {
+    if (COVER) return;
+    if (walkers.length || alighting) return;
+    const gap = TrainSim.firstGap(grid);
+    if (gap) {
+      showHole(gap, 'A piece is missing.', 'A piece is missing. Tap the glowing corner.');
+      return;
+    }
+    if (train.doorsOpen && !peopleAt(col, row)) {
+      train.doorsOpen = false;
+      refreshDoor();
+    }
+    const target = chooseStop();
+    if (!target) {
+      announce('No station on this line yet.', kid ? 'Lay a station first.' : '');
+      return;
+    }
+    if (target.col === col && target.row === row) {
+      currentSpeed = 0;
+      throttle = 0;
+      boostUntil = 0;
+      progress = 0.5;
+      finishStop();
+      return;
+    }
+    if (!TrainSim.reaches(grid, col, row, dir, target.col, target.row)) {
+      const back = TrainSim.OPP[dir];
+      if (TrainSim.reaches(grid, col, row, back, target.col, target.row)) dir = back;
+      else {
+        const hole = TrainSim.firstHole(grid, col, row, dir);
+        showHole(hole, 'The track does not reach the station.', 'The track is not finished.');
+        return;
+      }
+    }
+    train.doorsOpen = false;
+    refreshDoor();
+    autoTarget = { col: target.col, row: target.row };
+    throttle = 0;
+    boostUntil = 0;
+    braking = false;
+    announce('Stopping at the station.', 'Stopping at the station.');
+    save();
+  }
+
+  function toggleDoors() {
+    if (walkers.length) {
+      announce('Friends are still stepping through the door.', kid ? 'Wait for them.' : '');
+      return;
+    }
+    if (!train.doorsOpen) {
+      if (currentSpeed >= 1) {
+        announce('Stop the train first.', kid ? 'Stop the train first.' : '');
+        return;
+      }
+      const piece = stationHere();
+      if (!piece) {
+        announce('Pull up to a station.', kid ? 'Stop at the station.' : '');
+        return;
+      }
+      train.doorsOpen = true;
+      refreshDoor();
+      if (piece.role === 'festival' && train.boarded > 0) beginAlighting();
+      else if (kid) beginBoarding();
+      else announce('Doors open.', '');
+      save();
+      return;
+    }
+    train.doorsOpen = false;
+    refreshDoor();
+    announce('Doors closed.', kid ? 'Doors closed.' : '');
     save();
   }
 
   function boardAll() {
-    if (!train.doorsOpen) {
-      train.doorsOpen = true;
-      refreshDoor();
+    if (walkers.length || alighting) return;
+    const piece = stationHere();
+    if (currentSpeed >= 1 || !piece) {
+      if (currentSpeed >= 1) announce('Stop the train first.', kid ? 'Stop the train first.' : '');
+      else announce('Pull up to a station.', kid ? 'Stop at the station.' : '');
+      return;
     }
-    const moved = TrainSim.boardAll(train.boarded, waiting, true);
-    const n = moved.boarded;
-    train.boarded = moved.count;
-    waiting = [];
-    refreshBadge();
-    announce(n ? 'All aboard!' : 'Nobody is waiting.', n ? 'All aboard!' : 'Nobody is waiting.');
+    train.doorsOpen = true;
+    currentSpeed = 0;
+    refreshDoor();
+    if (piece.role === 'festival' && train.boarded > 0 && !peopleAt(col, row)) beginAlighting();
+    else beginBoarding();
+  }
+
+  function brake() {
+    userDrove = true;
+    throttle = 0;
+    boostUntil = 0;
+    braking = true;
+    autoTarget = null;
+    const lever = $('speedLever');
+    if (lever) lever.value = '0';
+    announce('Brake.', kid ? 'Brake.' : '');
     save();
   }
 
   function triggerTurbo() {
+    if (walkers.length || alighting) {
+      announce('Friends are still at the door.', kid ? 'Wait for the doors.' : '');
+      return;
+    }
+    if (train.doorsOpen) {
+      train.doorsOpen = false;
+      refreshDoor();
+    }
     audio.unlock();
     userDrove = true;
+    braking = false;
+    autoTarget = null;
     boostUntil = performance.now() + 5000;
+    throttle = Math.max(throttle, 80);
     audio.whoosh();
     $('hornBtn').classList.remove('hint');
-    announce('GO-GO-GO!', 'Go, go, go!');
+    announce('GO!', 'Go, go, go!');
     save();
   }
 
   function setThrottle(v) {
     throttle = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+    if (throttle > 0) {
+      braking = false;
+      autoTarget = null;
+      if (train.doorsOpen && !walkers.length) {
+        train.doorsOpen = false;
+        refreshDoor();
+      }
+    }
     userDrove = true;
-    if (performance.now() >= boostUntil) refreshSpeed();
+    refreshSpeed();
+    save();
+  }
+
+  function rideAgain() {
+    bootstrapping = true;
+    startFestival(true);
+    bootstrapping = false;
+    undoStack = [];
+    refreshAll(true);
+    announce('The corner is missing again.', 'One corner is missing. Tap the glowing piece.');
+  }
+
+  function buildOwn() {
+    const scrim = $('festivalScrim');
+    if (scrim) scrim.hidden = true;
+    snapshot();
+    grid = TrainSim.emptyGrid(COLS, ROWS);
+    story = 'free';
+    beat = 'free';
+    resetRideBits();
+    waiting = [];
+    col = 2;
+    row = 2;
+    dir = 'E';
+    progress = 0.5;
+    mode = 'track';
+    tool = 'straight-h';
+    refreshAll(true);
+    announce('Build your own route.', kid ? 'Build your own route.' : '');
     save();
   }
 
@@ -968,10 +1647,9 @@
     if (COVER) return;
     firstGesture();
     const p = point(e);
-    pointerDown = p;
     if (mode === 'track') {
-      const cell = cellOf(p);
-      placeAt(cell.c, cell.r);
+      pressCell = cellOf(p);
+      hover = p;
       return;
     }
     if (mode !== 'drive') return;
@@ -979,6 +1657,7 @@
     if (cell.c >= 0 && cell.r >= 0 && cell.c < COLS && cell.r < ROWS) {
       const tileHere = grid[cell.r][cell.c];
       if (tileHere && tileHere.type === 'switch') {
+        snapshot();
         TrainSim.toggleSwitch(tileHere);
         audio.clack();
         announce(tileHere.state ? 'Switch thrown!' : 'Switch is straight.',
@@ -989,23 +1668,22 @@
     }
     const person = passengerAt(p);
     if (!person) return;
-    if (!train.doorsOpen) {
-      train.doorsOpen = true;
-      refreshDoor();
-      if (kid) {
-        boardPerson(person, true);
-        announce('Doors open. Hop on!', 'Doors open. Hop on!');
-        return;
-      }
-      announce('Doors open. Drag a friend to the train.', 'Doors open. Drag a friend onto the train.');
-    }
-    if (kid && !e.shiftKey) {
-      boardPerson(person);
+    const piece = stationHere();
+    if (currentSpeed >= 1 || !piece) {
+      announce('Stop at the station.', kid ? 'Stop at the station.' : '');
       return;
     }
-    person.drag = p;
-    drag = person;
-    canvas.setPointerCapture(e.pointerId);
+    train.doorsOpen = true;
+    currentSpeed = 0;
+    refreshDoor();
+    if (!kid || e.shiftKey) {
+      person.drag = p;
+      drag = person;
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+      return;
+    }
+    walkPerson(person);
+    announce('Hop on!', 'Hop on!');
   }
 
   function onPointerMove(e) {
@@ -1016,12 +1694,20 @@
 
   function onPointerUp(e) {
     const p = point(e);
+    if (mode === 'track' && pressCell) {
+      const cell = cellOf(p);
+      if (cell.c === pressCell.c && cell.r === pressCell.r) placeAt(cell.c, cell.r);
+      pressCell = null;
+    }
     if (drag) {
-      if (nearTrain(p) && train.doorsOpen) boardPerson(drag);
-      else drag.drag = null;
+      const piece = stationHere();
+      if (nearTrain(p) && piece && currentSpeed < 1) {
+        drag.drag = null;
+        walkPerson(drag);
+        announce('Hop on!', 'Hop on!');
+      } else drag.drag = null;
       drag = null;
     }
-    pointerDown = null;
   }
 
   function point(e) {
@@ -1033,9 +1719,13 @@
     audio.unlock();
     if (welcomed || !kid || COVER) return;
     welcomed = true;
-    $('hornBtn').classList.remove('hint');
-    speak('Your train is ready. Tap the horn. Then tap go, go, go.');
-    setTimeout(function () { speak('火車', 'zh-TW'); }, 2600);
+    if (story === 'festival' && beat === 'gap') speak('One corner is missing. Tap the glowing piece.');
+    else if (story === 'festival' && beat === 'paint') speak('Paint your train.');
+    else if (story === 'festival') speak('Drive down the hill. Stop for the friends with lanterns.');
+    else {
+      speak('Your train is ready. Tap the horn.');
+      setTimeout(function () { speak('火車', 'zh-TW'); }, 2200);
+    }
   }
 
   function layout() {
@@ -1047,44 +1737,60 @@
     canvas.height = Math.round(viewH * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const narrow = viewW < 860;
-    const panelW = mode !== 'drive' && !COVER && !narrow ? 300 : 0;
-    const sheet = mode !== 'drive' && !COVER && narrow ? Math.min(300, viewH * 0.42) : 0;
-    const hud = mode === 'drive' && !COVER ? (narrow ? 150 : 108) : 0;
-    const availW = viewW - panelW - 20;
-    const availH = viewH - sheet - hud - 16;
-    tile = Math.max(22, Math.min(78, Math.floor(Math.min(availW / COLS, availH / ROWS))));
-    originX = panelW + 10 + Math.max(0, (availW - tile * COLS) / 2);
-    originY = 8 + Math.max(0, (availH - tile * ROWS) / 2);
+    let left = 0;
+    let bottom = 0;
+    if (!COVER) {
+      if (mode === 'workshop' && !narrow) left = Math.min(320, $('workshopPanel').offsetWidth + 16);
+      if (mode === 'workshop' && narrow) bottom = $('workshopPanel').offsetHeight + 8;
+      if (mode === 'track') bottom = $('trackPanel').offsetHeight + 8;
+      if (mode === 'drive') bottom = $('conductorHUD').offsetHeight + 4;
+    }
+    const availW = Math.max(40, viewW - left - 12);
+    const availH = Math.max(40, viewH - bottom - 12);
+    tile = Math.max(16, Math.min(78, Math.floor(Math.min(availW / COLS, availH / ROWS))));
+    originX = left + 6 + Math.max(0, (availW - tile * COLS) / 2);
+    originY = 6 + Math.max(0, (availH - tile * ROWS) / 2);
   }
 
   function tick(dt) {
     dt = Math.max(0, Math.min(0.05, dt));
     const goal = goalSpeed();
-    const creep = train.doorsOpen ? 0.08 : 1;
-    currentSpeed += (goal * creep - currentSpeed) * Math.min(1, dt * 2.4);
-    if (currentSpeed < 0.2) currentSpeed = 0;
+    const accel = braking || train.doorsOpen ? 8 : 2.6;
+    currentSpeed += (goal - currentSpeed) * Math.min(1, dt * accel);
+    if (currentSpeed < 0.4 && goal === 0) currentSpeed = 0;
+    if (train.doorsOpen || walkers.length || alighting) currentSpeed = 0;
     wheelSpin += currentSpeed * dt * 0.12;
     audio.setSpeed(currentSpeed);
-    const rate = (currentSpeed / 100) * 4.4 * dt;
-    progress += rate;
-    let guard = 0;
-    while (progress >= 1 && guard++ < 6) {
-      progress -= 1;
-      const n = TrainSim.step(grid, col, row, dir, mem);
-      if (n.event === 'reverse') {
+    if (!(train.doorsOpen || walkers.length || alighting)) {
+      const rate = (currentSpeed / 100) * 4.4 * dt;
+      progress += rate;
+      let guard = 0;
+      while (progress >= 1 && guard++ < 6) {
+        progress -= 1;
+        const n = TrainSim.step(grid, col, row, dir, mem);
+        if (n.event === 'reverse') {
+          dir = n.dir;
+          progress = 0;
+          trail = [];
+          audio.clack();
+          break;
+        }
+        const festivalStop = kid && story === 'festival' && n.tile && n.tile.role === 'festival' && train.boarded > 0 && !alighting;
+        const linedUp = autoTarget && n.col === autoTarget.col && n.row === autoTarget.row;
+        col = n.col;
+        row = n.row;
         dir = n.dir;
-        progress = 0;
-        trail = [];
         audio.clack();
-        break;
-      }
-      col = n.col;
-      row = n.row;
-      dir = n.dir;
-      audio.clack();
-      if (n.event === 'speed' && performance.now() > boostUntil) {
-        boostUntil = performance.now() + 1800;
-        audio.whoosh();
+        if (festivalStop || linedUp) {
+          progress = 0.5;
+          currentSpeed = 0;
+          finishStop();
+          break;
+        }
+        if (n.event === 'speed' && !autoTarget && performance.now() > boostUntil) {
+          boostUntil = performance.now() + 1800;
+          audio.whoosh();
+        }
       }
     }
     const here = trainPoint();
@@ -1094,17 +1800,12 @@
       if (trail.length > 700) trail.pop();
     }
     doorAnim += ((train.doorsOpen ? 1 : 0) - doorAnim) * Math.min(1, dt * 6);
+    updateWalkers(dt);
     smokeClock += dt;
     if (train.engine === 'steam' && currentSpeed > 4 && smokeClock > 0.14) {
       smokeClock = 0;
       const stack = stackPoint();
-      puffs.push({
-        x: stack.x, y: stack.y,
-        vx: (Math.random() - 0.5) * 10,
-        vy: -20 - Math.random() * 18,
-        life: 1,
-        r: tile * 0.08
-      });
+      puffs.push({ x: stack.x, y: stack.y, vx: (Math.random() - 0.5) * 10, vy: -20 - Math.random() * 18, life: 1, r: tile * 0.08 });
     }
     for (let i = puffs.length - 1; i >= 0; i--) {
       const puff = puffs[i];
@@ -1116,14 +1817,6 @@
     }
     leafClock += dt;
     refreshSpeed();
-  }
-
-  function trainPoint() {
-    const x = originX + (col + 0.5) * tile;
-    const y = originY + (row + 0.5) * tile;
-    const v = TrainSim.VEC[dir];
-    const along = (progress - 0.5) * tile;
-    return { x: x + v[0] * along, y: y + v[1] * along };
   }
 
   function carPose(i) {
@@ -1146,7 +1839,7 @@
   }
 
   function skyStops() {
-    if (hour < 5 || hour >= 21) return ['#020617', '#1e1b4b', '#0f172a'];
+    if (isNight()) return ['#020617', '#1e1b4b', '#0f172a'];
     if (hour < 8) return ['#fb923c', '#7dd3fc', '#bbf7d0'];
     if (hour < 16) return ['#38bdf8', '#bae6fd', '#86efac'];
     if (hour < 19) return ['#fb7185', '#fb923c', '#7c2d12'];
@@ -1163,51 +1856,64 @@
     grad.addColorStop(1, sky[2]);
     g.fillStyle = grad;
     g.fillRect(0, 0, viewW, viewH);
-
+    if (isNight()) {
+      g.fillStyle = '#e2e8f0';
+      for (let i = 0; i < 16; i++) g.fillRect((i * 97) % viewW, (i * 53) % (viewH * 0.4), 2, 2);
+    }
     const sunX = viewW * (0.15 + (hour % 24) / 30);
-    const sunY = viewH * (hour > 6 && hour < 18 ? 0.18 : 0.72);
-    g.fillStyle = hour >= 21 || hour < 5 ? '#f8fafc' : '#fde68a';
+    const sunY = viewH * (hour > 6 && hour < 18 ? 0.16 : 0.2);
+    g.fillStyle = isNight() ? '#f8fafc' : '#fde68a';
     g.beginPath();
-    g.arc(sunX, sunY, hour >= 21 || hour < 5 ? 16 : 28, 0, Math.PI * 2);
+    g.arc(sunX, sunY, isNight() ? 14 : 26, 0, Math.PI * 2);
     g.fill();
 
-    g.fillStyle = theme === 'germany' ? '#334155' : '#14532d';
-    g.beginPath();
-    g.moveTo(0, viewH * 0.72);
-    g.quadraticCurveTo(viewW * 0.25, viewH * 0.58, viewW * 0.5, viewH * 0.7);
-    g.quadraticCurveTo(viewW * 0.75, viewH * 0.82, viewW, viewH * 0.62);
-    g.lineTo(viewW, viewH);
-    g.lineTo(0, viewH);
-    g.fill();
-
-    if (theme === 'germany') drawCastle(viewW * 0.78, viewH * 0.62);
-    drawScenery();
+    if (theme === 'lantern' || story === 'festival') drawLanternHill();
+    else {
+      g.fillStyle = theme === 'germany' ? '#334155' : '#14532d';
+      g.beginPath();
+      g.moveTo(0, viewH * 0.72);
+      g.quadraticCurveTo(viewW * 0.25, viewH * 0.58, viewW * 0.5, viewH * 0.7);
+      g.quadraticCurveTo(viewW * 0.75, viewH * 0.82, viewW, viewH * 0.62);
+      g.lineTo(viewW, viewH);
+      g.lineTo(0, viewH);
+      g.fill();
+      if (theme === 'germany') drawCastle(viewW * 0.78, viewH * 0.62);
+      drawScenery();
+    }
 
     if (mode === 'track') {
       g.strokeStyle = 'rgba(255,255,255,0.08)';
       g.lineWidth = 1;
       for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          g.strokeRect(originX + c * tile, originY + r * tile, tile, tile);
-        }
+        for (let c = 0; c < COLS; c++) g.strokeRect(originX + c * tile, originY + r * tile, tile, tile);
       }
     }
 
     for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        if (grid[r][c]) drawTrack(c, r, grid[r][c], false);
-      }
+      for (let c = 0; c < COLS; c++) if (grid[r][c]) drawTrack(c, r, grid[r][c], false);
     }
+    if (mode === 'track' || gapFlash) drawOpenEnds();
+    const gap = TrainSim.firstGap(grid);
+    if (mode === 'track' && gap && gap.type) {
+      drawTrack(gap.col, gap.row, { type: gap.type, state: 0 }, true);
+      drawGapRing(gap.col, gap.row);
+    }
+    if (gapFlash) drawGapRing(gapFlash.col, gapFlash.row);
     if (mode === 'track' && hover) {
       const cell = cellOf(hover);
       if (cell.c >= 0 && cell.r >= 0 && cell.c < COLS && cell.r < ROWS) {
-        const ghostType = tool === 'curve-1' ? 'curve-tl' : tool;
-        if (ghostType !== 'erase') drawTrack(cell.c, cell.r, { type: ghostType, state: 0 }, true);
+        const sameGap = gap && cell.c === gap.col && cell.r === gap.row && tool === 'curve-1';
+        if (!sameGap) {
+          if (tool === 'erase') drawEraseGhost(cell.c, cell.r);
+          else drawTrack(cell.c, cell.r, { type: ghostTypeAt(cell.c, cell.r), state: 0 }, true);
+        }
       }
     }
 
+    platformPeople.forEach(drawPerson);
     waiting.forEach(drawPerson);
-    for (let i = train.cars - 1; i >= 0; i--) drawCar(carPose(i), i);
+    walkers.forEach(drawWalker);
+    for (let i = train.cars - 1; i >= 0; i--) drawCar(carPose(i));
     drawEngine();
     puffs.forEach(function (puff) {
       g.fillStyle = 'rgba(241,245,249,' + (puff.life * 0.45) + ')';
@@ -1215,7 +1921,6 @@
       g.arc(puff.x, puff.y, Math.max(1, puff.r), 0, Math.PI * 2);
       g.fill();
     });
-
     if (theme === 'fall' && !reduceMotion) {
       leaves.forEach(function (leaf, i) {
         const y = ((leaf.y + leafClock * leaf.v) % 1) * viewH;
@@ -1225,18 +1930,86 @@
         g.fill();
       });
     }
+    if (theme === 'lantern' || story === 'festival' || lanternsLit > 0) drawLanternString();
+
+    document.documentElement.dataset.beat = beat;
+    document.documentElement.dataset.story = story;
+    document.documentElement.dataset.ghost = gap && gap.type ? gap.type : '';
+    document.documentElement.dataset.lanterns = String(lanternsLit);
 
     if (COVER) {
-      g.fillStyle = 'rgba(15, 23, 42, 0.55)';
-      round(28, 22, 430, 78, 16);
+      g.fillStyle = 'rgba(15, 23, 42, 0.62)';
+      round(28, 18, Math.min(560, viewW - 56), 92, 16);
       g.fill();
       g.fillStyle = '#fff7ed';
       g.font = '700 32px Fredoka, sans-serif';
-      g.fillText('Ultimate Train Studio', 44, 58);
+      g.fillText('Ultimate Train Studio', 44, 54);
       g.fillStyle = '#fecdd3';
-      g.font = '600 22px "Noto Serif TC", serif';
-      g.fillText('火車工作室', 44, 86);
+      g.font = '600 20px "Noto Serif TC", serif';
+      g.fillText('燈會末班車', 44, 84);
     }
+  }
+
+  function drawLanternHill() {
+    ctx.fillStyle = isNight() ? '#052e16' : '#166534';
+    ctx.beginPath();
+    ctx.moveTo(0, viewH * 0.78);
+    ctx.lineTo(0, viewH * 0.62);
+    ctx.quadraticCurveTo(viewW * 0.25, viewH * 0.5, viewW * 0.55, viewH * 0.6);
+    ctx.quadraticCurveTo(viewW * 0.82, viewH * 0.68, viewW, viewH * 0.52);
+    ctx.lineTo(viewW, viewH);
+    ctx.fill();
+    ctx.fillStyle = isNight() ? '#064e3b' : '#22c55e';
+    ctx.fillRect(0, viewH * 0.72, viewW, viewH * 0.08);
+    ctx.fillStyle = isNight() ? '#0c4a6e' : '#38bdf8';
+    ctx.fillRect(0, viewH * 0.9, viewW, viewH * 0.12);
+    const towers = [[0.06, 86], [0.16, 120], [0.8, 108], [0.9, 74]];
+    towers.forEach(function (tower, i) {
+      const x = tower[0] * viewW;
+      const h = tower[1];
+      const y = viewH * 0.62;
+      ctx.fillStyle = isNight() ? '#1c1917' : '#44403c';
+      ctx.fillRect(x, y - h, 28 + (i % 2) * 10, h);
+      const win = isNight() || lanternsLit > 0 ? '#fde68a' : '#bae6fd';
+      ctx.fillStyle = win;
+      for (let wy = y - h + 10; wy < y - 12; wy += 16) {
+        ctx.fillRect(x + 6, wy, 6, 8);
+        ctx.fillRect(x + 18, wy, 6, 8);
+      }
+    });
+  }
+
+  function drawLanternString() {
+    const glow = isNight() ? 1 : (hour >= 16 || hour < 8 ? 0.6 : 0.35);
+    LANTERN_SPOTS.forEach(function (spot, i) {
+      const x = spot[0] * viewW;
+      const y = spot[1] * viewH;
+      const lit = i < lanternsLit;
+      ctx.save();
+      if (lit) {
+        ctx.fillStyle = 'rgba(253, 224, 71,' + (0.28 * glow) + ')';
+        ctx.beginPath();
+        ctx.arc(x, y, 18 + 8 * glow, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fde68a';
+      } else ctx.fillStyle = isNight() ? '#7f1d1d' : '#b45309';
+      ctx.beginPath();
+      ctx.ellipse(x, y, 7, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = lit ? '#ef4444' : '#44403c';
+      ctx.fillRect(x - 5, y - 12, 10, 4);
+      ctx.restore();
+    });
+    ctx.strokeStyle = 'rgba(127, 29, 29, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    LANTERN_SPOTS.forEach(function (spot, i) {
+      const x = spot[0] * viewW;
+      const y = spot[1] * viewH - 12;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
   }
 
   function drawScenery() {
@@ -1277,16 +2050,64 @@
     ctx.fill();
   }
 
+  function ghostTypeAt(c, r) {
+    if (tool === 'curve-1') return TrainSim.obviousCurve(grid, r, c) || 'curve-tl';
+    return tool;
+  }
+
+  function drawGapRing(c, r) {
+    const x = originX + c * tile;
+    const y = originY + r * tile;
+    const pulse = 0.45 + 0.55 * Math.abs(Math.sin(performance.now() / 260));
+    ctx.save();
+    ctx.strokeStyle = 'rgba(251, 191, 36,' + pulse + ')';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x + 3, y + 3, tile - 6, tile - 6);
+    ctx.restore();
+  }
+
+  function drawEraseGhost(c, r) {
+    const x = originX + (c + 0.5) * tile;
+    const y = originY + (r + 0.5) * tile;
+    ctx.save();
+    ctx.strokeStyle = '#f87171';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - 8, y - 8);
+    ctx.lineTo(x + 8, y + 8);
+    ctx.moveTo(x + 8, y - 8);
+    ctx.lineTo(x - 8, y + 8);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawOpenEnds() {
+    TrainSim.openEnds(grid).forEach(function (end) {
+      const v = TrainSim.VEC[end.dir];
+      const x = originX + (end.col + 0.5) * tile + v[0] * tile * 0.46;
+      const y = originY + (end.row + 0.5) * tile + v[1] * tile * 0.46;
+      ctx.save();
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(4, tile * 0.1), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
   function drawTrack(c, r, piece, ghost) {
     const x = originX + c * tile;
     const y = originY + r * tile;
     ctx.save();
     ctx.translate(x + tile / 2, y + tile / 2);
-    ctx.globalAlpha = ghost ? 0.45 : 1;
+    ctx.globalAlpha = ghost ? 0.5 : 1;
     const type = piece.type;
     const half = tile / 2;
     const gauge = Math.max(4, tile * 0.12);
-    ctx.strokeStyle = '#44403c';
+    ctx.strokeStyle = ghost ? '#fde68a' : '#44403c';
     ctx.lineWidth = tile * 0.36;
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -1306,7 +2127,7 @@
       ctx.lineTo(half, 0);
     }
     ctx.stroke();
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = ghost ? '#fffbeb' : '#e2e8f0';
     ctx.lineWidth = Math.max(2, tile * 0.045);
     ctx.lineCap = 'butt';
     if (type === 'straight-h' || type === 'station' || type === 'speed' || type === 'switch') {
@@ -1330,12 +2151,13 @@
       arcRails(half, -half, Math.PI / 2, Math.PI, gauge);
     }
     if (type === 'station') {
-      ctx.fillStyle = '#6b21a8';
-      ctx.fillRect(-half + 2, -half + 2, tile - 4, Math.max(8, tile * 0.22));
+      ctx.fillStyle = piece.role === 'festival' ? '#9f1239' : '#6b21a8';
+      ctx.fillRect(-half + 2, -half + 2, tile - 4, Math.max(8, tile * 0.28));
       ctx.fillStyle = '#fff';
-      ctx.font = '600 ' + Math.max(10, tile * 0.22) + 'px "Noto Serif TC", serif';
+      ctx.font = '600 ' + Math.max(9, tile * (piece.role === 'festival' ? 0.18 : 0.22)) + 'px "Noto Serif TC", serif';
       ctx.textAlign = 'center';
-      ctx.fillText('站', 0, -half + Math.max(12, tile * 0.2));
+      const label = piece.role === 'festival' ? '燈會' : (piece.lanterns ? '燈' : '站');
+      ctx.fillText(label, 0, -half + Math.max(12, tile * 0.22));
     }
     if (type === 'speed') {
       ctx.fillStyle = '#ef4444';
@@ -1374,6 +2196,15 @@
     ctx.stroke();
   }
 
+  function drawLanternIcon() {
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(-1, -16, 2, 5);
+    ctx.fillStyle = isNight() ? '#fde68a' : '#f97316';
+    ctx.beginPath();
+    ctx.ellipse(0, -6, 5, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   function drawPerson(person) {
     const at = personPos(person);
     const s = Math.max(0.85, tile / 52);
@@ -1388,7 +2219,27 @@
     ctx.fillStyle = '#fff';
     ctx.fillRect(-3, -12, 2, 2);
     ctx.fillRect(2, -12, 2, 2);
+    if (person.lantern) {
+      ctx.save();
+      ctx.translate(10, 0);
+      drawLanternIcon();
+      ctx.restore();
+    }
     ctx.restore();
+  }
+
+  function drawWalker(w) {
+    const t = Math.max(0, Math.min(1, w.delay > 0 ? 0 : w.t));
+    const ease = t * t * (3 - 2 * t);
+    const bob = Math.abs(Math.sin(t * Math.PI * 3)) * 4;
+    drawPerson({
+      color: w.color,
+      lantern: w.lantern,
+      drag: {
+        x: w.from.x + (w.to.x - w.from.x) * ease,
+        y: w.from.y + (w.to.y - w.from.y) * ease - bob
+      }
+    });
   }
 
   function paintStyle(w) {
@@ -1431,6 +2282,18 @@
     ctx.fillRect(len * 0.02 + open, -h * 0.35, tile * 0.08, h * 0.7);
   }
 
+  function drawWindow(x, y, w, h) {
+    ctx.save();
+    if (isDark()) {
+      ctx.shadowColor = '#fde68a';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#fde68a';
+    } else ctx.fillStyle = '#e0f2fe';
+    round(x, y, w, h, 3);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function drawCar(pose) {
     ctx.save();
     ctx.translate(pose.x, pose.y);
@@ -1440,9 +2303,7 @@
     ctx.fillStyle = paintStyle(len);
     round(-len / 2, -h / 2, len, h, 6);
     ctx.fill();
-    ctx.fillStyle = '#e0f2fe';
-    round(-len * 0.28, -h * 0.28, len * 0.18, h * 0.36, 3);
-    ctx.fill();
+    drawWindow(-len * 0.28, -h * 0.28, len * 0.18, h * 0.36);
     if (train.boarded) {
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
@@ -1470,6 +2331,7 @@
       ctx.lineTo(-len / 2, h / 2);
       ctx.closePath();
       ctx.fill();
+      drawWindow(-len * 0.05, -h * 0.22, len * 0.16, h * 0.28);
     } else {
       round(-len / 2, -h / 2, len * 0.78, h, 5);
       ctx.fill();
@@ -1479,25 +2341,24 @@
         ctx.fillStyle = paintStyle(len);
         ctx.fillRect(-len * 0.28, -h * 0.85, len * 0.32, h * 0.4);
       } else {
-        ctx.fillStyle = '#e0f2fe';
-        round(-len * 0.22, -h * 0.28, len * 0.28, h * 0.4, 4);
-        ctx.fill();
+        drawWindow(-len * 0.22, -h * 0.28, len * 0.28, h * 0.4);
       }
     }
     if (train.engine !== 'bullet') drawDoors(len * 0.7, h);
-    ctx.fillStyle = '#fef08a';
+    ctx.fillStyle = isDark() ? '#fef08a' : '#fef9c3';
     ctx.beginPath();
     ctx.arc(len * 0.28, 0, Math.max(3, tile * 0.06), 0, Math.PI * 2);
     ctx.fill();
-    if (hour >= 19 || hour < 6) {
-      const beam = ctx.createLinearGradient(len * 0.3, 0, len, 0);
-      beam.addColorStop(0, 'rgba(254,240,138,0.45)');
+    if (isDark()) {
+      const reach = isNight() ? tile * 0.95 : tile * 0.55;
+      const beam = ctx.createLinearGradient(len * 0.3, 0, len * 0.3 + reach, 0);
+      beam.addColorStop(0, 'rgba(254,240,138,' + (isNight() ? 0.7 : 0.4) + ')');
       beam.addColorStop(1, 'rgba(254,240,138,0)');
       ctx.fillStyle = beam;
       ctx.beginPath();
       ctx.moveTo(len * 0.3, -4);
-      ctx.lineTo(len, -tile * 0.2);
-      ctx.lineTo(len, tile * 0.2);
+      ctx.lineTo(len * 0.3 + reach, -tile * 0.22);
+      ctx.lineTo(len * 0.3 + reach, tile * 0.22);
       ctx.closePath();
       ctx.fill();
     }
@@ -1512,21 +2373,22 @@
   }
 
   function save() {
-    if (NO_SAVE) return;
+    if (NO_SAVE || bootstrapping) return;
     try {
       const cells = [];
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           const piece = grid[r][c];
           if (!piece) continue;
-          cells.push({ c: c, r: r, t: piece.type, s: piece.state || 0, n: piece.name || '' });
+          cells.push({ c: c, r: r, t: piece.type, s: piece.state || 0, n: piece.name || '', role: piece.role || '', lanterns: !!piece.lanterns });
         }
       }
       localStorage.setItem(KEY, JSON.stringify({
-        v: 1, cells: cells, col: col, row: row, dir: dir,
+        v: 2, cells: cells, col: col, row: row, dir: dir,
         throttle: throttle, engine: train.engine, wheels: train.wheels, paint: train.paint,
         cars: train.cars, theme: theme, hour: hour, mode: mode, kid: kid, tool: tool,
-        boarded: train.boarded, doors: train.doorsOpen
+        boarded: 0, doors: false, story: story, beat: beat, painted: painted,
+        lanternsLit: lanternsLit, arrived: arrived
       }));
     } catch (e) {}
   }
@@ -1537,29 +2399,53 @@
       const raw = localStorage.getItem(KEY);
       if (!raw) return false;
       const data = JSON.parse(raw);
-      if (!data || data.v !== 1 || !Array.isArray(data.cells)) return false;
+      if (!data || data.v !== 2 || !Array.isArray(data.cells)) return false;
       grid = TrainSim.emptyGrid(COLS, ROWS);
       data.cells.forEach(function (cell) {
         if (cell.r < 0 || cell.c < 0 || cell.r >= ROWS || cell.c >= COLS) return;
-        grid[cell.r][cell.c] = { type: cell.t, state: cell.s || 0, name: cell.n || '' };
+        grid[cell.r][cell.c] = {
+          type: cell.t,
+          state: cell.s || 0,
+          name: cell.n || '',
+          role: cell.role || '',
+          lanterns: !!cell.lanterns
+        };
       });
       col = clamp(data.col, 0, COLS - 1);
       row = clamp(data.row, 0, ROWS - 1);
       dir = TrainSim.VEC[data.dir] ? data.dir : 'E';
       throttle = clamp(data.throttle, 0, 100);
       if (reduceMotion) throttle = 0;
-      currentSpeed = throttle;
+      currentSpeed = 0;
       train.engine = data.engine || 'steam';
       train.wheels = data.wheels || 'classic';
       train.paint = data.paint || '#3b82f6';
       train.cars = clamp(data.cars, 1, 5);
-      train.boarded = Math.max(0, data.boarded || 0);
-      train.doorsOpen = !!data.doors;
-      theme = data.theme || 'fall';
+      train.boarded = 0;
+      train.doorsOpen = false;
+      theme = data.theme || 'lantern';
       hour = clamp(data.hour, 0, 24);
-      mode = data.mode || 'drive';
+      mode = data.mode || 'track';
       kid = data.kid !== false;
       tool = data.tool || 'straight-h';
+      story = data.story === 'free' ? 'free' : 'festival';
+      beat = data.beat || 'gap';
+      painted = !!data.painted;
+      arrived = clamp(data.arrived, 0, 8);
+      lanternsLit = clamp(data.lanternsLit, 0, 8);
+      if (beat === 'celebrate') {
+        lanternsLit = 8;
+        arrived = 4;
+        const fest = festivalCell();
+        platformPeople = [];
+        if (fest) {
+          for (let i = 0; i < 4; i++) {
+            const spot = { col: fest.col, row: fest.row, ox: (i - 1.5) * 16, oy: -8, color: COLORS[i], lantern: true };
+            platformPeople.push(spot);
+          }
+        }
+        waiting = [];
+      }
       return true;
     } catch (e) {
       return false;
@@ -1572,6 +2458,45 @@
     return Math.max(a, Math.min(b, n));
   }
 
+  function coverPose() {
+    const built = TrainSim.buildFestival(COLS, ROWS);
+    grid = built.grid;
+    TrainSim.placePiece(grid, built.gap.row, built.gap.col, 'curve-1');
+    col = built.festival.col;
+    row = built.festival.row;
+    dir = 'E';
+    progress = 0.45;
+    story = 'festival';
+    beat = 'celebrate';
+    theme = 'lantern';
+    hour = 21;
+    train.paint = 'rainbow';
+    train.engine = 'steam';
+    train.cars = 2;
+    train.doorsOpen = true;
+    doorAnim = 1;
+    lanternsLit = 8;
+    arrived = 4;
+    train.boarded = 0;
+    currentSpeed = 0;
+    throttle = 0;
+    kid = true;
+    mode = 'drive';
+    painted = true;
+    waiting = [];
+    platformPeople = [];
+    for (let i = 0; i < 4; i++) {
+      platformPeople.push({
+        col: built.festival.col,
+        row: built.festival.row,
+        ox: (i - 1.5) * 16,
+        oy: -10,
+        color: COLORS[i],
+        lantern: true
+      });
+    }
+  }
+
   function bootPalette() {
     const box = $('colorPalette');
     box.innerHTML = '';
@@ -1581,7 +2506,7 @@
       b.className = 'swatch';
       b.style.background = color;
       b.dataset.color = color;
-      b.setAttribute('aria-label', 'Paint ' + color);
+      b.setAttribute('aria-label', 'Paint');
       b.addEventListener('click', function () {
         firstGesture();
         setPaint(color);
@@ -1591,13 +2516,40 @@
     });
   }
 
+  function refreshAll(silent) {
+    setEngine(train.engine);
+    setWheels(train.wheels);
+    paintButtons(train.paint);
+    setTheme(theme);
+    setHour(hour);
+    selectTool(tool);
+    applyKid();
+    applyMode(mode, silent !== false);
+    refreshDoor();
+    refreshBadge();
+    refreshUndo();
+    updateChallenge();
+    refreshHints();
+    const lever = $('speedLever');
+    if (lever) lever.value = String(throttle);
+    if (beat === 'celebrate') {
+      const scrim = $('festivalScrim');
+      if (scrim) scrim.hidden = false;
+    }
+  }
+
   function bind() {
     $('tabWorkshop').addEventListener('click', function () { firstGesture(); applyMode('workshop'); });
     $('tabTrack').addEventListener('click', function () { firstGesture(); applyMode('track'); });
-    $('tabDrive').addEventListener('click', function () { firstGesture(); applyMode('drive'); });
-    $('toTrack').addEventListener('click', function () { firstGesture(); applyMode('track'); });
-    $('toDrive').addEventListener('click', function () { firstGesture(); applyMode('drive'); });
-    $('modeDifficultyBtn').addEventListener('click', function () { firstGesture(); toggleDifficulty(); });
+    $('tabDrive').addEventListener('click', function () { firstGesture(); tryDrive(); });
+    $('toTrack').addEventListener('click', function () {
+      firstGesture();
+      if (story === 'festival' && (beat === 'paint' || beat === 'ride')) tryDrive();
+      else applyMode('track');
+    });
+    $('toDrive').addEventListener('click', function () { firstGesture(); tryDrive(); });
+    $('kidPick').addEventListener('click', function () { firstGesture(); setKid(true); });
+    $('advPick').addEventListener('click', function () { firstGesture(); setKid(false); });
     $('musicToggleBtn').addEventListener('click', function () { audio.toggle(); });
     $('btnEngSteam').addEventListener('click', function () { firstGesture(); setEngine('steam'); if (kid) speak('Steam train.'); });
     $('btnEngBullet').addEventListener('click', function () { firstGesture(); setEngine('bullet'); if (kid) speak('Bullet train.'); });
@@ -1611,13 +2563,19 @@
     document.querySelectorAll('#toolBox .choice').forEach(function (b) {
       b.addEventListener('click', function () { firstGesture(); selectTool(b.dataset.tool); });
     });
+    $('themeLantern').addEventListener('click', function () { firstGesture(); setTheme('lantern'); });
     $('themeFall').addEventListener('click', function () { firstGesture(); setTheme('fall'); });
     $('themeJapan').addEventListener('click', function () { firstGesture(); setTheme('japan'); });
     $('themeGermany').addEventListener('click', function () { firstGesture(); setTheme('germany'); });
     $('timeSlider').addEventListener('input', function (e) { setHour(parseInt(e.target.value, 10)); });
+    $('todDay').addEventListener('click', function () { firstGesture(); setHour(11); });
+    $('todNight').addEventListener('click', function () { firstGesture(); setHour(21); });
+    $('undoBtn').addEventListener('click', function () { firstGesture(); undo(); });
     $('clearBtn').addEventListener('click', function () { firstGesture(); clearTracks(); });
-    $('presetBtn').addEventListener('click', function () { firstGesture(); loadLoop(); announce('Loop is ready.', 'The loop is ready.'); });
+    $('presetBtn').addEventListener('click', function () { firstGesture(); loadLoop(); announce('Loop is ready.', 'The loop is ready.'); refreshAll(true); });
+    $('festivalBtn').addEventListener('click', function () { firstGesture(); bootstrapping = true; startFestival(true); bootstrapping = false; refreshAll(true); announce('Last train to the lantern festival.', 'One corner is missing. Tap the glowing piece.'); });
     $('speedLever').addEventListener('input', function (e) { firstGesture(); setThrottle(e.target.value); });
+    $('brakeBtn').addEventListener('click', function () { firstGesture(); brake(); });
     $('turboBtn').addEventListener('click', triggerTurbo);
     $('hornBtn').addEventListener('click', function () {
       firstGesture();
@@ -1625,8 +2583,11 @@
       audio.horn();
       announce('Honk honk!', 'Honk honk!');
     });
+    $('stopStationBtn').addEventListener('click', function () { firstGesture(); stopAtStation(); });
     $('doorToggleBtn').addEventListener('click', function () { firstGesture(); toggleDoors(); });
     $('boardBtn').addEventListener('click', function () { firstGesture(); boardAll(); });
+    $('rideAgain').addEventListener('click', function () { firstGesture(); rideAgain(); });
+    $('buildOwn').addEventListener('click', function () { firstGesture(); buildOwn(); });
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
@@ -1636,9 +2597,12 @@
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'h' || e.key === 'H') $('hornBtn').click();
       else if (e.key === 'g' || e.key === 'G') $('turboBtn').click();
+      else if (e.key === 'b' || e.key === 'B') brake();
+      else if ((e.key === 's' || e.key === 'S') && kid && mode === 'drive') stopAtStation();
+      else if ((e.key === 'z' || e.key === 'Z') && mode === 'track') undo();
       else if (e.key === '1') applyMode('workshop');
       else if (e.key === '2') applyMode('track');
-      else if (e.key === '3') applyMode('drive');
+      else if (e.key === '3') tryDrive();
     });
     document.addEventListener('pointerdown', firstGesture, { capture: true });
     document.querySelectorAll('[data-tell]').forEach(function (btn) {
@@ -1660,11 +2624,14 @@
   }
 
   function state() {
+    const gap = TrainSim.firstGap(grid);
     return {
       col: col, row: row, dir: dir, progress: progress, mode: mode, kid: kid,
       boarded: train.boarded, doors: train.doorsOpen, speed: currentSpeed,
       music: audio.musicOn, engine: train.engine, cars: train.cars, waiting: waiting.length,
-      horn: audio.playedHorn, go: audio.playedGo, ctx: !!audio.ctx
+      walkers: walkers.length, horn: audio.playedHorn, go: audio.playedGo, ctx: !!audio.ctx,
+      lanterns: lanternsLit, arrived: arrived, beat: beat, story: story,
+      ghost: gap && gap.type ? gap.type : '', paint: train.paint
     };
   }
 
@@ -1672,107 +2639,180 @@
     state: state,
     tick: tick,
     place: placeAt,
-    loadLoop: loadLoop
+    loadLoop: loadLoop,
+    startFestival: function () { startFestival(true); refreshAll(true); },
+    stopAtStation: stopAtStation
   };
 
   function runSelfTest() {
     const lines = [];
-    const ok = function (name, cond) { lines.push((cond ? 'ok  ' : 'FAIL') + '  ' + name); return !!cond; };
-    const lap = TrainSim.lap(grid, col, row, dir);
-    ok('preset lap closes', lap.closed && !lap.reversed);
-    ok('workshop button', !!$('tabWorkshop'));
-    $('tabWorkshop').click();
-    ok('workshop panel', $('workshopPanel').hidden === false && $('conductorHUD').hidden === true);
-    $('tabTrack').click();
-    ok('track panel', $('trackPanel').hidden === false);
-    $('tabDrive').click();
-    ok('drive hud', $('conductorHUD').hidden === false && $('workshopPanel').hidden === true);
-    $('btnEngBullet').click();
-    ok('bullet engine', state().engine === 'bullet');
-    $('btnEngSteam').click();
-    const cars = state().cars;
-    $('addCar').click();
-    ok('add car', state().cars === Math.min(5, cars + 1));
-    const before = state();
-    throttle = 100;
-    userDrove = true;
-    boostUntil = 0;
-    train.doorsOpen = false;
-    for (let i = 0; i < 40; i++) tick(0.1);
-    const after = state();
-    ok('train moved', before.col !== after.col || before.row !== after.row || Math.abs(before.progress - after.progress) > 0.05);
-    $('hornBtn').click();
-    ok('horn scheduled', audio.playedHorn >= 1 && !!audio.ctx);
-    $('turboBtn').click();
-    ok('go scheduled', audio.playedGo >= 1);
-    $('musicToggleBtn').click();
-    ok('music on', audio.musicOn === true);
-    $('musicToggleBtn').click();
-    ok('music off', audio.musicOn === false);
-    const waitingBefore = waiting.length;
-    ok('station has people', waitingBefore > 0);
-    $('boardBtn').click();
-    ok('boarded', state().boarded >= waitingBefore && state().doors === true && state().waiting === 0);
-    $('modeDifficultyBtn').click();
-    ok('advanced label', $('diffLabel').textContent === 'Advanced');
-    $('modeDifficultyBtn').click();
-    ok('kid label', $('diffLabel').textContent === 'Kid Mode');
-    const links = [].slice.call(document.querySelectorAll('script[src], link[href]')).map(function (n) {
-      return n.src || n.href || '';
-    });
-    ok('no extra network', links.every(function (href) {
-      return !href || href.indexOf('fonts.googleapis.com') !== -1 || href.indexOf('sim.js') !== -1 || href.indexOf('data:') === 0;
-    }));
-    const pass = lines.every(function (line) { return line.indexOf('FAIL') !== 0; });
-    const out = $('selftest-out');
-    out.hidden = false;
-    out.textContent = lines.join('\n');
-    document.documentElement.dataset.selftest = pass ? 'pass' : 'fail';
-    document.title = (pass ? 'PASS' : 'FAIL') + ' Ultimate Train Studio';
+    const ok = function (name, cond) {
+      lines.push((cond ? 'ok  ' : 'FAIL') + '  ' + name);
+      return !!cond;
+    };
+    const finish = function () {
+      const pass = lines.every(function (line) { return line.indexOf('FAIL') !== 0; });
+      const out = $('selftest-out');
+      out.hidden = false;
+      out.textContent = lines.join('\n');
+      document.documentElement.dataset.selftest = pass ? 'pass' : 'fail';
+      document.title = (pass ? 'PASS' : 'FAIL') + ' Ultimate Train Studio';
+    };
+    const hit = function (el) {
+      const r = el.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8) return null;
+      const x = Math.min(window.innerWidth - 2, Math.max(1, r.left + r.width / 2));
+      const y = Math.min(window.innerHeight - 2, Math.max(1, r.top + r.height / 2));
+      return { r: r, node: document.elementFromPoint(x, y) };
+    };
+    try {
+      ok('festival first', story === 'festival' && beat === 'gap' && mode === 'track');
+      const gap = TrainSim.firstGap(grid);
+      ok('missing curve', !!gap && gap.type === 'curve-tr');
+      ok('ghost curve', !!gap && TrainSim.obviousCurve(grid, gap.row, gap.col) === 'curve-tr');
+      const ends = TrainSim.openEnds(grid);
+      ok('open ends', ends.some(function (end) { return end.dir === 'E' && end.col === 5; }) && ends.some(function (end) { return end.dir === 'N' && end.row === 2; }));
+      currentSpeed = 120;
+      train.doorsOpen = true;
+      const waited = waiting.length;
+      beginBoarding();
+      ok('no board at turbo', train.boarded === 0 && walkers.length === 0 && waiting.length === waited);
+      train.doorsOpen = false;
+      currentSpeed = 0;
+      tool = 'curve-1';
+      placeAt(gap.col, gap.row);
+      ok('placed fit', !!(grid[gap.row][gap.col] && grid[gap.row][gap.col].type === 'curve-tr'));
+      ok('gap closed', !TrainSim.firstGap(grid));
+      ok('paint beat', beat === 'paint');
+      ok('workshop hides drive', $('workshopPanel').hidden === false && $('conductorHUD').hidden === true && $('trackPanel').hidden === true);
+      ok('throttle stays in the drive bar', $('conductorHUD').contains($('speedLever')) && !$('workshopPanel').contains($('speedLever')));
+      setPaint('rainbow');
+      ok('rainbow', train.paint === 'rainbow' && beat === 'ride');
+      tryDrive();
+      ok('drive mode', mode === 'drive' && $('conductorHUD').hidden === false);
+      ok('go in drive bar', $('conductorHUD').contains($('turboBtn')));
+      stopAtStation();
+      for (let i = 0; i < 600 && (train.boarded < 4 || walkers.length); i++) tick(0.05);
+      ok('boarded four at stop speed ' + Math.round(currentSpeed), train.boarded === 4 && walkers.length === 0 && currentSpeed < 1 && train.doorsOpen === true);
+      stopAtStation();
+      for (let i = 0; i < 800 && ($('festivalScrim').hidden || lanternsLit < 8); i++) tick(0.05);
+      ok('lanterns lit ' + lanternsLit + ' arrived ' + arrived, lanternsLit >= 8 && arrived >= 4);
+      ok('arrival card', $('festivalScrim').hidden === false);
+      buildOwn();
+      ok('build own', story === 'free' && $('festivalScrim').hidden === true && mode === 'track');
+      ok('undo and test drive stay out of the tool scroller', !!$('undoBtn') && !$('toolBox').contains($('undoBtn')) && !$('toolBox').contains($('toDrive')));
+      const driveHit = hit($('toDrive'));
+      ok('test drive visible', !!driveHit && driveHit.r.bottom <= window.innerHeight + 1 && driveHit.r.top >= 0 && ($('toDrive') === driveHit.node || $('toDrive').contains(driveHit.node)));
+      const header = document.querySelector('header');
+      ok('header fits ' + Math.round(header.scrollWidth) + '/' + Math.round(header.clientWidth) + ' w=' + window.innerWidth, header.scrollWidth <= header.clientWidth + 2);
+      ['kidPick', 'advPick', 'tabWorkshop', 'tabTrack', 'tabDrive'].forEach(function (id) {
+        const r = $(id).getBoundingClientRect();
+        ok(id + ' on screen', r.width > 8 && r.left >= -1 && r.right <= window.innerWidth + 1 && r.top >= -1);
+      });
+      if (window.innerWidth >= 800) {
+        ok('modes one row', Math.abs($('tabWorkshop').getBoundingClientRect().top - $('tabDrive').getBoundingClientRect().top) < 2);
+      }
+      applyMode('workshop', true);
+      ok('workshop again', $('workshopPanel').hidden === false && $('conductorHUD').hidden === true);
+      const nextHit = hit($('toTrack'));
+      ok('workshop action visible', !!nextHit && nextHit.r.bottom <= window.innerHeight + 1 && ($('toTrack') === nextHit.node || $('toTrack').contains(nextHit.node)));
+      applyMode('drive', true);
+      const goHit = hit($('turboBtn'));
+      ok('go visible', !!goHit && goHit.r.height > 20 && goHit.r.bottom <= window.innerHeight + 1 && ($('turboBtn') === goHit.node || $('turboBtn').contains(goHit.node)));
+      const stopHit = hit($('stopStationBtn'));
+      ok('stop at station visible', !!stopHit && stopHit.r.height > 30 && ($('stopStationBtn') === stopHit.node || $('stopStationBtn').contains(stopHit.node)));
+      loadLoop();
+      const lap = TrainSim.lap(grid, col, row, dir);
+      ok('preset lap closes', lap.closed && !lap.reversed);
+      applyMode('drive', true);
+      $('btnEngBullet').click();
+      ok('bullet engine', state().engine === 'bullet');
+      $('btnEngSteam').click();
+      const cars = state().cars;
+      $('addCar').click();
+      ok('add car', state().cars === Math.min(5, cars + 1));
+      throttle = 100;
+      userDrove = true;
+      boostUntil = 0;
+      train.doorsOpen = false;
+      walkers = [];
+      const before = state();
+      for (let i = 0; i < 40; i++) tick(0.1);
+      const after = state();
+      ok('train moved', before.col !== after.col || before.row !== after.row || Math.abs(before.progress - after.progress) > 0.05);
+      let st = null;
+      for (let r = 0; r < ROWS && !st; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (grid[r][c] && grid[r][c].type === 'station') { st = { c: c, r: r }; break; }
+        }
+      }
+      col = st.c;
+      row = st.r;
+      dir = 'E';
+      progress = 0.5;
+      currentSpeed = 0;
+      throttle = 0;
+      train.doorsOpen = false;
+      walkers = [];
+      syncPassengers();
+      const waitingBefore = waiting.filter(function (p) { return p.col === col && p.row === row; }).length;
+      ok('station has people', waitingBefore > 0);
+      $('boardBtn').click();
+      for (let i = 0; i < 80 && walkers.length; i++) tick(0.05);
+      ok('boarded from stop', state().boarded >= waitingBefore && state().doors === true && state().speed < 1);
+      $('hornBtn').click();
+      ok('horn scheduled', audio.playedHorn >= 1 && !!audio.ctx);
+      $('turboBtn').click();
+      ok('go scheduled', audio.playedGo >= 1);
+      $('musicToggleBtn').click();
+      ok('music on', audio.musicOn === true);
+      $('musicToggleBtn').click();
+      ok('music off', audio.musicOn === false);
+      $('advPick').click();
+      ok('advanced selected', $('advPick').getAttribute('aria-checked') === 'true' && $('kidPick').getAttribute('aria-checked') === 'false' && kid === false);
+      $('advPick').click();
+      ok('advanced stays', $('advPick').getAttribute('aria-checked') === 'true' && kid === false);
+      if (window.innerWidth >= 1100) {
+        const wide = document.querySelector('header');
+        ok('advanced header fits', wide.scrollWidth <= wide.clientWidth + 2);
+      }
+      $('kidPick').click();
+      ok('kid selected', kid === true && $('kidPick').getAttribute('aria-checked') === 'true');
+      const links = [].slice.call(document.querySelectorAll('script[src], link[href]')).map(function (n) {
+        return n.src || n.href || '';
+      });
+      ok('no extra network', links.every(function (href) {
+        return !href || href.indexOf('fonts.googleapis.com') !== -1 || href.indexOf('sim.js') !== -1 || href.indexOf('data:') === 0;
+      }));
+    } catch (err) {
+      lines.push('FAIL  exception ' + (err && err.stack ? err.stack : err));
+    }
+    finish();
   }
 
   bootPalette();
-  if (COVER) {
-    loadLoop();
-    train.paint = '#ef4444';
-    train.engine = 'steam';
-    train.cars = 3;
-    theme = 'fall';
-    hour = 17;
-    mode = 'drive';
-    kid = false;
-    throttle = 62;
-    currentSpeed = 62;
-  } else if (!load()) {
-    loadLoop();
-    mode = 'drive';
-    kid = true;
-  }
-  if (location.hash === '#workshop') mode = 'workshop';
-  if (location.hash === '#track') mode = 'track';
-  setEngine(train.engine);
-  setWheels(train.wheels);
-  setPaint(train.paint);
-  setTheme(theme);
-  setHour(hour);
-  selectTool(tool);
-  applyKid();
-  applyMode(mode, true);
-  refreshDoor();
-  refreshBadge();
-  syncPassengers();
+  if (COVER) coverPose();
+  else if (SELFTEST || location.hash === '#festival') startFestival(false);
+  else if (!load()) startFestival(false);
+  else if (beat !== 'celebrate') syncPassengers();
+  if (!COVER && location.hash === '#workshop') mode = 'workshop';
+  if (!COVER && location.hash === '#track') mode = 'track';
+  if (!COVER && location.hash === '#drive') mode = 'drive';
   bind();
+  bootstrapping = false;
+  refreshAll(true);
   layout();
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    tick(dt);
+    if (!COVER) tick(dt);
+    else doorAnim = 1;
     render();
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  if (SELFTEST) setTimeout(runSelfTest, 300);
+  if (SELFTEST) setTimeout(runSelfTest, 400);
 })();
 </script>
 </body>

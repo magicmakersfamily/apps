@@ -65,11 +65,13 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | shelf-F8 | feature | shelf | Play checks: one command for every test (`tools/check.mjs`), Chrome / Firefox / WebKit harness, persona bots, a grouped report, a pre-push check | P1 | doing | family | | Phase 1 (checks, personas, report) and phase 2 (GUTS playtest recording and exact replay, guts-F18) built (`tools/play/README.md`). Next: screenshot comparisons and speed budgets, then GitHub checks. |
 | touch-tone-B1 | bug | touch-tone | Not yet tried on a phone or tablet: pencil pressure, Cantonese voice, replay timing, silent switch | P1 | testing | self | | Check Safari on iPhone and iPad. Hear Word follows the device silent switch. Drawing music does not. |
 | marble-run-B1 | bug | marble-run | Not yet tried on a phone or tablet: placing pieces with a finger, booster sound, and replay | P1 | testing | self | | Check Safari on iPhone and iPad. The track should stay put after a refresh. |
+| ultimate-train-studio-B1 | bug | ultimate-train-studio | Not yet tried on a real phone or tablet: finger track placement, horn, and the silent switch | P1 | testing | self | | Check Safari on iPhone and iPad. Kid Mode should speak the first steps without reading. |
 
 ## Closed
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| ultimate-train-studio-F1 | feature | ultimate-train-studio | Workshop, track builder, conductor, and Kid Mode with horn, throttle, doors, and boarding | P0 | done | family | 1.0 | Web Audio unlocks on the first tap. Kid Mode speaks the first steps. The preset loop stays on the rails. |
 | marble-run-F12 | feature | marble-run | Musical machine slice: scoring clarity, replay exit, starter reset, chimes, orchestra showcase | P0 | done | playtest | 1.3 | Gap says Put a ramp here. Home reads N of 5 · Giant home/missed. Watch again / Back to build. Tuned chimes and The Marble Orchestra. |
 | marble-run-F11 | feature | marble-run | Epic looping theme and velocity-aware SFX with unlock-on-gesture | P0 | done | playtest | 1.2 | Theme bed lifts when marbles run. Drop, clack, booster, bouncer, funnel, switch, giant, bell + success sting, UI clicks. Sound stays silent until the first tap. |
 | marble-run-F10 | feature | marble-run | Pick a piece to move, flip, or erase; a switch paddle; save a copy | P2 | done | playtest | 1.1 | Each tube can release its own marble. Save a copy keeps the original track. |

@@ -1,0 +1,1779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Paint a train, lay a track, and drive it. Honk the horn, open the doors, and let people hop on. Kid Mode talks you through it.">
+<meta property="og:title" content="Ultimate Train Studio 火車工作室 · The App Shelf">
+<meta property="og:description" content="Paint a train, lay a track, and drive it. Honk the horn, open the doors, and tap the people to hop aboard.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/ultimate-train-studio/cover.png">
+<meta property="og:type" content="website">
+<title>Ultimate Train Studio · The App Shelf</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b91c1c'/%3E%3Crect x='8' y='30' width='36' height='16' rx='3' fill='%23fff'/%3E%3Ccircle cx='18' cy='48' r='5' fill='%231e293b'/%3E%3Ccircle cx='34' cy='48' r='5' fill='%231e293b'/%3E%3Crect x='44' y='34' width='12' height='10' rx='2' fill='%23fde68a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Noto+Serif+TC:wght@600&display=swap">
+<script>if (location.hash === '#cover') document.documentElement.classList.add('cover-mode');</script>
+<style>
+  :root {
+    --bg: #0f172a;
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --line: #334155;
+    --card: rgba(15, 23, 42, 0.94);
+    --link: #fde68a;
+    --paper: #0b1220;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #e8eef5; --ink: #0f172a; --muted: #475569; --line: #d5dee8; --link: #1d4ed8; --paper: #f8fafc; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    height: 100dvh;
+    max-width: 100%;
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    font: 500 16px/1.35 Fredoka, "Trebuchet MS", sans-serif;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  [hidden] { display: none !important; }
+  img { max-width: 100%; }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--link); }
+  .zh { font-family: "Noto Serif TC", "Songti TC", PMingLiU, serif; font-weight: 600; }
+  ruby { ruby-position: under; }
+  rt { font-family: Fredoka, sans-serif; font-size: 0.42em; color: var(--muted); }
+
+  .back { color: var(--muted); text-decoration: none; padding: 8px 12px 0; font-size: 0.95rem; min-width: 0; }
+  .back:hover { color: var(--ink); }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 6px 12px 8px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    z-index: 5;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .mark { width: 42px; height: 42px; flex: none; }
+  h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.01em; }
+  h1 .zh { display: block; font-size: 0.82rem; color: #fb7185; }
+  .beta {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #6d28d9;
+    color: #fff;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    vertical-align: 2px;
+  }
+  .head-actions { display: flex; gap: 8px; margin-left: auto; }
+  .icon-btn, .mode-btn, .text-btn, .choice, .go, .horn, .door, .small {
+    border-radius: 14px;
+    border: 2px solid transparent;
+    min-height: 48px;
+    padding: 8px 12px;
+  }
+  .icon-btn {
+    width: 48px;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+    font-size: 1.25rem;
+  }
+  .icon-btn[aria-pressed="true"] { color: #fbbf24; border-color: #f59e0b; }
+  .kid-toggle {
+    background: rgba(245, 158, 11, 0.18);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.45);
+    font-weight: 700;
+  }
+  @media (prefers-color-scheme: light) {
+    header { color: #0f172a; }
+    .icon-btn { background: #fff; color: #0f172a; }
+    .kid-toggle { color: #9a3412; background: #ffedd5; }
+    h1 .zh { color: #be123c; }
+  }
+  .modes { display: flex; gap: 6px; flex: 1 1 280px; min-width: 0; max-width: 100%; }
+  .mode-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #334155;
+    font-weight: 700;
+  }
+  .mode-btn[aria-pressed="true"] { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .mode-btn .emo { display: block; font-size: 1.15rem; line-height: 1; }
+  body.kid .mode-btn { min-height: 58px; font-size: 1.05rem; }
+
+  main { position: relative; flex: 1; min-height: 0; min-width: 0; max-width: 100%; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+
+  .panel {
+    position: absolute;
+    z-index: 3;
+    top: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: min(320px, calc(100% - 20px));
+    overflow: auto;
+    padding: 12px;
+    background: var(--card);
+    color: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  }
+  .panel h2 { margin: 0 0 8px; font-size: 1.05rem; color: #fbbf24; }
+  .panel h3 { margin: 12px 0 6px; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #94a3b8; }
+  .hint { margin: 0 0 8px; color: #cbd5e1; font-size: 0.92rem; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .choice {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f8fafc;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+  .choice[aria-pressed="true"] { border-color: #60a5fa; background: #1d4ed8; }
+  .choice .emo { display: block; font-size: 1.35rem; line-height: 1.1; }
+  body.kid .choice { min-height: 62px; font-size: 0.95rem; }
+  .colors { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .swatch { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; padding: 0; min-height: 0; }
+  body.kid .swatch { width: 48px; height: 48px; }
+  .swatch[aria-pressed="true"] { outline: 3px solid #38bdf8; }
+  .rainbow {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(90deg, #ef4444, #eab308, #22c55e, #3b82f6, #a855f7);
+  }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .text-btn { background: #1e293b; border-color: #334155; color: #f8fafc; font-weight: 700; }
+  .text-btn.wide { width: 100%; margin-top: 12px; background: #2563eb; border-color: #2563eb; }
+  #trackPanel .text-btn.wide { background: #059669; border-color: #059669; }
+  .count { color: #7dd3fc; font-weight: 700; }
+
+  .hud {
+    position: absolute;
+    z-index: 4;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+    pointer-events: none;
+  }
+  .pad, .horn, .go, .door, .small { pointer-events: auto; }
+  .pad {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    background: var(--card);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 18px;
+    color: #f8fafc;
+  }
+  .throttle { display: flex; flex-direction: column; gap: 4px; min-width: 140px; font-size: 0.78rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  .throttle input { width: 160px; height: 36px; accent-color: #38bdf8; }
+  .speed { font-variant-numeric: tabular-nums; color: #67e8f9; font-weight: 700; font-size: 1rem; }
+  .go {
+    border: 0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.15rem;
+    background: linear-gradient(90deg, #dc2626, #f97316 55%, #f59e0b);
+    min-width: 148px;
+  }
+  .go.hot { box-shadow: 0 0 0 3px #fecaca, 0 0 24px #ef4444; }
+  .horn {
+    border: 0;
+    color: #1c1917;
+    font-weight: 700;
+    font-size: 1.25rem;
+    background: linear-gradient(#fde68a, #f59e0b);
+    min-width: 150px;
+  }
+  body.kid .horn.hint { animation: hint 1.1s ease-in-out infinite; }
+  @keyframes hint {
+    50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.35); }
+  }
+  .door { background: #7e22ce; color: #fff; font-weight: 700; border-color: #7e22ce; }
+  .door.open { background: #e11d48; border-color: #e11d48; }
+  .small { background: #1e293b; border-color: #334155; color: #e9d5ff; font-weight: 700; }
+  .badge { font-size: 0.85rem; color: #e9d5ff; font-weight: 700; }
+  body.kid .go, body.kid .horn, body.kid .door, body.kid .small { min-height: 64px; font-size: 1.2rem; }
+
+  .banner {
+    position: absolute;
+    z-index: 6;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(92%, 520px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.55);
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+  }
+  .shelf-foot {
+    padding: 8px 12px max(10px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+  .shelf-foot p { margin: 2px 0; }
+  .linkish {
+    background: none;
+    border: 0;
+    padding: 0;
+    min-height: 0;
+    color: var(--link);
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  #selftest-out {
+    position: fixed;
+    z-index: 20;
+    left: 8px;
+    top: 8px;
+    max-width: min(92vw, 640px);
+    max-height: 70vh;
+    overflow: auto;
+    margin: 0;
+    padding: 10px;
+    background: #fff;
+    color: #111;
+    font: 12px/1.45 ui-monospace, monospace;
+    border-radius: 8px;
+    user-select: text;
+  }
+  @media (max-width: 860px) {
+    body { height: auto; min-height: 100dvh; overflow: auto; }
+    h1 { font-size: 1.05rem; }
+    header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; width: 100%; }
+    .brand { min-width: 0; }
+    h1 { overflow: hidden; }
+    .head-actions { margin-left: 0; }
+    .modes { grid-column: 1 / -1; flex: none; width: 100%; max-width: 100%; justify-content: stretch; }
+    .mode-btn { padding: 8px 4px; font-size: 0.95rem; }
+    .go, .horn, .door, .small { font-size: 1rem; padding: 8px 6px; }
+    .hud .pad, .door, .small { min-width: 0; }
+    main { min-height: 70dvh; flex: none; }
+    .panel { top: auto; bottom: 8px; left: 8px; right: 8px; width: auto; height: min(42dvh, 300px); }
+    .hud { left: 8px; right: 8px; display: grid; grid-template-columns: 1fr 1fr; }
+    .hud .pad:first-child { grid-column: 1 / -1; flex-wrap: wrap; }
+    .throttle { flex: 1; min-width: 0; }
+    .throttle input { width: 100%; }
+    .horn, .go { min-width: 0; width: 100%; }
+    .go { flex: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.kid .horn.hint { animation: none; }
+  }
+  html.cover-mode, html.cover-mode body { height: 100%; overflow: hidden; background: #431407; }
+  html.cover-mode main { position: fixed; inset: 0; min-height: 0; }
+  html.cover-mode .back,
+  html.cover-mode header,
+  html.cover-mode footer,
+  html.cover-mode .panel,
+  html.cover-mode .hud,
+  html.cover-mode .banner,
+  html.cover-mode #selftest-out { display: none !important; }
+</style>
+</head>
+<body class="kid">
+<a class="back" href="../">← All apps</a>
+<header>
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+      <rect width="64" height="64" rx="16" fill="#b91c1c"/>
+      <rect x="6" y="30" width="34" height="16" rx="3" fill="#fff"/>
+      <rect x="30" y="24" width="12" height="10" fill="#1e293b"/>
+      <circle cx="16" cy="48" r="5" fill="#0f172a"/>
+      <circle cx="32" cy="48" r="5" fill="#0f172a"/>
+      <rect x="42" y="34" width="16" height="10" rx="3" fill="#fde68a"/>
+    </svg>
+    <h1>Ultimate Train Studio <span class="beta">beta</span>
+      <span class="zh" lang="zh-TW"><ruby>火<rt>huǒ</rt>車<rt>chē</rt>工<rt>gōng</rt>作<rt>zuò</rt>室<rt>shì</rt></ruby></span>
+    </h1>
+  </div>
+  <div class="modes" role="tablist" aria-label="Studio">
+    <button class="mode-btn" id="tabWorkshop" type="button" role="tab" aria-pressed="false"><span class="emo" aria-hidden="true">🎨</span><span class="tab-label">Paint</span></button>
+    <button class="mode-btn" id="tabTrack" type="button" role="tab" aria-pressed="false"><span class="emo" aria-hidden="true">🛤️</span><span class="tab-label">Tracks</span></button>
+    <button class="mode-btn" id="tabDrive" type="button" role="tab" aria-pressed="true"><span class="emo" aria-hidden="true">🚂</span><span class="tab-label">Drive</span></button>
+  </div>
+  <div class="head-actions">
+    <button class="kid-toggle" id="modeDifficultyBtn" type="button" aria-pressed="true"><span id="diffLabel">Kid Mode</span></button>
+    <button class="icon-btn" id="musicToggleBtn" type="button" aria-pressed="false" aria-label="Theme music" title="Theme music">♪</button>
+  </div>
+</header>
+
+<main>
+  <canvas id="gameCanvas" width="800" height="500" aria-label="Train world"></canvas>
+
+  <aside class="panel" id="workshopPanel" hidden>
+    <h2>🎨 Paint the train</h2>
+    <p class="hint">Pick an engine, a color, and how many cars.</p>
+    <h3>Engine</h3>
+    <div class="grid3">
+      <button class="choice" id="btnEngSteam" type="button" aria-pressed="true"><span class="emo" aria-hidden="true">💨</span>Steam</button>
+      <button class="choice" id="btnEngBullet" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">⚡</span>Bullet</button>
+      <button class="choice" id="btnEngMetro" type="button" aria-pressed="false"><span class="emo" aria-hidden="true">🚇</span>City</button>
+    </div>
+    <h3>Wheels</h3>
+    <div class="grid3">
+      <button class="choice" id="btnWheelClassic" type="button" aria-pressed="true">Heavy</button>
+      <button class="choice" id="btnWheelSleek" type="button" aria-pressed="false">Sleek</button>
+      <button class="choice" id="btnWheelUrban" type="button" aria-pressed="false">Plain</button>
+    </div>
+    <h3>Color</h3>
+    <div class="colors" id="colorPalette"></div>
+    <p style="height:8px"></p>
+    <button class="rainbow" id="rainbowBtn" type="button">Rainbow</button>
+    <h3>Cars <span class="count" id="carriageCount">2</span></h3>
+    <div class="row">
+      <button class="text-btn" id="addCar" type="button">＋ Add a car</button>
+      <button class="text-btn" id="removeCar" type="button">− Take a car</button>
+    </div>
+    <button class="text-btn wide" id="toTrack" type="button">Next: lay the track →</button>
+  </aside>
+
+  <aside class="panel" id="trackPanel" hidden>
+    <h2>🛤️ Lay the track</h2>
+    <p class="hint">Tap the world to place a piece. Tap a corner again to turn it. Tap the same straight piece to pick it up.</p>
+    <div class="grid2" id="toolBox">
+      <button class="choice" id="toolStraightH" type="button" data-tool="straight-h" aria-pressed="true"><span class="emo" aria-hidden="true">↔️</span>Across</button>
+      <button class="choice" id="toolStraightV" type="button" data-tool="straight-v" aria-pressed="false"><span class="emo" aria-hidden="true">↕️</span>Up-down</button>
+      <button class="choice" id="toolCurve1" type="button" data-tool="curve-1" aria-pressed="false"><span class="emo" aria-hidden="true">↩️</span>Corner</button>
+      <button class="choice" id="toolSwitch" type="button" data-tool="switch" aria-pressed="false"><span class="emo" aria-hidden="true">🔀</span>Switch</button>
+      <button class="choice" id="toolStation" type="button" data-tool="station" aria-pressed="false"><span class="emo" aria-hidden="true">🚉</span>Station</button>
+      <button class="choice" id="toolSpeed" type="button" data-tool="speed" aria-pressed="false"><span class="emo" aria-hidden="true">⏩</span>Fast bit</button>
+      <button class="choice" id="toolErase" type="button" data-tool="erase" aria-pressed="false"><span class="emo" aria-hidden="true">✕</span>Erase</button>
+    </div>
+    <h3>Place</h3>
+    <div class="grid3">
+      <button class="choice" id="themeFall" type="button" aria-pressed="true">🍁 Leaves</button>
+      <button class="choice" id="themeJapan" type="button" aria-pressed="false">🌸 Sakura</button>
+      <button class="choice" id="themeGermany" type="button" aria-pressed="false">🏰 Castle</button>
+    </div>
+    <h3>Time of day <span class="count" id="timeLabel">Sunset</span></h3>
+    <input id="timeSlider" type="range" min="0" max="24" value="17" aria-label="Time of day">
+    <div class="row" style="margin-top:10px">
+      <button class="text-btn" id="clearBtn" type="button">Clear</button>
+      <button class="text-btn" id="presetBtn" type="button">Loop again</button>
+    </div>
+    <button class="text-btn wide" id="toDrive" type="button">Drive the train →</button>
+  </aside>
+
+  <div class="hud" id="conductorHUD">
+    <div class="pad">
+      <label class="throttle">Throttle
+        <input id="speedLever" type="range" min="0" max="100" value="40" aria-label="Throttle">
+        <span class="speed" id="speedValueDisplay">40 km/h</span>
+      </label>
+      <button class="go" id="turboBtn" type="button">GO-GO-GO!</button>
+    </div>
+    <button class="horn hint" id="hornBtn" type="button">📣 HONK HORN!</button>
+    <div class="pad">
+      <div>
+        <div class="badge" id="passengerCountBadge">Train: 0</div>
+        <div class="row" style="margin-top:6px">
+          <button class="door" id="doorToggleBtn" type="button" aria-pressed="false"><span id="doorBtnLabel">🚪 Open doors</span></button>
+          <button class="small" id="boardBtn" type="button">All aboard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="banner" id="announcementBanner" role="status" aria-live="polite" hidden>
+    <span id="announcementText"></span>
+  </div>
+</main>
+
+<footer class="shelf-foot">
+  <p><b>Version 1.0 (beta)</b> · Launched <time datetime="2026-11-05">November 5, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.0">Share your thoughts</a> · <a href="../feedback/?game=ultimate-train-studio&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
+  <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+  <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
+  <p>The horn, the chugs, and the theme song are made on this device. Kid Mode uses your device’s voice. Your train stays on this device.</p>
+  <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/ultimate-train-studio/" data-text="Paint a train, lay the track, and honk the horn: Ultimate Train Studio">Tell a friend</button></p>
+</footer>
+<noscript><p class="shelf-foot">Turn on JavaScript to build a train and drive it.</p></noscript>
+<pre id="selftest-out" hidden></pre>
+
+<script src="sim.js"></script>
+<script>
+(function () {
+  const COLS = 14;
+  const ROWS = 9;
+  const KEY = 'ultimate-train-studio:v1';
+  const COLORS = ['#ef4444', '#f97316', '#eab308', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6'];
+  const COVER = document.documentElement.classList.contains('cover-mode');
+  const SELFTEST = location.hash === '#selftest';
+  const NO_SAVE = COVER || SELFTEST;
+  const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches && !COVER);
+
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const $ = (id) => document.getElementById(id);
+
+  const train = {
+    engine: 'steam',
+    wheels: 'classic',
+    paint: '#3b82f6',
+    cars: 2,
+    doorsOpen: false,
+    boarded: 0
+  };
+
+  let mode = 'drive';
+  let kid = true;
+  let theme = 'fall';
+  let hour = 17;
+  let tool = 'straight-h';
+  let grid = [];
+  let col = 6, row = 1, dir = 'E', progress = 0.4;
+  let mem = {};
+  let throttle = reduceMotion ? 0 : 40;
+  let currentSpeed = throttle;
+  let boostUntil = 0;
+  let userDrove = !reduceMotion;
+  let wheelSpin = 0;
+  let trail = [];
+  let waiting = [];
+  let nextPid = 1;
+  let hover = null;
+  let drag = null;
+  let pointerDown = null;
+  let originX = 0, originY = 0, tile = 48, viewW = 800, viewH = 500;
+  let doorAnim = 0;
+  let welcomed = false;
+  let bannerTimer = 0;
+  let smokeClock = 0;
+  let leafClock = 0;
+  const puffs = [];
+  const leaves = Array.from({ length: 10 }, (_, i) => ({
+    x: (i + 1) / 11, y: (i * 0.17) % 1, s: 0.4 + (i % 3) * 0.2, v: 0.04 + (i % 4) * 0.02
+  }));
+  let zhVoice = null;
+
+  const audio = {
+    ctx: null,
+    unlocked: false,
+    musicOn: false,
+    playedHorn: 0,
+    playedGo: 0,
+    master: null,
+    sfx: null,
+    music: null,
+    bed: null,
+    rumble: null,
+    noise: null,
+    step: 0,
+    timer: null,
+    lastChuff: 0,
+    unlock: function () {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return false;
+      if (!this.ctx) {
+        this.ctx = new AC();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.9;
+        this.master.connect(this.ctx.destination);
+        this.sfx = this.ctx.createGain();
+        this.sfx.gain.value = 0.95;
+        this.sfx.connect(this.master);
+        this.music = this.ctx.createGain();
+        this.music.gain.value = 0;
+        this.music.connect(this.master);
+        this.bed = this.ctx.createGain();
+        this.bed.gain.value = 0;
+        this.bed.connect(this.master);
+        this.rumble = this.ctx.createOscillator();
+        this.rumble.type = 'sawtooth';
+        this.rumble.frequency.value = 62;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 240;
+        this.rumble.connect(filter);
+        filter.connect(this.bed);
+        this.rumble.start();
+        const n = this.ctx.sampleRate;
+        this.noise = this.ctx.createBuffer(1, n, n);
+        const data = this.noise.getChannelData(0);
+        for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+      }
+      if (this.ctx.state !== 'running') this.ctx.resume();
+      const ping = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      g.gain.value = 0.0001;
+      ping.frequency.value = 440;
+      ping.connect(g);
+      g.connect(this.master);
+      const t = this.ctx.currentTime;
+      ping.start(t);
+      ping.stop(t + 0.03);
+      this.unlocked = true;
+      if (this.musicOn) this.startTheme();
+      return true;
+    },
+    env: function (node, t, peak, dur) {
+      node.gain.setValueAtTime(0.0001, t);
+      node.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + 0.03);
+      node.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    },
+    tone: function (freq, type, t, dur, peak, dest) {
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      this.env(g, t, peak, dur);
+      o.connect(g);
+      g.connect(dest || this.sfx);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    },
+    horn: function () {
+      this.unlock();
+      if (!this.ctx) return;
+      this.playedHorn++;
+      const fire = () => {
+        const t = this.ctx.currentTime;
+        this.tone(220, 'sawtooth', t, 0.95, 0.22);
+        this.tone(277.18, 'sawtooth', t, 0.95, 0.16);
+        this.tone(110, 'triangle', t, 0.95, 0.12);
+      };
+      if (this.ctx.state === 'running') fire();
+      else this.ctx.resume().then(fire);
+    },
+    whoosh: function () {
+      this.unlock();
+      if (!this.ctx) return;
+      this.playedGo++;
+      const fire = () => {
+        const t = this.ctx.currentTime;
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noise;
+        const f = this.ctx.createBiquadFilter();
+        f.type = 'bandpass';
+        f.frequency.setValueAtTime(300, t);
+        f.frequency.exponentialRampToValueAtTime(1800, t + 0.35);
+        const g = this.ctx.createGain();
+        this.env(g, t, 0.28, 0.45);
+        src.connect(f);
+        f.connect(g);
+        g.connect(this.sfx);
+        src.start(t);
+        src.stop(t + 0.5);
+        this.tone(392, 'square', t, 0.28, 0.08);
+        this.tone(523, 'square', t + 0.08, 0.28, 0.08);
+      };
+      if (this.ctx.state === 'running') fire();
+      else this.ctx.resume().then(fire);
+    },
+    clack: function () {
+      if (!this.unlocked || !this.ctx || this.ctx.state !== 'running') return;
+      const t = this.ctx.currentTime;
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.noise;
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'highpass';
+      f.frequency.value = 800;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      src.connect(f);
+      f.connect(g);
+      g.connect(this.sfx);
+      src.start(t);
+      src.stop(t + 0.07);
+    },
+    chuff: function () {
+      if (!this.unlocked || !this.ctx || train.engine !== 'steam') return;
+      const now = performance.now();
+      const gap = Math.max(140, 520 - currentSpeed * 3.2);
+      if (now - this.lastChuff < gap) return;
+      this.lastChuff = now;
+      if (this.ctx.state !== 'running') return;
+      const t = this.ctx.currentTime;
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.noise;
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = 420;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.16 + currentSpeed / 700, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      src.connect(f);
+      f.connect(g);
+      g.connect(this.bed);
+      src.start(t);
+      src.stop(t + 0.18);
+    },
+    setSpeed: function (speed) {
+      if (!this.ctx || !this.bed) return;
+      const target = speed > 2 ? 0.05 + Math.min(0.2, speed / 500) : 0;
+      this.bed.gain.setTargetAtTime(target, this.ctx.currentTime, 0.08);
+      if (this.rumble) this.rumble.frequency.setTargetAtTime(48 + speed * 0.45, this.ctx.currentTime, 0.1);
+      if (speed > 6) this.chuff();
+    },
+    startTheme: function () {
+      if (!this.ctx || this.timer) return;
+      const tune = [523, 659, 784, 880, 784, 659, 784, 659, 587, 698, 880, 988, 880, 698, 784, 659];
+      const bass = [196, 196, 247, 247, 220, 220, 196, 262];
+      this.music.gain.setTargetAtTime(0.9, this.ctx.currentTime, 0.05);
+      this.timer = setInterval(() => {
+        if (!this.musicOn || !this.ctx || this.ctx.state !== 'running') return;
+        const i = this.step % tune.length;
+        const t = this.ctx.currentTime;
+        this.tone(tune[i], 'triangle', t, 0.28, 0.09, this.music);
+        if (i % 2 === 0) this.tone(bass[(i / 2) % bass.length], 'sine', t, 0.46, 0.07, this.music);
+        this.step++;
+      }, 280);
+    },
+    stopTheme: function () {
+      if (this.timer) clearInterval(this.timer);
+      this.timer = null;
+      if (this.ctx && this.music) this.music.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+    },
+    toggle: function () {
+      this.unlock();
+      this.musicOn = !this.musicOn;
+      $('musicToggleBtn').setAttribute('aria-pressed', this.musicOn ? 'true' : 'false');
+      if (this.musicOn) this.startTheme();
+      else this.stopTheme();
+    }
+  };
+
+  function speak(text, lang) {
+    if (!kid || COVER || !window.speechSynthesis || !text) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang || 'en-US';
+    u.rate = lang && lang.indexOf('zh') === 0 ? 0.86 : 0.95;
+    if (lang && lang.indexOf('zh') === 0 && zhVoice) u.voice = zhVoice;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  function pickZhVoice() {
+    if (!window.speechSynthesis) return;
+    const voices = window.speechSynthesis.getVoices() || [];
+    zhVoice = voices.filter(function (v) { return /^zh-TW/i.test(v.lang); })[0]
+      || voices.filter(function (v) { return /^zh/i.test(v.lang) && !/HK|yue/i.test(v.lang + v.name); })[0]
+      || null;
+  }
+  if (window.speechSynthesis) {
+    pickZhVoice();
+    window.speechSynthesis.addEventListener('voiceschanged', pickZhVoice);
+  }
+
+  function announce(show, say) {
+    const banner = $('announcementBanner');
+    $('announcementText').textContent = show;
+    banner.hidden = false;
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(function () { banner.hidden = true; }, 2600);
+    if (say) speak(say);
+  }
+
+  function goalSpeed() {
+    if (COVER) return 62;
+    if (performance.now() < boostUntil) return 120;
+    return throttle;
+  }
+
+  function refreshSpeed() {
+    const turbo = performance.now() < boostUntil;
+    $('speedValueDisplay').textContent = Math.round(currentSpeed) + ' km/h' + (turbo ? ' · GO!' : '');
+    $('turboBtn').classList.toggle('hot', turbo);
+    $('speedLever').value = String(throttle);
+  }
+
+  function refreshDoor() {
+    const btn = $('doorToggleBtn');
+    $('doorBtnLabel').textContent = train.doorsOpen ? '🚪 Close doors' : '🚪 Open doors';
+    btn.classList.toggle('open', train.doorsOpen);
+    btn.setAttribute('aria-pressed', train.doorsOpen ? 'true' : 'false');
+  }
+
+  function refreshBadge() {
+    $('passengerCountBadge').textContent = 'Train: ' + train.boarded;
+    $('carriageCount').textContent = String(train.cars);
+  }
+
+  function pressGroup(ids, on) {
+    ids.forEach(function (id) {
+      const el = $(id);
+      if (el) el.setAttribute('aria-pressed', id === on ? 'true' : 'false');
+    });
+  }
+
+  function setEngine(type) {
+    train.engine = type;
+    pressGroup(['btnEngSteam', 'btnEngBullet', 'btnEngMetro'], 'btnEng' + type.charAt(0).toUpperCase() + type.slice(1));
+    save();
+  }
+  function setWheels(type) {
+    train.wheels = type;
+    const map = { classic: 'btnWheelClassic', sleek: 'btnWheelSleek', urban: 'btnWheelUrban' };
+    pressGroup(Object.values(map), map[type]);
+    save();
+  }
+  function setPaint(color) {
+    train.paint = color;
+    document.querySelectorAll('.swatch').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.color === color ? 'true' : 'false');
+    });
+    save();
+  }
+  function addCarriage() {
+    if (train.cars < 5) train.cars++;
+    refreshBadge();
+    save();
+  }
+  function removeCarriage() {
+    if (train.cars > 1) train.cars--;
+    refreshBadge();
+    save();
+  }
+
+  function timeName(h) {
+    if (h < 5 || h >= 21) return 'Night';
+    if (h < 8) return 'Sunrise';
+    if (h < 16) return 'Day';
+    if (h < 19) return 'Sunset';
+    return 'Evening';
+  }
+  function setHour(h) {
+    hour = Math.max(0, Math.min(24, h));
+    $('timeLabel').textContent = timeName(hour);
+    $('timeSlider').value = String(hour);
+    save();
+  }
+  function setTheme(name) {
+    theme = name;
+    const map = { fall: 'themeFall', japan: 'themeJapan', germany: 'themeGermany' };
+    pressGroup(Object.values(map), map[name]);
+    save();
+  }
+  function selectTool(name) {
+    tool = name;
+    document.querySelectorAll('#toolBox .choice').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.tool === name ? 'true' : 'false');
+    });
+  }
+
+  function applyMode(next, silent) {
+    mode = next;
+    const map = { workshop: 'tabWorkshop', track: 'tabTrack', drive: 'tabDrive' };
+    Object.keys(map).forEach(function (k) {
+      $(map[k]).setAttribute('aria-pressed', k === mode ? 'true' : 'false');
+    });
+    $('workshopPanel').hidden = mode !== 'workshop';
+    $('trackPanel').hidden = mode !== 'track';
+    $('conductorHUD').hidden = mode !== 'drive';
+    if (!silent && kid) {
+      if (mode === 'workshop') announce('Paint your train.', 'Paint your train. Tap a color.');
+      else if (mode === 'track') announce('Lay the track.', 'Tap the grass to lay track.');
+      else announce('You are the conductor.', 'You are the conductor. Tap the horn.');
+    }
+    save();
+  }
+
+  function applyKid() {
+    document.body.classList.toggle('kid', kid);
+    $('diffLabel').textContent = kid ? 'Kid Mode' : 'Advanced';
+    $('modeDifficultyBtn').setAttribute('aria-pressed', kid ? 'true' : 'false');
+    $('tabWorkshop').querySelector('.tab-label').textContent = kid ? 'Paint' : 'Workshop';
+    $('tabTrack').querySelector('.tab-label').textContent = kid ? 'Tracks' : 'Track Builder';
+    $('tabDrive').querySelector('.tab-label').textContent = kid ? 'Drive' : 'Conductor';
+    if (!kid && window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function toggleDifficulty() {
+    kid = !kid;
+    applyKid();
+    announce(kid ? 'Kid Mode. Big buttons.' : 'Advanced mode.', kid ? 'Kid mode. I will talk you through it.' : '');
+    save();
+  }
+
+  function syncPassengers() {
+    const keys = {};
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (grid[r][c] && grid[r][c].type === 'station') keys[c + ',' + r] = true;
+      }
+    }
+    waiting = waiting.filter(function (p) { return keys[p.key]; });
+    Object.keys(keys).forEach(function (key) {
+      if (waiting.some(function (p) { return p.key === key; })) return;
+      const parts = key.split(',');
+      const c = +parts[0], r = +parts[1];
+      for (let i = 0; i < 4; i++) {
+        waiting.push({
+          id: nextPid++,
+          key: key,
+          col: c,
+          row: r,
+          color: COLORS[i % COLORS.length],
+          ox: (i - 1.5) * 14,
+          oy: (i % 2) * 8
+        });
+      }
+    });
+    refreshBadge();
+  }
+
+  function loadLoop() {
+    const built = TrainSim.buildLoop(COLS, ROWS);
+    grid = built.grid;
+    col = built.start.col;
+    row = built.start.row;
+    dir = 'E';
+    progress = 0.35;
+    mem = {};
+    trail = [];
+    waiting = [];
+    syncPassengers();
+    save();
+  }
+
+  function clearTracks() {
+    grid = TrainSim.emptyGrid(COLS, ROWS);
+    waiting = [];
+    mem = {};
+    refreshBadge();
+    announce('Track cleared.', kid ? 'The track is clear.' : '');
+    save();
+  }
+
+  function placeAt(c, r) {
+    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return;
+    TrainSim.placePiece(grid, r, c, tool);
+    syncPassengers();
+    save();
+  }
+
+  function cellOf(p) {
+    return {
+      c: Math.floor((p.x - originX) / tile),
+      r: Math.floor((p.y - originY) / tile)
+    };
+  }
+
+  function passengerAt(p) {
+    const reach = kid ? Math.max(30, tile * 0.48) : Math.max(18, tile * 0.3);
+    let found = null;
+    waiting.forEach(function (person) {
+      const at = personPos(person);
+      if (Math.hypot(at.x - p.x, at.y - p.y) <= reach) found = person;
+    });
+    return found;
+  }
+
+  function personPos(person) {
+    if (person.drag) return { x: person.drag.x, y: person.drag.y };
+    return {
+      x: originX + (person.col + 0.5) * tile + person.ox,
+      y: originY + (person.row + 0.42) * tile + person.oy
+    };
+  }
+
+  function nearTrain(p) {
+    const spots = [{ x: trainPoint().x, y: trainPoint().y }];
+    for (let i = 0; i < train.cars; i++) spots.push(carPose(i));
+    return spots.some(function (s) { return Math.hypot(s.x - p.x, s.y - p.y) < tile * 1.05; });
+  }
+
+  function boardPerson(person, quiet) {
+    waiting = waiting.filter(function (p) { return p.id !== person.id; });
+    train.boarded++;
+    refreshBadge();
+    if (!quiet) announce('Hop on!', 'Hop on!');
+    save();
+  }
+
+  function toggleDoors(silent) {
+    train.doorsOpen = !train.doorsOpen;
+    refreshDoor();
+    if (!silent) {
+      announce(train.doorsOpen ? 'Doors open. Tap a friend.' : 'Doors closed.',
+        train.doorsOpen ? 'Doors open. Tap a friend to hop on.' : 'Doors closed.');
+    }
+    save();
+  }
+
+  function boardAll() {
+    if (!train.doorsOpen) {
+      train.doorsOpen = true;
+      refreshDoor();
+    }
+    const moved = TrainSim.boardAll(train.boarded, waiting, true);
+    const n = moved.boarded;
+    train.boarded = moved.count;
+    waiting = [];
+    refreshBadge();
+    announce(n ? 'All aboard!' : 'Nobody is waiting.', n ? 'All aboard!' : 'Nobody is waiting.');
+    save();
+  }
+
+  function triggerTurbo() {
+    audio.unlock();
+    userDrove = true;
+    boostUntil = performance.now() + 5000;
+    audio.whoosh();
+    $('hornBtn').classList.remove('hint');
+    announce('GO-GO-GO!', 'Go, go, go!');
+    save();
+  }
+
+  function setThrottle(v) {
+    throttle = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
+    userDrove = true;
+    if (performance.now() >= boostUntil) refreshSpeed();
+    save();
+  }
+
+  function onPointerDown(e) {
+    if (COVER) return;
+    firstGesture();
+    const p = point(e);
+    pointerDown = p;
+    if (mode === 'track') {
+      const cell = cellOf(p);
+      placeAt(cell.c, cell.r);
+      return;
+    }
+    if (mode !== 'drive') return;
+    const cell = cellOf(p);
+    if (cell.c >= 0 && cell.r >= 0 && cell.c < COLS && cell.r < ROWS) {
+      const tileHere = grid[cell.r][cell.c];
+      if (tileHere && tileHere.type === 'switch') {
+        TrainSim.toggleSwitch(tileHere);
+        audio.clack();
+        announce(tileHere.state ? 'Switch thrown!' : 'Switch is straight.',
+          tileHere.state ? 'The switch is thrown.' : 'The switch is straight.');
+        save();
+        return;
+      }
+    }
+    const person = passengerAt(p);
+    if (!person) return;
+    if (!train.doorsOpen) {
+      train.doorsOpen = true;
+      refreshDoor();
+      if (kid) {
+        boardPerson(person, true);
+        announce('Doors open. Hop on!', 'Doors open. Hop on!');
+        return;
+      }
+      announce('Doors open. Drag a friend to the train.', 'Doors open. Drag a friend onto the train.');
+    }
+    if (kid && !e.shiftKey) {
+      boardPerson(person);
+      return;
+    }
+    person.drag = p;
+    drag = person;
+    canvas.setPointerCapture(e.pointerId);
+  }
+
+  function onPointerMove(e) {
+    const p = point(e);
+    hover = p;
+    if (drag) drag.drag = p;
+  }
+
+  function onPointerUp(e) {
+    const p = point(e);
+    if (drag) {
+      if (nearTrain(p) && train.doorsOpen) boardPerson(drag);
+      else drag.drag = null;
+      drag = null;
+    }
+    pointerDown = null;
+  }
+
+  function point(e) {
+    const b = canvas.getBoundingClientRect();
+    return { x: e.clientX - b.left, y: e.clientY - b.top };
+  }
+
+  function firstGesture() {
+    audio.unlock();
+    if (welcomed || !kid || COVER) return;
+    welcomed = true;
+    $('hornBtn').classList.remove('hint');
+    speak('Your train is ready. Tap the horn. Then tap go, go, go.');
+    setTimeout(function () { speak('火車', 'zh-TW'); }, 2600);
+  }
+
+  function layout() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    viewW = Math.max(1, rect.width);
+    viewH = Math.max(1, rect.height);
+    canvas.width = Math.round(viewW * dpr);
+    canvas.height = Math.round(viewH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const narrow = viewW < 860;
+    const panelW = mode !== 'drive' && !COVER && !narrow ? 300 : 0;
+    const sheet = mode !== 'drive' && !COVER && narrow ? Math.min(300, viewH * 0.42) : 0;
+    const hud = mode === 'drive' && !COVER ? (narrow ? 150 : 108) : 0;
+    const availW = viewW - panelW - 20;
+    const availH = viewH - sheet - hud - 16;
+    tile = Math.max(22, Math.min(78, Math.floor(Math.min(availW / COLS, availH / ROWS))));
+    originX = panelW + 10 + Math.max(0, (availW - tile * COLS) / 2);
+    originY = 8 + Math.max(0, (availH - tile * ROWS) / 2);
+  }
+
+  function tick(dt) {
+    dt = Math.max(0, Math.min(0.05, dt));
+    const goal = goalSpeed();
+    const creep = train.doorsOpen ? 0.08 : 1;
+    currentSpeed += (goal * creep - currentSpeed) * Math.min(1, dt * 2.4);
+    if (currentSpeed < 0.2) currentSpeed = 0;
+    wheelSpin += currentSpeed * dt * 0.12;
+    audio.setSpeed(currentSpeed);
+    const rate = (currentSpeed / 100) * 4.4 * dt;
+    progress += rate;
+    let guard = 0;
+    while (progress >= 1 && guard++ < 6) {
+      progress -= 1;
+      const n = TrainSim.step(grid, col, row, dir, mem);
+      if (n.event === 'reverse') {
+        dir = n.dir;
+        progress = 0;
+        trail = [];
+        audio.clack();
+        break;
+      }
+      col = n.col;
+      row = n.row;
+      dir = n.dir;
+      audio.clack();
+      if (n.event === 'speed' && performance.now() > boostUntil) {
+        boostUntil = performance.now() + 1800;
+        audio.whoosh();
+      }
+    }
+    const here = trainPoint();
+    const last = trail[0];
+    if (!last || Math.hypot(last.x - here.x, last.y - here.y) > 3) {
+      trail.unshift({ x: here.x, y: here.y, angle: TrainSim.ANGLE[dir] });
+      if (trail.length > 700) trail.pop();
+    }
+    doorAnim += ((train.doorsOpen ? 1 : 0) - doorAnim) * Math.min(1, dt * 6);
+    smokeClock += dt;
+    if (train.engine === 'steam' && currentSpeed > 4 && smokeClock > 0.14) {
+      smokeClock = 0;
+      const stack = stackPoint();
+      puffs.push({
+        x: stack.x, y: stack.y,
+        vx: (Math.random() - 0.5) * 10,
+        vy: -20 - Math.random() * 18,
+        life: 1,
+        r: tile * 0.08
+      });
+    }
+    for (let i = puffs.length - 1; i >= 0; i--) {
+      const puff = puffs[i];
+      puff.x += puff.vx * dt;
+      puff.y += puff.vy * dt;
+      puff.life -= dt * 0.55;
+      puff.r += dt * tile * 0.25;
+      if (puff.life <= 0) puffs.splice(i, 1);
+    }
+    leafClock += dt;
+    refreshSpeed();
+  }
+
+  function trainPoint() {
+    const x = originX + (col + 0.5) * tile;
+    const y = originY + (row + 0.5) * tile;
+    const v = TrainSim.VEC[dir];
+    const along = (progress - 0.5) * tile;
+    return { x: x + v[0] * along, y: y + v[1] * along };
+  }
+
+  function carPose(i) {
+    const gap = Math.max(4, Math.round(tile * 0.78 / 3));
+    const index = (i + 1) * gap;
+    if (trail.length > index) return trail[index];
+    const v = TrainSim.VEC[dir];
+    const here = trainPoint();
+    const back = (i + 1) * tile * 0.78;
+    return { x: here.x - v[0] * back, y: here.y - v[1] * back, angle: TrainSim.ANGLE[dir] };
+  }
+
+  function stackPoint() {
+    const p = trainPoint();
+    const a = TrainSim.ANGLE[dir];
+    return {
+      x: p.x + Math.cos(a) * tile * 0.12 - Math.sin(a) * tile * 0.22,
+      y: p.y + Math.sin(a) * tile * 0.12 + Math.cos(a) * tile * 0.22
+    };
+  }
+
+  function skyStops() {
+    if (hour < 5 || hour >= 21) return ['#020617', '#1e1b4b', '#0f172a'];
+    if (hour < 8) return ['#fb923c', '#7dd3fc', '#bbf7d0'];
+    if (hour < 16) return ['#38bdf8', '#bae6fd', '#86efac'];
+    if (hour < 19) return ['#fb7185', '#fb923c', '#7c2d12'];
+    return ['#312e81', '#1e1b4b', '#0f172a'];
+  }
+
+  function render() {
+    layout();
+    const g = ctx;
+    const sky = skyStops();
+    const grad = g.createLinearGradient(0, 0, 0, viewH);
+    grad.addColorStop(0, sky[0]);
+    grad.addColorStop(0.55, sky[1]);
+    grad.addColorStop(1, sky[2]);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, viewW, viewH);
+
+    const sunX = viewW * (0.15 + (hour % 24) / 30);
+    const sunY = viewH * (hour > 6 && hour < 18 ? 0.18 : 0.72);
+    g.fillStyle = hour >= 21 || hour < 5 ? '#f8fafc' : '#fde68a';
+    g.beginPath();
+    g.arc(sunX, sunY, hour >= 21 || hour < 5 ? 16 : 28, 0, Math.PI * 2);
+    g.fill();
+
+    g.fillStyle = theme === 'germany' ? '#334155' : '#14532d';
+    g.beginPath();
+    g.moveTo(0, viewH * 0.72);
+    g.quadraticCurveTo(viewW * 0.25, viewH * 0.58, viewW * 0.5, viewH * 0.7);
+    g.quadraticCurveTo(viewW * 0.75, viewH * 0.82, viewW, viewH * 0.62);
+    g.lineTo(viewW, viewH);
+    g.lineTo(0, viewH);
+    g.fill();
+
+    if (theme === 'germany') drawCastle(viewW * 0.78, viewH * 0.62);
+    drawScenery();
+
+    if (mode === 'track') {
+      g.strokeStyle = 'rgba(255,255,255,0.08)';
+      g.lineWidth = 1;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          g.strokeRect(originX + c * tile, originY + r * tile, tile, tile);
+        }
+      }
+    }
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (grid[r][c]) drawTrack(c, r, grid[r][c], false);
+      }
+    }
+    if (mode === 'track' && hover) {
+      const cell = cellOf(hover);
+      if (cell.c >= 0 && cell.r >= 0 && cell.c < COLS && cell.r < ROWS) {
+        const ghostType = tool === 'curve-1' ? 'curve-tl' : tool;
+        if (ghostType !== 'erase') drawTrack(cell.c, cell.r, { type: ghostType, state: 0 }, true);
+      }
+    }
+
+    waiting.forEach(drawPerson);
+    for (let i = train.cars - 1; i >= 0; i--) drawCar(carPose(i), i);
+    drawEngine();
+    puffs.forEach(function (puff) {
+      g.fillStyle = 'rgba(241,245,249,' + (puff.life * 0.45) + ')';
+      g.beginPath();
+      g.arc(puff.x, puff.y, Math.max(1, puff.r), 0, Math.PI * 2);
+      g.fill();
+    });
+
+    if (theme === 'fall' && !reduceMotion) {
+      leaves.forEach(function (leaf, i) {
+        const y = ((leaf.y + leafClock * leaf.v) % 1) * viewH;
+        g.fillStyle = i % 2 ? '#ea580c' : '#facc15';
+        g.beginPath();
+        g.ellipse(leaf.x * viewW, y, 5, 3, leafClock + i, 0, Math.PI * 2);
+        g.fill();
+      });
+    }
+
+    if (COVER) {
+      g.fillStyle = 'rgba(15, 23, 42, 0.55)';
+      round(28, 22, 430, 78, 16);
+      g.fill();
+      g.fillStyle = '#fff7ed';
+      g.font = '700 32px Fredoka, sans-serif';
+      g.fillText('Ultimate Train Studio', 44, 58);
+      g.fillStyle = '#fecdd3';
+      g.font = '600 22px "Noto Serif TC", serif';
+      g.fillText('火車工作室', 44, 86);
+    }
+  }
+
+  function drawScenery() {
+    const spots = theme === 'japan' ? 5 : 4;
+    for (let i = 0; i < spots; i++) {
+      const x = viewW * (0.08 + i * 0.2);
+      const y = viewH * 0.66;
+      if (theme === 'japan') {
+        ctx.fillStyle = '#365314';
+        ctx.fillRect(x, y, 8, 28);
+        ctx.fillStyle = 'rgba(244,114,182,0.9)';
+        ctx.beginPath();
+        ctx.arc(x + 4, y, 22, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (theme === 'fall') {
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(x, y, 8, 30);
+        ctx.fillStyle = i % 2 ? '#c2410c' : '#ca8a04';
+        ctx.beginPath();
+        ctx.arc(x + 4, y - 4, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawCastle(x, y) {
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(x, y - 70, 90, 70);
+    ctx.fillRect(x - 16, y - 96, 26, 96);
+    ctx.fillRect(x + 80, y - 96, 26, 96);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(x + 36, y - 28, 18, 28);
+    ctx.fillStyle = '#7f1d1d';
+    ctx.beginPath();
+    ctx.moveTo(x - 22, y - 96);
+    ctx.lineTo(x - 3, y - 118);
+    ctx.lineTo(x + 16, y - 96);
+    ctx.fill();
+  }
+
+  function drawTrack(c, r, piece, ghost) {
+    const x = originX + c * tile;
+    const y = originY + r * tile;
+    ctx.save();
+    ctx.translate(x + tile / 2, y + tile / 2);
+    ctx.globalAlpha = ghost ? 0.45 : 1;
+    const type = piece.type;
+    const half = tile / 2;
+    const gauge = Math.max(4, tile * 0.12);
+    ctx.strokeStyle = '#44403c';
+    ctx.lineWidth = tile * 0.36;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    if (type === 'straight-v') {
+      ctx.moveTo(0, -half);
+      ctx.lineTo(0, half);
+    } else if (type === 'curve-tl') {
+      ctx.arc(half, half, half, Math.PI, Math.PI * 1.5);
+    } else if (type === 'curve-tr') {
+      ctx.arc(-half, half, half, Math.PI * 1.5, Math.PI * 2);
+    } else if (type === 'curve-br') {
+      ctx.arc(-half, -half, half, 0, Math.PI / 2);
+    } else if (type === 'curve-bl') {
+      ctx.arc(half, -half, half, Math.PI / 2, Math.PI);
+    } else {
+      ctx.moveTo(-half, 0);
+      ctx.lineTo(half, 0);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = Math.max(2, tile * 0.045);
+    ctx.lineCap = 'butt';
+    if (type === 'straight-h' || type === 'station' || type === 'speed' || type === 'switch') {
+      railH(half, gauge);
+      if (type === 'switch') {
+        ctx.strokeStyle = piece.state ? '#fbbf24' : 'rgba(226,232,240,0.45)';
+        ctx.beginPath();
+        ctx.moveTo(-half, gauge);
+        ctx.quadraticCurveTo(0, -half * 0.2, 0, -half);
+        ctx.stroke();
+      }
+    } else if (type === 'straight-v') {
+      railV(half, gauge);
+    } else if (type === 'curve-tl') {
+      arcRails(half, half, Math.PI, Math.PI * 1.5, gauge);
+    } else if (type === 'curve-tr') {
+      arcRails(-half, half, Math.PI * 1.5, Math.PI * 2, gauge);
+    } else if (type === 'curve-br') {
+      arcRails(-half, -half, 0, Math.PI / 2, gauge);
+    } else if (type === 'curve-bl') {
+      arcRails(half, -half, Math.PI / 2, Math.PI, gauge);
+    }
+    if (type === 'station') {
+      ctx.fillStyle = '#6b21a8';
+      ctx.fillRect(-half + 2, -half + 2, tile - 4, Math.max(8, tile * 0.22));
+      ctx.fillStyle = '#fff';
+      ctx.font = '600 ' + Math.max(10, tile * 0.22) + 'px "Noto Serif TC", serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('站', 0, -half + Math.max(12, tile * 0.2));
+    }
+    if (type === 'speed') {
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(-6, -gauge - 6);
+      ctx.lineTo(8, 0);
+      ctx.lineTo(-6, gauge + 6);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function railH(half, gauge) {
+    ctx.beginPath();
+    ctx.moveTo(-half, -gauge);
+    ctx.lineTo(half, -gauge);
+    ctx.moveTo(-half, gauge);
+    ctx.lineTo(half, gauge);
+    ctx.stroke();
+  }
+  function railV(half, gauge) {
+    ctx.beginPath();
+    ctx.moveTo(-gauge, -half);
+    ctx.lineTo(-gauge, half);
+    ctx.moveTo(gauge, -half);
+    ctx.lineTo(gauge, half);
+    ctx.stroke();
+  }
+  function arcRails(cx, cy, a0, a1, gauge) {
+    const half = tile / 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(3, half - gauge), a0, a1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, half + gauge, a0, a1);
+    ctx.stroke();
+  }
+
+  function drawPerson(person) {
+    const at = personPos(person);
+    const s = Math.max(0.85, tile / 52);
+    ctx.save();
+    ctx.translate(at.x, at.y);
+    ctx.scale(s, s);
+    ctx.fillStyle = person.color;
+    ctx.fillRect(-7, -2, 14, 16);
+    ctx.beginPath();
+    ctx.arc(0, -10, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(-3, -12, 2, 2);
+    ctx.fillRect(2, -12, 2, 2);
+    ctx.restore();
+  }
+
+  function paintStyle(w) {
+    if (train.paint !== 'rainbow') return train.paint;
+    const grad = ctx.createLinearGradient(-w, 0, w, 0);
+    grad.addColorStop(0, '#ef4444');
+    grad.addColorStop(0.25, '#f59e0b');
+    grad.addColorStop(0.5, '#22c55e');
+    grad.addColorStop(0.75, '#3b82f6');
+    grad.addColorStop(1, '#a855f7');
+    return grad;
+  }
+
+  function drawWheels(len) {
+    const radius = train.wheels === 'sleek' ? tile * 0.09 : tile * 0.11;
+    ctx.fillStyle = train.wheels === 'sleek' ? '#22d3ee' : '#0f172a';
+    [-0.32, 0.28].forEach(function (t) {
+      ctx.save();
+      ctx.translate(len * t, tile * 0.16);
+      ctx.rotate(wheelSpin);
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-radius, 0);
+      ctx.lineTo(radius, 0);
+      ctx.moveTo(0, -radius);
+      ctx.lineTo(0, radius);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function drawDoors(len, h) {
+    const open = doorAnim * tile * 0.08;
+    ctx.fillStyle = 'rgba(15,23,42,0.55)';
+    ctx.fillRect(-len * 0.08 - open, -h * 0.35, tile * 0.08, h * 0.7);
+    ctx.fillRect(len * 0.02 + open, -h * 0.35, tile * 0.08, h * 0.7);
+  }
+
+  function drawCar(pose) {
+    ctx.save();
+    ctx.translate(pose.x, pose.y);
+    ctx.rotate(pose.angle || TrainSim.ANGLE[dir]);
+    const len = tile * 0.62;
+    const h = tile * 0.28;
+    ctx.fillStyle = paintStyle(len);
+    round(-len / 2, -h / 2, len, h, 6);
+    ctx.fill();
+    ctx.fillStyle = '#e0f2fe';
+    round(-len * 0.28, -h * 0.28, len * 0.18, h * 0.36, 3);
+    ctx.fill();
+    if (train.boarded) {
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(-len * 0.2, -h * 0.08, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    drawDoors(len, h);
+    drawWheels(len);
+    ctx.restore();
+  }
+
+  function drawEngine() {
+    const p = trainPoint();
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(TrainSim.ANGLE[dir]);
+    const len = tile * 0.7;
+    const h = tile * 0.32;
+    ctx.fillStyle = paintStyle(len);
+    if (train.engine === 'bullet') {
+      ctx.beginPath();
+      ctx.moveTo(-len / 2, -h / 2);
+      ctx.lineTo(len * 0.15, -h / 2);
+      ctx.quadraticCurveTo(len * 0.55, 0, len * 0.15, h / 2);
+      ctx.lineTo(-len / 2, h / 2);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      round(-len / 2, -h / 2, len * 0.78, h, 5);
+      ctx.fill();
+      if (train.engine === 'steam') {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(len * 0.02, -h * 0.95, tile * 0.1, h * 0.5);
+        ctx.fillStyle = paintStyle(len);
+        ctx.fillRect(-len * 0.28, -h * 0.85, len * 0.32, h * 0.4);
+      } else {
+        ctx.fillStyle = '#e0f2fe';
+        round(-len * 0.22, -h * 0.28, len * 0.28, h * 0.4, 4);
+        ctx.fill();
+      }
+    }
+    if (train.engine !== 'bullet') drawDoors(len * 0.7, h);
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(len * 0.28, 0, Math.max(3, tile * 0.06), 0, Math.PI * 2);
+    ctx.fill();
+    if (hour >= 19 || hour < 6) {
+      const beam = ctx.createLinearGradient(len * 0.3, 0, len, 0);
+      beam.addColorStop(0, 'rgba(254,240,138,0.45)');
+      beam.addColorStop(1, 'rgba(254,240,138,0)');
+      ctx.fillStyle = beam;
+      ctx.beginPath();
+      ctx.moveTo(len * 0.3, -4);
+      ctx.lineTo(len, -tile * 0.2);
+      ctx.lineTo(len, tile * 0.2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    drawWheels(len);
+    ctx.restore();
+  }
+
+  function round(x, y, w, h, r) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+    else ctx.rect(x, y, w, h);
+  }
+
+  function save() {
+    if (NO_SAVE) return;
+    try {
+      const cells = [];
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const piece = grid[r][c];
+          if (!piece) continue;
+          cells.push({ c: c, r: r, t: piece.type, s: piece.state || 0, n: piece.name || '' });
+        }
+      }
+      localStorage.setItem(KEY, JSON.stringify({
+        v: 1, cells: cells, col: col, row: row, dir: dir,
+        throttle: throttle, engine: train.engine, wheels: train.wheels, paint: train.paint,
+        cars: train.cars, theme: theme, hour: hour, mode: mode, kid: kid, tool: tool,
+        boarded: train.boarded, doors: train.doorsOpen
+      }));
+    } catch (e) {}
+  }
+
+  function load() {
+    if (NO_SAVE) return false;
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      if (!data || data.v !== 1 || !Array.isArray(data.cells)) return false;
+      grid = TrainSim.emptyGrid(COLS, ROWS);
+      data.cells.forEach(function (cell) {
+        if (cell.r < 0 || cell.c < 0 || cell.r >= ROWS || cell.c >= COLS) return;
+        grid[cell.r][cell.c] = { type: cell.t, state: cell.s || 0, name: cell.n || '' };
+      });
+      col = clamp(data.col, 0, COLS - 1);
+      row = clamp(data.row, 0, ROWS - 1);
+      dir = TrainSim.VEC[data.dir] ? data.dir : 'E';
+      throttle = clamp(data.throttle, 0, 100);
+      if (reduceMotion) throttle = 0;
+      currentSpeed = throttle;
+      train.engine = data.engine || 'steam';
+      train.wheels = data.wheels || 'classic';
+      train.paint = data.paint || '#3b82f6';
+      train.cars = clamp(data.cars, 1, 5);
+      train.boarded = Math.max(0, data.boarded || 0);
+      train.doorsOpen = !!data.doors;
+      theme = data.theme || 'fall';
+      hour = clamp(data.hour, 0, 24);
+      mode = data.mode || 'drive';
+      kid = data.kid !== false;
+      tool = data.tool || 'straight-h';
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function clamp(n, a, b) {
+    n = parseInt(n, 10);
+    if (isNaN(n)) return a;
+    return Math.max(a, Math.min(b, n));
+  }
+
+  function bootPalette() {
+    const box = $('colorPalette');
+    box.innerHTML = '';
+    COLORS.forEach(function (color) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'swatch';
+      b.style.background = color;
+      b.dataset.color = color;
+      b.setAttribute('aria-label', 'Paint ' + color);
+      b.addEventListener('click', function () {
+        firstGesture();
+        setPaint(color);
+        if (kid) announce('Nice color.', 'Nice color.');
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function bind() {
+    $('tabWorkshop').addEventListener('click', function () { firstGesture(); applyMode('workshop'); });
+    $('tabTrack').addEventListener('click', function () { firstGesture(); applyMode('track'); });
+    $('tabDrive').addEventListener('click', function () { firstGesture(); applyMode('drive'); });
+    $('toTrack').addEventListener('click', function () { firstGesture(); applyMode('track'); });
+    $('toDrive').addEventListener('click', function () { firstGesture(); applyMode('drive'); });
+    $('modeDifficultyBtn').addEventListener('click', function () { firstGesture(); toggleDifficulty(); });
+    $('musicToggleBtn').addEventListener('click', function () { audio.toggle(); });
+    $('btnEngSteam').addEventListener('click', function () { firstGesture(); setEngine('steam'); if (kid) speak('Steam train.'); });
+    $('btnEngBullet').addEventListener('click', function () { firstGesture(); setEngine('bullet'); if (kid) speak('Bullet train.'); });
+    $('btnEngMetro').addEventListener('click', function () { firstGesture(); setEngine('metro'); if (kid) speak('City train.'); });
+    $('btnWheelClassic').addEventListener('click', function () { firstGesture(); setWheels('classic'); });
+    $('btnWheelSleek').addEventListener('click', function () { firstGesture(); setWheels('sleek'); });
+    $('btnWheelUrban').addEventListener('click', function () { firstGesture(); setWheels('urban'); });
+    $('rainbowBtn').addEventListener('click', function () { firstGesture(); setPaint('rainbow'); if (kid) speak('Rainbow train.'); });
+    $('addCar').addEventListener('click', function () { firstGesture(); addCarriage(); });
+    $('removeCar').addEventListener('click', function () { firstGesture(); removeCarriage(); });
+    document.querySelectorAll('#toolBox .choice').forEach(function (b) {
+      b.addEventListener('click', function () { firstGesture(); selectTool(b.dataset.tool); });
+    });
+    $('themeFall').addEventListener('click', function () { firstGesture(); setTheme('fall'); });
+    $('themeJapan').addEventListener('click', function () { firstGesture(); setTheme('japan'); });
+    $('themeGermany').addEventListener('click', function () { firstGesture(); setTheme('germany'); });
+    $('timeSlider').addEventListener('input', function (e) { setHour(parseInt(e.target.value, 10)); });
+    $('clearBtn').addEventListener('click', function () { firstGesture(); clearTracks(); });
+    $('presetBtn').addEventListener('click', function () { firstGesture(); loadLoop(); announce('Loop is ready.', 'The loop is ready.'); });
+    $('speedLever').addEventListener('input', function (e) { firstGesture(); setThrottle(e.target.value); });
+    $('turboBtn').addEventListener('click', triggerTurbo);
+    $('hornBtn').addEventListener('click', function () {
+      firstGesture();
+      $('hornBtn').classList.remove('hint');
+      audio.horn();
+      announce('Honk honk!', 'Honk honk!');
+    });
+    $('doorToggleBtn').addEventListener('click', function () { firstGesture(); toggleDoors(); });
+    $('boardBtn').addEventListener('click', function () { firstGesture(); boardAll(); });
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('resize', layout);
+    window.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'h' || e.key === 'H') $('hornBtn').click();
+      else if (e.key === 'g' || e.key === 'G') $('turboBtn').click();
+      else if (e.key === '1') applyMode('workshop');
+      else if (e.key === '2') applyMode('track');
+      else if (e.key === '3') applyMode('drive');
+    });
+    document.addEventListener('pointerdown', firstGesture, { capture: true });
+    document.querySelectorAll('[data-tell]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        const url = btn.getAttribute('data-tell');
+        const text = btn.getAttribute('data-text') || document.title;
+        const old = btn.textContent;
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: document.title, text: text, url: url });
+            return;
+          }
+          await navigator.clipboard.writeText(text + ' ' + url);
+          btn.textContent = 'Link copied. Paste it in a message.';
+          setTimeout(function () { btn.textContent = old; }, 2500);
+        } catch (err) {}
+      });
+    });
+  }
+
+  function state() {
+    return {
+      col: col, row: row, dir: dir, progress: progress, mode: mode, kid: kid,
+      boarded: train.boarded, doors: train.doorsOpen, speed: currentSpeed,
+      music: audio.musicOn, engine: train.engine, cars: train.cars, waiting: waiting.length,
+      horn: audio.playedHorn, go: audio.playedGo, ctx: !!audio.ctx
+    };
+  }
+
+  window.UTS = {
+    state: state,
+    tick: tick,
+    place: placeAt,
+    loadLoop: loadLoop
+  };
+
+  function runSelfTest() {
+    const lines = [];
+    const ok = function (name, cond) { lines.push((cond ? 'ok  ' : 'FAIL') + '  ' + name); return !!cond; };
+    const lap = TrainSim.lap(grid, col, row, dir);
+    ok('preset lap closes', lap.closed && !lap.reversed);
+    ok('workshop button', !!$('tabWorkshop'));
+    $('tabWorkshop').click();
+    ok('workshop panel', $('workshopPanel').hidden === false && $('conductorHUD').hidden === true);
+    $('tabTrack').click();
+    ok('track panel', $('trackPanel').hidden === false);
+    $('tabDrive').click();
+    ok('drive hud', $('conductorHUD').hidden === false && $('workshopPanel').hidden === true);
+    $('btnEngBullet').click();
+    ok('bullet engine', state().engine === 'bullet');
+    $('btnEngSteam').click();
+    const cars = state().cars;
+    $('addCar').click();
+    ok('add car', state().cars === Math.min(5, cars + 1));
+    const before = state();
+    throttle = 100;
+    userDrove = true;
+    boostUntil = 0;
+    train.doorsOpen = false;
+    for (let i = 0; i < 40; i++) tick(0.1);
+    const after = state();
+    ok('train moved', before.col !== after.col || before.row !== after.row || Math.abs(before.progress - after.progress) > 0.05);
+    $('hornBtn').click();
+    ok('horn scheduled', audio.playedHorn >= 1 && !!audio.ctx);
+    $('turboBtn').click();
+    ok('go scheduled', audio.playedGo >= 1);
+    $('musicToggleBtn').click();
+    ok('music on', audio.musicOn === true);
+    $('musicToggleBtn').click();
+    ok('music off', audio.musicOn === false);
+    const waitingBefore = waiting.length;
+    ok('station has people', waitingBefore > 0);
+    $('boardBtn').click();
+    ok('boarded', state().boarded >= waitingBefore && state().doors === true && state().waiting === 0);
+    $('modeDifficultyBtn').click();
+    ok('advanced label', $('diffLabel').textContent === 'Advanced');
+    $('modeDifficultyBtn').click();
+    ok('kid label', $('diffLabel').textContent === 'Kid Mode');
+    const links = [].slice.call(document.querySelectorAll('script[src], link[href]')).map(function (n) {
+      return n.src || n.href || '';
+    });
+    ok('no extra network', links.every(function (href) {
+      return !href || href.indexOf('fonts.googleapis.com') !== -1 || href.indexOf('sim.js') !== -1 || href.indexOf('data:') === 0;
+    }));
+    const pass = lines.every(function (line) { return line.indexOf('FAIL') !== 0; });
+    const out = $('selftest-out');
+    out.hidden = false;
+    out.textContent = lines.join('\n');
+    document.documentElement.dataset.selftest = pass ? 'pass' : 'fail';
+    document.title = (pass ? 'PASS' : 'FAIL') + ' Ultimate Train Studio';
+  }
+
+  bootPalette();
+  if (COVER) {
+    loadLoop();
+    train.paint = '#ef4444';
+    train.engine = 'steam';
+    train.cars = 3;
+    theme = 'fall';
+    hour = 17;
+    mode = 'drive';
+    kid = false;
+    throttle = 62;
+    currentSpeed = 62;
+  } else if (!load()) {
+    loadLoop();
+    mode = 'drive';
+    kid = true;
+  }
+  if (location.hash === '#workshop') mode = 'workshop';
+  if (location.hash === '#track') mode = 'track';
+  setEngine(train.engine);
+  setWheels(train.wheels);
+  setPaint(train.paint);
+  setTheme(theme);
+  setHour(hour);
+  selectTool(tool);
+  applyKid();
+  applyMode(mode, true);
+  refreshDoor();
+  refreshBadge();
+  syncPassengers();
+  bind();
+  layout();
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    tick(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if (SELFTEST) setTimeout(runSelfTest, 300);
+})();
+</script>
+</body>
+</html>

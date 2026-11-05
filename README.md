@@ -10,7 +10,7 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf itself (version 2.1): Games and Utilities tabs, one icon tile per app
+index.html          the shelf itself (version 2.2): Games and Utilities tabs, one icon tile per app
 TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
@@ -81,6 +81,9 @@ guts/               GUTS (beta): a comic platformer where what Gus eats and feel
 touch-tone/         Touch Tone 筆音 (beta): trace a character, hear drawing music, and a separate Cantonese word
   index.html        the whole app (pad, synthesizer, replay, spoken word)
   cover.png         1200×744 card image (render with index.html#cover)
+marble-run/         James’s Marble Run 彈珠軌道 (beta): build a track, drop marbles, and watch gravity
+  index.html        the whole app (track builder, physics, recorder)
+  cover.png         1200×744 card image (render with index.html#cover)
 versions/           past releases, still playable (versions/<game>/<X.Y>/), see versions/index.html
 tools/              freeze-version.sh: freeze a tagged release into versions/
 .nojekyll           serve files as-is
@@ -101,9 +104,10 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 2.0 | 2026-10-16 |
 | GUTS 大肚仔歷險 (beta) | `guts/` | 1.8 | 2026-10-26 |
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
+| James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.0 | 2026-11-04 |
 
-The shelf is versioned too: **The App Shelf 2.1** (2026-11-04). Version 2.0, the tabbed shelf before Touch Tone, is frozen at
-`versions/shelf/2.0/`. Version 1.0, the long page of cards, is frozen at
+The shelf is versioned too: **The App Shelf 2.2** (2026-11-04). Version 2.1, the shelf before Marble Run, is frozen at
+`versions/shelf/2.1/`. Version 2.0 is frozen at `versions/shelf/2.0/`. Version 1.0, the long page of cards, is frozen at
 `versions/shelf/1.0/` (`tools/freeze-shelf.sh`) in case we want to roll back.
 
 Past versions stay playable at https://magicmakersfamily.github.io/apps/versions/ (for

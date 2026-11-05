@@ -64,11 +64,13 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | shelf-F7 | feature | shelf | Make the shelf installable (Add to Home Screen) | P3 | idea | AI review | | Same work as sequence-flow-F5. |
 | shelf-F8 | feature | shelf | Play checks: one command for every test (`tools/check.mjs`), Chrome / Firefox / WebKit harness, persona bots, a grouped report, a pre-push check | P1 | doing | family | | Phase 1 (checks, personas, report) and phase 2 (GUTS playtest recording and exact replay, guts-F18) built (`tools/play/README.md`). Next: screenshot comparisons and speed budgets, then GitHub checks. |
 | touch-tone-B1 | bug | touch-tone | Not yet tried on a phone or tablet: pencil pressure, Cantonese voice, replay timing, silent switch | P1 | testing | self | | Check Safari on iPhone and iPad. Hear Word follows the device silent switch. Drawing music does not. |
+| marble-run-B1 | bug | marble-run | Not yet tried on a phone or tablet: placing pieces with a finger, booster sound, and replay | P1 | testing | self | | Check Safari on iPhone and iPad. The track should stay put after a refresh. |
 
 ## Closed
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| marble-run-F1 | feature | marble-run | Build a marble track, drop marbles, and replay a run | P1 | done | family | 1.0 | Ramps, curves, a funnel, a booster and a bouncer. The big marble clears the others. The track is saved on the device. A sideways roll is not slowed by a bounce. |
 | touch-tone-F1 | feature | touch-tone | Trace characters with drawing music, a separate Cantonese voice, and concert replay | P1 | done | family | 1.0 | Audiator follows the hand. Hear Word uses a device voice (zh-HK, else Mandarin). Replay uses the recorded pitch, pan and volume. |
 | guts-B10 | bug | guts | 1.6 kept the old controls on the first level: Little Guts auto-ran, blasts and blowouts looked like explosions, and the asked-for controls only ran in the Gym | P0 | done | family | 1.7 | New controls everywhere, no auto-run, tap-tap-hold to run (Mario-style build-up), gas that is never lost and lasts about 40 boosts, no explosions; `guts/PLAN.md`. |
 | guts-F7 | feature | guts | Rebuild the first level around a memorable toy, a question-shaped goal, a reactive world, quick funny recovery and a secret | P1 | done | AI review | 1.2 | "Find the missing breakfast": Mimi the cat leads, a fizzy drink starts the first blast in slow motion, a laundry basket tips into a step, a fruit hanger drops snacks, a pinwheel pops a snack; every required step is a plain jump (`tools/route.mjs` plays it through at vitality 15). |

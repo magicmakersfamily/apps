@@ -412,7 +412,7 @@
 </div>
 
 <footer class="shelf-foot">
-  <p><b>Version 1.1 (beta)</b> · Launched <time datetime="2026-11-04">November 4, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=marble-run&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=marble-run&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
+  <p><b>Version 1.2 (beta)</b> · Launched <time datetime="2026-11-04">November 4, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=marble-run&amp;v=1.2">Share your thoughts</a> · <a href="../feedback/?game=marble-run&amp;v=1.2&amp;kind=bug">Report a bug</a></p>
   <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
   <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
   <p>The clacks, the boost, and the bell are generated on this device. Your tracks are saved on this device.</p>
@@ -445,49 +445,422 @@
   const SLOT_ICON = { starter: '🔔 ', sample: '✦ ', mine: '★ ' };
 
   class SoundEngine {
-    constructor() { this.ctx = null; this.enabled = true; this.lastBoost = 0; }
-    init() {
+    constructor() {
+      this.ctx = null;
+      this.enabled = true;
+      this.unlocked = false;
+      this.master = null;
+      this.sfxBus = null;
+      this.musicBus = null;
+      this.comp = null;
+      this.theme = null;
+      this.running = false;
+      this.lastBoost = 0;
+      this.lastClack = 0;
+      this.lastUi = 0;
+      this.noiseBuf = null;
+      this._wantTheme = true;
+      this._listeners = false;
+      this.lastError = null;
+      this._reduceMotion = false;
+      try {
+        this._reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) {}
+      this.installUnlock();
+    }
+    installUnlock() {
+      if (this._listeners) return;
+      this._listeners = true;
+      const self = this;
+      const kick = function () { self.unlock(true); };
+      ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'].forEach(function (ev) {
+        window.addEventListener(ev, kick, { capture: true, passive: true });
+      });
+    }
+    unlock(fromGesture) {
+      if (!this.enabled) return false;
+      const ok = this.init(!!fromGesture);
+      if (ok && this._wantTheme) this.startTheme();
+      return ok;
+    }
+    init(forceResume) {
       try {
         if (!this.ctx) {
           const AC = window.AudioContext || window.webkitAudioContext;
           if (!AC) return false;
           this.ctx = new AC();
+          this.master = this.ctx.createGain();
+          this.master.gain.value = 0.9;
+          this.comp = this.ctx.createDynamicsCompressor();
+          this.comp.threshold.value = -18;
+          this.comp.knee.value = 12;
+          this.comp.ratio.value = 3.2;
+          this.comp.attack.value = 0.01;
+          this.comp.release.value = 0.18;
+          this.sfxBus = this.ctx.createGain();
+          this.sfxBus.gain.value = 0.95;
+          this.musicBus = this.ctx.createGain();
+          this.musicBus.gain.value = 0.42;
+          this.sfxBus.connect(this.comp);
+          this.musicBus.connect(this.comp);
+          this.comp.connect(this.master);
+          this.master.connect(this.ctx.destination);
+          this.noiseBuf = this._makeNoise(1.0);
         }
-        if (this.ctx.state === 'suspended') this.ctx.resume();
+        if (this.ctx.state === 'suspended') {
+          const p = this.ctx.resume();
+          if (p && typeof p.then === 'function') {
+            p.catch(function () {});
+          }
+        }
+        // Gesture-time silent tick so Safari/Chrome keep the context hot.
+        if (forceResume || !this.unlocked) {
+          try {
+            const t = this.ctx.currentTime;
+            const o = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            g.gain.value = 0.00001;
+            o.connect(g);
+            g.connect(this.master);
+            o.start(t);
+            o.stop(t + 0.01);
+          } catch (e) {}
+          this.unlocked = true;
+        }
         return this.ctx.state !== 'closed';
       } catch (e) { return false; }
     }
-    tone(type, f0, f1, g0, dur) {
+    _makeNoise(seconds) {
+      const n = Math.max(1, Math.floor(this.ctx.sampleRate * seconds));
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      return buf;
+    }
+    setEnabled(on) {
+      this.enabled = !!on;
+      if (!this.enabled) {
+        this.stopTheme(true);
+        return;
+      }
+      this.unlock(true);
+    }
+    duck(amount, ms) {
+      if (!this.musicBus || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const g = this.musicBus.gain;
+      const target = Math.max(0.12, 0.42 - (amount || 0.25));
+      try {
+        g.cancelScheduledValues(now);
+        g.setValueAtTime(g.value, now);
+        g.linearRampToValueAtTime(target, now + 0.04);
+        g.linearRampToValueAtTime(0.42, now + Math.max(0.2, (ms || 350) / 1000));
+      } catch (e) {}
+    }
+    envGain(peak, attack, hold, release) {
+      const g = this.ctx.createGain();
+      const now = this.ctx.currentTime;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak), now + attack);
+      g.gain.setValueAtTime(Math.max(0.0001, peak), now + attack + hold);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + attack + hold + release);
+      return { node: g, stopAt: now + attack + hold + release + 0.02 };
+    }
+    tone(type, f0, f1, g0, dur, dest) {
       if (!this.enabled || !this.init()) return;
       try {
         const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = type;
+        osc.type = type || 'sine';
         osc.frequency.setValueAtTime(Math.max(1, f0), now);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(1, f1), now + dur);
-        gain.gain.setValueAtTime(g0, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        if (f1 != null) osc.frequency.exponentialRampToValueAtTime(Math.max(1, f1), now + dur);
+        gain.gain.setValueAtTime(Math.max(0.0001, g0), now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(dest || this.sfxBus);
         osc.start(now);
-        osc.stop(now + dur);
+        osc.stop(now + dur + 0.02);
       } catch (e) {}
     }
-    playClack(pitch) {
+    noiseBurst(dur, peak, hpHz, dest) {
+      if (!this.enabled || !this.init() || !this.noiseBuf) return;
+      try {
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.noiseBuf;
+        const hp = this.ctx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = hpHz || 600;
+        const env = this.envGain(peak, 0.004, 0.01, Math.max(0.02, dur - 0.02));
+        src.connect(hp);
+        hp.connect(env.node);
+        env.node.connect(dest || this.sfxBus);
+        src.start();
+        src.stop(env.stopAt);
+      } catch (e) {}
+    }
+    playClack(pitch, impact) {
+      if (!this.enabled) return;
+      const nowMs = performance.now();
+      if (nowMs - this.lastClack < 28) return;
+      this.lastClack = nowMs;
       const p = pitch || 1;
-      this.tone('triangle', 300 * p, 80 * p, 0.22, 0.05);
+      const imp = Math.max(0.4, Math.min(2.2, impact == null ? 1 : impact));
+      this.tone('triangle', 320 * p, 70 * p, 0.16 * imp, 0.045);
+      this.noiseBurst(0.035, 0.08 * imp, 1200 * p);
+    }
+    playDrop(isBig) {
+      if (isBig) {
+        this.playBigMarbleSpawn();
+        return;
+      }
+      this.tone('sine', 520, 180, 0.18, 0.12);
+      this.tone('triangle', 780, 220, 0.08, 0.1);
+      this.noiseBurst(0.05, 0.05, 900);
     }
     playBoosterSound() {
       const t = performance.now();
-      if (t - this.lastBoost < 120) return;
+      if (t - this.lastBoost < 110) return;
       this.lastBoost = t;
-      this.tone('sine', 200, 600, 0.16, 0.15);
+      this.duck(0.18, 280);
+      this.tone('sine', 180, 720, 0.2, 0.18);
+      this.tone('sawtooth', 90, 360, 0.05, 0.16);
+      this.noiseBurst(0.12, 0.07, 400);
     }
-    playBigMarbleSpawn() { this.tone('sine', 150, 40, 0.45, 0.4); }
-    playBell() {
-      this.tone('sine', 880, 660, 0.2, 0.45);
-      this.tone('triangle', 1320, 880, 0.07, 0.55);
+    playBoing(impact) {
+      const imp = Math.max(0.5, Math.min(2, impact || 1));
+      this.tone('sine', 180, 520, 0.2 * imp, 0.16);
+      this.tone('triangle', 260, 90, 0.1 * imp, 0.2);
+    }
+    playFunnel() {
+      this.tone('sine', 240, 520, 0.1, 0.28);
+      this.tone('triangle', 360, 160, 0.07, 0.32);
+      this.noiseBurst(0.2, 0.035, 500);
+    }
+    playSwitchHit() {
+      this.tone('square', 420, 180, 0.07, 0.05);
+      this.noiseBurst(0.03, 0.05, 1500);
+    }
+    playSwitchFlip() {
+      this.tone('triangle', 280, 560, 0.12, 0.1);
+      this.tone('sine', 140, 90, 0.08, 0.14);
+    }
+    playBigMarbleSpawn() {
+      this.duck(0.22, 500);
+      this.tone('sine', 110, 36, 0.42, 0.55);
+      this.tone('triangle', 70, 28, 0.18, 0.6);
+      this.noiseBurst(0.35, 0.1, 120);
+    }
+    playGiantClear() {
+      this.tone('sine', 90, 40, 0.25, 0.35);
+      this.noiseBurst(0.2, 0.09, 200);
+    }
+    playBell(success) {
+      this.duck(0.3, 900);
+      this.tone('sine', 880, 660, 0.22, 0.7);
+      this.tone('triangle', 1320, 990, 0.09, 0.85);
+      this.tone('sine', 1760, 1320, 0.04, 0.9);
+      if (success !== false) this.playSuccessSting();
+    }
+    playSuccessSting() {
+      // Short heroic answer that echoes the theme hook (C-E-G-A).
+      if (!this.enabled || !this.init()) return;
+      const now = this.ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 880];
+      for (let i = 0; i < notes.length; i++) {
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = i % 2 ? 'triangle' : 'sine';
+        const t0 = now + i * 0.09;
+        osc.frequency.setValueAtTime(notes[i], t0);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.16 - i * 0.02, t0 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.32);
+        osc.connect(g);
+        g.connect(this.sfxBus);
+        osc.start(t0);
+        osc.stop(t0 + 0.35);
+      }
+    }
+    playJam() {
+      this.tone('sine', 140, 70, 0.1, 0.18);
+      this.noiseBurst(0.08, 0.04, 300);
+    }
+    playUi(kind) {
+      const t = performance.now();
+      if (t - this.lastUi < 40) return;
+      this.lastUi = t;
+      if (kind === 'undo') this.tone('triangle', 360, 220, 0.08, 0.07);
+      else if (kind === 'erase') this.tone('sine', 240, 120, 0.07, 0.06);
+      else this.tone('sine', 640, 420, 0.07, 0.05); // snap / place
+    }
+    setRunning(on) {
+      on = !!on;
+      if (on === this.running) return;
+      this.running = on;
+      if (!this.theme || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const bed = this.theme.bedGain;
+      const lead = this.theme.leadGain;
+      const pulse = this.theme.pulseGain;
+      try {
+        const calm = this._reduceMotion;
+        const bedT = calm ? 0.18 : (on ? 0.22 : 0.28);
+        const leadT = calm ? 0.04 : (on ? 0.2 : 0.08);
+        const pulseT = calm ? 0.02 : (on ? 0.12 : 0.03);
+        const ramp = on ? 0.35 : 0.7;
+        [bed, lead, pulse].forEach(function (g) {
+          if (!g) return;
+          g.gain.cancelScheduledValues(now);
+          g.gain.setValueAtTime(g.gain.value, now);
+        });
+        bed.gain.linearRampToValueAtTime(bedT, now + ramp);
+        lead.gain.linearRampToValueAtTime(leadT, now + ramp);
+        pulse.gain.linearRampToValueAtTime(pulseT, now + ramp);
+      } catch (e) {}
+    }
+    startTheme() {
+      if (!this.enabled) return;
+      if (!this.init()) return;
+      if (this.theme) return;
+      try {
+        const ctx = this.ctx;
+        const now = ctx.currentTime + 0.05;
+        const bedGain = ctx.createGain();
+        const leadGain = ctx.createGain();
+        const pulseGain = ctx.createGain();
+        bedGain.gain.value = 0.0001;
+        leadGain.gain.value = 0.0001;
+        pulseGain.gain.value = 0.0001;
+        bedGain.connect(this.musicBus);
+        leadGain.connect(this.musicBus);
+        pulseGain.connect(this.musicBus);
+
+        // Warm fifth pad
+        const padA = ctx.createOscillator();
+        const padB = ctx.createOscillator();
+        padA.type = 'sine';
+        padB.type = 'triangle';
+        padA.frequency.value = 130.81; // C3
+        padB.frequency.value = 196.0;  // G3
+        const padFilter = ctx.createBiquadFilter();
+        padFilter.type = 'lowpass';
+        padFilter.frequency.value = 900;
+        padA.connect(padFilter);
+        padB.connect(padFilter);
+        padFilter.connect(bedGain);
+        padA.start(now);
+        padB.start(now);
+
+        // Soft pulse bass
+        const bass = ctx.createOscillator();
+        bass.type = 'sine';
+        bass.frequency.value = 65.41;
+        bass.connect(pulseGain);
+        bass.start(now);
+
+        // Lead: looping whistleable hook in C major pentatonic-ish
+        // Pattern lasts 8 beats at ~92 BPM (~5.22s loop)
+        const bpm = 92;
+        const beat = 60 / bpm;
+        const loopBeats = 16;
+        const loopDur = beat * loopBeats;
+        // Melody (degree relative to C5=523.25): whistleable adventure
+        const melody = [
+          [0, 523.25, 0.85], [1, 587.33, 0.55], [2, 659.25, 0.85], [3, 783.99, 1.1],
+          [4.5, 659.25, 0.55], [5, 587.33, 0.55], [6, 523.25, 1.2],
+          [8, 392.0, 0.7], [9, 523.25, 0.7], [10, 659.25, 0.7], [11, 784.0, 1.0],
+          [12.5, 659.25, 0.55], [13.5, 587.33, 0.55], [14, 523.25, 1.4]
+        ];
+        const leadOsc = ctx.createOscillator();
+        leadOsc.type = 'triangle';
+        const leadFilter = ctx.createBiquadFilter();
+        leadFilter.type = 'lowpass';
+        leadFilter.frequency.value = 2400;
+        const noteGain = ctx.createGain();
+        noteGain.gain.value = 0.0001;
+        leadOsc.connect(leadFilter);
+        leadFilter.connect(noteGain);
+        noteGain.connect(leadGain);
+        leadOsc.frequency.value = 523.25;
+        leadOsc.start(now);
+
+        // Schedule a few loops ahead, then re-schedule with interval
+        const scheduleFrom = function (origin) {
+          for (let L = 0; L < 3; L++) {
+            const base = origin + L * loopDur;
+            for (let i = 0; i < melody.length; i++) {
+              const step = melody[i];
+              const t0 = base + step[0] * beat;
+              const freq = step[1];
+              const dur = step[2] * beat;
+              try {
+                leadOsc.frequency.setValueAtTime(freq, t0);
+                noteGain.gain.cancelScheduledValues(t0);
+                noteGain.gain.setValueAtTime(0.0001, t0);
+                noteGain.gain.exponentialRampToValueAtTime(0.9, t0 + 0.03);
+                noteGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+              } catch (e) {}
+            }
+            // gentle bass thumps on 1 and 3 when running feel is up
+            try {
+              bass.frequency.setValueAtTime(65.41, base);
+              bass.frequency.setValueAtTime(98.0, base + 4 * beat);
+              bass.frequency.setValueAtTime(87.31, base + 8 * beat);
+              bass.frequency.setValueAtTime(65.41, base + 12 * beat);
+            } catch (e) {}
+          }
+        };
+        scheduleFrom(now);
+        const timer = setInterval(function () {
+          if (!sound.theme) { clearInterval(timer); return; }
+          const t = sound.ctx.currentTime;
+          // keep 2+ loops ahead
+          if (t > sound.theme.horizon - loopDur * 1.2) {
+            sound.theme.horizon += loopDur * 2;
+            scheduleFrom(sound.theme.horizon - loopDur * 2);
+          }
+        }, 800);
+
+        const bedTarget = this._reduceMotion ? 0.12 : 0.28;
+        const leadTarget = this._reduceMotion ? 0.03 : 0.1;
+        const pulseTarget = this._reduceMotion ? 0.015 : 0.04;
+        bedGain.gain.linearRampToValueAtTime(bedTarget, now + 1.2);
+        leadGain.gain.linearRampToValueAtTime(leadTarget, now + 1.6);
+        pulseGain.gain.linearRampToValueAtTime(pulseTarget, now + 1.4);
+
+        this.theme = {
+          padA: padA, padB: padB, bass: bass, leadOsc: leadOsc,
+          bedGain: bedGain, leadGain: leadGain, pulseGain: pulseGain,
+          noteGain: noteGain, timer: timer, horizon: now + loopDur * 3,
+          loopDur: loopDur
+        };
+        this.setRunning(this.running);
+      } catch (e) {
+        this.theme = null;
+        this.lastError = (e && e.message) ? e.message : String(e);
+      }
+    }
+    stopTheme(hard) {
+      if (!this.theme) return;
+      try {
+        clearInterval(this.theme.timer);
+        const now = this.ctx ? this.ctx.currentTime : 0;
+        const nodes = [this.theme.bedGain, this.theme.leadGain, this.theme.pulseGain];
+        nodes.forEach(function (g) {
+          if (!g) return;
+          try {
+            g.gain.cancelScheduledValues(now);
+            g.gain.setValueAtTime(g.gain.value, now);
+            g.gain.linearRampToValueAtTime(0.0001, now + (hard ? 0.05 : 0.4));
+          } catch (e) {}
+        });
+        const th = this.theme;
+        setTimeout(function () {
+          try { th.padA.stop(); th.padB.stop(); th.bass.stop(); th.leadOsc.stop(); } catch (e) {}
+        }, hard ? 80 : 450);
+      } catch (e) {}
+      this.theme = null;
     }
   }
   const sound = new SoundEngine();
@@ -601,8 +974,8 @@
         ctx.fill();
       },
       getSegments: (gx, gy) => [
-        { x1: gx, y1: gy + 10, x2: gx + GRID_SIZE * 0.4, y2: gy + GRID_SIZE * 0.75, friction: 0.98 },
-        { x1: gx + GRID_SIZE * 0.6, y1: gy + GRID_SIZE * 0.75, x2: gx + GRID_SIZE, y2: gy + 10, friction: 0.98 }
+        { x1: gx, y1: gy + 10, x2: gx + GRID_SIZE * 0.4, y2: gy + GRID_SIZE * 0.75, friction: 0.98, funnel: true },
+        { x1: gx + GRID_SIZE * 0.6, y1: gy + GRID_SIZE * 0.75, x2: gx + GRID_SIZE, y2: gy + 10, friction: 0.98, funnel: true }
       ]
     },
     booster: {
@@ -932,6 +1305,7 @@
       if (!inside) {
         p.gate = p.gate ? 0 : 1;
         p.wantFlip = false;
+        sound.playSwitchFlip();
       }
     }
   }
@@ -1032,14 +1406,19 @@
           this.vx += (dx / len) * seg.boost;
           this.vy += (dy / len) * seg.boost;
           sound.playBoosterSound();
-        } else if (Math.abs(dot) > 1.5) {
-          sound.playClack(this.isBig ? 0.6 : 1.2);
+        } else if (seg.bounce && seg.bounce > 1) {
+          sound.playBoing(Math.min(2, Math.abs(dot) / 2));
+        } else if (seg.funnel) {
+          if (Math.abs(dot) > 0.9) sound.playFunnel();
+        } else if (Math.abs(dot) > 1.35) {
+          sound.playClack(this.isBig ? 0.55 : 1.15, Math.min(2.2, Math.abs(dot) / 1.5));
         }
       }
       if (seg.switchId && !(this.tripped && this.tripped[seg.switchId])) {
         if (!this.tripped) this.tripped = {};
         this.tripped[seg.switchId] = true;
         this.switchHit = seg.switchId;
+        sound.playSwitchHit();
       }
       if (seg.friction) this.vx *= seg.friction;
       if (Math.hypot(this.vx, this.vy) < 0.9) {
@@ -1267,6 +1646,7 @@
       this.save();
       this.refreshUndo();
       this.refreshSel();
+      sound.playUi('undo');
       this.showToast('Undid that.');
     }
     refreshUndo() {
@@ -1287,7 +1667,7 @@
       this.pieces.push({ gx: gx, gy: gy, type: type, flip: 0, gate: 0 });
       this.sel = { gx: gx, gy: gy };
       this.save();
-      sound.playClack(1.3);
+      sound.playUi('snap');
       this.refreshSel();
       if (hint && gx === hint.gx && gy === hint.gy) {
         this.launch({ n: 1, big: false, vx: 0 }, { stagger: false });
@@ -1301,7 +1681,7 @@
       this.pieces = this.pieces.filter(function (p) { return !(p.gx === gx && p.gy === gy); });
       if (this.sel && this.sel.gx === gx && this.sel.gy === gy) this.sel = null;
       this.save();
-      sound.playClack(0.7);
+      sound.playUi('erase');
       this.refreshSel();
     }
     clearTrack() {
@@ -1328,7 +1708,7 @@
       if (p.type === 'switch') p.gate = p.gate ? 0 : 1;
       else p.flip = p.flip ? 0 : 1;
       this.save();
-      sound.playClack(1);
+      sound.playUi('snap');
       this.refreshSel();
     }
     moveSelected(gx, gy) {
@@ -1376,8 +1756,8 @@
       m.vy = 0;
       this.marbles.push(m);
       if (this.marbles.length > 40) this.marbles.splice(0, this.marbles.length - 40);
-      if (isBig) sound.playBigMarbleSpawn();
-      else sound.playClack(1.5);
+      if (isBig) sound.playDrop(true);
+      else sound.playDrop(false);
       return m;
     }
     tubeFor(spec) {
@@ -1723,12 +2103,15 @@
       document.getElementById('btnClear').addEventListener('click', function () { game.clearTrack(); });
       document.getElementById('btnUndo').addEventListener('click', function () { game.undo(); });
       document.getElementById('btnSound').addEventListener('click', function () {
-        sound.enabled = !sound.enabled;
+        sound.setEnabled(!sound.enabled);
         const btn = document.getElementById('btnSound');
         btn.setAttribute('aria-pressed', sound.enabled ? 'true' : 'false');
         btn.textContent = sound.enabled ? 'Sound' : 'Muted';
         btn.classList.toggle('is-off', !sound.enabled);
-        if (sound.enabled) sound.init();
+        if (sound.enabled) {
+          sound.unlock(true);
+          sound.playUi('snap');
+        }
       });
       document.getElementById('btnSpawnMarble').addEventListener('click', function () {
         game.launch({ n: 1, big: false }, { stagger: false });
@@ -1905,10 +2288,12 @@
     update() {
       if (this.playback) {
         this.stepPlayback();
+        sound.setRunning(true);
         this.refreshWhere();
         return;
       }
       if (this.paused) {
+        sound.setRunning(false);
         this.refreshWhere();
         return;
       }
@@ -1965,6 +2350,12 @@
         });
         if (this.rec.frames.length >= MAX_FRAMES) this.endRecording('Run saved. That is as long as a recording can be.');
       }
+      let lively = false;
+      for (let i = 0; i < this.marbles.length; i++) {
+        const m = this.marbles[i];
+        if (Math.hypot(m.vx, m.vy) > 0.8) { lively = true; break; }
+      }
+      sound.setRunning(lively);
       this.refreshWhere();
     }
     render() {
@@ -2140,6 +2531,7 @@
     let maxVx = 0;
     sound.enabled = false;
     for (let i = 0; i < 25; i++) { shot.update([boost]); maxVx = Math.max(maxVx, shot.vx); }
+    sound.enabled = true;
     ok('a booster speeds the marble to the right', maxVx > 3);
 
     const pad = { x1: 0, y1: 200, x2: 200, y2: 200, bounce: 1.4 };
@@ -2191,7 +2583,29 @@
       localStorage.removeItem('marble-run:selftest');
     } catch (e) { ok('local save works', false); }
 
-    ok('audio can start', sound.init() === true);
+    sound.enabled = true;
+    ok('audio can start', sound.init(true) === true);
+    let themeOk = false;
+    let sfxOk = true;
+    try {
+      sound.unlock(true);
+      sound.startTheme();
+      themeOk = !!sound.theme;
+      sound.playDrop(false);
+      sound.playClack(1, 1);
+      sound.playBoosterSound();
+      sound.playBoing(1);
+      sound.playFunnel();
+      sound.playSwitchHit();
+      sound.playSwitchFlip();
+      sound.playBell(true);
+      sound.playUi('snap');
+      sound.setRunning(true);
+      sound.setRunning(false);
+      sound.stopTheme(true);
+    } catch (e) { sfxOk = false; }
+    ok('theme can start and stop', themeOk);
+    ok('key sound effects run', sfxOk);
 
     const game = window.gameInstance;
     ok('controls sit outside the track', document.getElementById('dock') && !document.getElementById('world').contains(document.getElementById('dock')));

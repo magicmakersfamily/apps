@@ -104,7 +104,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 2.0 | 2026-10-16 |
 | GUTS 大肚仔歷險 (beta) | `guts/` | 1.8 | 2026-10-26 |
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
-| James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.1 | 2026-11-04 |
+| James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.2 | 2026-11-04 |
 
 The shelf is versioned too: **The App Shelf 2.3** (2026-11-04). Version 2.2, the shelf when Marble Run 1.0 joined, is frozen at
 `versions/shelf/2.2/`. Version 2.1 is frozen at `versions/shelf/2.1/`. Version 2.0 is frozen at `versions/shelf/2.0/`.

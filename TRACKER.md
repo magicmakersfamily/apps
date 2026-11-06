@@ -67,6 +67,11 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | marble-run-B1 | bug | marble-run | Not yet tried on a phone or tablet: placing pieces with a finger, booster sound, and replay | P1 | testing | self | | Check Safari on iPhone and iPad. The track should stay put after a refresh. |
 | ultimate-train-studio-B1 | bug | ultimate-train-studio | Not yet tried on a real phone or tablet: finger track placement, horn, and the silent switch | P1 | testing | self | | Check Safari on iPhone and iPad. Kid Mode should speak the first steps without reading. 2.0 passed headless Chrome at 1024×768, 768×1024, and 820×1180, with the board clear of panels. A real device is still open. |
 | ultimate-train-studio-F3 | feature | ultimate-train-studio | A Detroit Q-Line streetcar route | P3 | idea | playtest | | Deferred past 2.0. The first drive is the small tabletop loop to the lantern festival. |
+| marble-run-B2 | bug | marble-run | Orchestra chimes trap marbles, and Run it never fires the lower tube | P0 | testing | playtest | | A chime was a closed V, so marbles stopped in the first one. Play now rolls through, fires both tubes, and the giant finishes on a low gong. |
+| marble-run-B3 | bug | marble-run | Giant status, replay title and camera, Try again, Show me where, and a silent gap drop disagree or stick | P0 | testing | playtest | | Toast and counter share one phrase. Watch names the recorded track. Back to build restores the view. An open gap says the marble fell. |
+| marble-run-F13 | feature | marble-run | One-tap play of a track's launch sequence, including copies | P0 | testing | playtest | | A play button runs the current build. Make it yours copies the sequence. A track without one fires every tube once. |
+| marble-run-F14 | feature | marble-run | Chimes preview a note, each note has its own color, and they flash when hit | P1 | testing | playtest | | Note replaces Flip on a chime. The piece menu sits beside the piece, clear of the marble path. |
+| marble-run-F15 | feature | marble-run | Short spoken first steps for a player who cannot read yet | P1 | testing | playtest | | Gap, drop, first bell, and the orchestra cue. The browser speaks them until recorded clips exist. Skipped when sound or voice is off. |
 
 ## Closed
 

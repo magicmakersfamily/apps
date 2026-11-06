@@ -152,7 +152,7 @@
     padding: 8px 10px;
     font-weight: 700;
     font-size: 0.82rem;
-    min-height: 40px;
+    min-height: 44px;
   }
   .btn:active { transform: scale(0.96); }
   .btn.on, .btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
@@ -233,7 +233,7 @@
     background: radial-gradient(circle at 35% 35%, #fef08a, #f59e0b 55%, #b45309);
     flex: none;
   }
-  .check { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; }
+  .check { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; min-height: 44px; }
   .home-label { font-size: 0.78rem; font-weight: 700; color: #fde68a; }
   .pips { display: flex; gap: 5px; align-items: center; }
   .pips i {
@@ -251,6 +251,41 @@
   .replay-bar.show { display: flex; }
   .sel-float { position: absolute; z-index: 3; display: none; gap: 6px; padding: 6px; border-radius: 12px; background: rgba(15,23,42,.92); border: 1px solid rgba(148,163,184,.35); }
   .sel-float.show { display: flex; }
+  .sel-float .btn { min-width: 44px; min-height: 44px; }
+  .play-fab {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 5;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 4px solid #ecfdf5;
+    background: #10b981;
+    color: #042f2e;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    display: grid;
+    place-items: center;
+    padding: 0;
+    animation: playPulse 1.6s ease-in-out infinite;
+  }
+  .play-fab svg { width: 34px; height: 34px; margin-left: 4px; }
+  .play-fab:active { transform: scale(0.96); }
+  @keyframes playPulse { 50% { transform: scale(1.06); } }
+  .watch-banner {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    z-index: 4;
+    max-width: min(70%, 360px);
+    background: #1d4ed8;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 8px 14px;
+    pointer-events: none;
+  }
+  .replay-bar.show { background: #1e3a8a; border-color: #60a5fa; }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: #475569; flex: none; }
   .dot.live { background: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulse 1.1s infinite; }
   .dot.saved { background: #34d399; }
@@ -325,10 +360,14 @@
   @media (prefers-reduced-motion: reduce) {
     .dot.live { animation: none; }
     .big-btn { box-shadow: none; }
+    .play-fab { animation: none; }
+    .btn.pulse-hint { animation: none; }
   }
   html.cover-mode .shelf-foot,
   html.cover-mode .tools,
   html.cover-mode .dock,
+  html.cover-mode .play-fab,
+  html.cover-mode .watch-banner,
   html.cover-mode .tagline,
   html.cover-mode .header-actions,
   html.cover-mode .back-link { display: none !important; }
@@ -345,6 +384,7 @@
     <button class="btn" id="btnClear" type="button">Clear</button>
     <button class="btn indigo" id="btnUndo" type="button">Undo</button>
     <button class="btn" id="btnSound" type="button" aria-pressed="true">Sound</button>
+    <button class="btn" id="btnVoice" type="button" aria-pressed="true" aria-label="Voice on">Voice</button>
   </div>
 </header>
 
@@ -385,9 +425,13 @@
     <div class="world" id="world">
       <canvas id="gameCanvas" aria-label="Marble run. Tap an empty square to place a piece. Tap a tube to drop a marble from it."></canvas>
       <div class="sel-float" id="selFloat" role="toolbar" aria-label="Selected piece">
-        <button class="btn" id="btnFloatFlip" type="button">Flip</button>
-        <button class="btn" id="btnFloatErase" type="button">Erase</button>
+        <button class="btn" id="btnFloatFlip" type="button" aria-label="Flip">Flip</button>
+        <button class="btn" id="btnFloatErase" type="button" aria-label="Erase piece">Erase</button>
       </div>
+      <button class="play-fab" id="btnPlay" type="button" aria-label="Play this track">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><polygon points="20,12 54,32 20,52" fill="currentColor"/></svg>
+      </button>
+      <div class="watch-banner" id="watchBanner" hidden>Watching</div>
       <div class="toast" id="toastMessage" role="status" aria-live="polite"><span id="toastText"></span></div>
     </div>
     <div class="dock" id="dock">
@@ -419,7 +463,7 @@
         <span id="recStatus">Recorder ready</span>
         <button class="btn red" id="btnStartRec" type="button">Record</button>
         <button class="btn" id="btnStopRec" type="button" hidden>Stop</button>
-        <button class="btn blue" id="btnPlayRec" type="button" disabled>Replay run</button>
+        <button class="btn blue" id="btnPlayRec" type="button" disabled aria-label="Watch saved run">Watch saved run</button>
       </div>
       <div class="cluster replay-bar" id="replayBar">
         <span id="replayLabel">Watching a saved run</span>
@@ -438,7 +482,7 @@
 </div>
 
 <footer class="shelf-foot">
-  <p><b>Version 1.3 (beta)</b> · Launched <time datetime="2026-11-04">November 4, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=marble-run&amp;v=1.3">Share your thoughts</a> · <a href="../feedback/?game=marble-run&amp;v=1.3&amp;kind=bug">Report a bug</a></p>
+  <p><b>Version 1.4 (beta)</b> · Launched <time datetime="2026-11-04">November 4, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=marble-run&amp;v=1.4">Share your thoughts</a> · <a href="../feedback/?game=marble-run&amp;v=1.4&amp;kind=bug">Report a bug</a></p>
   <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
   <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
   <p>The theme song, clacks, boosts, and bells are generated on this device. Your tracks are saved on this device.</p>
@@ -469,6 +513,25 @@
   ];
   const STARTER_HINT = { gx: 3, gy: 3, type: 'ramp' };
   const SLOT_ICON = { starter: '🔔 ', orchestra: '🎵 ', sample: '✦ ', mine: '★ ' };
+  // Eight notes, each with its own color and a simple mark a non-reader can match.
+  const CHIME_NOTES = [
+    { freq: 523.25, color: '#fbbf24', glyph: 'circle' },
+    { freq: 587.33, color: '#4ade80', glyph: 'triangle' },
+    { freq: 659.25, color: '#60a5fa', glyph: 'square' },
+    { freq: 698.46, color: '#f472b6', glyph: 'diamond' },
+    { freq: 783.99, color: '#a78bfa', glyph: 'star' },
+    { freq: 880, color: '#fb923c', glyph: 'dots' },
+    { freq: 987.77, color: '#22d3ee', glyph: 'plus' },
+    { freq: 1046.5, color: '#f87171', glyph: 'ring' }
+  ];
+  // Short first-step lines. A recorded clip can live at voice/<id>.mp3 (see blow-up/voice/).
+  // This build has no clips, so the browser speaks them.
+  const VOICE_LINES = {
+    gap: { text: 'Put a ramp here.' },
+    drop: { text: 'Now drop a marble.' },
+    bell: { text: 'The bell rang!' },
+    orchestra: { text: 'Tap a chime to change its sound, then press play.' }
+  };
 
   class SoundEngine {
     constructor() {
@@ -682,11 +745,18 @@
       this.noiseBurst(0.2, 0.09, 200);
     }
     playChime(note) {
-      const scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.5];
-      const f = scale[(note || 0) % scale.length];
+      const scale = CHIME_NOTES;
+      const f = scale[(note || 0) % scale.length].freq;
       this.duck(0.12, 260);
       this.tone('sine', f, f * 0.9, 0.18, 0.45);
       this.tone('triangle', f * 2, f * 1.6, 0.05, 0.5);
+    }
+    playGong() {
+      this.duck(0.28, 900);
+      this.tone('sine', 98, 49, 0.4, 1.5);
+      this.tone('triangle', 147, 55, 0.16, 1.6);
+      this.tone('sine', 196, 70, 0.06, 1.2);
+      this.noiseBurst(0.4, 0.06, 90);
     }
     playBell(success) {
       this.duck(0.3, 900);
@@ -1134,30 +1204,57 @@
     chime: {
       flippable: false,
       render(ctx, piece) {
-        const note = (piece && piece.note) || 0;
-        const hues = ['#fde68a', '#86efac', '#93c5fd', '#f9a8d4', '#c4b5fd'];
-        const c = hues[note % hues.length];
+        const spec = CHIME_NOTES[((piece && piece.note) || 0) % CHIME_NOTES.length];
+        const flash = piece && piece.flash ? piece.flash : 0;
+        ctx.save();
+        if (flash) {
+          const s = 1 + flash / 48;
+          ctx.translate(GRID_SIZE / 2, GRID_SIZE / 2);
+          ctx.scale(s, s);
+          ctx.translate(-GRID_SIZE / 2, -GRID_SIZE / 2);
+        }
         ctx.beginPath();
-        ctx.moveTo(14, 8);
-        ctx.lineTo(GRID_SIZE / 2, GRID_SIZE - 8);
-        ctx.lineTo(GRID_SIZE - 14, 8);
-        ctx.closePath();
-        ctx.fillStyle = c;
-        ctx.globalAlpha = 0.9;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = '#78350f';
+        ctx.moveTo(0, 5);
+        ctx.lineTo(GRID_SIZE, GRID_SIZE - 5);
+        ctx.strokeStyle = flash ? '#fff' : spec.color;
+        ctx.lineWidth = flash ? 14 : 10;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.strokeStyle = '#1e1b4b';
         ctx.lineWidth = 3;
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(GRID_SIZE / 2, GRID_SIZE - 6, 5, 0, Math.PI * 2);
-        ctx.fillStyle = '#fbbf24';
+        ctx.moveTo(14, 18);
+        ctx.lineTo(GRID_SIZE / 2, GRID_SIZE - 16);
+        ctx.lineTo(GRID_SIZE - 12, 26);
+        ctx.closePath();
+        ctx.fillStyle = spec.color;
+        ctx.globalAlpha = flash ? 1 : 0.92;
         ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#1e1b4b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        drawChimeGlyph(ctx, spec.glyph, GRID_SIZE / 2, 24);
+        if (flash) {
+          ctx.beginPath();
+          ctx.arc(GRID_SIZE / 2, GRID_SIZE / 2, 16 + (16 - Math.min(16, flash)), 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255,255,255,' + Math.min(1, flash / 10) + ')';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+        ctx.restore();
       },
+      // Same rail as a down ramp, so a marble rings the chime and rolls on.
+      // The old closed V stopped every marble at the bottom point.
       getSegments(gx, gy, piece) {
         return [
-          { x1: gx + 10, y1: gy + 12, x2: gx + GRID_SIZE / 2, y2: gy + GRID_SIZE - 10, friction: 0.96, chime: true, note: (piece && piece.note) || 0 },
-          { x1: gx + GRID_SIZE - 10, y1: gy + 12, x2: gx + GRID_SIZE / 2, y2: gy + GRID_SIZE - 10, friction: 0.96, chime: true, note: (piece && piece.note) || 0 }
+          {
+            x1: gx, y1: gy + 5, x2: gx + GRID_SIZE, y2: gy + GRID_SIZE - 5,
+            friction: 0.995, chime: true,
+            note: (piece && piece.note) || 0,
+            chimeKey: piece ? (piece.gx + ',' + piece.gy) : ''
+          }
         ];
       }
     },
@@ -1204,7 +1301,7 @@
     bouncer: [[10, GRID_SIZE - 15], [GRID_SIZE - 10, GRID_SIZE - 15]],
     spawner: [[GRID_SIZE / 2, GRID_SIZE]],
     switch: [[0, 5], [GRID_SIZE, GRID_SIZE - 5], [GRID_SIZE * 0.45, GRID_SIZE]],
-    chime: [[GRID_SIZE / 2, GRID_SIZE - 8], [14, 10], [GRID_SIZE - 14, 10]],
+    chime: [[0, 5], [GRID_SIZE, GRID_SIZE - 5]],
     bell: [[8, 8]]
   };
 
@@ -1247,8 +1344,101 @@
       { gx: 2, gy: 6, type: 'spawner' },
       { gx: 2, gy: 7, type: 'ramp' },
       { gx: 3, gy: 8, type: 'chime', note: 1 },
-      { gx: 4, gy: 9, type: 'flat' }
+      { gx: 4, gy: 9, type: 'bell' }
     ];
+  }
+
+  // Top tube, lower tube, then the giant. Switches stay as built for the whole song.
+  function stockOrchestra13(pieces) {
+    const want = ['1,1,spawner', '1,2,ramp', '2,3,chime', '3,4,switch', '4,5,chime', '5,6,chime', '6,7,bell', '3,5,ramp', '2,6,spawner', '2,7,ramp', '3,8,chime', '4,9,flat'];
+    if (!pieces || pieces.length !== want.length) return false;
+    const got = pieces.map(function (p) { return p.gx + ',' + p.gy + ',' + p.type; }).sort();
+    want.sort();
+    for (let i = 0; i < want.length; i++) if (got[i] !== want[i]) return false;
+    return true;
+  }
+
+  function orchestraSequence() {
+    return [
+      { delay: 0, tube: '1,1', index: 0, big: false },
+      { delay: 1100, tube: '2,6', index: 1, big: false },
+      { delay: 2400, tube: '1,1', index: 0, big: true }
+    ];
+  }
+
+  function defaultSequence(pieces) {
+    const tubes = (pieces || []).filter(function (p) { return p.type === 'spawner'; });
+    if (!tubes.length) return [{ delay: 0, tube: null, index: 0, big: false }];
+    return tubes.map(function (t, i) {
+      return { delay: i * 800, tube: t.gx + ',' + t.gy, index: i, big: false };
+    });
+  }
+
+  function cleanSequence(raw) {
+    if (!Array.isArray(raw)) return null;
+    const out = [];
+    for (const step of raw) {
+      if (!step || typeof step !== 'object') continue;
+      if (out.length >= 12) break;
+      const delay = Math.max(0, Math.min(20000, Math.round(Number(step.delay) || 0)));
+      let tube = null;
+      if (typeof step.tube === 'string' && /^\d+,\d+$/.test(step.tube)) tube = step.tube;
+      const index = Number.isFinite(Number(step.index)) ? Math.max(0, Math.min(11, Math.round(Number(step.index)))) : 0;
+      out.push({ delay: delay, tube: tube, index: index, big: !!step.big });
+    }
+    return out.length ? out : null;
+  }
+
+  function drawChimeGlyph(ctx, glyph, x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#1e1b4b';
+    ctx.strokeStyle = '#1e1b4b';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    if (glyph === 'triangle') {
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.lineTo(6, 5);
+      ctx.lineTo(-6, 5);
+      ctx.closePath();
+      ctx.fill();
+    } else if (glyph === 'square') {
+      ctx.fillRect(-5, -5, 10, 10);
+    } else if (glyph === 'diamond') {
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.lineTo(6, 0);
+      ctx.lineTo(0, 6);
+      ctx.lineTo(-6, 0);
+      ctx.closePath();
+      ctx.fill();
+    } else if (glyph === 'star') {
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+        const b = a + Math.PI / 5;
+        ctx.lineTo(Math.cos(a) * 6, Math.sin(a) * 6);
+        ctx.lineTo(Math.cos(b) * 2.6, Math.sin(b) * 2.6);
+      }
+      ctx.closePath();
+      ctx.fill();
+    } else if (glyph === 'dots') {
+      ctx.beginPath(); ctx.arc(-3.5, 0, 2.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(3.5, 0, 2.4, 0, Math.PI * 2); ctx.fill();
+    } else if (glyph === 'plus') {
+      ctx.fillRect(-5, -1.6, 10, 3.2);
+      ctx.fillRect(-1.6, -5, 3.2, 10);
+    } else if (glyph === 'ring') {
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   function normalizePiece(p) {
@@ -1315,14 +1505,25 @@
       const slot = data.slots[id];
       if (!slot || typeof slot !== 'object') continue;
       store.slots[id] = {
-        name: cleanName(slot.name, id === 'mine' ? 'My track' : id === 'starter' ? 'Starter' : id === 'sample' ? 'Sample' : 'Track'),
-        pieces: clonePieces(slot.pieces)
+        name: cleanName(slot.name, id === 'mine' ? 'My track' : id === 'starter' ? 'Starter' : id === 'sample' ? 'Sample' : id === 'orchestra' ? 'The Marble Orchestra' : 'Track'),
+        pieces: clonePieces(slot.pieces),
+        sequence: cleanSequence(slot.sequence)
       };
     }
     if (!store.slots.mine) store.slots.mine = { name: 'My track', pieces: [] };
     if (!store.slots.starter) store.slots.starter = { name: 'Starter', pieces: clonePieces(starterPieces()) };
     if (!store.slots.sample) store.slots.sample = { name: 'Sample', pieces: clonePieces(samplePieces()) };
     if (!store.slots.orchestra) store.slots.orchestra = { name: 'The Marble Orchestra', pieces: clonePieces(orchestraPieces()) };
+    if (store.slots.orchestra && stockOrchestra13(store.slots.orchestra.pieces)) {
+      const old = store.slots.orchestra.pieces;
+      const next = clonePieces(orchestraPieces());
+      for (const p of next) {
+        if (p.type !== 'chime') continue;
+        const prev = old.find(function (o) { return o.type === 'chime' && o.gx === p.gx && o.gy === p.gy; });
+        if (prev) p.note = prev.note;
+      }
+      store.slots.orchestra.pieces = next;
+    }
     const current = typeof data.current === 'string' && store.slots[data.current] ? data.current : 'mine';
     store.current = current;
     return store;
@@ -1419,11 +1620,15 @@
     const bw = Math.max(1, b.maxX - b.minX);
     const bh = Math.max(1, b.maxY - b.minY);
     const pad = 48;
-    let zoom = mode === 'fit' ? Math.min((viewW - pad) / bw, (viewH - pad) / bh) : 1;
+    const extraR = mode === 'fit' ? 96 : 0;
+    const extraB = mode === 'fit' ? 96 : 0;
+    let zoom = mode === 'fit' ? Math.min((viewW - pad - extraR) / bw, (viewH - pad - extraB) / bh) : 1;
     zoom = Math.max(0.35, Math.min(zoom, 1.7));
     const cx = (b.minX + b.maxX) / 2;
     const cy = (b.minY + b.maxY) / 2;
-    return { zoom: zoom, camX: viewW / 2 - cx * zoom, camY: viewH / 2 - cy * zoom };
+    const viewCX = (pad + (viewW - extraR)) / 2;
+    const viewCY = (pad + (viewH - extraB)) / 2;
+    return { zoom: zoom, camX: viewCX - cx * zoom, camY: viewCY - cy * zoom };
   }
 
   function marbleInView(m, cam, viewW, viewH) {
@@ -1502,7 +1707,12 @@
         } else if (seg.funnel) {
           if (Math.abs(dot) > 0.9) sound.playFunnel();
         } else if (seg.chime) {
-          if (Math.abs(dot) > 0.8) sound.playChime(seg.note || 0);
+          if (!this.chimed) this.chimed = {};
+          const key = seg.chimeKey || 'c';
+          if (!this.chimed[key] && Math.abs(dot) > 0.35) {
+            this.chimed[key] = true;
+            this.chimeHit = { key: key, note: seg.note || 0, big: !!this.isBig };
+          }
         } else if (Math.abs(dot) > 1.35) {
           sound.playClack(this.isBig ? 0.55 : 1.15, Math.min(2.2, Math.abs(dot) / 1.5));
         }
@@ -1588,7 +1798,21 @@
       this.whereStep = 0;
       this.preferTube = null;
       this.lastLaunch = null;
+      this.lastRun = null;
       this.launchGates = [];
+      this.launchLog = [];
+      this.seq = null;
+      this.holdSwitches = false;
+      this.giantLaunched = false;
+      this.missMark = null;
+      this.buildCam = null;
+      this.buildName = null;
+      this.voiceOn = true;
+      this.voiceArmed = false;
+      this.pendingLine = null;
+      this.said = {};
+      this.lastSpoken = '';
+      this.voiceAudio = null;
       this.bellFlash = 0;
       this.autoFit = true;
       this.coverReady = false;
@@ -1610,9 +1834,11 @@
       this.refreshSlotActions();
       this.refreshDropHint();
       this.refreshReplayBar(false);
+      this.loadVoicePref();
       if (!COVER && !SELFTEST) {
         this.save();
         this.showToast(this.firstVisit ? 'Put a ramp in the yellow square.' : 'Your track is back.');
+        this.cueForSlot();
       }
       if (!SELFTEST) this.loop();
     }
@@ -1687,9 +1913,14 @@
       this.sel = null;
       this.undoStack = (this.undoBySlot[id] || []).slice();
       this.home = { little: 0, giant: false };
+      this.giantLaunched = false;
       this.spotlight = null;
+      this.missMark = null;
       this.launchGates = [];
       this.lastLaunch = null;
+      this.lastRun = null;
+      this.seq = null;
+      this.holdSwitches = false;
       this.dropHint = false;
       this.firstBellDone = false;
       this.celebrate = 0;
@@ -1702,8 +1933,10 @@
       this.refreshSel();
       this.refreshSlotActions();
       this.refreshUndo();
+      this.refreshWhere();
       const label = this.store.slots[id].name || 'Track';
       this.showToast(label + ' is open. Your other tracks are still saved.');
+      this.cueForSlot();
     }
     duplicateSlot() {
       const ids = Object.keys(this.store.slots);
@@ -1716,7 +1949,12 @@
       const names = ids.map(function (id) { return this.store.slots[id].name; }, this);
       while (names.indexOf('Track ' + n) >= 0) n++;
       const id = 't' + n;
-      this.store.slots[id] = { name: 'Track ' + n, pieces: clonePieces(this.pieces) };
+      const seq = this.currentSequence();
+      this.store.slots[id] = {
+        name: 'Track ' + n,
+        pieces: clonePieces(this.pieces),
+        sequence: seq ? cleanSequence(seq) : null
+      };
       this.slotId = id;
       this.store.current = id;
       this.undoStack = [];
@@ -1777,9 +2015,12 @@
       this.refreshSel();
       if (hint && gx === hint.gx && gy === hint.gy) {
         this.dropHint = true;
+        this.missMark = null;
         this.refreshDropHint();
+        this.refreshWhere();
         this.launch({ n: 1, big: false, vx: 0 }, { stagger: false });
         this.showToast('Nice! Next, tap Drop marble.');
+        this.cue('drop');
       }
     }
     eraseCell(gx, gy) {
@@ -1800,7 +2041,11 @@
       this.marks = [];
       this.sel = null;
       this.home = { little: 0, giant: false };
+      this.giantLaunched = false;
       this.spotlight = null;
+      this.missMark = null;
+      this.seq = null;
+      this.holdSwitches = false;
       this.save();
       this.refreshSel();
       this.refreshHome();
@@ -1815,7 +2060,7 @@
       this.pushUndo();
       if (p.type === 'switch') p.gate = p.gate ? 0 : 1;
       else if (p.type === 'chime') {
-        p.note = ((p.note || 0) + 1) % 8;
+        p.note = ((p.note || 0) + 1) % CHIME_NOTES.length;
         sound.playChime(p.note);
         this.showToast('Chime tuned.');
       } else p.flip = p.flip ? 0 : 1;
@@ -1883,6 +2128,12 @@
       return this.pieces.find(function (p) { return p.type === 'spawner'; }) || null;
     }
     launch(spec, opts) {
+      const fromSeq = !!(opts && opts.fromSequence);
+      if (!fromSeq) {
+        this.lastRun = { kind: 'launch' };
+        this.seq = null;
+        this.holdSwitches = false;
+      }
       this.lastLaunch = {
         n: spec.n,
         big: !!spec.big,
@@ -1890,6 +2141,9 @@
         tubeKey: spec.tubeKey || null,
         vx: spec.vx
       };
+      if (!this.launchLog) this.launchLog = [];
+      this.launchLog.push(this.lastLaunch.tubeKey || '');
+      if (spec.big) this.giantLaunched = true;
       this.launchGates = this.pieces.filter(function (p) { return p.type === 'switch'; }).map(function (p) {
         return { gx: p.gx, gy: p.gy, gate: p.gate ? 1 : 0 };
       });
@@ -1903,6 +2157,7 @@
       } else {
         for (let i = 0; i < spec.n; i++) once();
       }
+      this.refreshHome();
     }
     dropGiant() {
       const clearFirst = document.getElementById('chkClearFirst').checked;
@@ -1920,9 +2175,14 @@
       this.stopPlayback();
       this.paused = false;
       this.refreshPause();
+      if (!this.lastRun || this.lastRun.kind === 'sequence') {
+        this.playSequence();
+        return;
+      }
       this.marbles = [];
       this.marks = [];
       this.spotlight = null;
+      this.missMark = null;
       for (const g of this.launchGates || []) {
         const p = this.pieces.find(function (pp) {
           return pp.type === 'switch' && pp.gx === g.gx && pp.gy === g.gy;
@@ -1945,12 +2205,13 @@
         if (!m.switchHit) continue;
         const id = m.switchHit;
         m.switchHit = null;
+        if (this.holdSwitches) continue;
         const p = this.pieces.find(function (pp) {
           return pp.type === 'switch' && (pp.gx + ',' + pp.gy) === id;
         });
         if (p) p.wantFlip = true;
       }
-      releaseSwitches(this.pieces, this.marbles);
+      if (!this.holdSwitches) releaseSwitches(this.pieces, this.marbles);
     }
     marbleHasScored(m) {
       if (!m || !m.rung) return false;
@@ -1961,6 +2222,8 @@
       const bells = this.pieces.filter(function (p) { return p.type === 'bell'; });
       let ding = false;
       let first = false;
+      let giantDing = false;
+      let smallDing = false;
       for (const m of this.marbles) {
         for (const b of bells) {
           const s = bellSensor(b);
@@ -1973,19 +2236,25 @@
           if (m.rung[k]) continue;
           m.rung[k] = true;
           ding = true;
-          if (m.isBig) this.home.giant = true;
-          else this.home.little++;
+          if (m.isBig) { this.home.giant = true; giantDing = true; }
+          else { this.home.little++; smallDing = true; }
           if (!this.firstBellDone) { this.firstBellDone = true; first = true; }
         }
       }
       if (!ding) return;
       this.bellFlash = first ? 34 : 16;
       if (first) this.celebrate = 48;
-      sound.playBell(true);
+      if (giantDing && !smallDing) sound.playGong();
+      else {
+        sound.playBell(true);
+        if (giantDing) sound.playGong();
+      }
       const n = Math.min(5, this.home.little);
-      const giantBit = this.home.giant ? 'Giant home' : 'Giant missed';
-      if (first) this.showToast('First bell! ' + n + ' of 5 home · ' + giantBit);
-      else if (this.home.little >= 5 && this.home.giant) this.showToast('5 of 5 home · Giant home');
+      const giantBit = this.giantPhrase();
+      if (first) {
+        this.showToast('First bell! ' + n + ' of 5 home · ' + giantBit);
+        this.cue('bell');
+      } else if (this.home.little >= 5 && this.home.giant) this.showToast('5 of 5 home · Giant home');
       else this.showToast(n + ' of 5 home · ' + giantBit);
       this.refreshHome();
     }
@@ -1998,7 +2267,7 @@
       const status = document.getElementById('homeStatus');
       if (status) {
         const n = Math.min(5, this.home.little | 0);
-        const g = this.home.giant ? 'Giant home' : (this.marbles.some(function (m) { return m.isBig; }) ? 'Giant missed' : 'Giant waiting');
+        const g = this.giantPhrase();
         status.innerHTML = '<strong>' + n + ' of 5</strong> home · ' + g;
       }
     }
@@ -2009,7 +2278,7 @@
       const stuck = this.marbles.filter(function (m) {
         return m.stopped && !game.marbleHasScored(m);
       });
-      btn.hidden = stuck.length === 0;
+      btn.hidden = stuck.length === 0 && !this.missMark;
       if (this.spotlight && this.marbles.indexOf(this.spotlight) < 0) this.spotlight = null;
     }
     refreshFollow() {
@@ -2027,12 +2296,29 @@
       const p = this.selectedPiece();
       const flip = document.getElementById('btnFlip');
       const erase = document.getElementById('btnEraseSel');
-      const canFlip = !!(p && (p.type === 'switch' || p.type === 'chime' || (PIECE_DEFINITIONS[p.type] && PIECE_DEFINITIONS[p.type].flippable)));
-      if (flip) flip.disabled = !canFlip;
-      if (erase) erase.disabled = !p;
       const ff = document.getElementById('btnFloatFlip');
       const fe = document.getElementById('btnFloatErase');
-      if (ff) ff.disabled = !canFlip;
+      const canFlip = !!(p && (p.type === 'switch' || p.type === 'chime' || (PIECE_DEFINITIONS[p.type] && PIECE_DEFINITIONS[p.type].flippable)));
+      const chime = !!(p && p.type === 'chime');
+      const label = chime ? 'Note' : 'Flip';
+      const aria = chime ? 'Change note' : 'Flip';
+      [flip, ff].forEach(function (btn) {
+        if (!btn) return;
+        btn.textContent = label;
+        btn.setAttribute('aria-label', aria);
+        btn.disabled = !canFlip;
+        if (chime) {
+          const col = CHIME_NOTES[(p.note || 0) % CHIME_NOTES.length].color;
+          btn.style.background = col;
+          btn.style.color = '#1e1b4b';
+          btn.style.borderColor = '#1e1b4b';
+        } else {
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      });
+      if (erase) erase.disabled = !p;
       if (fe) fe.disabled = !p;
       this.positionSelFloat();
     }
@@ -2041,12 +2327,52 @@
       if (!box) return;
       const p = this.selectedPiece();
       if (!p || this.playback) { box.classList.remove('show'); return; }
-      const z = this.zoom || 1;
-      const x = this.camX + (p.gx * GRID_SIZE + GRID_SIZE / 2) * z;
-      const y = this.camY + (p.gy * GRID_SIZE) * z - 8;
-      box.style.left = Math.max(8, Math.min(this.viewW - 160, x - 70)) + 'px';
-      box.style.top = Math.max(8, y - 40) + 'px';
       box.classList.add('show');
+      const z = this.zoom || 1;
+      const pw = GRID_SIZE * z;
+      const ph = GRID_SIZE * z;
+      const px = this.camX + p.gx * GRID_SIZE * z;
+      const py = this.camY + p.gy * GRID_SIZE * z;
+      const bw = Math.max(96, box.offsetWidth || 120);
+      const bh = Math.max(44, box.offsetHeight || 56);
+      const spots = [
+        { left: px + pw + 10, top: py + (ph - bh) / 2 },
+        { left: px + (pw - bw) / 2, top: py + ph + 10 },
+        { left: px - bw - 10, top: py + (ph - bh) / 2 },
+        { left: px + (pw - bw) / 2, top: py - bh - 10 }
+      ];
+      const blocks = [];
+      for (const o of this.pieces) {
+        if (o === p) continue;
+        blocks.push({
+          left: this.camX + o.gx * GRID_SIZE * z - 6,
+          top: this.camY + o.gy * GRID_SIZE * z - 6,
+          right: this.camX + (o.gx + 1) * GRID_SIZE * z + 6,
+          bottom: this.camY + (o.gy + 1) * GRID_SIZE * z + 6
+        });
+      }
+      blocks.push({ left: this.viewW - 100, top: this.viewH - 100, right: this.viewW, bottom: this.viewH });
+      const hits = function (spot) {
+        const r = { left: spot.left, top: spot.top, right: spot.left + bw, bottom: spot.top + bh };
+        if (r.left < 4 || r.top < 4 || r.right > this.viewW - 4 || r.bottom > this.viewH - 4) return true;
+        if (r.left < px + pw && r.right > px && r.top < py + ph && r.bottom > py) return true;
+        for (const q of blocks) {
+          if (r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top) return true;
+        }
+        return false;
+      };
+      let chosen = null;
+      for (const s of spots) {
+        if (!hits.call(this, s)) { chosen = s; break; }
+      }
+      if (!chosen) {
+        chosen = {
+          left: Math.max(4, Math.min(this.viewW - bw - 4, spots[0].left)),
+          top: Math.max(4, Math.min(this.viewH - bh - 4, spots[0].top))
+        };
+      }
+      box.style.left = Math.round(chosen.left) + 'px';
+      box.style.top = Math.round(chosen.top) + 'px';
     }
     refreshDropHint() {
       const btn = document.getElementById('btnSpawnMarble');
@@ -2067,28 +2393,30 @@
       this.marks = [];
       this.sel = null;
       this.home = { little: 0, giant: false };
+      this.giantLaunched = false;
       this.spotlight = null;
+      this.missMark = null;
+      this.seq = null;
+      this.holdSwitches = false;
+      this.lastRun = null;
       this.dropHint = false;
       this.firstBellDone = false;
       this.celebrate = 0;
+      this.said.gap = false;
       this.selectType('ramp');
       this.save();
       this.fitView();
       this.refreshHome();
       this.refreshSel();
       this.refreshDropHint();
+      this.refreshWhere();
       this.refreshUndo();
       this.showToast('Puzzle reset. Put a ramp in the glowing gap.');
+      this.cue('gap');
     }
     runOrchestra() {
       if (this.slotId !== 'orchestra') this.openSlot('orchestra');
-      this.home = { little: 0, giant: false };
-      this.refreshHome();
-      this.launch({ n: 1, big: false }, { stagger: false });
-      const game = this;
-      setTimeout(function () { game.launch({ n: 1, big: false }, { stagger: false }); }, 700);
-      setTimeout(function () { game.launch({ n: 1, big: true, clearFirst: false }, { stagger: false }); }, 1600);
-      this.showToast('The Marble Orchestra is playing.');
+      this.playSequence();
     }
     makeOrchestraYours() {
       this.commitSlot();
@@ -2101,9 +2429,98 @@
       while (this.store.slots['orch' + n]) n++;
       const id = 'orch' + n;
       const src = this.store.slots.orchestra ? this.store.slots.orchestra.pieces : orchestraPieces();
-      this.store.slots[id] = { name: 'My orchestra', pieces: clonePieces(src) };
+      const seq = this.slotId === 'orchestra' || !(this.store.slots[this.slotId] && this.store.slots[this.slotId].sequence)
+        ? orchestraSequence()
+        : this.currentSequence();
+      this.store.slots[id] = {
+        name: 'My orchestra',
+        pieces: clonePieces(src),
+        sequence: cleanSequence(seq || orchestraSequence())
+      };
       this.openSlot(id);
-      this.showToast('This copy is yours. Flip a chime to change the tune.');
+      this.showToast('This copy is yours. Tap a chime, then press play.');
+    }
+    currentSequence() {
+      const slot = this.store.slots[this.slotId];
+      if (slot && slot.sequence && slot.sequence.length) return slot.sequence;
+      if (this.slotId === 'orchestra') return orchestraSequence();
+      return null;
+    }
+    resolveSequence() {
+      const authored = this.currentSequence();
+      if (authored && authored.length) return cleanSequence(authored);
+      return defaultSequence(this.pieces);
+    }
+    playSequence() {
+      this.stopVoice();
+      this.stopPlayback();
+      this.paused = false;
+      this.refreshPause();
+      this.marbles = [];
+      this.marks = [];
+      this.spotlight = null;
+      this.missMark = null;
+      this.home = { little: 0, giant: false };
+      this.giantLaunched = false;
+      this.firstBellDone = false;
+      this.celebrate = 0;
+      this.bellFlash = 0;
+      if (this.slotId === 'orchestra') {
+        const auth = orchestraPieces();
+        for (const a of auth) {
+          if (a.type !== 'switch') continue;
+          const p = this.pieceAt(a.gx, a.gy);
+          if (p && p.type === 'switch') p.gate = a.gate ? 1 : 0;
+        }
+      }
+      const steps = this.resolveSequence() || [];
+      this.seq = { steps: steps, frames: 0, i: 0 };
+      this.holdSwitches = true;
+      this.lastRun = { kind: 'sequence' };
+      this.launchLog = [];
+      this.refreshHome();
+      this.refreshWhere();
+      const slot = this.store.slots[this.slotId];
+      this.showToast(((slot && slot.name) || 'Track') + ' is playing.');
+      this.pumpSequence();
+    }
+    pumpSequence() {
+      const seq = this.seq;
+      if (!seq || this.paused || this.playback) return;
+      const elapsed = seq.frames * (1000 / 60);
+      while (seq.steps[seq.i] && seq.steps[seq.i].delay <= elapsed) {
+        this.fireStep(seq.steps[seq.i]);
+        seq.i++;
+      }
+      const last = seq.steps.length ? seq.steps[seq.steps.length - 1].delay : 0;
+      seq.frames += this.slow ? 0.35 : 1;
+      if (seq.i >= seq.steps.length && seq.frames * (1000 / 60) > last + 9000) {
+        this.seq = null;
+        this.holdSwitches = false;
+      }
+    }
+    fireStep(step) {
+      const tubes = this.pieces.filter(function (p) { return p.type === 'spawner'; });
+      let tube = null;
+      if (step.tube) {
+        tube = tubes.find(function (p) { return (p.gx + ',' + p.gy) === step.tube; }) || null;
+      }
+      if (!tube && step.index != null && tubes[step.index]) tube = tubes[step.index];
+      if (!tube) tube = tubes[0] || null;
+      const key = tube ? (tube.gx + ',' + tube.gy) : null;
+      this.launch({
+        n: 1, big: !!step.big, clearFirst: false, tubeKey: key, vx: 0
+      }, { stagger: false, fromSequence: true });
+    }
+    giantPhrase() {
+      if (this.home.giant) return 'Giant home';
+      const big = this.marbles.some(function (m) { return m.isBig; });
+      if (big) {
+        const rolling = this.marbles.some(function (m) { return m.isBig && !m.stopped; });
+        return rolling ? 'Giant rolling' : 'Giant missed';
+      }
+      if (this.giantLaunched) return 'Giant missed';
+      return 'Giant waiting';
     }
     refreshTracks() {
       const list = document.getElementById('trackList');
@@ -2169,20 +2586,34 @@
     showWhere() {
       const game = this;
       const stuck = this.marbles.filter(function (m) { return m.stopped && !game.marbleHasScored(m); });
-      if (!stuck.length) return;
+      if (!stuck.length) {
+        if (this.missMark) this.focusWorld(this.missMark.x, this.missMark.y);
+        return;
+      }
       if (!this.spotlight) this.whereStep = 0;
       else this.whereStep = (this.whereStep + 1) % stuck.length;
       this.spotlight = stuck[this.whereStep];
       this.cameraFollow = false;
       this.refreshFollow();
     }
+    focusWorld(x, y) {
+      this.cameraFollow = false;
+      this.autoFit = false;
+      this.refreshFollow();
+      const z = this.zoom || 1;
+      this.camX = this.viewW / 2 - x * z;
+      this.camY = this.viewH / 2 - y * z;
+    }
     beginRecording() {
       this.stopPlayback();
       this.isRecording = true;
+      const slot = this.store.slots[this.slotId];
       this.rec = {
         pieces: clonePieces(this.pieces),
         startView: { camX: this.camX, camY: this.camY, zoom: this.zoom || 1 },
-        frames: []
+        frames: [],
+        trackName: (slot && slot.name) || 'Track',
+        slotId: this.slotId
       };
       document.getElementById('recStatus').textContent = 'Recording';
       this.refreshRec();
@@ -2197,6 +2628,11 @@
     beginPlayback() {
       if (this.isRecording) this.endRecording('Run saved');
       if (!this.rec || !this.rec.frames.length) return;
+      if (!this.buildCam) {
+        this.buildCam = { camX: this.camX, camY: this.camY, zoom: this.zoom || 1, autoFit: this.autoFit };
+      }
+      const input = document.getElementById('trackName');
+      if (input && this.buildName == null) this.buildName = input.value;
       const frames = this.rec.frames;
       let index = 0;
       for (let i = 0; i < frames.length; i++) {
@@ -2213,15 +2649,36 @@
           zoom: holdCam.zoom
         };
       }
-      this.playback = { rec: this.rec, index: index, hold: 18, holdCam: holdCam, holding: true };
+      this.playback = { rec: this.rec, index: index, hold: 18, holdCam: holdCam, holding: true, done: false };
       this.applyPlaybackFrame(true);
       this.refreshReplayBar(true);
-      this.showToast('Replaying the run.');
+      this.showToast('Watching ' + (this.rec.trackName || 'a saved run') + '.');
     }
     stopPlayback(fromSwitch) {
       const was = !!this.playback;
+      const cam = this.buildCam;
       this.playback = null;
+      this.buildCam = null;
       this.refreshReplayBar(false);
+      const input = document.getElementById('trackName');
+      if (input) {
+        input.readOnly = false;
+        if (this.buildName != null) {
+          input.value = this.buildName;
+          this.buildName = null;
+        }
+      }
+      const banner = document.getElementById('watchBanner');
+      if (banner) banner.hidden = true;
+      if (cam) {
+        this.autoFit = !!cam.autoFit;
+        if (cam.autoFit) this.fitView();
+        else {
+          this.camX = cam.camX;
+          this.camY = cam.camY;
+          this.zoom = cam.zoom || 1;
+        }
+      }
       if (was) {
         this.marbles = [];
         this.marks = [];
@@ -2236,6 +2693,21 @@
       const bar = document.getElementById('replayBar');
       if (!bar) return;
       bar.classList.toggle('show', !!on);
+      const name = (this.rec && this.rec.trackName) ? this.rec.trackName : 'saved run';
+      const done = !!(this.playback && this.playback.done);
+      const label = document.getElementById('replayLabel');
+      const text = (done ? 'Replay finished · ' : 'Watching ') + name;
+      if (label) label.textContent = text;
+      const banner = document.getElementById('watchBanner');
+      if (banner) {
+        banner.hidden = !on;
+        banner.textContent = text;
+      }
+      const input = document.getElementById('trackName');
+      if (on && input && this.rec) {
+        input.value = this.rec.trackName || name;
+        input.readOnly = true;
+      }
       const recCluster = document.getElementById('btnPlayRec');
       if (recCluster && recCluster.parentElement) recCluster.parentElement.style.display = on ? 'none' : '';
     }
@@ -2258,7 +2730,7 @@
     }
     stepPlayback() {
       const pb = this.playback;
-      if (!pb) return;
+      if (!pb || pb.done) return;
       if (pb.holding) {
         pb.hold--;
         this.applyPlaybackFrame(true);
@@ -2267,8 +2739,9 @@
       }
       pb.index++;
       if (pb.index >= pb.rec.frames.length) {
-        this.playback = null;
-        this.marbles = [];
+        pb.index = Math.max(0, pb.rec.frames.length - 1);
+        pb.done = true;
+        this.applyPlaybackFrame(false);
         this.refreshReplayBar(true);
         this.showToast('Replay finished. Watch again or go back to build.');
         return;
@@ -2337,7 +2810,8 @@
         if (sound.enabled) {
           sound.unlock(true);
           sound.playUi('snap');
-        }
+          game.cueForSlot();
+        } else game.stopVoice();
       });
       document.getElementById('btnSpawnMarble').addEventListener('click', function () {
         game.dropHint = false;
@@ -2351,7 +2825,10 @@
         game.marbles = [];
         game.marks = [];
         game.spotlight = null;
+        game.missMark = null;
+        if (!game.home.giant) game.giantLaunched = false;
         game.refreshWhere();
+        game.refreshHome();
       });
       document.getElementById('btnGiant').addEventListener('click', function () { game.dropGiant(); });
       document.getElementById('btnFit').addEventListener('click', function () {
@@ -2390,6 +2867,19 @@
       if (runOrch) runOrch.addEventListener('click', function () { game.runOrchestra(); });
       const makeYours = document.getElementById('btnMakeYours');
       if (makeYours) makeYours.addEventListener('click', function () { game.makeOrchestraYours(); });
+      const playBtn = document.getElementById('btnPlay');
+      if (playBtn) playBtn.addEventListener('click', function () { game.playSequence(); });
+      const voiceBtn = document.getElementById('btnVoice');
+      if (voiceBtn) voiceBtn.addEventListener('click', function () {
+        game.voiceOn = !game.voiceOn;
+        game.saveVoicePref();
+        game.refreshVoice();
+        if (!game.voiceOn) game.stopVoice();
+        else {
+          sound.unlock(true);
+          game.cueForSlot();
+        }
+      });
       const floatFlip = document.getElementById('btnFloatFlip');
       if (floatFlip) floatFlip.addEventListener('click', function () { game.flipSelected(); });
       const floatErase = document.getElementById('btnFloatErase');
@@ -2411,6 +2901,8 @@
         else if (k === 'arrowup') game.nudge(0, -1);
         else if (k === 'arrowdown') game.nudge(0, 1);
       });
+
+      window.addEventListener('pointerdown', function () { game.flushVoice(); }, true);
 
       const down = function (e) {
         if (e.button != null && e.button !== 0) return;
@@ -2497,6 +2989,7 @@
       }
       if (!g.moved && startPiece && (g.tool === 'place' || g.tool === 'pick')) {
         this.sel = { gx: startPiece.gx, gy: startPiece.gy };
+        if (startPiece.type === 'chime') sound.playChime(startPiece.note || 0);
         if (g.tool === 'place' && startPiece.type === 'switch') {
           this.flipSelected();
           return;
@@ -2559,9 +3052,10 @@
       }
       this.noteSwitches();
       this.scoreBells();
-      this.marbles = this.marbles.filter(function (m) {
-        return m.y < 4000 && m.y > -800 && Math.abs(m.x) < 6000;
-      });
+      this.noteChimes();
+      this.cullMarbles();
+      for (const p of this.pieces) if (p.flash) p.flash--;
+      this.pumpSequence();
       if (this.bellFlash > 0) this.bellFlash--;
       if (this.celebrate > 0) this.celebrate--;
       if (this.slow) {
@@ -2609,6 +3103,143 @@
       }
       sound.setRunning(lively);
       this.refreshWhere();
+      this.refreshHome();
+    }
+    noteChimes() {
+      for (const m of this.marbles) {
+        if (!m.chimeHit) continue;
+        const hit = m.chimeHit;
+        m.chimeHit = null;
+        const p = this.pieces.find(function (pp) {
+          return pp.type === 'chime' && (pp.gx + ',' + pp.gy) === hit.key;
+        });
+        if (p) p.flash = 16;
+        if (hit.big) sound.playGong();
+        else sound.playChime(hit.note || 0);
+      }
+    }
+    cullMarbles() {
+      const b = trackBounds(this.pieces);
+      const kept = [];
+      for (const m of this.marbles) {
+        const far = m.y > 4000 || m.y < -800 || Math.abs(m.x) > 6000;
+        const below = b && m.y > b.maxY + 140;
+        if ((far || below) && !this.marbleHasScored(m)) this.noteMiss(m);
+        if (!far && !below) kept.push(m);
+      }
+      this.marbles = kept;
+    }
+    noteMiss(m) {
+      const gap = this.hintTarget();
+      if (gap) {
+        if (!this.missMark) {
+          this.missMark = {
+            x: gap.gx * GRID_SIZE + GRID_SIZE / 2,
+            y: gap.gy * GRID_SIZE + GRID_SIZE / 2,
+            gap: true
+          };
+          this.showToast('The marble fell through the gap.');
+          this.cue('gap');
+          this.refreshWhere();
+        }
+        return;
+      }
+      if (m.isBig && !this.home.giant) {
+        this.missMark = { x: m.x, y: Math.min(m.y, 2000), gap: false };
+        this.showToast('The giant missed the bell.');
+        this.refreshWhere();
+        this.refreshHome();
+        return;
+      }
+      if (this.seq || this.holdSwitches) return;
+      if (!this.missMark) {
+        this.missMark = { x: m.x, y: m.y, gap: false };
+        this.showToast('The marble fell off the track.');
+        this.refreshWhere();
+      }
+    }
+    loadVoicePref() {
+      try {
+        const v = localStorage.getItem('marble-run:voice');
+        if (v === '0') this.voiceOn = false;
+      } catch (e) {}
+      this.refreshVoice();
+    }
+    refreshVoice() {
+      const btn = document.getElementById('btnVoice');
+      if (!btn) return;
+      btn.setAttribute('aria-pressed', this.voiceOn ? 'true' : 'false');
+      btn.setAttribute('aria-label', this.voiceOn ? 'Voice on' : 'Voice off');
+      btn.textContent = this.voiceOn ? 'Voice' : 'Voice off';
+      btn.classList.toggle('is-off', !this.voiceOn);
+    }
+    saveVoicePref() {
+      try { localStorage.setItem('marble-run:voice', this.voiceOn ? '1' : '0'); } catch (e) {}
+    }
+    cueForSlot() {
+      if (this.hintTarget()) this.cue('gap');
+      else if (this.slotId === 'orchestra' || (this.currentSequence() && this.pieces.some(function (p) { return p.type === 'chime'; }))) {
+        this.cue('orchestra');
+      }
+    }
+    cue(id) {
+      if (SELFTEST || COVER) return;
+      if (!this.voiceOn || !sound.enabled) return;
+      if (!VOICE_LINES[id] || this.said[id]) return;
+      this.pendingLine = id;
+      if (this.voiceArmed) this.flushVoice();
+    }
+    flushVoice() {
+      this.voiceArmed = true;
+      if (!this.voiceOn || !sound.enabled || !this.pendingLine) return;
+      const id = this.pendingLine;
+      this.pendingLine = null;
+      this.said[id] = true;
+      this.speakNow(id);
+    }
+    stopVoice() {
+      this.pendingLine = null;
+      try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+      if (this.voiceAudio) {
+        try { this.voiceAudio.pause(); } catch (e) {}
+        this.voiceAudio = null;
+      }
+    }
+    speakNow(id) {
+      const line = VOICE_LINES[id];
+      if (!line || !this.voiceOn || !sound.enabled) return;
+      if (this.lastSpoken === line.text) return;
+      this.lastSpoken = line.text;
+      this.stopVoice();
+      this.lastSpoken = line.text;
+      // Recorded files (voice/<id>.mp3) can replace this. None are shipped in 1.4,
+      // so the browser's speech synthesis says the line.
+      if (line.file) {
+        try {
+          const audio = new Audio(line.file);
+          this.voiceAudio = audio;
+          const game = this;
+          audio.play().then(function () {}, function () { game.speakSynth(line.text); });
+          return;
+        } catch (e) {}
+      }
+      this.speakSynth(line.text);
+    }
+    speakSynth(text) {
+      try {
+        if (!window.speechSynthesis || typeof SpeechSynthesisUtterance !== 'function') return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.95;
+        u.pitch = 1.05;
+        let voices = [];
+        try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; }
+        const pick = voices.filter(function (v) { return /^en(-|_|$)/i.test(v.lang || ''); })[0];
+        if (pick) u.voice = pick;
+        setTimeout(function () {
+          try { speechSynthesis.speak(u); } catch (e) {}
+        }, 180);
+      } catch (e) {}
     }
     render() {
       const ctx = this.ctx;
@@ -2666,6 +3297,13 @@
         ctx.arc(s.x, s.y, s.radius + 16, 0, Math.PI * 2);
         ctx.strokeStyle = '#fef08a';
         ctx.lineWidth = 5;
+        ctx.stroke();
+      }
+      if (this.missMark && !this.playback) {
+        ctx.beginPath();
+        ctx.arc(this.missMark.x, this.missMark.y, 26, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.9)';
+        ctx.lineWidth = 4;
         ctx.stroke();
       }
       if (this.bellFlash > 0 || this.celebrate > 0) {
@@ -3110,6 +3748,191 @@
     const pix = game.ctx.getImageData(Math.floor(game.canvas.width / 2), Math.floor(game.canvas.height / 2), 1, 1).data;
     ok('the track is drawn', pix[3] > 0);
     ok('the page fits this window', document.documentElement.scrollWidth <= window.innerWidth + 1);
+
+    const colorSet = {};
+    CHIME_NOTES.forEach(function (n) { colorSet[n.color] = true; });
+    ok('each chime note has its own color', CHIME_NOTES.length === 8 && Object.keys(colorSet).length === 8);
+
+    game.slotId = 'orchestra';
+    game.store = freshStore(false);
+    game.pieces = clonePieces(orchestraPieces());
+    game.marbles = [];
+    game.home = { little: 0, giant: false };
+    game.giantLaunched = false;
+    game.firstBellDone = false;
+    game.playback = null;
+    game.paused = false;
+    game.slow = false;
+    game.cameraFollow = false;
+    game.seq = null;
+    game.holdSwitches = false;
+    game.missMark = null;
+    game.launchLog = [];
+    const chimeRail = pieceSegments(game.pieces.find(function (p) { return p.type === 'chime'; }))[0];
+    const rampRail = pieceSegments({ gx: 0, gy: 0, type: 'ramp', flip: 0, gate: 0 })[0];
+    ok('a chime is an open rail, not a closed V', chimeRail && chimeRail.chime && Math.abs((chimeRail.x2 - chimeRail.x1) - (rampRail.x2 - rampRail.x1)) < 0.1 && chimeRail.y2 > chimeRail.y1);
+    game.playSequence();
+    let orchGuard = 0;
+    while (orchGuard < 2500 && !(game.home.little >= 1 && game.home.giant)) {
+      game.update();
+      orchGuard++;
+    }
+    const orchWhere = game.marbles.map(function (m) {
+      return (m.isBig ? 'G' : 's') + m.x.toFixed(0) + ',' + m.y.toFixed(0);
+    }).join(' ');
+    ok('the orchestra reaches the bell' + (game.home.little >= 1 ? '' : ' (' + orchWhere + ' steps ' + orchGuard + ')'), game.home.little >= 1);
+    ok('the lower tube marble gets home too', game.home.little >= 2);
+    const oldOrch = orchestraPieces().map(function (p) {
+      return p.gx === 4 && p.gy === 9 ? { gx: 4, gy: 9, type: 'flat', flip: 0, gate: 0, note: 0 } : p;
+    });
+    oldOrch.forEach(function (p) { if (p.gx === 2 && p.gy === 3) p.note = 3; });
+    const migratedOrch = parseStore(JSON.stringify({
+      v: 2, current: 'orchestra',
+      slots: {
+        mine: { name: 'My track', pieces: [] },
+        orchestra: { name: 'The Marble Orchestra', pieces: oldOrch }
+      }
+    }));
+    const keptNote = migratedOrch.slots.orchestra.pieces.find(function (p) { return p.gx === 2 && p.gy === 3; });
+    ok('an old orchestra flat becomes a finish bell', migratedOrch.slots.orchestra.pieces.some(function (p) { return p.type === 'bell' && p.gx === 4 && p.gy === 9; }));
+    ok('a tuned chime note survives that fix', keptNote && keptNote.note === 3);
+    ok('the orchestra giant gets home' + (game.home.giant ? '' : ' (' + orchWhere + ')'), game.home.giant === true);
+    ok('the orchestra fires the lower tube', (game.launchLog || []).indexOf('2,6') >= 0 && (game.launchLog || []).indexOf('1,1') >= 0);
+    const toastAfter = document.getElementById('toastText').textContent;
+    const statusAfter = document.getElementById('homeStatus').textContent;
+    ok('giant home status agrees', statusAfter.indexOf('Giant home') >= 0 && (toastAfter.indexOf('Giant home') >= 0 || game.home.giant));
+
+    game.makeOrchestraYours();
+    const copyId = game.slotId;
+    ok('make it yours copies the sequence', copyId !== 'orchestra' && game.store.slots[copyId].sequence && game.store.slots[copyId].sequence.some(function (s) { return s.tube === '2,6'; }));
+    const edited = game.pieces.find(function (p) { return p.type === 'chime'; });
+    const editedNote = ((edited.note || 0) + 3) % 8;
+    edited.note = editedNote;
+    game.pieces = game.pieces.filter(function (p) { return p.type !== 'bell'; });
+    game.home = { little: 0, giant: false };
+    game.giantLaunched = false;
+    game.launchLog = [];
+    document.getElementById('btnPlay').click();
+    for (let i = 0; i < 400; i++) game.update();
+    const still = game.pieces.find(function (p) { return p.type === 'chime'; });
+    ok('play on a copy uses the current build', still && still.note === editedNote && game.pieces.every(function (p) { return p.type !== 'bell'; }));
+    ok('play on a copy releases the arrangement', game.launchLog.length >= 2 && game.home.little === 0 && game.home.giant === false);
+
+    game.seq = null;
+    game.holdSwitches = false;
+    game.marbles = [];
+    game.playback = null;
+    game.store.slots.starter.name = 'Starter';
+    game.slotId = 'starter';
+    game.pieces = clonePieces(starterPieces());
+    game.camX = 20;
+    game.camY = 30;
+    game.zoom = 1;
+    game.autoFit = false;
+    game.buildCam = null;
+    game.buildName = null;
+    game.marbles = [new Marble(40, 40, 12, false)];
+    game.beginRecording();
+    game.camX = 300;
+    game.update();
+    game.endRecording('Run saved');
+    game.slotId = 'mine';
+    game.store.slots.mine.name = 'My orchestra';
+    const nameInput = document.getElementById('trackName');
+    nameInput.value = 'My orchestra';
+    nameInput.readOnly = false;
+    game.camX = 20;
+    game.camY = 30;
+    game.zoom = 1;
+    game.autoFit = false;
+    game.beginPlayback();
+    const watchLabel = document.getElementById('replayLabel').textContent;
+    ok('watch label names the recorded track', watchLabel.indexOf('Starter') >= 0 && watchLabel.indexOf('Watching') >= 0);
+    ok('watch label is not the current track', watchLabel.indexOf('My orchestra') < 0);
+    ok('watch shows the recorded name in the name field', nameInput.value === 'Starter' && nameInput.readOnly);
+    const savedZoom = 1;
+    const savedX = 20;
+    for (let i = 0; i < 40; i++) game.stepPlayback();
+    const doneLabel = document.getElementById('replayLabel').textContent;
+    ok('a finished replay does not keep saying Watching', doneLabel.indexOf('Replay finished') >= 0 && doneLabel.indexOf('Starter') >= 0);
+    ok('a finished replay still shows the recorded track', game.playback && game.piecesForRender().some(function (p) { return p.type === 'bell'; }));
+    document.getElementById('btnBackBuild').click();
+    ok('back to build restores the camera', Math.abs(game.camX - savedX) < 0.5 && Math.abs(game.zoom - savedZoom) < 0.01 && !game.playback);
+    ok('back to build restores the track name', nameInput.value === 'My orchestra' && !nameInput.readOnly);
+
+    game.giantLaunched = false;
+    game.home = { little: 0, giant: false };
+    game.firstBellDone = false;
+    game.marbles = [];
+    const bellOnly = { gx: 0, gy: 0, type: 'bell', flip: 0, gate: 0 };
+    game.pieces = [bellOnly];
+    const sensor2 = bellSensor(bellOnly);
+    const one = new Marble(sensor2.x, sensor2.y, 12, false);
+    one.vx = 0; one.vy = 0;
+    game.marbles = [one];
+    game.scoreBells();
+    const agreeToast = document.getElementById('toastText').textContent;
+    const agreeStatus = document.getElementById('homeStatus').textContent;
+    ok('first bell without a giant says Giant waiting', agreeToast.indexOf('Giant waiting') >= 0 && agreeStatus.indexOf('Giant waiting') >= 0);
+    ok('first bell does not say Giant missed', agreeToast.indexOf('Giant missed') < 0 && agreeStatus.indexOf('Giant missed') < 0);
+
+    game.launch({ n: 1, big: true, vx: 0 }, { stagger: false });
+    game.marbles[game.marbles.length - 1].stopped = false;
+    game.refreshHome();
+    ok('a moving giant reads Giant rolling', document.getElementById('homeStatus').textContent.indexOf('Giant rolling') >= 0);
+
+    game.slotId = 'mine';
+    game.marbles = [new Marble(10, 10, 12, false)];
+    game.marbles[0].stopped = true;
+    game.missMark = null;
+    game.playback = null;
+    game.refreshWhere();
+    ok('show me where appears for a stopped marble', document.getElementById('btnWhere').hidden === false);
+    game.openSlot('sample');
+    ok('show me where clears when the track changes', document.getElementById('btnWhere').hidden === true);
+
+    game.slotId = 'starter';
+    game.pieces = clonePieces(starterPieces());
+    game.marbles = [];
+    game.home = { little: 0, giant: false };
+    game.giantLaunched = false;
+    game.missMark = null;
+    game.playback = null;
+    game.paused = false;
+    game.seq = null;
+    game.holdSwitches = false;
+    game.launch({ n: 1, big: false, vx: 0 }, { stagger: false });
+    for (let i = 0; i < 1600; i++) game.update();
+    ok('an open gap tells you the marble fell', document.getElementById('toastText').textContent.toLowerCase().indexOf('gap') >= 0);
+    ok('show me where marks the gap', document.getElementById('btnWhere').hidden === false && game.missMark && game.missMark.gap);
+
+    const playBtn = document.getElementById('btnPlay');
+    const playBox = playBtn.getBoundingClientRect();
+    ok('the play button is a labelled icon', !!playBtn.querySelector('svg') && (playBtn.getAttribute('aria-label') || '').toLowerCase().indexOf('play') >= 0);
+    ok('the play button is at least 44px', playBox.width >= 44 && playBox.height >= 44);
+
+    game.playback = null;
+    game.viewW = 900;
+    game.viewH = 700;
+    game.zoom = 1;
+    game.camX = 40;
+    game.camY = 40;
+    game.slotId = 'mine';
+    game.pieces = clonePieces(orchestraPieces());
+    game.sel = { gx: 2, gy: 3 };
+    game.refreshSel();
+    const floatBox = document.getElementById('selFloat');
+    const fLeft = parseFloat(floatBox.style.left);
+    const fTop = parseFloat(floatBox.style.top);
+    const fW = Math.max(44, floatBox.offsetWidth);
+    const fH = Math.max(44, floatBox.offsetHeight);
+    const pieceLeft = game.camX + 2 * GRID_SIZE;
+    const pieceTop = game.camY + 3 * GRID_SIZE;
+    const coversPiece = fLeft < pieceLeft + GRID_SIZE && fLeft + fW > pieceLeft && fTop < pieceTop + GRID_SIZE && fTop + fH > pieceTop;
+    ok('chime actions sit beside the piece', floatBox.classList.contains('show') && !coversPiece);
+    ok('a chime offers Change note', (document.getElementById('btnFloatFlip').getAttribute('aria-label') || '') === 'Change note');
+
+    ok('version is 1.4 beta', document.body.textContent.indexOf('Version 1.4 (beta)') >= 0);
 
     const pre = document.createElement('pre');
     pre.id = 'selftest-out';

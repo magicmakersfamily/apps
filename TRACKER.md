@@ -72,6 +72,11 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| marble-run-B3 | bug | marble-run | Giant status, replay title and camera, Try again, Show me where, and a gap a marble could jump | P0 | done | playtest | 1.4 | Toast and counter share one phrase. An open gap drops the marble. Watch mode names the recorded track and hides the live counter. Back to build restores the view. |
+| marble-run-B2 | bug | marble-run | Orchestra chimes trap marbles, and Run it never fires the lower tube | P0 | done | playtest | 1.4 | A chime was a closed V. Play rolls through, fires both tubes, and the giant finishes on a low gong. The song meter matches that launch. |
+| marble-run-F15 | feature | marble-run | Short spoken first steps for a player who cannot read yet | P1 | done | playtest | 1.4 | Gap, drop, first bell, and the orchestra cue. The browser speaks them until recorded clips exist. Skipped when sound or voice is off. |
+| marble-run-F14 | feature | marble-run | Chimes preview a note, each note has its own color, and they flash when hit | P1 | done | playtest | 1.4 | Note replaces Flip on a chime. The piece menu sits beside the piece, clear of the marble path. |
+| marble-run-F13 | feature | marble-run | One-tap play of a track's launch sequence, including copies | P0 | done | playtest | 1.4 | A play button runs the current build. Make it yours copies the sequence. A track without one fires every tube once. |
 | ultimate-train-studio-F5 | feature | ultimate-train-studio | Tabletop model railway: paint, build a chunky loop, and drive a three-quarter diorama | P0 | done | family | 2.0 | Look down at a wooden night board. Lantern festival corner, lit windows, soft shadow. First session is paint, then a small loop, then drive. |
 | ultimate-train-studio-B11 | bug | ultimate-train-studio | 1.2 camera was a side view with the track floating in the sky | P0 | done | family | 2.0 | Rebuilt as a three-quarter tabletop. Rails sit on the board. The old side-view sky is gone. |
 | ultimate-train-studio-B12 | bug | ultimate-train-studio | A mid-tone drone kept playing while the train was still | P0 | done | playtest | 2.0 | Silence when stopped. Rumble only while moving, and the audio context suspends when the tab hides. |

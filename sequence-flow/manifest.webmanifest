@@ -1,0 +1,14 @@
+{
+  "name": "Sequence Flow",
+  "short_name": "Flow",
+  "description": "Build a routine from timed steps and run it one step at a time.",
+  "display": "standalone",
+  "start_url": "./",
+  "scope": "./",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

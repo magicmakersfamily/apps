@@ -156,6 +156,7 @@
   }
   .btn:active { transform: scale(0.96); }
   .btn.on, .btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .btn.slot.watching { background: #1e3a8a; border-color: #60a5fa; color: #fff; }
   .btn.danger:hover, .btn.danger.on { background: #dc2626; border-color: #dc2626; color: #fff; }
   .btn.indigo { background: #4f46e5; border-color: #4f46e5; color: #fff; }
   .btn.green { background: #10b981; border-color: #10b981; color: #042f2e; }
@@ -323,7 +324,11 @@
   .linkish {
     background: none;
     border: 0;
-    padding: 0;
+    padding: 10px 8px;
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
     color: #fde68a;
     font-weight: 700;
     text-decoration: underline;
@@ -453,8 +458,8 @@
         <button class="btn" id="btnAgain" type="button">Try again</button>
         <button class="btn gold" id="btnWhere" type="button" hidden>Show me where</button>
       </div>
-      <div class="cluster">
-        <span class="home-label">Get all five home</span>
+      <div class="cluster" id="homeCluster">
+        <span class="home-label" id="homeLabel">Get all five home</span>
         <span class="pips" id="homePips" aria-label="Five little marbles and the giant marble"><i></i><i></i><i></i><i></i><i></i><b>★</b></span>
         <span class="home-status" id="homeStatus"><strong>0 of 5</strong> home · Giant waiting</span>
       </div>
@@ -528,6 +533,7 @@
   // This build has no clips, so the browser speaks them.
   const VOICE_LINES = {
     gap: { text: 'Put a ramp here.' },
+    fell: { text: 'It fell through the gap. Put a ramp here.' },
     drop: { text: 'Now drop a marble.' },
     bell: { text: 'The bell rang!' },
     orchestra: { text: 'Tap a chime to change its sound, then press play.' }
@@ -1805,6 +1811,7 @@
       this.holdSwitches = false;
       this.giantLaunched = false;
       this.missMark = null;
+      this.gapNoted = false;
       this.buildCam = null;
       this.buildName = null;
       this.voiceOn = true;
@@ -1916,6 +1923,7 @@
       this.giantLaunched = false;
       this.spotlight = null;
       this.missMark = null;
+      this.gapNoted = false;
       this.launchGates = [];
       this.lastLaunch = null;
       this.lastRun = null;
@@ -1934,6 +1942,7 @@
       this.refreshSlotActions();
       this.refreshUndo();
       this.refreshWhere();
+      this.refreshRec();
       const label = this.store.slots[id].name || 'Track';
       this.showToast(label + ' is open. Your other tracks are still saved.');
       this.cueForSlot();
@@ -2021,6 +2030,7 @@
         this.launch({ n: 1, big: false, vx: 0 }, { stagger: false });
         this.showToast('Nice! Next, tap Drop marble.');
         this.cue('drop');
+        this.gapNoted = false;
       }
     }
     eraseCell(gx, gy) {
@@ -2133,6 +2143,8 @@
         this.lastRun = { kind: 'launch' };
         this.seq = null;
         this.holdSwitches = false;
+        this.gapNoted = false;
+        if (this.said) delete this.said.fell;
       }
       this.lastLaunch = {
         n: spec.n,
@@ -2197,8 +2209,44 @@
     }
     getAllSegments() {
       const segs = [];
-      for (const p of this.pieces) segs.push.apply(segs, pieceSegments(p));
+      const gap = this.hintTarget();
+      // While the starter gap is empty, ignore every piece past it. A rolling marble
+      // otherwise jumps that one missing cell and lands on the next ramp.
+      for (const p of this.pieces) {
+        if (gap && (p.gx + p.gy) > (gap.gx + gap.gy)) continue;
+        segs.push.apply(segs, pieceSegments(p));
+      }
       return segs;
+    }
+    catchOpenGap() {
+      const gap = this.hintTarget();
+      if (!gap) return;
+      const lip = gap.gx * GRID_SIZE - 2;
+      const yTop = gap.gy * GRID_SIZE - 80;
+      const yBot = (gap.gy + 1) * GRID_SIZE + 80;
+      const xFar = (gap.gx + 2) * GRID_SIZE;
+      for (const m of this.marbles) {
+        if (this.marbleHasScored(m)) continue;
+        if (m.x < lip || m.x > xFar || m.y < yTop || m.y > yBot) continue;
+        m.gapFall = true;
+        m.vx *= 0.05;
+        if (m.vy < 1.2) m.vy = 1.2;
+        this.pointAtGap();
+      }
+    }
+    pointAtGap() {
+      if (this.gapNoted) return;
+      const gap = this.hintTarget();
+      if (!gap) return;
+      this.gapNoted = true;
+      this.missMark = {
+        x: gap.gx * GRID_SIZE + GRID_SIZE / 2,
+        y: gap.gy * GRID_SIZE + GRID_SIZE / 2,
+        gap: true
+      };
+      this.showToast('Fell in the gap!');
+      this.cue('fell');
+      this.refreshWhere();
     }
     noteSwitches() {
       for (const m of this.marbles) {
@@ -2225,6 +2273,7 @@
       let giantDing = false;
       let smallDing = false;
       for (const m of this.marbles) {
+        if (m.gapFall) continue;
         for (const b of bells) {
           const s = bellSensor(b);
           const hitR = s.r + (m.isBig ? 14 : 0);
@@ -2249,26 +2298,61 @@
         sound.playBell(true);
         if (giantDing) sound.playGong();
       }
-      const n = Math.min(5, this.home.little);
+      const goal = this.homeGoal();
+      const n = Math.min(goal.little, this.home.little);
       const giantBit = this.giantPhrase();
+      const songDone = goal.song && n >= goal.little && (!goal.giant || this.home.giant);
+      const allHome = !goal.song && this.home.little >= goal.little && this.home.giant;
       if (first) {
-        this.showToast('First bell! ' + n + ' of 5 home · ' + giantBit);
+        this.showToast('First bell!');
         this.cue('bell');
-      } else if (this.home.little >= 5 && this.home.giant) this.showToast('5 of 5 home · Giant home');
-      else this.showToast(n + ' of 5 home · ' + giantBit);
+      } else if (songDone) this.showToast('Song done!');
+      else if (allHome) this.showToast(goal.little + ' of ' + goal.little + ' home · Giant home');
+      else this.showToast(n + ' of ' + goal.little + ' home · ' + giantBit);
       this.refreshHome();
     }
+    homeGoal() {
+      const seq = this.currentSequence();
+      if (this.slotId === 'starter' || !seq || !seq.length) {
+        return { little: 5, giant: true, song: false };
+      }
+      let little = 0;
+      let giant = false;
+      for (const step of seq) {
+        if (step.big) giant = true;
+        else little++;
+      }
+      if (!little && !giant) return { little: 5, giant: true, song: false };
+      return { little: little, giant: giant, song: true };
+    }
     refreshHome() {
+      const goal = this.homeGoal();
+      const label = document.getElementById('homeLabel');
+      if (label) label.textContent = goal.song ? 'Finish the song' : 'Get all five home';
+      const box = document.getElementById('homePips');
+      const key = String(goal.little) + (goal.giant ? 'g' : '') + (goal.song ? 's' : '');
+      if (box && box.dataset.goal !== key) {
+        box.replaceChildren();
+        for (let i = 0; i < goal.little; i++) box.appendChild(document.createElement('i'));
+        if (goal.giant) {
+          const star = document.createElement('b');
+          star.textContent = '★';
+          box.appendChild(star);
+        }
+        box.dataset.goal = key;
+        box.setAttribute('aria-label', goal.song ? 'Marbles in this song, and the giant' : 'Five little marbles and the giant marble');
+      }
       const bits = document.querySelectorAll('#homePips i, #homePips b');
       bits.forEach(function (el, i) {
-        if (i < 5) el.classList.toggle('on', this.home.little > i);
-        else el.classList.toggle('on', !!this.home.giant);
+        if (el.tagName === 'B') el.classList.toggle('on', !!this.home.giant);
+        else el.classList.toggle('on', this.home.little > i);
       }, this);
       const status = document.getElementById('homeStatus');
       if (status) {
-        const n = Math.min(5, this.home.little | 0);
+        const n = Math.min(goal.little, this.home.little | 0);
         const g = this.giantPhrase();
-        status.innerHTML = '<strong>' + n + ' of 5</strong> home · ' + g;
+        if (goal.little) status.innerHTML = '<strong>' + n + ' of ' + goal.little + '</strong> home · ' + g;
+        else status.textContent = g;
       }
     }
     refreshWhere() {
@@ -2381,8 +2465,9 @@
     refreshSlotActions() {
       const starter = document.getElementById('starterActions');
       const orch = document.getElementById('orchestraActions');
-      if (starter) starter.hidden = this.slotId !== 'starter';
-      if (orch) orch.hidden = this.slotId !== 'orchestra';
+      const watching = !!this.playback;
+      if (starter) starter.hidden = watching || this.slotId !== 'starter';
+      if (orch) orch.hidden = watching || this.slotId !== 'orchestra';
     }
     resetPuzzle() {
       if (this.slotId !== 'starter') return;
@@ -2396,6 +2481,7 @@
       this.giantLaunched = false;
       this.spotlight = null;
       this.missMark = null;
+      this.gapNoted = false;
       this.seq = null;
       this.holdSwitches = false;
       this.lastRun = null;
@@ -2478,6 +2564,8 @@
       this.holdSwitches = true;
       this.lastRun = { kind: 'sequence' };
       this.launchLog = [];
+      this.gapNoted = false;
+      if (this.said) delete this.said.fell;
       this.refreshHome();
       this.refreshWhere();
       const slot = this.store.slots[this.slotId];
@@ -2529,10 +2617,12 @@
       Object.keys(this.store.slots).forEach(function (id) {
         if (order.indexOf(id) < 0) order.push(id);
       });
+      const watching = !!this.playback;
+      const watchId = watching && this.rec ? this.rec.slotId : '';
       for (const id of order) {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'btn slot' + (id === this.slotId ? ' on' : '');
+        b.className = 'btn slot' + (!watching && id === this.slotId ? ' on' : '') + (watching && id === watchId ? ' watching' : '');
         b.dataset.slot = id;
         const icon = SLOT_ICON[id] || '';
         b.textContent = icon + (this.store.slots[id].name || 'Track');
@@ -2540,7 +2630,7 @@
       }
       const input = document.getElementById('trackName');
       const slot = this.store.slots[this.slotId];
-      if (document.activeElement !== input && slot) input.value = slot.name || '';
+      if (!watching && document.activeElement !== input && slot) input.value = slot.name || '';
       this.refreshUndo();
     }
     refreshRec() {
@@ -2552,10 +2642,17 @@
       btnStop.hidden = !this.isRecording;
       btnStart.hidden = this.isRecording;
       const has = !!(this.rec && this.rec.frames && this.rec.frames.length);
+      const name = (this.rec && this.rec.trackName) || 'saved run';
+      const mine = !!(has && this.rec.slotId === this.slotId);
       btnPlay.disabled = !has;
       recIndicator.className = this.isRecording ? 'dot live' : (has ? 'dot saved' : 'dot');
-      if (!this.isRecording && recStatus.textContent === 'Recording') recStatus.textContent = 'Run saved';
+      if (this.isRecording) recStatus.textContent = 'Recording';
+      else if (has) recStatus.textContent = mine ? 'Run saved' : ('Saved · ' + name);
+      else recStatus.textContent = 'Recorder ready';
       recStatus.classList.toggle('hot', this.isRecording);
+      const watchLabel = has && !mine ? ('Watch ' + name) : 'Watch saved run';
+      btnPlay.textContent = watchLabel;
+      btnPlay.setAttribute('aria-label', has ? ('Watch saved run of ' + name) : 'Watch saved run');
     }
     centerView() {
       const f = frameTrack(this.piecesForRender(), this.viewW, this.viewH, 'center');
@@ -2652,6 +2749,8 @@
       this.playback = { rec: this.rec, index: index, hold: 18, holdCam: holdCam, holding: true, done: false };
       this.applyPlaybackFrame(true);
       this.refreshReplayBar(true);
+      this.refreshTracks();
+      this.refreshSlotActions();
       this.showToast('Watching ' + (this.rec.trackName || 'a saved run') + '.');
     }
     stopPlayback(fromSwitch) {
@@ -2679,14 +2778,15 @@
           this.zoom = cam.zoom || 1;
         }
       }
+      this.refreshTracks();
+      this.refreshRec();
+      this.refreshSlotActions();
+      this.refreshHome();
       if (was) {
         this.marbles = [];
         this.marks = [];
         this.spotlight = null;
-        if (!fromSwitch) {
-          this.refreshWhere();
-          this.refreshHome();
-        }
+        this.refreshWhere();
       }
     }
     refreshReplayBar(on) {
@@ -2710,6 +2810,8 @@
       }
       const recCluster = document.getElementById('btnPlayRec');
       if (recCluster && recCluster.parentElement) recCluster.parentElement.style.display = on ? 'none' : '';
+      const home = document.getElementById('homeCluster');
+      if (home) home.hidden = !!on;
     }
     applyPlaybackFrame(useHoldCam) {
       const pb = this.playback;
@@ -3051,6 +3153,7 @@
         m.stopped = m.still > 40;
       }
       this.noteSwitches();
+      this.catchOpenGap();
       this.scoreBells();
       this.noteChimes();
       this.cullMarbles();
@@ -3138,8 +3241,8 @@
             y: gap.gy * GRID_SIZE + GRID_SIZE / 2,
             gap: true
           };
-          this.showToast('The marble fell through the gap.');
-          this.cue('gap');
+          this.showToast('Fell in the gap!');
+          this.cue('fell');
           this.refreshWhere();
         }
         return;
@@ -3782,6 +3885,9 @@
     }).join(' ');
     ok('the orchestra reaches the bell' + (game.home.little >= 1 ? '' : ' (' + orchWhere + ' steps ' + orchGuard + ')'), game.home.little >= 1);
     ok('the lower tube marble gets home too', game.home.little >= 2);
+    ok('the song meter matches the launch', document.getElementById('homeStatus').textContent.indexOf('2 of 2') >= 0 && document.getElementById('homeStatus').textContent.indexOf('of 5') < 0);
+    ok('the song meter is two dots and the giant', document.querySelectorAll('#homePips i').length === 2 && document.querySelector('#homePips b'));
+    ok('the song label is not five marbles', document.getElementById('homeLabel').textContent.indexOf('five') < 0);
     const oldOrch = orchestraPieces().map(function (p) {
       return p.gx === 4 && p.gy === 9 ? { gx: 4, gy: 9, type: 'flat', flip: 0, gate: 0, note: 0 } : p;
     });
@@ -3873,7 +3979,8 @@
     game.scoreBells();
     const agreeToast = document.getElementById('toastText').textContent;
     const agreeStatus = document.getElementById('homeStatus').textContent;
-    ok('first bell without a giant says Giant waiting', agreeToast.indexOf('Giant waiting') >= 0 && agreeStatus.indexOf('Giant waiting') >= 0);
+    ok('first bell toast is short', agreeToast === 'First bell!');
+    ok('first bell counter says Giant waiting', agreeStatus.indexOf('Giant waiting') >= 0 && agreeStatus.indexOf('of 5') >= 0);
     ok('first bell does not say Giant missed', agreeToast.indexOf('Giant missed') < 0 && agreeStatus.indexOf('Giant missed') < 0);
 
     game.launch({ n: 1, big: true, vx: 0 }, { stagger: false });
@@ -3933,6 +4040,78 @@
     ok('a chime offers Change note', (document.getElementById('btnFloatFlip').getAttribute('aria-label') || '') === 'Change note');
 
     ok('version is 1.4 beta', document.body.textContent.indexOf('Version 1.4 (beta)') >= 0);
+
+    const tell = document.querySelector('[data-tell]');
+    const tellBox = tell.getBoundingClientRect();
+    ok('tell a friend is at least 44px', tellBox.height >= 44 && tellBox.width >= 44);
+
+    game.slotId = 'starter';
+    game.resetPuzzle();
+    let jumped = false;
+    for (const vx of [0, 0.3, 0.6, 1.2]) {
+      game.marbles = [];
+      game.home = { little: 0, giant: false };
+      game.giantLaunched = false;
+      game.firstBellDone = false;
+      game.gapNoted = false;
+      game.missMark = null;
+      game.seq = null;
+      game.holdSwitches = false;
+      game.playback = null;
+      game.paused = false;
+      game.launch({ n: 1, big: false, vx: vx }, { stagger: false });
+      for (let i = 0; i < 800; i++) game.update();
+      if (game.home.little > 0) jumped = true;
+    }
+    ok('sideways speed cannot cross the open gap', !jumped && game.home.little === 0);
+    ok('the open gap is marked', !!(game.missMark && game.missMark.gap) && document.getElementById('toastText').textContent.toLowerCase().indexOf('gap') >= 0);
+
+    game.marbles = [];
+    game.home = { little: 0, giant: false };
+    game.firstBellDone = false;
+    game.placePiece(STARTER_HINT.gx, STARTER_HINT.gy, 'ramp');
+    game.marbles = [];
+    game.home = { little: 0, giant: false };
+    game.firstBellDone = false;
+    game.launch({ n: 1, big: false, vx: 0.8 }, { stagger: false });
+    let filledRang = false;
+    for (let i = 0; i < 900; i++) {
+      game.update();
+      if (game.home.little > 0) { filledRang = true; break; }
+    }
+    ok('a filled gap still reaches the bell', filledRang);
+    ok('starter still asks for five', document.querySelectorAll('#homePips i').length === 5 && document.getElementById('homeLabel').textContent.indexOf('five') >= 0);
+
+    game.store.slots.orchestra.name = 'My orchestra';
+    game.slotId = 'orchestra';
+    game.pieces = clonePieces(orchestraPieces());
+    game.marbles = [new Marble(70, 70, 12, false)];
+    game.playback = null;
+    game.buildCam = null;
+    game.buildName = null;
+    game.autoFit = false;
+    game.camX = 30;
+    game.camY = 40;
+    game.zoom = 1;
+    game.beginRecording();
+    game.update();
+    game.endRecording('Run saved');
+    game.openSlot('starter');
+    const backX = game.camX;
+    const backY = game.camY;
+    const backZ = game.zoom;
+    const watchOther = document.getElementById('btnPlayRec');
+    ok('another track\'s save is named', watchOther.textContent.indexOf('My orchestra') >= 0 && document.getElementById('recStatus').textContent.indexOf('My orchestra') >= 0);
+    game.beginPlayback();
+    ok('watching does not keep the starter tab selected', !document.querySelector('[data-slot="starter"]').classList.contains('on'));
+    ok('watching highlights the recorded track', document.querySelector('[data-slot="orchestra"]').classList.contains('watching'));
+    ok('watching shows the recorded name', document.getElementById('trackName').value === 'My orchestra');
+    ok('watching hides the live counter', document.getElementById('homeCluster').hidden === true);
+    document.getElementById('btnBackBuild').click();
+    ok('back to build stays on starter', game.slotId === 'starter' && document.querySelector('[data-slot="starter"]').classList.contains('on'));
+    ok('back to build restores the starter name', document.getElementById('trackName').value === 'Starter');
+    ok('back to build shows the counter', document.getElementById('homeCluster').hidden === false);
+    ok('back to build restores the camera', Math.abs(game.camX - backX) < 1 && Math.abs(game.camY - backY) < 1 && Math.abs(game.zoom - backZ) < 0.02);
 
     const pre = document.createElement('pre');
     pre.id = 'selftest-out';

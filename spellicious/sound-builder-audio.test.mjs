@@ -1,8 +1,11 @@
 /*  Sound Builder — audio adapter tests
  *
  *  Deterministic fakes only: a fake speech synthesiser, fake AudioContext and
- *  nodes, fake utterances and a fake timer scheduler.  These tests never use
- *  the network, `ps`, `sudo` or loopback sockets, so no test needs a skip.
+ *  nodes, fake utterances and a fake timer scheduler.  Fake contexts can also
+ *  start suspended and resume late, reject, or never settle, so the adapter's
+ *  bounded readiness handling is exercised without real audio hardware.  These
+ *  tests never use the network, `ps`, `sudo` or loopback sockets, so no test
+ *  needs a skip.
  *
  *  Run with:
  *      node --test spellicious/sound-builder-audio.test.mjs
@@ -139,8 +142,10 @@ function createSpeech(initialVoices) {
     };
 }
 
-function createFakeContext() {
+function createFakeContext(options = {}) {
+    const behavior = options || {};
     const allNodes = [];
+    const stateListeners = new Set();
     const created = {
         gains: [],
         oscillators: [],
@@ -185,7 +190,7 @@ function createFakeContext() {
     }
 
     const context = {
-        state: 'running',
+        state: behavior.state || 'running',
         sampleRate: 16000,
         currentTime: 0,
         destination: {
@@ -197,6 +202,22 @@ function createFakeContext() {
         closeCalls: 0,
         created,
         allNodes,
+
+        addEventListener(type, handler) {
+            if (type === 'statechange' && typeof handler === 'function') {
+                stateListeners.add(handler);
+            }
+        },
+        removeEventListener(type, handler) {
+            if (type === 'statechange') stateListeners.delete(handler);
+        },
+        listenerCount() {
+            return stateListeners.size;
+        },
+        setState(next) {
+            context.state = next;
+            for (const handler of Array.from(stateListeners)) handler();
+        },
 
         createGain() {
             const gain = baseNode('gain', { gain: makeParam(0) });
@@ -265,17 +286,35 @@ function createFakeContext() {
 
         resume() {
             this.resumeCalls += 1;
+            if (typeof behavior.resume === 'function') {
+                return behavior.resume.call(this, this);
+            }
             return Promise.resolve();
         },
 
         close() {
             this.closeCalls += 1;
             this.state = 'closed';
+            for (const handler of Array.from(stateListeners)) handler();
             return Promise.resolve();
         }
     };
 
     return context;
+}
+
+function deferred() {
+    let resolve;
+    let reject;
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
+
+function flush() {
+    return new Promise(resolve => setImmediate(resolve));
 }
 
 function makeAudio(options = {}) {
@@ -296,7 +335,10 @@ function makeAudio(options = {}) {
             : 50,
         speechTimeoutMs: Object.prototype.hasOwnProperty.call(options, 'speechTimeoutMs')
             ? options.speechTimeoutMs
-            : 100
+            : 100,
+        audioReadyTimeoutMs: Object.prototype.hasOwnProperty.call(options, 'audioReadyTimeoutMs')
+            ? options.audioReadyTimeoutMs
+            : 1000
     });
 
     return { audio, scheduler, context, speechKit, speech };
@@ -306,6 +348,9 @@ function assertClean({ context, scheduler, speechKit }) {
     assert.equal(scheduler.pending(), 0, 'no timers remain');
     for (const node of context.allNodes) {
         assert.equal(node.disconnected, true, `${node.kind} node was disconnected`);
+    }
+    if (typeof context.listenerCount === 'function') {
+        assert.equal(context.listenerCount(), 0, 'no AudioContext statechange listeners remain');
     }
     if (speechKit) {
         assert.equal(speechKit.listenerCount(), 0, 'no voiceschanged listeners remain');
@@ -602,6 +647,290 @@ test('planRender keeps the S1 contracts for compounds, blends and gaps', () => {
     ]);
     assert.deepEqual(partial.entries.map(entry => entry.id), ['p', 'a_short']);
     assert.ok(partial.entries[1].start >= partial.entries[0].start + partial.entries[0].duration);
+});
+
+// ── AudioContext readiness ───────────────────────────────────────────────
+//
+// These fakes start suspended, or resume late / reject / never settle.  They
+// prove the adapter never schedules audio on a context that cannot run and
+// never resolves "completed" for sound that never started.
+
+test('creating an adapter is inert: no context, no speech until play', () => {
+    let created = 0;
+    const kit = createSpeech([LOCAL_EN]);
+    createAudio({
+        speech: kit.speech,
+        createUtterance: text => new FakeUtterance(text),
+        createAudioContext() {
+            created += 1;
+            return createFakeContext();
+        },
+        scheduler: createScheduler()
+    });
+
+    assert.equal(created, 0, 'no AudioContext before play');
+    assert.equal(kit.calls.speak, 0, 'no speech before play');
+});
+
+test('a delayed AudioContext resume is awaited before synthesis', async () => {
+    const resume = deferred();
+    const context = createFakeContext({
+        state: 'suspended',
+        resume: () => resume.promise
+    });
+    const { audio, scheduler, speechKit } = makeAudio({
+        speech: null,
+        context,
+        audioReadyTimeoutMs: 250
+    });
+
+    const result = audio.play(planFor('pa'));
+
+    assert.equal(context.resumeCalls, 1, 'resume started inside play');
+    assert.equal(context.created.bufferSources.length, 0, 'nothing scheduled while suspended');
+    assert.equal(scheduler.pending(), 1, 'one bounded readiness timer');
+
+    scheduler.advance(100);
+    assert.equal(context.created.bufferSources.length, 0, 'still nothing before resume completes');
+
+    resume.resolve();
+    context.setState('running');
+    await flush();
+
+    assert.ok(context.created.bufferSources.length >= 1, 'synthesis starts once running');
+    assert.equal(scheduler.pending(), 1, 'readiness timer replaced by the completion timer');
+
+    scheduler.advance(1000);
+    assert.equal(await result, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('a rejected AudioContext resume resolves unavailable and schedules no sound', async () => {
+    const context = createFakeContext({
+        state: 'suspended',
+        resume() {
+            return Promise.reject(new Error('resume blocked'));
+        }
+    });
+    const { audio, scheduler, speechKit } = makeAudio({
+        speech: null,
+        context,
+        audioReadyTimeoutMs: 250
+    });
+
+    const result = audio.play(planFor('pa'));
+    assert.equal(context.resumeCalls, 1);
+
+    assert.equal(await result, RESULT.UNAVAILABLE);
+    assert.equal(context.created.bufferSources.length, 0, 'no noise scheduled');
+    assert.equal(context.created.oscillators.length, 0, 'no voice scheduled');
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('a stalled AudioContext resume is bounded and resolves unavailable', async () => {
+    const context = createFakeContext({
+        state: 'suspended',
+        resume: () => new Promise(() => {})
+    });
+    const { audio, scheduler, speechKit } = makeAudio({
+        speech: null,
+        context,
+        audioReadyTimeoutMs: 120
+    });
+
+    const result = audio.play(planFor('pa'));
+    assert.equal(scheduler.pending(), 1);
+
+    scheduler.advance(119);
+    assert.equal(context.created.bufferSources.length, 0, 'no sound before the deadline');
+
+    scheduler.advance(1);
+    assert.equal(await result, RESULT.UNAVAILABLE, 'bounded wait gives up');
+    assert.equal(context.created.bufferSources.length, 0);
+
+    // A very late state change must not resurrect the finished operation.
+    context.setState('running');
+    await flush();
+    assert.equal(context.created.bufferSources.length, 0, 'late readiness schedules nothing');
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('cancelling during AudioContext readiness ignores a late resume', async () => {
+    const resume = deferred();
+    const context = createFakeContext({
+        state: 'suspended',
+        resume: () => resume.promise
+    });
+    const { audio, scheduler, speechKit } = makeAudio({
+        speech: null,
+        context,
+        audioReadyTimeoutMs: 250
+    });
+
+    const result = audio.play(planFor('pa'));
+    assert.equal(scheduler.pending(), 1);
+
+    audio.stop();
+    assert.equal(await result, RESULT.CANCELLED);
+    assert.equal(scheduler.pending(), 0, 'readiness timer cleared');
+    assert.equal(context.listenerCount(), 0, 'readiness listener removed');
+
+    resume.resolve();
+    context.setState('running');
+    await flush();
+
+    assert.equal(context.created.bufferSources.length, 0, 'late resume schedules nothing');
+    assert.equal(scheduler.pending(), 0);
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('a speech-error fallback reuses the gesture-time context without creating or resuming again', async () => {
+    let createCalls = 0;
+    const context = createFakeContext({ state: 'suspended' });
+    context.resume = function resumeInGesture() {
+        this.resumeCalls += 1;
+        this.setState('running');
+        return Promise.resolve();
+    };
+    const kit = createSpeech([LOCAL_EN]);
+    const { audio, scheduler, speechKit } = makeAudio({
+        speechKit: kit,
+        context,
+        createAudioContext() {
+            createCalls += 1;
+            return context;
+        }
+    });
+
+    const result = audio.play(planFor('pan'));
+    assert.equal(createCalls, 1, 'one context created inside play');
+    assert.equal(context.resumeCalls, 1, 'one resume inside play');
+    assert.equal(context.state, 'running');
+
+    speechKit.spoken[0].onerror({ error: 'synthesis-failed' });
+
+    assert.equal(createCalls, 1, 'fallback creates no second context');
+    assert.equal(context.resumeCalls, 1, 'fallback resumes nothing');
+    assert.ok(context.created.bufferSources.length >= 1, 'fallback uses the prepared context');
+
+    scheduler.advance(1000);
+    assert.equal(await result, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('audio readiness never blocks an already spoken word', async () => {
+    const resume = deferred(); // deliberately never settles
+    const context = createFakeContext({
+        state: 'suspended',
+        resume: () => resume.promise
+    });
+    const kit = createSpeech([LOCAL_EN]);
+    const { audio, scheduler, speechKit } = makeAudio({
+        speechKit: kit,
+        context,
+        audioReadyTimeoutMs: 250
+    });
+
+    const result = audio.play(planFor('pan'));
+    assert.equal(speechKit.spoken.length, 1, 'the word is spoken immediately');
+
+    speechKit.spoken[0].onend();
+
+    assert.equal(await result, RESULT.COMPLETED, 'no audio wait for a spoken word');
+    assert.equal(scheduler.pending(), 0, 'no readiness timer was needed');
+    assert.equal(context.listenerCount(), 0);
+});
+
+test('a late resume rejection from a cancelled play cannot poison the next play', async () => {
+    const firstResume = deferred();
+    let resumeNumber = 0;
+    const context = createFakeContext({ state: 'suspended' });
+    context.resume = function resume() {
+        resumeNumber += 1;
+        this.resumeCalls += 1;
+        if (resumeNumber === 1) return firstResume.promise;
+        this.setState('running');
+        return Promise.resolve();
+    };
+    const { audio, scheduler, speechKit } = makeAudio({
+        speech: null,
+        context,
+        audioReadyTimeoutMs: 250
+    });
+
+    const first = audio.play(planFor('pa'));
+    audio.stop();
+    assert.equal(await first, RESULT.CANCELLED);
+
+    const second = audio.play(planFor('pa'));
+    assert.equal(context.resumeCalls, 2, 'the new play resumes again inside its gesture');
+    assert.ok(context.created.bufferSources.length >= 1, 'the new play synthesizes');
+
+    firstResume.reject(new Error('late rejection'));
+    await flush();
+
+    assert.ok(context.created.bufferSources.length >= 1, 'the stale rejection changes nothing');
+    scheduler.advance(1000);
+    assert.equal(await second, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('the celebration tone reuses the gesture-time context and never resumes late', async () => {
+    let createCalls = 0;
+    const context = createFakeContext({ state: 'suspended' });
+    context.resume = function resumeInGesture() {
+        this.resumeCalls += 1;
+        this.setState('running');
+        return Promise.resolve();
+    };
+    const kit = createSpeech([LOCAL_EN]);
+    const { audio, scheduler, speechKit } = makeAudio({
+        speechKit: kit,
+        context,
+        createAudioContext() {
+            createCalls += 1;
+            return context;
+        }
+    });
+
+    const result = audio.play(planFor('pan'), { celebrate: true });
+    assert.equal(context.resumeCalls, 1, 'resume happens inside play');
+    assert.equal(context.created.oscillators.length, 0, 'no tone before the word ends');
+
+    speechKit.spoken[0].onend();
+
+    assert.equal(context.created.oscillators.length, 1, 'one tone after the word');
+    assert.equal(context.resumeCalls, 1, 'the tone never resumes again');
+    assert.equal(createCalls, 1, 'the tone never creates a context');
+
+    scheduler.advance(1000);
+    assert.equal(await result, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit });
+});
+
+test('celebration completes silently when audio cannot run, without a late resume', async () => {
+    const context = createFakeContext({
+        state: 'suspended',
+        resume() {
+            return Promise.reject(new Error('resume blocked'));
+        }
+    });
+    const kit = createSpeech([LOCAL_EN]);
+    const { audio, scheduler, speechKit } = makeAudio({
+        speechKit: kit,
+        context,
+        audioReadyTimeoutMs: 100
+    });
+
+    const result = audio.play(planFor('pan'), { celebrate: true });
+    await flush(); // let the resume rejection settle before the word ends
+
+    speechKit.spoken[0].onend();
+
+    assert.equal(await result, RESULT.COMPLETED, 'the spoken word still succeeds');
+    assert.equal(context.created.oscillators.length, 0, 'no tone when audio cannot run');
+    assert.equal(context.resumeCalls, 1, 'no retry outside the gesture');
+    assertClean({ context, scheduler, speechKit });
 });
 
 // ── One operation at a time ──────────────────────────────────────────────

@@ -35,8 +35,15 @@
  *    sequence.  If neither speech nor synthesis can run, `play` resolves
  *    'unavailable' without throwing.
  *  - Web Audio is created or resumed only from the user-triggered `play`
- *    call, so a later synthesized fallback or celebration tone is not
- *    blocked by autoplay rules.
+ *    call.  Every asynchronous continuation (late voice list, speech error,
+ *    stall fallback, celebration tone) reuses that context; it never creates
+ *    or resumes one outside the original gesture.
+ *  - Before any synthesized sound is scheduled the adapter waits, in a
+ *    bounded and generation-guarded way, for the context to be `running`.
+ *    A delayed resume is allowed to finish; a rejected, stalled or closed
+ *    context makes phoneme playback resolve `unavailable` instead of
+ *    pretending to play.  A celebration tone after an already spoken word is
+ *    optional: if audio cannot run, the word still resolves `completed`.
  *
  *  Dependency injection (all optional; useful for deterministic tests):
  *
@@ -46,6 +53,7 @@
  *      scheduler            { setTimeout(fn, ms), clearTimeout(id) }
  *      voiceTimeoutMs       bounded wait for a late voice list (default 700)
  *      speechTimeoutMs      bounded wait for a stalled utterance (default 4000)
+ *      audioReadyTimeoutMs  bounded wait for a resumed context (default 1000)
  *      blends               S1 blend table, defaulting to sound-builder-logic.js
  *
  *  ── Synthesis approximation limits ──────────────────────────────────────
@@ -381,6 +389,9 @@
         const speechTimeoutMs = Number.isFinite(settings.speechTimeoutMs)
             ? Math.max(0, settings.speechTimeoutMs)
             : 4000;
+        const audioReadyTimeoutMs = Number.isFinite(settings.audioReadyTimeoutMs)
+            ? Math.max(0, settings.audioReadyTimeoutMs)
+            : 1000;
         const blends = settings.blends || (logic && logic.BLENDS) || null;
 
         let muted = false;
@@ -388,6 +399,13 @@
         let current = null;
         let generation = 0;
         let audioContext = null;
+        // AudioContext readiness is tracked separately from operation
+        // generations because it belongs to the shared context.  `resumeToken`
+        // makes sure a late resume rejection from an older play cannot poison a
+        // newer play.
+        let resumeToken = 0;
+        let resumeRejected = false;
+        const audioWaiters = new Set();
 
         function isCurrent(operation) {
             return !disposed &&
@@ -413,7 +431,18 @@
             operation.nodes.length = 0;
         }
 
+        function clearStallTimer(operation) {
+            if (operation.stallTimer === null || operation.stallTimer === undefined) return;
+            const id = operation.stallTimer;
+            operation.stallTimer = null;
+            try { scheduler.clearTimeout(id); } catch (error) { /* ignore */ }
+            operation.timers.delete(id);
+        }
+
         function clearUtterance(operation, cancelSpeech) {
+            // The stall guard belongs to the utterance and is useless (and,
+            // worse, a leftover timer) once the utterance has ended or failed.
+            clearStallTimer(operation);
             const utterance = operation.utterance;
             if (!utterance) return;
             operation.utterance = null;
@@ -435,11 +464,16 @@
                 try { operation.removeVoiceListener(); } catch (error) { /* ignore */ }
                 operation.removeVoiceListener = null;
             }
+            if (operation.readinessCleanup) {
+                try { operation.readinessCleanup(); } catch (error) { /* ignore */ }
+                operation.readinessCleanup = null;
+            }
 
             for (const id of operation.timers) {
                 try { scheduler.clearTimeout(id); } catch (error) { /* ignore */ }
             }
             operation.timers.clear();
+            operation.stallTimer = null;
 
             clearUtterance(operation, true);
             cleanupNodes(operation);
@@ -474,34 +508,178 @@
             finish(operation, status);
         }
 
-        function ensureContext() {
-            if (disposed) return null;
-            if (audioContext) {
-                if (audioContext.state === 'closed') return null;
-                resumeContext(audioContext);
-                return audioContext;
+        function notifyAudioState() {
+            for (const check of Array.from(audioWaiters)) {
+                try { check(); } catch (error) { /* a waiter must not break the others */ }
             }
-            let context = null;
-            try {
-                context = createAudioContext();
-            } catch (error) {
+        }
+
+        // Creates and/or resumes the shared context.  THIS IS ONLY CALLED FROM
+        // `play`, synchronously, while the caller's user gesture is still on
+        // the stack.  Late callbacks deliberately have no way to reach it.
+        function prepareContext(operation) {
+            if (disposed) return null;
+
+            let context = audioContext;
+            if (context && context.state === 'closed') {
+                audioContext = null;
+                context = null;
+            }
+
+            if (!context) {
+                try {
+                    context = createAudioContext();
+                } catch (error) {
+                    context = null;
+                }
+                if (!context || typeof context.createGain !== 'function') {
+                    audioContext = null;
+                    return null;
+                }
+                audioContext = context;
+                resumeRejected = false;
+            }
+
+            // A fresh token for every play makes any resume promise from an
+            // older play harmless, whatever state this play ends in.
+            resumeToken += 1;
+            const token = resumeToken;
+            operation.contextToken = token;
+            resumeRejected = false;
+
+            const state = context.state;
+            if (state === 'running' || typeof state === 'undefined') {
+                return context;
+            }
+            if (state === 'closed') {
+                audioContext = null;
                 return null;
             }
-            if (!context || typeof context.createGain !== 'function') return null;
-            audioContext = context;
-            resumeContext(audioContext);
+
+            // Suspended or interrupted: ask to resume exactly once for this
+            // play.  The promise (when one exists) is observed, not ignored.
+            if (typeof context.resume !== 'function') {
+                resumeRejected = true;
+                notifyAudioState();
+                return context;
+            }
+
+            try {
+                const pending = context.resume();
+                if (pending && typeof pending.then === 'function') {
+                    pending.then(function () {
+                        if (token !== resumeToken || disposed) return;
+                        notifyAudioState();
+                    }, function () {
+                        if (token !== resumeToken || disposed) return;
+                        resumeRejected = true;
+                        notifyAudioState();
+                    });
+                }
+            } catch (error) {
+                resumeRejected = true;
+                notifyAudioState();
+            }
+
             return context;
         }
 
-        function resumeContext(context) {
-            try {
-                if (context.state === 'suspended' && typeof context.resume === 'function') {
-                    const resumed = context.resume();
-                    if (resumed && typeof resumed.catch === 'function') {
-                        resumed.catch(function () { /* a later gesture can resume */ });
-                    }
+        // Bounded, generation-guarded wait for a context that is already
+        // created.  It never creates or resumes anything: it only listens for
+        // the state change the gesture-time `resume` (or the browser) is
+        // already producing.  When it cannot become running in time the
+        // operation is reported unavailable rather than silently "completed".
+        function waitForAudioReady(operation, onReady, onUnavailable) {
+            const context = audioContext;
+            if (!context || disposed) {
+                onUnavailable();
+                return;
+            }
+
+            const tokenAtWait = resumeToken;
+            let settled = false;
+            let cleaned = false;
+            let listening = false;
+            let timeoutId = null;
+
+            function cleanup() {
+                if (cleaned) return;
+                cleaned = true;
+                audioWaiters.delete(check);
+                if (listening) {
+                    listening = false;
+                    try { context.removeEventListener('statechange', check); } catch (error) { /* ignore */ }
                 }
-            } catch (error) { /* ignore */ }
+                if (timeoutId !== null) {
+                    try { scheduler.clearTimeout(timeoutId); } catch (error) { /* ignore */ }
+                    operation.timers.delete(timeoutId);
+                    timeoutId = null;
+                }
+                if (operation.readinessCleanup === cleanup) operation.readinessCleanup = null;
+            }
+
+            function settle(ready) {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                if (!isCurrent(operation)) return;
+                try {
+                    if (ready) onReady();
+                    else onUnavailable();
+                } catch (error) {
+                    finish(operation, RESULT.UNAVAILABLE);
+                }
+            }
+
+            function check() {
+                if (settled) return;
+                if (!isCurrent(operation)) {
+                    settled = true;
+                    cleanup();
+                    return;
+                }
+                const state = context.state;
+                if (state === 'running' || typeof state === 'undefined') {
+                    settle(true);
+                    return;
+                }
+                if (state === 'closed') {
+                    settle(false);
+                    return;
+                }
+                if (tokenAtWait === resumeToken && resumeRejected) {
+                    settle(false);
+                }
+            }
+
+            check();
+            if (settled) return;
+
+            try {
+                if (typeof context.addEventListener === 'function' &&
+                    typeof context.removeEventListener === 'function') {
+                    context.addEventListener('statechange', check);
+                    listening = true;
+                }
+            } catch (error) {
+                // No state events; the bounded timer below is still enough to
+                // avoid an indefinite wait.
+            }
+
+            audioWaiters.add(check);
+            operation.readinessCleanup = cleanup;
+            timeoutId = later(operation, function () {
+                timeoutId = null;
+                settle(false);
+            }, audioReadyTimeoutMs);
+
+            // A synchronous scheduler could have settled before `later`
+            // returned; never keep an id that cleanup could no longer reach.
+            if ((settled || cleaned) && timeoutId !== null) {
+                try { scheduler.clearTimeout(timeoutId); } catch (error) { /* ignore */ }
+                operation.timers.delete(timeoutId);
+                timeoutId = null;
+            }
         }
 
         // ── Web Audio renderer ───────────────────────────────────────────
@@ -854,10 +1032,12 @@
             }
 
             // A test double may end the utterance synchronously; never leave a
-            // stall timer behind for an operation that already finished.
-            if (!isCurrent(operation)) return;
-
-            later(operation, function () {
+            // stall timer behind for an operation that already finished or
+            // moved on to the celebration tone.
+            if (!isCurrent(operation) || operation.stage !== 'speech') return;
+            clearStallTimer(operation);
+            operation.stallTimer = later(operation, function () {
+                operation.stallTimer = null;
                 if (!isCurrent(operation) ||
                     operation.stage !== 'speech' ||
                     operation.utterance !== utterance) {
@@ -888,66 +1068,130 @@
             if (!isCurrent(operation)) return;
             operation.stage = 'synth';
 
-            const context = ensureContext();
-            if (!context) {
+            // The context was created/resumed inside `play`.  From here on we
+            // only use it; creating or resuming in a late callback would run
+            // outside the user gesture (and is exactly what Safari blocks).
+            const context = audioContext;
+            if (!context || disposed) {
                 finish(operation, RESULT.UNAVAILABLE);
                 return;
             }
 
-            let timeline = null;
-            try {
-                timeline = planRender(operation.plan.units, {
-                    connected: operation.plan.kind === 'word',
-                    blends: blends
-                });
-            } catch (error) {
+            function begin() {
+                if (!isCurrent(operation)) return;
+                if (!context || disposed) {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+                const state = context.state;
+                if (state === 'closed') {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+                if (!(state === 'running' || typeof state === 'undefined')) {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+
+                let timeline = null;
+                try {
+                    timeline = planRender(operation.plan.units, {
+                        connected: operation.plan.kind === 'word',
+                        blends: blends
+                    });
+                } catch (error) {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+
+                if (!timeline || timeline.entries.length === 0) {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+
+                const lead = Math.max(0, Number(context.currentTime) || 0) + 0.02;
+                try {
+                    schedulePlan(context, operation, timeline, lead);
+                } catch (error) {
+                    cleanupNodes(operation);
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+
+                const totalMs = Math.ceil((timeline.duration + 0.06) * 1000);
+                later(operation, function () {
+                    if (!isCurrent(operation) || operation.stage !== 'synth') return;
+                    if (operation.celebrate) playPositiveTone(operation);
+                    else finish(operation, RESULT.COMPLETED);
+                }, totalMs);
+            }
+
+            const state = context.state;
+            if (state === 'running' || typeof state === 'undefined') {
+                begin();
+                return;
+            }
+            if (state === 'closed' ||
+                (operation.contextToken === resumeToken && resumeRejected)) {
                 finish(operation, RESULT.UNAVAILABLE);
                 return;
             }
 
-            if (!timeline || timeline.entries.length === 0) {
+            waitForAudioReady(operation, begin, function () {
                 finish(operation, RESULT.UNAVAILABLE);
-                return;
-            }
-
-            const lead = Math.max(0, Number(context.currentTime) || 0) + 0.02;
-            try {
-                schedulePlan(context, operation, timeline, lead);
-            } catch (error) {
-                cleanupNodes(operation);
-                finish(operation, RESULT.UNAVAILABLE);
-                return;
-            }
-
-            const totalMs = Math.ceil((timeline.duration + 0.06) * 1000);
-            later(operation, function () {
-                if (!isCurrent(operation) || operation.stage !== 'synth') return;
-                if (operation.celebrate) playPositiveTone(operation);
-                else finish(operation, RESULT.COMPLETED);
-            }, totalMs);
+            });
         }
 
         function playPositiveTone(operation) {
             if (!isCurrent(operation)) return;
             operation.stage = 'tone';
 
-            const context = ensureContext();
-            if (!context) {
+            const context = audioContext;
+            if (!context || disposed || context.state === 'closed') {
                 finish(operation, RESULT.COMPLETED);
                 return;
             }
 
-            try {
-                renderTone(context, operation);
-            } catch (error) {
-                finish(operation, RESULT.COMPLETED);
-                return;
-            }
-
-            later(operation, function () {
+            function begin() {
                 if (!isCurrent(operation) || operation.stage !== 'tone') return;
+                if (!context || disposed) {
+                    finish(operation, RESULT.COMPLETED);
+                    return;
+                }
+                const state = context.state;
+                if (!(state === 'running' || typeof state === 'undefined')) {
+                    finish(operation, RESULT.COMPLETED);
+                    return;
+                }
+
+                try {
+                    renderTone(context, operation);
+                } catch (error) {
+                    finish(operation, RESULT.COMPLETED);
+                    return;
+                }
+
+                later(operation, function () {
+                    if (!isCurrent(operation) || operation.stage !== 'tone') return;
+                    finish(operation, RESULT.COMPLETED);
+                }, Math.ceil(POSITIVE_TONE.duration * 1000) + 40);
+            }
+
+            const state = context.state;
+            if (state === 'running' || typeof state === 'undefined') {
+                begin();
+                return;
+            }
+            if (operation.contextToken === resumeToken && resumeRejected) {
+                // The word is already spoken; a missing tone must not turn a
+                // successful word into a failure or throw into the UI.
                 finish(operation, RESULT.COMPLETED);
-            }, Math.ceil(POSITIVE_TONE.duration * 1000) + 40);
+                return;
+            }
+
+            waitForAudioReady(operation, begin, function () {
+                finish(operation, RESULT.COMPLETED);
+            });
         }
 
         // ── Plan validation ──────────────────────────────────────────────
@@ -999,11 +1243,14 @@
             return new Promise(function (resolve) {
                 const operation = {
                     token: generation + 1,
+                    contextToken: 0,
                     plan: normalized,
                     celebrate: celebrate && normalized.kind === 'word',
                     stage: 'init',
                     utterance: null,
+                    stallTimer: null,
                     removeVoiceListener: null,
+                    readinessCleanup: null,
                     timers: new Set(),
                     nodes: [],
                     done: false,
@@ -1013,10 +1260,11 @@
                 current = operation;
 
                 try {
-                    // Called from the user-triggered play stack so a later
-                    // synthesized fallback or celebration tone is already
-                    // unlocked on browsers that require a gesture.
-                    ensureContext();
+                    // Creation and resume happen here, synchronously, while
+                    // the caller's user gesture is on the stack.  Everything
+                    // asynchronous (voice lists, speech errors, stalls, the
+                    // celebration tone) only reuses the context prepared here.
+                    prepareContext(operation);
                     if (operation.plan.kind === 'word') startWord(operation);
                     else startSynth(operation);
                 } catch (error) {
@@ -1038,6 +1286,11 @@
             if (disposed) return;
             disposed = true;
             invalidate(RESULT.CANCELLED);
+
+            // Any in-flight resume callback is now stale.
+            resumeToken += 1;
+            resumeRejected = false;
+            audioWaiters.clear();
 
             if (audioContext) {
                 const context = audioContext;

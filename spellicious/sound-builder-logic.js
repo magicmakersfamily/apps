@@ -23,8 +23,10 @@
  *       /dʒ/ ("soft g"), while ga/go/gu use /g/.  Other spellings (garage,
  *       giant for older speakers) are not modelled.
  *    Q  taught as /kw/.  English q is almost always followed by u, so the
- *       curated "qu" chunk is /kw/ rather than q + a short u.  A bare q uses
- *       the same /kw/ fallback.
+ *       curated "qu" chunk is /kw/ rather than q + a short u.  U belongs to
+ *       the digraph, so "qu" still applies when another vowel follows (quiz,
+ *       quit) and its u is never sequenced as a short vowel of its own.  A
+ *       bare q uses the same /kw/ fallback.
  *    X  taught as /ks/ as in box.  Initial /z/ (xylophone) and /ɡz/ (exam)
  *       are not modelled.
  *    Y  taught as the consonant /j/ as in yes.  Y as a vowel (/aɪ/ in my,
@@ -370,7 +372,9 @@
         if (!state || typeof state !== 'object' || !Array.isArray(state.slots)) return null;
         if (!isSupportedCount(state.slots.length)) return null;
 
-        const slots = state.slots.map(slot => (slot == null ? null : normalizeLetter(slot)));
+        // `Array.from`, unlike `map`, visits sparse holes and turns them into
+        // undefined, so a hole is read as an empty slot rather than skipped.
+        const slots = Array.from(state.slots, slot => (slot == null ? null : normalizeLetter(slot)));
         const hasSelection = Number.isInteger(state.selectedIndex) &&
             state.selectedIndex >= 0 &&
             state.selectedIndex < slots.length;
@@ -521,7 +525,9 @@
     function recognizeWord(slots, dictionary = DEFAULT_WORDS) {
         if (!Array.isArray(slots) || slots.length === 0) return null;
 
-        const letters = slots.map(slot => (slot == null ? null : normalizeLetter(slot)));
+        // Sparse arrays have holes; `Array.from` reads each hole as an empty
+        // slot.  Skipping holes would let ['C', , 'A', 'T'] masquerade as CAT.
+        const letters = Array.from(slots, slot => (slot == null ? null : normalizeLetter(slot)));
         if (letters.some(letter => letter === null)) return null;
 
         const word = letters.join('').toLowerCase();
@@ -554,7 +560,15 @@
         return false;
     }
 
-    function blendContextMatches(slots, index) {
+    // A true digraph: its second letter belongs to the sound, so the usual
+    // "do not run into another vowel" guard does not apply.
+    const DIGRAPH_BLENDS = new Set(['qu']);
+
+    function blendContextMatches(slots, index, id) {
+        // qu is always the /kw/ chunk when q and u are contiguous (the caller
+        // has checked that).  The following vowel is sequenced separately.
+        if (DIGRAPH_BLENDS.has(id)) return true;
+
         const follower = slots[index + 2];
         // End of the entered prefix (trailing empty slots are not a gap in
         // this path): the lab's short-vowel convention applies.
@@ -578,7 +592,7 @@
             if (next != null) {
                 const id = (letter + next).toLowerCase();
                 if (Object.prototype.hasOwnProperty.call(BLENDS, id) &&
-                    blendContextMatches(slots, index)) {
+                    blendContextMatches(slots, index, id)) {
                     units.push({ type: 'blend', id });
                     index += 2;
                     continue;

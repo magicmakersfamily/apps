@@ -360,6 +360,75 @@ test('a blend is not used when it runs into another vowel', () => {
     });
 });
 
+test('QU keeps u inside the /kw/ digraph even before another vowel', () => {
+    // qu is a true digraph: the u belongs to /kw/, so it is never sequenced
+    // as a short vowel of its own when another vowel follows.
+    const qu = enterAll(createState(2), 'qu');
+    assert.deepEqual(selectAudio(qu), {
+        kind: 'sequence',
+        units: [{ type: 'blend', id: 'qu' }]
+    });
+
+    const qui = enterAll(createState(), 'qui');
+    assert.deepEqual(selectAudio(qui), {
+        kind: 'sequence',
+        units: [
+            { type: 'blend', id: 'qu' },
+            { type: 'phoneme', id: 'i_short' }
+        ]
+    });
+
+    const qua = enterAll(createState(), 'qua');
+    assert.deepEqual(selectAudio(qua), {
+        kind: 'sequence',
+        units: [
+            { type: 'blend', id: 'qu' },
+            { type: 'phoneme', id: 'a_short' }
+        ]
+    });
+
+    const quit = enterAll(createState(4), 'quit');
+    assert.deepEqual(selectAudio(quit), {
+        kind: 'sequence',
+        units: [
+            { type: 'blend', id: 'qu' },
+            { type: 'phoneme', id: 'i_short' },
+            { type: 'phoneme', id: 't' }
+        ]
+    });
+
+    // A bare Q still falls back to /kw/.
+    const q = enterLetter(createState(), 'q');
+    assert.deepEqual(selectAudio(q), {
+        kind: 'sequence',
+        units: [{ type: 'phoneme', id: 'kw' }]
+    });
+});
+
+test('sparse slot arrays treat holes as empty slots, never as letters', () => {
+    // A hole must not be skipped across: C _ A T is not CAT.
+    assert.equal(recognizeWord(['C', , 'A', 'T']), null);
+    assert.equal(recognizeWord(['P', , 'N']), null);
+
+    const plan = selectAudio({ slots: ['P', , 'N'], selectedIndex: 0 });
+    assert.deepEqual(plan, {
+        kind: 'sequence',
+        units: [
+            { type: 'phoneme', id: 'p' },
+            { type: 'phoneme', id: 'n' }
+        ]
+    });
+
+    const catWithHole = selectAudio({ slots: ['C', , 'A', 'T'], selectedIndex: 0 });
+    assert.equal(catWithHole.kind, 'sequence');
+    assert.deepEqual(phonemeIds(catWithHole.units), ['c_hard', 'a_short', 't']);
+
+    // A hole is an empty slot when editing too, not a filled one.
+    const filled = enterLetter({ slots: ['P', , 'N'], selectedIndex: 1 }, 'a');
+    assert.deepEqual(filled, { slots: ['P', 'A', 'N'], selectedIndex: null });
+    assert.equal(recognizeWord(filled.slots), 'pan');
+});
+
 test('gaps never collapse into a word or a blend', () => {
     let state = selectSlot(createState(), 2);
     state = enterLetter(state, 'n');

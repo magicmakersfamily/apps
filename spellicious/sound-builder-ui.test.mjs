@@ -12,8 +12,11 @@
  *
  *  These tests prove the *wiring*: state transitions, which actions make
  *  sound, when confetti is requested, mute/replay suppression, cleanup and
- *  repeated entry.  They cannot prove that synthesized phonemes are accurate
- *  or pleasant; that needs a human listening check on a real device.
+ *  repeated entry.  They also prove the two page-lifecycle guards the page
+ *  uses: stale recognition sessions are isolated, and opening/closing the
+ *  activity inside the startup-speech delay never speaks after Back.  They
+ *  cannot prove that synthesized phonemes are accurate or pleasant; that needs
+ *  a human listening check on a real device.
  */
 
 import test from 'node:test';
@@ -21,7 +24,7 @@ import assert from 'node:assert/strict';
 import logic from './sound-builder-logic.js';
 import SoundBuilderUI from './sound-builder-ui.js';
 
-const { createController } = SoundBuilderUI;
+const { createController, createRecognitionSessionGate, createStartupSpeechGuard } = SoundBuilderUI;
 
 // ── Fakes ────────────────────────────────────────────────────────────────
 
@@ -632,4 +635,166 @@ test('rapid edits stop the previous operation before every new play', () => {
     assert.equal(h.audio.calls.stop, 3, 'each actual change invalidates the previous one');
     const words = h.audio.calls.play.map(entry => entry.plan.kind);
     assert.deepEqual(words, ['sequence', 'sequence', 'word']);
+});
+
+// ── Recognition session isolation (index.html integration) ──────────────
+//
+//  The page reuses one SpeechRecognition object.  Each start() gets a token;
+//  the onstart/onresult/onerror/onend handlers carry the token of the session
+//  that installed them.  These tests prove the exact sequence from the review:
+//  enter Sound Builder, leave, restart the mic, then receive a late callback
+//  from the old session.
+
+test('a stale recognition callback cannot clear or act on a newer session', () => {
+    const gate = createRecognitionSessionGate();
+    const first = gate.startSession();
+    assert.equal(gate.isCurrent(first), true);
+
+    // Opening the activity invalidates the live session.
+    gate.setActivityActive(true);
+    gate.invalidate();
+    assert.equal(gate.isCurrent(first), false, 'old result/end/error is rejected');
+
+    // Back, then the player taps the mic again.
+    gate.setActivityActive(false);
+    const second = gate.startSession();
+    assert.notEqual(second, first, 'tokens are never reused');
+    assert.equal(gate.isCurrent(second), true);
+
+    // A late onend/onerror from session one must not invalidate session two.
+    function simulateOnEnd(token) {
+        if (gate.isCurrent(token)) gate.invalidate();
+    }
+    simulateOnEnd(first);
+    assert.equal(gate.currentToken(), second, 'the new token survives the old onend');
+    assert.equal(gate.isCurrent(second), true, 'the new session is still listening');
+
+    // The new session's own onend still clears it.
+    simulateOnEnd(second);
+    assert.equal(gate.currentToken(), 0);
+    assert.equal(gate.isCurrent(second), false);
+});
+
+test('a failed start restores the session that was running and its callbacks', () => {
+    const gate = createRecognitionSessionGate();
+    const running = gate.startSession();
+
+    // toggleListening() issues a new session token before start(); if the new
+    // instance's start() throws, the page restores the previous session.
+    const attempted = gate.startSession();
+    assert.equal(gate.isCurrent(running), false);
+    gate.restoreSession(running);
+
+    assert.equal(gate.isCurrent(attempted), false);
+    assert.equal(gate.isCurrent(running), true);
+    assert.equal(gate.currentToken(), running);
+});
+
+test('activity ownership rejects sessions across repeated entry and exit', () => {
+    const gate = createRecognitionSessionGate();
+    for (let i = 0; i < 3; i += 1) {
+        const token = gate.startSession();
+        gate.setActivityActive(true);
+        gate.invalidate();
+        assert.equal(gate.isCurrent(token), false);
+        gate.setActivityActive(false);
+    }
+
+    const last = gate.startSession();
+    assert.equal(gate.isCurrent(last), true);
+});
+
+// ── Startup speech guard (index.html integration) ───────────────────────
+
+function createFakeClock() {
+    let nextId = 1;
+    const timers = new Map();
+    return {
+        setTimeout(fn, delay) {
+            const id = nextId++;
+            timers.set(id, { fn, delay });
+            return id;
+        },
+        clearTimeout(id) {
+            timers.delete(id);
+        },
+        runAll() {
+            const pending = [...timers.values()];
+            timers.clear();
+            for (const timer of pending) timer.fn();
+        },
+        count() {
+            return timers.size;
+        }
+    };
+}
+
+function createStartupHarness() {
+    const clock = createFakeClock();
+    const state = { activityActive: false, runId: 0, speeches: 0 };
+    const guard = createStartupSpeechGuard({
+        setTimeout: clock.setTimeout,
+        clearTimeout: clock.clearTimeout,
+        isActivityActive: () => state.activityActive,
+        getSpeechRunId: () => state.runId,
+        speak: () => { state.speeches += 1; }
+    });
+    return { clock, state, guard };
+}
+
+test('startup speech fires once after the delay when nothing opens', () => {
+    const h = createStartupHarness();
+    h.guard.schedule(300);
+    assert.equal(h.clock.count(), 1);
+
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 1);
+
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 1, 'a fired timer never repeats');
+});
+
+test('opening and closing Sound Builder within the startup delay never speaks after Back', () => {
+    const h = createStartupHarness();
+    h.guard.schedule(300);
+
+    // Open: the page cancels the timer and stopSpeaking() bumps the run.
+    h.state.activityActive = true;
+    h.guard.cancel();
+    h.state.runId += 1;
+    // Back, all before the 300 ms delay would have elapsed.
+    h.state.activityActive = false;
+
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 0, 'no stale startup speech after Back');
+});
+
+test('the speech generation drops a stale callback even without cancel', () => {
+    const h = createStartupHarness();
+    h.guard.schedule(300);
+
+    h.state.runId += 1; // entry bumped the generation; the timer still fires
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 0);
+
+    // A later, fresh schedule captures the new generation and may speak.
+    h.guard.schedule(300);
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 1);
+});
+
+test('the startup guard stays silent while the activity owns the page, and cancel removes the timer', () => {
+    const h = createStartupHarness();
+    h.guard.schedule(300);
+    h.state.activityActive = true;
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 0);
+
+    h.state.activityActive = false;
+    h.guard.schedule(300);
+    assert.equal(h.clock.count(), 1);
+    h.guard.cancel();
+    assert.equal(h.clock.count(), 0);
+    h.clock.runAll();
+    assert.equal(h.state.speeches, 0);
 });

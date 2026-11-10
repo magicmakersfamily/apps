@@ -556,8 +556,7 @@
         let selectedVoice = null;
         let availableVoices = [];
         let recognition = null;
-        let recognitionSessionId = 0;
-        let recognitionSessionToken = 0;
+        let recognitionCtor = null;
         let speechRunId = 0;
         let wordHighlightTimers = [];
         let letterHighlightTimers = [];
@@ -565,6 +564,42 @@
         let lastAnnouncedMicState = null;
         let soundBuilderSession = null;
         let soundBuilderActive = false;
+
+        // Microphone callbacks carry the token of the session that produced
+        // them.  A late callback from an earlier session therefore cannot
+        // clear or act on a newer one (for example after Back restarts the
+        // mic).  The gate is supplied by sound-builder-ui.js; the small
+        // fallback keeps the microphone working even if that optional script
+        // fails to load (in which case Sound Builder can never open).
+        let bindRecognitionHandlers = null;
+        const recognitionGate = (window.SoundBuilderUI &&
+            typeof window.SoundBuilderUI.createRecognitionSessionGate === 'function')
+            ? window.SoundBuilderUI.createRecognitionSessionGate()
+            : (function () {
+                let currentToken = 0;
+                let issuedToken = 0;
+                let activityActive = false;
+                return {
+                    startSession() { issuedToken += 1; currentToken = issuedToken; return currentToken; },
+                    restoreSession(token) { currentToken = token; },
+                    invalidate() { currentToken = 0; },
+                    setActivityActive(value) { activityActive = !!value; },
+                    currentToken() { return currentToken; },
+                    isCurrent(token) { return token !== 0 && token === currentToken && !activityActive; }
+                };
+            }());
+
+        // The first word is spoken after a short delay.  Entry into Sound
+        // Builder cancels this timer and bumps the speech run, so opening and
+        // closing the activity within that delay cannot speak after Back.
+        const startupSpeechGuard = (window.SoundBuilderUI &&
+            typeof window.SoundBuilderUI.createStartupSpeechGuard === 'function')
+            ? window.SoundBuilderUI.createStartupSpeechGuard({
+                isActivityActive: () => soundBuilderActive,
+                getSpeechRunId: () => speechRunId,
+                speak: () => speakCurrentText()
+            })
+            : null;
 
         const voiceStyles = {
             default: { rate: 1.0, pitch: 1.05, volume: 1.0 },
@@ -663,10 +698,15 @@
             initTranslateDirection();
             renderSampleWords();
             updateDisplay();
-            setTimeout(() => {
-                // A player may open Sound Builder during the startup delay.
-                if (!soundBuilderActive) speakCurrentText();
-            }, 300);
+            if (startupSpeechGuard) {
+                startupSpeechGuard.schedule(300);
+            } else {
+                // Without Sound Builder support the activity cannot open, so
+                // the simple guard is equivalent.
+                setTimeout(() => {
+                    if (!soundBuilderActive) speakCurrentText();
+                }, 300);
+            }
         });
 
         function populateTranslateDirectionOptions() {
@@ -1249,60 +1289,26 @@
             speakCurrentText();
         }
 
-        /* A recognition session is current only between its successful
-           start() and its onstart/onresult/onerror/onend.  Opening Sound
-           Builder invalidates the token, so a late result from the
-           microphone can neither edit the page nor start a translation that
-           would speak after Back. */
-        function isRecognitionCallbackCurrent() {
-            return recognitionSessionToken !== 0 && !soundBuilderActive;
+        /* A recognition session is current only while it still owns the
+           latest token.  The handlers carry the token of the start() that
+           installed them, so a late onresult from an earlier session can
+           neither edit the page nor start a translation, and a late
+           onend/onerror cannot clear a newer session's token and listening
+           state.  Opening Sound Builder invalidates the token as well. */
+        function isRecognitionCallbackCurrent(sessionToken) {
+            return recognitionGate.isCurrent(sessionToken);
         }
 
         function invalidateRecognitionCallbacks() {
-            recognitionSessionToken = 0;
+            recognitionGate.invalidate();
         }
 
         function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
+            recognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!recognitionCtor) {
                 updateStatus("Speech recognition not supported in this browser. Try Chrome/Safari.");
                 return;
             }
-
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = currentLang;
-
-            recognition.onstart = () => {
-                if (!isRecognitionCallbackCurrent()) return;
-                isListening = true;
-                updateMicUI();
-                const translateConfig = translateDirections[translateDirection];
-                const listeningLangName = getLangName(translateConfig ? translateConfig.sourceLang : currentLang);
-                updateStatus(`Listening in ${listeningLangName}... Speak now!`);
-            };
-
-            recognition.onresult = (event) => {
-                if (!isRecognitionCallbackCurrent()) return;
-                const transcript = event.results[0][0].transcript.trim();
-                if (transcript) {
-                    const safetyResult = checkTranscriptSafety(transcript);
-                    if (safetyResult.blocked) {
-                        updateStatus(formatCaseText("oops"));
-                        return;
-                    }
-                    const normalized = normalizeSpelledTranscript(normalizeRecognizedTranscript(transcript));
-                    const translateConfig = translateDirections[translateDirection];
-                    if (translateConfig) {
-                        handleTranslateRecognition(normalized, translateConfig);
-                        return;
-                    }
-                    currentWord = normalized;
-                    updateDisplay();
-                    speakCurrentText();
-                }
-            };
 
             function checkTranscriptSafety(transcript) {
                 try {
@@ -1323,7 +1329,7 @@
                 }
             }
 
-        function normalizeSpelledTranscript(transcript) {
+            function normalizeSpelledTranscript(transcript) {
                 const parts = transcript.toLowerCase().split(/[^a-z]+/).filter(Boolean);
                 if (parts.length >= 2 && parts.every(part => part.length === 1)) {
                     return parts.join('');
@@ -1339,22 +1345,60 @@
                     .trim();
             }
 
-            recognition.onerror = (event) => {
-                if (!isRecognitionCallbackCurrent()) return;
-                console.error("Speech recognition error:", event.error);
-                const message = getRecognitionErrorMessage(event.error);
-                updateStatus(message);
-                const announcer = document.getElementById('micStatusAnnouncer');
-                if (announcer) announcer.textContent = message;
-                recognitionSessionToken = 0;
-                stopListeningUI();
-            };
+            // Each session gets its own SpeechRecognition object as well as
+            // its own token, so a queued event from an earlier session is
+            // delivered to that session's handlers and can never be mistaken
+            // for an event from the current one.
+            function bindRecognitionHandlersFor(instance, sessionToken) {
+                instance.onstart = () => {
+                    if (!isRecognitionCallbackCurrent(sessionToken)) return;
+                    isListening = true;
+                    updateMicUI();
+                    const translateConfig = translateDirections[translateDirection];
+                    const listeningLangName = getLangName(translateConfig ? translateConfig.sourceLang : currentLang);
+                    updateStatus(`Listening in ${listeningLangName}... Speak now!`);
+                };
 
-            recognition.onend = () => {
-                if (!isRecognitionCallbackCurrent()) return;
-                recognitionSessionToken = 0;
-                stopListeningUI();
-            };
+                instance.onresult = (event) => {
+                    if (!isRecognitionCallbackCurrent(sessionToken)) return;
+                    const transcript = event.results[0][0].transcript.trim();
+                    if (transcript) {
+                        const safetyResult = checkTranscriptSafety(transcript);
+                        if (safetyResult.blocked) {
+                            updateStatus(formatCaseText("oops"));
+                            return;
+                        }
+                        const normalized = normalizeSpelledTranscript(normalizeRecognizedTranscript(transcript));
+                        const translateConfig = translateDirections[translateDirection];
+                        if (translateConfig) {
+                            handleTranslateRecognition(normalized, translateConfig);
+                            return;
+                        }
+                        currentWord = normalized;
+                        updateDisplay();
+                        speakCurrentText();
+                    }
+                };
+
+                instance.onerror = (event) => {
+                    if (!isRecognitionCallbackCurrent(sessionToken)) return;
+                    console.error("Speech recognition error:", event.error);
+                    const message = getRecognitionErrorMessage(event.error);
+                    updateStatus(message);
+                    const announcer = document.getElementById('micStatusAnnouncer');
+                    if (announcer) announcer.textContent = message;
+                    recognitionGate.invalidate();
+                    stopListeningUI();
+                };
+
+                instance.onend = () => {
+                    if (!isRecognitionCallbackCurrent(sessionToken)) return;
+                    recognitionGate.invalidate();
+                    stopListeningUI();
+                };
+            }
+
+            bindRecognitionHandlers = bindRecognitionHandlersFor;
         }
 
         function getRecognitionErrorMessage(errorCode) {
@@ -1381,25 +1425,52 @@
 
         function toggleListening() {
             if (soundBuilderActive) return;
-            if (!recognition) {
+            if (!recognitionCtor) {
                 alert("Speech recognition is not supported on this browser.");
                 return;
             }
-            if (isListening) {
+            if (isListening && recognition) {
                 recognition.stop();
             } else {
                 const translateConfig = translateDirections[translateDirection];
-                recognition.lang = translateConfig ? translateConfig.sourceLang : currentLang;
-                // Only callbacks from this start are allowed to touch the page
-                // or speech state.  If start() throws because a session is
-                // already running (an impatient double tap), restore that
-                // session's token instead of killing it.
-                const previousToken = recognitionSessionToken;
-                recognitionSessionToken = ++recognitionSessionId;
+                // Give every start its own SpeechRecognition object and
+                // token.  A late event from an earlier session is delivered
+                // to that session's handlers, never to this one, so it cannot
+                // clear the new token, stop the new listening state, or edit
+                // the page.
+                const previousInstance = recognition;
+                const previousToken = recognitionGate.currentToken();
+                const sessionToken = recognitionGate.startSession();
+
+                const instance = new recognitionCtor();
+                instance.continuous = false;
+                instance.interimResults = false;
+                instance.lang = translateConfig ? translateConfig.sourceLang : currentLang;
+                if (bindRecognitionHandlers) {
+                    bindRecognitionHandlers(instance, sessionToken);
+                }
+                recognition = instance;
+
+                // Retire the previous session before opening the microphone.
+                if (previousInstance) {
+                    try {
+                        if (typeof previousInstance.abort === 'function') previousInstance.abort();
+                        else previousInstance.stop();
+                    } catch (error) {
+                        /* already stopped */
+                    }
+                }
+
                 try {
-                    recognition.start();
+                    instance.start();
                 } catch (e) {
-                    recognitionSessionToken = previousToken;
+                    // If this start fails, hand the page back to the session
+                    // that was running so its handlers keep their token.
+                    recognitionGate.restoreSession(previousToken);
+                    recognition = previousInstance || null;
+                    if (previousInstance && bindRecognitionHandlers) {
+                        bindRecognitionHandlers(previousInstance, previousToken);
+                    }
                     console.error(e);
                 }
             }
@@ -1889,8 +1960,12 @@
         function prepareSpelliciousForSoundBuilder() {
             // Invalidate microphone callbacks first: a late onresult must not
             // edit the page or begin a translation while the activity is open
-            // (or speak after Back).
+            // (or speak after Back).  Old callbacks carry their own session
+            // token, so they are ignored even after a new session starts.
             invalidateRecognitionCallbacks();
+            // Cancel the delayed startup speech; its generation guard would
+            // also drop it, but removing the timer is cleaner.
+            if (startupSpeechGuard) startupSpeechGuard.cancel();
             stopSpeaking();
             if (recognition) {
                 try {
@@ -1912,6 +1987,7 @@
 
             const session = ensureSoundBuilderSession();
             soundBuilderActive = true;
+            recognitionGate.setActivityActive(true);
             prepareSpelliciousForSoundBuilder();
             session.controller.enter();
         }
@@ -1919,6 +1995,7 @@
         function closeSoundBuilder() {
             if (!soundBuilderActive) return;
             soundBuilderActive = false;
+            recognitionGate.setActivityActive(false);
             if (soundBuilderSession) soundBuilderSession.controller.leave();
 
             // Restore the existing interface without starting speech or the mic.

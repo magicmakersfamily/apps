@@ -36,6 +36,19 @@
  *  `spellicious/index.html`.  It expects the panel markup in that page and
  *  exposes the three methods above plus `attach(controller)` and `dispose()`.
  *
+ *  Two page-lifecycle helpers live here so plain-Node tests can exercise the
+ *  exact sequences `index.html` relies on:
+ *
+ *      createRecognitionSessionGate()
+ *          startSession() / restoreSession(token) / invalidate() /
+ *          setActivityActive(value) / currentToken() / isCurrent(token)
+ *
+ *      createStartupSpeechGuard({ isActivityActive, getSpeechRunId, speak,
+ *                                 setTimeout?, clearTimeout? })
+ *          schedule(delay) / cancel()
+ *
+ *  They are pure and use injected timers/callbacks; they never touch the DOM.
+ *
  *  Lifecycle rules implemented here:
  *  - Selection is silent.  Only an actual letter change touches audio.
  *  - On an actual letter change: stop the old operation, stop confetti,
@@ -70,6 +83,90 @@
         if (!plan || plan.kind === 'silent') return false;
         if (plan.kind === 'word') return true;
         return plan.kind === 'sequence' && Array.isArray(plan.units) && plan.units.length > 0;
+    }
+
+    // ── Page lifecycle guards ────────────────────────────────────────────
+    //
+    //  The Spellicious page uses these two helpers.  They are pure and take
+    //  injectable timers/callbacks so plain-Node tests can prove the exact
+    //  sequences that are hard to reproduce by hand in a browser.
+
+    // Recognition sessions share one SpeechRecognition object, so a late
+    // onstart/onresult/onerror/onend from an old session can otherwise land
+    // on top of a new one.  Every start gets a fresh, never-reused token;
+    // callbacks carry the token of the session that produced them and are
+    // ignored unless that session is still the current one.
+    function createRecognitionSessionGate() {
+        let currentToken = 0;
+        let issuedToken = 0;
+        let activityActive = false;
+
+        return {
+            startSession() {
+                issuedToken += 1;
+                currentToken = issuedToken;
+                return currentToken;
+            },
+            // A failed `recognition.start()` (an impatient double tap) leaves
+            // the already-running session in charge.
+            restoreSession(token) {
+                currentToken = token;
+            },
+            invalidate() {
+                currentToken = 0;
+            },
+            setActivityActive(value) {
+                activityActive = !!value;
+            },
+            currentToken() {
+                return currentToken;
+            },
+            isCurrent(token) {
+                return token !== 0 && token === currentToken && !activityActive;
+            }
+        };
+    }
+
+    // The page speaks its first word after a short delay.  A guard captures
+    // the speech generation when it schedules, so opening and closing the
+    // activity inside that delay (which bumps the generation) cannot let the
+    // stale callback speak after Back.  `cancel()` also removes the timer when
+    // the activity opens.
+    function createStartupSpeechGuard(options) {
+        const settings = options || {};
+        const setTimer = typeof settings.setTimeout === 'function'
+            ? settings.setTimeout : setTimeout;
+        const clearTimer = typeof settings.clearTimeout === 'function'
+            ? settings.clearTimeout : clearTimeout;
+        const isActivityActive = typeof settings.isActivityActive === 'function'
+            ? settings.isActivityActive : function () { return false; };
+        const getSpeechRunId = typeof settings.getSpeechRunId === 'function'
+            ? settings.getSpeechRunId : function () { return 0; };
+        const speak = typeof settings.speak === 'function'
+            ? settings.speak : function () {};
+
+        let timer = null;
+        let scheduledRunId = null;
+
+        function cancel() {
+            if (timer !== null) clearTimer(timer);
+            timer = null;
+            scheduledRunId = null;
+        }
+
+        function schedule(delay) {
+            cancel();
+            scheduledRunId = getSpeechRunId();
+            timer = setTimer(function () {
+                const runId = scheduledRunId;
+                timer = null;
+                scheduledRunId = null;
+                if (isActivityActive() || getSpeechRunId() !== runId) return;
+                speak();
+            }, delay);
+        }
+
+        return { schedule, cancel };
     }
 
     // ── Controller ───────────────────────────────────────────────────────
@@ -566,6 +663,8 @@
 
     return {
         createController,
-        createDomView
+        createDomView,
+        createRecognitionSessionGate,
+        createStartupSpeechGuard
     };
 }));

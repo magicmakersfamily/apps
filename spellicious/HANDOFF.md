@@ -10,13 +10,15 @@ it does not add a score, a level, a timer, a new round, a network call or any pe
 
 - `sound-builder-logic.js` (S1, unchanged) — pure slot/word/audio-plan rules.
 - `sound-builder-audio.js` (S2, unchanged) — audio adapter and plans.
-- `sound-builder-ui.js` (new S3) — `createController({ logic, audio, view })` and the
-  browser `createDomView()` used by `index.html`.
+- `sound-builder-ui.js` (new S3) — `createController({ logic, audio, view })`, the
+  browser `createDomView()` used by `index.html`, and two small page-lifecycle guards
+  (`createRecognitionSessionGate`, `createStartupSpeechGuard`) that live here so plain
+  Node can test the sequences `index.html` relies on.
 - `sound-builder-ui.test.mjs` (new) — plain-Node controller/view tests with fake audio,
   a fake view and a fake document.
 - `index.html` — panel markup, styles, entry button, three script tags and small lifecycle
-  guards only (speech, microphone/recognition token, Space key). Existing app behaviour was
-  not restructured.
+  guards only (speech timer, per-session recognition isolation, Space key). Existing app
+  behaviour was not restructured.
 
 ### Controller contract
 
@@ -63,17 +65,29 @@ Semantics preserved from S1:
   (cancels `speechSynthesis`, bumps `speechRunId`, clears highlights and queued callbacks),
   `recognition.abort()` (falling back to `recognition.stop()`) and `stopListeningUI()`. No
   microphone capture is started.
-- Every recognition session now carries a token set by `toggleListening()` right before
-  `recognition.start()` (a failed double-tap start restores the running session's token).
-  `onstart` / `onresult` / `onerror` / `onend` return immediately when their token is stale
-  or Sound Builder is open. A late microphone result therefore cannot edit the page, start
-  a translation, or queue speech after Back. The async translation continuation also checks
-  both `speechRunId` and `soundBuilderActive` before rendering or speaking.
+- **Recognition sessions are isolated (review fix).** Every `toggleListening()` start
+  creates a **new `SpeechRecognition` instance** and a fresh, never-reused token from
+  `recognitionGate`. `bindRecognitionHandlersFor(instance, sessionToken)` installs that
+  instance's `onstart` / `onresult` / `onerror` / `onend` closures, so a queued event from
+  an earlier session is delivered to the earlier instance's handlers and cannot even be
+  mistaken for an event from the current one. A callback is still accepted only when its
+  own token is current and Sound Builder is closed. Entering the activity calls
+  `invalidate()`, which sets the current token to 0; after Back a new session gets a new
+  instance and token, so a late `onend`/`onerror` from the old session can no longer clear
+  the new session's token or `isListening` state, and an old `onresult` cannot edit the
+  page, start a translation or queue speech. The previous instance is aborted before the
+  new one starts; if the new `start()` throws, the page restores the previous instance's
+  token and handlers. The async translation continuation also checks both `speechRunId`
+  and `soundBuilderActive` before rendering or speaking.
 - `queueUtterance()` refuses to speak while the activity is open, so a late startup
   speech, translation result or old callback cannot talk over Sound Builder.
 - The global Space handler and `toggleListening()` are guarded while the activity is open.
-- The startup `speakCurrentText()` call is skipped if the activity opened during its
-  300 ms delay.
+- **Startup speech is generation-guarded (review fix).** The 300 ms first-word timer is
+  scheduled through `createStartupSpeechGuard`, which captures `speechRunId` at schedule
+  time. Entry cancels the timer *and* `stopSpeaking()` bumps the generation, so opening and
+  closing Sound Builder within the delay cannot let the stale callback speak after Back.
+  If the optional Sound Builder script failed to load the activity cannot open, and the
+  page falls back to the old `soundBuilderActive` check.
 - Back/Escape calls `controller.leave()`; the page restores the normal interface, focuses
   the Sound Builder entry button, and never restarts the microphone or speech.
 - S1 and S2 contracts were not changed.
@@ -112,18 +126,31 @@ and `pagehide` on the window, and assert that pagehide is never registered on th
 Two explicit cases were added after review: **Clear keeps the chosen 2/3/4 count** and
 **mute during the positive tone cancels it without a replay or a new celebration**.
 
-The inline recognition-token guards in `index.html` live in the page's non-module script and
-are not importable by these plain-Node tests. They are covered by code review and must be
-exercised in the browser/iPad checklist below (late result after Back, background/foreground
-while listening, and repeated entry/exit).
+After the second review, seven lifecycle regressions were added for the two integration
+gaps:
+
+- **Recognition session isolation:** a stale callback from session one cannot act on, or
+  clear the token of, session two after enter → Back → restart the mic; a failed start
+  restores the session that was running; repeated entry/exit never revives an old session.
+  Production uses the same `createRecognitionSessionGate` from `sound-builder-ui.js` (plus
+  a fresh `SpeechRecognition` object per session, which the page owns and this plain-Node
+  test cannot instantiate).
+- **Startup speech generation:** opening and closing Sound Builder inside the 300 ms delay
+  never speaks after Back (timer cancel and generation mismatch are tested separately), a
+  stale generation is dropped even if cancel was missed, and the activity-open check and
+  explicit cancel are covered. Production uses the same `createStartupSpeechGuard`.
+
+The inline recognition and timer wiring in `index.html` is still not importable by these
+plain-Node tests; the guards they call are tested directly, and the browser/iPad checklist
+below must confirm the wiring on a real device.
 
 **Run status in this development environment: NOT RUN — pending.** The environment's
-permission layer refused every `node --test` / `node -e` / `node --check` invocation
-("This command requires approval"); only `node --version` was permitted. The prior review
-reported all 112 Node tests passing on the earlier revision; the current tree adds the
-Clear/count, positive-tone mute, window-target pagehide and injected-window cases, and no
-pass/fail claim is made for it. A human or an environment that permits test execution must
-run the command above before this work is treated as verified.
+permission layer refused every `node --test` / `node -e` / `node --check` invocation and
+headless Chrome ("This command requires approval"); only `node --version` was permitted.
+The prior review reported all 115 Node tests passing on the previous revision, which did
+not include these seven lifecycle cases. The current tree is therefore **unverified by
+execution**: a human or an environment that permits test execution must run the command
+above (and the existing regression command) before this slice is treated as verified.
 
 ### Manual iPad Safari checklist (all items PENDING)
 
@@ -148,11 +175,23 @@ Record each result honestly; do not tick an item without running it.
 - [ ] Leave (Back/Escape) during playback: audio and confetti stop; no mic restart.
 - [ ] With Translate mode on, say a word, then open Sound Builder before the translation
       settles and press Back: a late result must not change the page or speak after Back.
+- [ ] Enter Sound Builder, press Back, then tap the mic again. A late `onend`/`onerror`
+      from the first session must not stop the new listening session, and a late
+      `onresult` from the first session must not edit the page or speak.
+- [ ] Open Sound Builder and press Back again within the first 300 ms: the delayed startup
+      word must not speak after Back (check with speech audible and watch the console).
+- [ ] Tap the mic twice quickly: the first session is retired, exactly one session ends up
+      listening, and no stale `onend`/`onerror` stops it.
+- [ ] Opening Sound Builder while the mic is listening aborts capture; Back never restarts
+      the microphone by itself.
 - [ ] Background the tab during playback: audio and confetti stop; foreground does not autoplay.
 - [ ] Repeated entry/exit: no duplicate handlers, duplicate sounds or duplicate confetti.
 - [ ] Speech synthesis unavailable: activity remains usable and silent where required.
 - [ ] Web Audio unavailable: no crash; recognized words still show and celebrate visually.
 - [ ] Regression: child-safe speech filter still blocks unsafe transcripts.
+- [ ] Regression: normal microphone start/stop, Stop button and status messages still work.
+- [ ] Regression: Translate mode recognition and readback still work after leaving and
+      re-entering Sound Builder.
 - [ ] Regression: language and Spell-mode switching preserve the displayed word.
 - [ ] Regression: spell mode letter highlighting and click-to-speak.
 - [ ] Regression: case cycling (lower/UPPER/random) and responsive word sizing.

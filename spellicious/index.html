@@ -556,6 +556,8 @@
         let selectedVoice = null;
         let availableVoices = [];
         let recognition = null;
+        let recognitionSessionId = 0;
+        let recognitionSessionToken = 0;
         let speechRunId = 0;
         let wordHighlightTimers = [];
         let letterHighlightTimers = [];
@@ -779,6 +781,7 @@
            speechRunId, and every checkpoint below bails out as soon as it sees
            a stale runId. */
         async function handleTranslateRecognition(sourceText, config) {
+            if (soundBuilderActive) return;
             const runId = beginSpeechRun();
 
             try { recognition.stop(); } catch (error) { /* already stopped */ }
@@ -797,7 +800,7 @@
                 console.error('Translation failed:', error);
             }
 
-            if (runId !== speechRunId) return; // Stop was pressed meanwhile
+            if (runId !== speechRunId || soundBuilderActive) return; // Stop or Sound Builder took over
 
             if (!translated) {
                 lastTranslation = null;
@@ -1246,6 +1249,19 @@
             speakCurrentText();
         }
 
+        /* A recognition session is current only between its successful
+           start() and its onstart/onresult/onerror/onend.  Opening Sound
+           Builder invalidates the token, so a late result from the
+           microphone can neither edit the page nor start a translation that
+           would speak after Back. */
+        function isRecognitionCallbackCurrent() {
+            return recognitionSessionToken !== 0 && !soundBuilderActive;
+        }
+
+        function invalidateRecognitionCallbacks() {
+            recognitionSessionToken = 0;
+        }
+
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -1259,6 +1275,7 @@
             recognition.lang = currentLang;
 
             recognition.onstart = () => {
+                if (!isRecognitionCallbackCurrent()) return;
                 isListening = true;
                 updateMicUI();
                 const translateConfig = translateDirections[translateDirection];
@@ -1267,6 +1284,7 @@
             };
 
             recognition.onresult = (event) => {
+                if (!isRecognitionCallbackCurrent()) return;
                 const transcript = event.results[0][0].transcript.trim();
                 if (transcript) {
                     const safetyResult = checkTranscriptSafety(transcript);
@@ -1322,15 +1340,19 @@
             }
 
             recognition.onerror = (event) => {
+                if (!isRecognitionCallbackCurrent()) return;
                 console.error("Speech recognition error:", event.error);
                 const message = getRecognitionErrorMessage(event.error);
                 updateStatus(message);
                 const announcer = document.getElementById('micStatusAnnouncer');
                 if (announcer) announcer.textContent = message;
+                recognitionSessionToken = 0;
                 stopListeningUI();
             };
 
             recognition.onend = () => {
+                if (!isRecognitionCallbackCurrent()) return;
+                recognitionSessionToken = 0;
                 stopListeningUI();
             };
         }
@@ -1366,11 +1388,18 @@
             if (isListening) {
                 recognition.stop();
             } else {
+                const translateConfig = translateDirections[translateDirection];
+                recognition.lang = translateConfig ? translateConfig.sourceLang : currentLang;
+                // Only callbacks from this start are allowed to touch the page
+                // or speech state.  If start() throws because a session is
+                // already running (an impatient double tap), restore that
+                // session's token instead of killing it.
+                const previousToken = recognitionSessionToken;
+                recognitionSessionToken = ++recognitionSessionId;
                 try {
-                    const translateConfig = translateDirections[translateDirection];
-                    recognition.lang = translateConfig ? translateConfig.sourceLang : currentLang;
                     recognition.start();
                 } catch (e) {
+                    recognitionSessionToken = previousToken;
                     console.error(e);
                 }
             }
@@ -1858,6 +1887,10 @@
         }
 
         function prepareSpelliciousForSoundBuilder() {
+            // Invalidate microphone callbacks first: a late onresult must not
+            // edit the page or begin a translation while the activity is open
+            // (or speak after Back).
+            invalidateRecognitionCallbacks();
             stopSpeaking();
             if (recognition) {
                 try {

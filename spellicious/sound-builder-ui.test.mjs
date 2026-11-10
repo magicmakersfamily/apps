@@ -3,8 +3,9 @@
  *  Plain Node, no browser, no network, no sockets, no `ps`/`sudo`.  S1 is the
  *  real deterministic logic module; S2 is a fake audio adapter and the view is
  *  a fake that records every render, celebration and cancellation.  A fake
- *  document records the controller's visibility/pagehide listeners, so
- *  background and disposal behaviour is exercised without a DOM.
+ *  document/window pair records the controller's `visibilitychange` (document)
+ *  and `pagehide` (window) listeners, so background and disposal behaviour is
+ *  exercised without a DOM.
  *
  *  Run with:
  *      node --test spellicious/sound-builder-ui.test.mjs
@@ -27,21 +28,34 @@ const { createController } = SoundBuilderUI;
 function createFakeAudio() {
     const calls = { play: [], stop: 0, setMuted: [] };
     let muted = false;
+    // Models S2's celebration tone, which starts after a recognized word has
+    // finished speaking.  `setMuted(true)` invalidates whatever stage is
+    // running, exactly as the real adapter does.
+    let positiveTone = false;
 
     return {
         calls,
         isMuted() {
             return muted;
         },
+        isPositiveToneActive() {
+            return positiveTone;
+        },
+        startPositiveTone() {
+            positiveTone = true;
+        },
         play(plan, options) {
+            positiveTone = false;
             calls.play.push({ plan, options: options || {} });
             return Promise.resolve(muted ? 'muted' : 'completed');
         },
         stop() {
             calls.stop += 1;
+            positiveTone = false;
         },
         setMuted(value) {
             muted = !!value;
+            if (muted) positiveTone = false;
             calls.setMuted.push(muted);
         },
         dispose() {
@@ -67,11 +81,9 @@ function createFakeView() {
     };
 }
 
-function createFakeDocument() {
+function createEventTarget(extra) {
     const listeners = new Map();
-
-    return {
-        hidden: false,
+    return Object.assign({
         addEventListener(type, handler) {
             if (!listeners.has(type)) listeners.set(type, new Set());
             listeners.get(type).add(handler);
@@ -88,15 +100,30 @@ function createFakeDocument() {
         count(type) {
             return listeners.has(type) ? listeners.get(type).size : 0;
         }
-    };
+    }, extra || {});
+}
+
+function createFakeWindow() {
+    return createEventTarget();
+}
+
+function createFakeDocument(win) {
+    // A real document carries a reference to its window; the controller must
+    // use it for `pagehide`, which never fires on the document itself.
+    return createEventTarget({ hidden: false, defaultView: win || null });
 }
 
 function createHarness(options = {}) {
+    const win = options.window || (options.document ? options.document.defaultView : null);
     const view = createFakeView();
     const audio = createFakeAudio();
     const doc = options.document || null;
-    const controller = createController({ logic, audio, view, document: doc });
-    return { controller, view, audio, doc };
+    const controllerOptions = { logic, audio, view, document: doc };
+    // Only inject `window` when the test wants to override the realistic
+    // `document.defaultView` path.
+    if (options.window) controllerOptions.window = options.window;
+    const controller = createController(controllerOptions);
+    return { controller, view, audio, doc, win };
 }
 
 function resetCounts(harness) {
@@ -308,6 +335,33 @@ test('clear stops audio and confetti, resets through S1, and permits a fresh cel
     assert.equal(h.view.calls.celebrate, 1);
 });
 
+test('clear preserves the chosen slot count and selects slot 1', () => {
+    const h = createHarness();
+    h.controller.enter();
+    h.controller.setSlotCount(4);
+    type(h.controller, 'HAND');
+    resetCounts(h);
+
+    h.controller.clear();
+
+    const render = lastRender(h);
+    assert.deepEqual(render.state.slots, [null, null, null, null],
+        'clear empties every slot but does not shrink the board');
+    assert.equal(render.state.selectedIndex, 0);
+    assert.equal(render.settings.slotCount, 4, 'the 4-slot choice survives Clear');
+    assert.equal(render.settings.canReplay, false);
+    assert.equal(h.audio.calls.play.length, 0);
+    assert.equal(h.view.calls.celebrate, 0);
+    assert.ok(h.audio.calls.stop >= 1);
+    assert.ok(h.view.calls.stopCelebration >= 1);
+
+    h.controller.setSlotCount(2);
+    type(h.controller, 'AT');
+    h.controller.clear();
+    assert.deepEqual(lastRender(h).state.slots, [null, null]);
+    assert.equal(lastRender(h).settings.slotCount, 2);
+});
+
 test('count changes stop everything, reset the board, and reject unsupported counts', () => {
     const h = createHarness();
     h.controller.enter();
@@ -401,10 +455,38 @@ test('mute suppresses all audio, still allows visual discovery, and survives re-
     assert.equal(h.view.calls.celebrate, 1);
 });
 
+test('mute during the positive tone cancels it and unmute never replays it', () => {
+    const h = createHarness();
+    h.controller.enter();
+    type(h.controller, 'PAN');
+    assert.equal(h.view.calls.celebrate, 1);
+    assert.equal(lastPlay(h).options.celebrate, true);
+
+    // S2 reaches its short celebration tone after the word has finished
+    // speaking.  Muting at that exact stage must silence it.
+    h.audio.startPositiveTone();
+    assert.equal(h.audio.isPositiveToneActive(), true);
+
+    resetCounts(h);
+    h.controller.setMuted(true);
+
+    assert.deepEqual(h.audio.calls.setMuted, [true]);
+    assert.equal(h.audio.isPositiveToneActive(), false, 'the positive tone is cancelled');
+    assert.equal(h.audio.calls.play.length, 0);
+    assert.equal(h.view.calls.celebrate, 0, 'muting is not a new celebration');
+
+    resetCounts(h);
+    h.controller.setMuted(false);
+    assert.equal(h.audio.isPositiveToneActive(), false, 'unmute never replays the tone');
+    assert.equal(h.audio.calls.play.length, 0);
+    assert.equal(h.view.calls.celebrate, 0);
+});
+
 // ── Visibility, pagehide, exit and disposal ─────────────────────────────
 
 test('hiding the document cancels audio and confetti and never autoplays on return', () => {
-    const doc = createFakeDocument();
+    const win = createFakeWindow();
+    const doc = createFakeDocument(win);
     const h = createHarness({ document: doc });
     h.controller.enter();
     type(h.controller, 'CAT');
@@ -425,18 +507,37 @@ test('hiding the document cancels audio and confetti and never autoplays on retu
     assert.equal(h.view.calls.render.length, 0, 'returning is silent');
 });
 
-test('pagehide cancels activity audio and confetti', () => {
-    const doc = createFakeDocument();
+test('pagehide is registered on the window, not the document, and cancels activity', () => {
+    const win = createFakeWindow();
+    const doc = createFakeDocument(win);
     const h = createHarness({ document: doc });
     h.controller.enter();
     type(h.controller, 'SUN');
     resetCounts(h);
 
-    doc.dispatch('pagehide');
+    assert.equal(win.count('pagehide'), 1, 'pagehide is a Window event');
+    assert.equal(doc.count('pagehide'), 0, 'the document never receives pagehide');
+
+    win.dispatch('pagehide');
 
     assert.ok(h.audio.calls.stop >= 1);
     assert.ok(h.view.calls.stopCelebration >= 1);
     assert.equal(h.audio.calls.play.length, 0);
+});
+
+test('an injected window is used when the document exposes no defaultView', () => {
+    const win = createFakeWindow();
+    const doc = createFakeDocument();
+    const h = createHarness({ document: doc, window: win });
+    h.controller.enter();
+    type(h.controller, 'FUN');
+    resetCounts(h);
+
+    assert.equal(win.count('pagehide'), 1);
+    win.dispatch('pagehide');
+
+    assert.ok(h.audio.calls.stop >= 1);
+    assert.ok(h.view.calls.stopCelebration >= 1);
 });
 
 test('leave closes the view, stops output and does not restart anything', () => {
@@ -460,12 +561,14 @@ test('leave closes the view, stops output and does not restart anything', () => 
 });
 
 test('dispose removes listeners and makes further activity inert', () => {
-    const doc = createFakeDocument();
+    const win = createFakeWindow();
+    const doc = createFakeDocument(win);
     const h = createHarness({ document: doc });
     h.controller.enter();
     type(h.controller, 'CAT');
     assert.equal(doc.count('visibilitychange'), 1);
-    assert.equal(doc.count('pagehide'), 1);
+    assert.equal(win.count('pagehide'), 1);
+    assert.equal(doc.count('pagehide'), 0);
     resetCounts(h);
 
     h.controller.dispose();
@@ -474,11 +577,11 @@ test('dispose removes listeners and makes further activity inert', () => {
     assert.ok(h.audio.calls.stop >= 1);
     assert.ok(h.view.calls.stopCelebration >= 1);
     assert.equal(doc.count('visibilitychange'), 0);
-    assert.equal(doc.count('pagehide'), 0);
+    assert.equal(win.count('pagehide'), 0);
 
     doc.hidden = true;
     doc.dispatch('visibilitychange');
-    doc.dispatch('pagehide');
+    win.dispatch('pagehide');
     assert.equal(h.audio.calls.stop, 1, 'removed listeners must not fire');
 
     h.controller.enter();
@@ -490,7 +593,8 @@ test('dispose removes listeners and makes further activity inert', () => {
 });
 
 test('repeated entry and exit neither duplicates listeners nor effects', () => {
-    const doc = createFakeDocument();
+    const win = createFakeWindow();
+    const doc = createFakeDocument(win);
     const h = createHarness({ document: doc });
 
     h.controller.enter();
@@ -500,7 +604,8 @@ test('repeated entry and exit neither duplicates listeners nor effects', () => {
 
     h.controller.enter();
     assert.equal(doc.count('visibilitychange'), 1);
-    assert.equal(doc.count('pagehide'), 1);
+    assert.equal(win.count('pagehide'), 1);
+    assert.equal(doc.count('pagehide'), 0);
     type(h.controller, 'CAT');
 
     assert.equal(h.view.calls.celebrate, 2, 'one celebration per entry, not two');

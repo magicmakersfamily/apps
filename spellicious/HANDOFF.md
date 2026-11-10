@@ -15,7 +15,8 @@ it does not add a score, a level, a timer, a new round, a network call or any pe
 - `sound-builder-ui.test.mjs` (new) — plain-Node controller/view tests with fake audio,
   a fake view and a fake document.
 - `index.html` — panel markup, styles, entry button, three script tags and small lifecycle
-  guards only. Existing app behaviour was not restructured.
+  guards only (speech, microphone/recognition token, Space key). Existing app behaviour was
+  not restructured.
 
 ### Controller contract
 
@@ -40,23 +41,35 @@ Semantics preserved from S1:
   calls `view.celebrate()` once and plays with `{ celebrate: true }`. PAN → CAN therefore
   celebrates CAN without clearing.
 - Replay, identical/rejected input, selection, re-render and mute changes never celebrate.
-- Clear and 2/3/4-slot changes stop audio and confetti and reset through S1.
+- Clear and 2/3/4-slot changes stop audio and confetti and reset through S1. Clear empties
+  the board while keeping the chosen count; a count change starts an empty board at the new
+  count.
 - Replay never celebrates; an empty plan is silent.
 - Mute is enforced in the controller (no `audio.play`) and in S2 (`setMuted` invalidates a
-  running operation, including the positive tone); visual discovery still occurs.
-- `visibilitychange` (when hidden) and `pagehide` cancel activity audio and confetti.
-  Becoming visible again has no branch, so nothing autoplays.
+  running operation, including a pending or already-playing positive tone); visual discovery
+  still occurs.
+- `visibilitychange` (when hidden) cancels activity audio and confetti. `pagehide` is
+  registered on the **window** (via `document.defaultView`, or an injected `window`), because
+  it is a Window event, and is removed from that same target on disposal. Becoming visible
+  again has no branch, so nothing autoplays.
 - The mute choice is retained across leave/enter for the page session. State is not
   persisted anywhere; every entry starts at three empty slots.
-- `dispose()` removes the controller's document listeners. The view also has its own
-  `dispose()` for its element listeners.
+- `dispose()` removes the controller's document **and window** listeners. The view also has
+  its own `dispose()` for its element listeners.
 
 ### Entry/exit integration (actual app hooks inspected, not invented)
 
-- Entry runs `stopSpeaking()` (cancels `speechSynthesis`, bumps `speechRunId`, clears
-  highlights and queued callbacks), then `recognition.abort()` (falling back to
-  `recognition.stop()`) and `stopListeningUI()`. No microphone capture is started.
-- `queueUtterance()` now refuses to speak while the activity is open, so a late startup
+- Entry first invalidates any microphone-callback token, then runs `stopSpeaking()`
+  (cancels `speechSynthesis`, bumps `speechRunId`, clears highlights and queued callbacks),
+  `recognition.abort()` (falling back to `recognition.stop()`) and `stopListeningUI()`. No
+  microphone capture is started.
+- Every recognition session now carries a token set by `toggleListening()` right before
+  `recognition.start()` (a failed double-tap start restores the running session's token).
+  `onstart` / `onresult` / `onerror` / `onend` return immediately when their token is stale
+  or Sound Builder is open. A late microphone result therefore cannot edit the page, start
+  a translation, or queue speech after Back. The async translation continuation also checks
+  both `speechRunId` and `soundBuilderActive` before rendering or speaking.
+- `queueUtterance()` refuses to speak while the activity is open, so a late startup
   speech, translation result or old callback cannot talk over Sound Builder.
 - The global Space handler and `toggleListening()` are guarded while the activity is open.
 - The startup `speakCurrentText()` call is skipped if the activity opened during its
@@ -93,13 +106,24 @@ node --test spellicious/sound-builder-logic.test.mjs \
 `content-safety.test.mjs` is unchanged. The new S3 tests cover fill, selection,
 replacement, clear, resize, mute, replay, recognized transitions, unknown combinations,
 no-op suppression, visibility cleanup, pagehide, exit, disposal and repeated entry, with
-CAT, BAT, HAT, PAN, CAN, SUN and FUN (including PAN → CAN).
+CAT, BAT, HAT, PAN, CAN, SUN and FUN (including PAN → CAN). The event tests use a fake
+document that carries a `defaultView` window, dispatch `visibilitychange` on the document
+and `pagehide` on the window, and assert that pagehide is never registered on the document.
+Two explicit cases were added after review: **Clear keeps the chosen 2/3/4 count** and
+**mute during the positive tone cancels it without a replay or a new celebration**.
+
+The inline recognition-token guards in `index.html` live in the page's non-module script and
+are not importable by these plain-Node tests. They are covered by code review and must be
+exercised in the browser/iPad checklist below (late result after Back, background/foreground
+while listening, and repeated entry/exit).
 
 **Run status in this development environment: NOT RUN — pending.** The environment's
-permission layer refused every `node --test` / `node <script>` invocation ("This command
-requires approval"); only `node --version` was permitted. No pass/fail claim is made. A
-human or an environment that permits test execution must run the command above before
-this work is treated as verified.
+permission layer refused every `node --test` / `node -e` / `node --check` invocation
+("This command requires approval"); only `node --version` was permitted. The prior review
+reported all 112 Node tests passing on the earlier revision; the current tree adds the
+Clear/count, positive-tone mute, window-target pagehide and injected-window cases, and no
+pass/fail claim is made for it. A human or an environment that permits test execution must
+run the command above before this work is treated as verified.
 
 ### Manual iPad Safari checklist (all items PENDING)
 
@@ -114,10 +138,16 @@ Record each result honestly; do not tick an item without running it.
 - [ ] PAN → CAN by selecting slot 1 and tapping C: CAN celebrates exactly once.
 - [ ] Rapid edits: no overlapping, stale or truncated audio; no orphan confetti.
 - [ ] Mute during word playback silences it immediately.
-- [ ] Mute before a recognized word suppresses the positive tone (visual confetti may show).
-- [ ] Clear during/after playback stops everything; board returns to three empty slots.
+- [ ] Mute before a recognized word suppresses playback (visual confetti may show).
+- [ ] Mute during the positive tone (just after a recognized word finishes) silences the
+      tone; unmute never replays it and never re-celebrates.
+- [ ] Clear during/after playback stops everything; the board empties but **keeps the
+      selected 2/3/4 count** (e.g. Clear with 4 slots chosen leaves four empty slots,
+      selected count still 4), with slot 1 selected.
 - [ ] 2/3/4-slot changes stop everything and reset; 3 is the default on every entry.
 - [ ] Leave (Back/Escape) during playback: audio and confetti stop; no mic restart.
+- [ ] With Translate mode on, say a word, then open Sound Builder before the translation
+      settles and press Back: a late result must not change the page or speak after Back.
 - [ ] Background the tab during playback: audio and confetti stop; foreground does not autoplay.
 - [ ] Repeated entry/exit: no duplicate handlers, duplicate sounds or duplicate confetti.
 - [ ] Speech synthesis unavailable: activity remains usable and silent where required.

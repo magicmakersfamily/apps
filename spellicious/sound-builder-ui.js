@@ -43,8 +43,9 @@
  *  - A change into a *different* recognized complete word celebrates once.
  *    Replay, repeated identical input, mute changes and selection never do.
  *  - Clear and slot-count changes stop everything and reset through S1.
- *  - Hidden documents and `pagehide` cancel activity audio and confetti but
- *    do not restart anything when the page becomes visible again.
+ *  - A hidden document and the window's `pagehide` cancel activity audio
+ *    and confetti but do not restart anything when the page becomes visible
+ *    again.
  *  - The chosen mute setting survives `leave()`/`enter()` for this page
  *    session; no state is persisted anywhere.
  */
@@ -98,6 +99,12 @@
 
         const doc = settings.document ||
             (typeof document !== 'undefined' ? document : null);
+        // `pagehide` is a Window event, not a Document event.  In a browser
+        // `document.defaultView` is that window; tests (and unusual hosts) may
+        // inject one explicitly.
+        const win = settings.window ||
+            (doc && doc.defaultView ? doc.defaultView : null) ||
+            (typeof window !== 'undefined' ? window : null);
 
         let active = false;
         let disposed = false;
@@ -139,13 +146,18 @@
 
         if (doc && typeof doc.addEventListener === 'function') {
             doc.addEventListener('visibilitychange', onVisibilityChange);
-            doc.addEventListener('pagehide', onPageHide);
+        }
+        if (win && typeof win.addEventListener === 'function') {
+            win.addEventListener('pagehide', onPageHide);
         }
 
         function removeDocumentListeners() {
-            if (!doc || typeof doc.removeEventListener !== 'function') return;
-            doc.removeEventListener('visibilitychange', onVisibilityChange);
-            doc.removeEventListener('pagehide', onPageHide);
+            if (doc && typeof doc.removeEventListener === 'function') {
+                doc.removeEventListener('visibilitychange', onVisibilityChange);
+            }
+            if (win && typeof win.removeEventListener === 'function') {
+                win.removeEventListener('pagehide', onPageHide);
+            }
         }
 
         function enter() {

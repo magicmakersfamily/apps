@@ -1,5 +1,148 @@
 # Spellicious — Handoff Note
 
+## Sound Builder activity (development slice — not a release)
+
+Version and release metadata were deliberately **not** changed in this slice. The current
+page is still 4.40. Sound Builder is an additional activity inside `spellicious/index.html`;
+it does not add a score, a level, a timer, a new round, a network call or any persistence.
+
+### Files
+
+- `sound-builder-logic.js` (S1, unchanged) — pure slot/word/audio-plan rules.
+- `sound-builder-audio.js` (S2, unchanged) — audio adapter and plans.
+- `sound-builder-ui.js` (new S3) — `createController({ logic, audio, view })` and the
+  browser `createDomView()` used by `index.html`.
+- `sound-builder-ui.test.mjs` (new) — plain-Node controller/view tests with fake audio,
+  a fake view and a fake document.
+- `index.html` — panel markup, styles, entry button, three script tags and small lifecycle
+  guards only. Existing app behaviour was not restructured.
+
+### Controller contract
+
+`SoundBuilderUI.createController({ logic, audio, view })` exposes:
+
+```
+enter()  selectSlot(index)  inputLetter(letter)  setSlotCount(count)
+clear()  replay()           setMuted(value)      leave()  dispose()
+```
+
+The required view surface is `render(state, settings)`, `celebrate()` and
+`stopCelebration()`; that is all the controller needs and all the fake view in the test
+file supplies. `settings` is `{ active, muted, slotCount, canReplay }`.
+
+Semantics preserved from S1:
+
+- Fresh entry is an empty three-slot board with slot 1 selected.
+- Selection only changes presentation state; it is silent.
+- An actual letter change stops the previous operation and any confetti, renders, then plays
+  the new S1 plan.
+- A change into a recognized complete word that differs from the previous recognized word
+  calls `view.celebrate()` once and plays with `{ celebrate: true }`. PAN → CAN therefore
+  celebrates CAN without clearing.
+- Replay, identical/rejected input, selection, re-render and mute changes never celebrate.
+- Clear and 2/3/4-slot changes stop audio and confetti and reset through S1.
+- Replay never celebrates; an empty plan is silent.
+- Mute is enforced in the controller (no `audio.play`) and in S2 (`setMuted` invalidates a
+  running operation, including the positive tone); visual discovery still occurs.
+- `visibilitychange` (when hidden) and `pagehide` cancel activity audio and confetti.
+  Becoming visible again has no branch, so nothing autoplays.
+- The mute choice is retained across leave/enter for the page session. State is not
+  persisted anywhere; every entry starts at three empty slots.
+- `dispose()` removes the controller's document listeners. The view also has its own
+  `dispose()` for its element listeners.
+
+### Entry/exit integration (actual app hooks inspected, not invented)
+
+- Entry runs `stopSpeaking()` (cancels `speechSynthesis`, bumps `speechRunId`, clears
+  highlights and queued callbacks), then `recognition.abort()` (falling back to
+  `recognition.stop()`) and `stopListeningUI()`. No microphone capture is started.
+- `queueUtterance()` now refuses to speak while the activity is open, so a late startup
+  speech, translation result or old callback cannot talk over Sound Builder.
+- The global Space handler and `toggleListening()` are guarded while the activity is open.
+- The startup `speakCurrentText()` call is skipped if the activity opened during its
+  300 ms delay.
+- Back/Escape calls `controller.leave()`; the page restores the normal interface, focuses
+  the Sound Builder entry button, and never restarts the microphone or speech.
+- S1 and S2 contracts were not changed.
+
+### Layout and accessibility
+
+- Centered large construction display that keeps every slot (including empty gaps), large
+  slot buttons, 2/3/4-slot controls, Clear, Replay Sound, Mute and Back controls, and an
+  A–Z keyboard pinned near the bottom.
+- Real `<button>` elements throughout, `aria-pressed` for selection/count/mute, descriptive
+  labels for slots and keys, a live region, visible `:focus-visible` rings, and gentle
+  active-slot highlighting.
+- Minimum 48 CSS-pixel targets (slots are larger); safe-area padding uses
+  `env(safe-area-inset-*)`; the panel scrolls rather than clipping and compacts on short
+  landscape heights.
+- Confetti is skipped entirely under `prefers-reduced-motion: reduce`; the CSS animation is
+  also disabled there.
+
+### Automated tests
+
+Command:
+
+```
+node --test spellicious/sound-builder-logic.test.mjs \
+  spellicious/sound-builder-audio.test.mjs \
+  spellicious/sound-builder-ui.test.mjs \
+  spellicious/content-safety.test.mjs
+```
+
+`content-safety.test.mjs` is unchanged. The new S3 tests cover fill, selection,
+replacement, clear, resize, mute, replay, recognized transitions, unknown combinations,
+no-op suppression, visibility cleanup, pagehide, exit, disposal and repeated entry, with
+CAT, BAT, HAT, PAN, CAN, SUN and FUN (including PAN → CAN).
+
+**Run status in this development environment: NOT RUN — pending.** The environment's
+permission layer refused every `node --test` / `node <script>` invocation ("This command
+requires approval"); only `node --version` was permitted. No pass/fail claim is made. A
+human or an environment that permits test execution must run the command above before
+this work is treated as verified.
+
+### Manual iPad Safari checklist (all items PENDING)
+
+Record each result honestly; do not tick an item without running it.
+
+- [ ] Portrait fit: no clipping; slots, controls, keyboard and safe-area padding visible.
+- [ ] Landscape fit: same, including a short landscape height.
+- [ ] Every control has at least a 48 CSS-pixel touch target and is reachable.
+- [ ] P → PA → PAN: each tap sounds, the construction display keeps visible gaps.
+- [ ] S → SU → SUN: same.
+- [ ] Recognized words speak naturally (not letter names); no unwanted "uh" on consonants.
+- [ ] PAN → CAN by selecting slot 1 and tapping C: CAN celebrates exactly once.
+- [ ] Rapid edits: no overlapping, stale or truncated audio; no orphan confetti.
+- [ ] Mute during word playback silences it immediately.
+- [ ] Mute before a recognized word suppresses the positive tone (visual confetti may show).
+- [ ] Clear during/after playback stops everything; board returns to three empty slots.
+- [ ] 2/3/4-slot changes stop everything and reset; 3 is the default on every entry.
+- [ ] Leave (Back/Escape) during playback: audio and confetti stop; no mic restart.
+- [ ] Background the tab during playback: audio and confetti stop; foreground does not autoplay.
+- [ ] Repeated entry/exit: no duplicate handlers, duplicate sounds or duplicate confetti.
+- [ ] Speech synthesis unavailable: activity remains usable and silent where required.
+- [ ] Web Audio unavailable: no crash; recognized words still show and celebrate visually.
+- [ ] Regression: child-safe speech filter still blocks unsafe transcripts.
+- [ ] Regression: language and Spell-mode switching preserve the displayed word.
+- [ ] Regression: spell mode letter highlighting and click-to-speak.
+- [ ] Regression: case cycling (lower/UPPER/random) and responsive word sizing.
+- [ ] Regression: number phrases, speed selector/curve and voice styles.
+- [ ] Regression: Space opens the mic only when Sound Builder is closed.
+- [ ] Regression: Cantonese voice selection still never falls back to Mandarin.
+
+### Human listening review (PENDING — required before calling it child-ready)
+
+A person must explicitly assess:
+
+1. **Phoneme accuracy** — short vowels, hard/soft c and g, qu, x, and consonants.
+2. **Voice suitability** — child-friendly pace/pitch; no robotic or startling delivery.
+3. **Fallback intelligibility** — both browser speech and the Web Audio fallback are
+   understandable when the other is unavailable.
+
+Pronunciation quality is **not** verified by this slice. Do not call the activity
+child-ready, and do not treat synthesized respellings as verified audio, until this
+listening review has passed.
+
 ## Update — Version 4.24
 
 - **Child-safe speech:** Expands filtering across every language in the selector.

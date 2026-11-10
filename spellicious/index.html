@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta name="description" content="Free voice spelling, no ads. Spellicious helps children say words, see them in giant letters, and hear their letters spoken aloud.">
@@ -17,6 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;1,500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="content-safety.js?v=4.24"></script>
+    <script src="sound-builder-logic.js?v=4.40"></script>
+    <script src="sound-builder-audio.js?v=4.40"></script>
+    <script src="sound-builder-ui.js?v=4.40"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -49,6 +52,276 @@
         @keyframes soundWave {
             0% { height: 6px; }
             100% { height: 28px; }
+        }
+
+        /* ── Sound Builder activity ───────────────────────────────────── */
+        body.sb-open { overflow: hidden; }
+
+        #soundBuilderPanel {
+            --sb-bg: #FAF6F0;
+            --sb-surface: #FFFFFF;
+            --sb-text: #2D3748;
+            --sb-muted: #78716C;
+            --sb-border: #E7E5E4;
+            --sb-accent: #EA580C;
+            --sb-accent-soft: #FFEDD5;
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            background: var(--sb-bg);
+            color: var(--sb-text);
+            padding:
+                max(10px, env(safe-area-inset-top))
+                max(10px, env(safe-area-inset-right))
+                max(10px, env(safe-area-inset-bottom))
+                max(10px, env(safe-area-inset-left));
+        }
+        #soundBuilderPanel[hidden] { display: none; }
+
+        @media (prefers-color-scheme: dark) {
+            #soundBuilderPanel {
+                --sb-bg: #1C1917;
+                --sb-surface: #292524;
+                --sb-text: #F5F5F4;
+                --sb-muted: #A8A29E;
+                --sb-border: #44403C;
+                --sb-accent: #FB923C;
+                --sb-accent-soft: #431407;
+            }
+        }
+
+        .sb-shell {
+            width: 100%;
+            max-width: 980px;
+            min-height: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.5vh, 16px);
+        }
+        .sb-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .sb-title {
+            font-family: 'Fredoka', cursive;
+            font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+            font-weight: 700;
+            color: var(--sb-accent);
+            line-height: 1.1;
+            margin: 0;
+        }
+        .sb-subtitle {
+            margin: 2px 0 0;
+            font-size: clamp(0.8rem, 1.6vw, 0.95rem);
+            color: var(--sb-muted);
+        }
+        .sb-header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sb-shell button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sb-shell button:focus-visible {
+            outline: 3px solid #F59E0B;
+            outline-offset: 3px;
+        }
+        .sb-chip {
+            min-height: 48px;
+            min-width: 48px;
+            padding: 0 16px;
+            border-radius: 999px;
+            border: 2px solid var(--sb-border);
+            background: var(--sb-surface);
+            color: var(--sb-text);
+            font: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+        }
+        .sb-chip:hover { border-color: var(--sb-accent); }
+        .sb-chip:active { transform: scale(0.96); }
+        .sb-chip[aria-pressed="true"] {
+            background: var(--sb-accent-soft);
+            border-color: var(--sb-accent);
+            color: var(--sb-accent);
+        }
+
+        .sb-construction {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: clamp(8px, 1.6vw, 18px);
+            min-height: clamp(72px, 12vh, 132px);
+            padding: 2px 0;
+        }
+        .sb-display-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: clamp(46px, 9vw, 96px);
+            padding: 0 clamp(2px, 0.6vw, 8px);
+            font-family: 'Fredoka', cursive;
+            font-size: clamp(2.4rem, 9vw, 5.5rem);
+            font-weight: 700;
+            line-height: 1;
+            border-bottom: 5px solid var(--sb-accent);
+        }
+        .sb-display-slot.is-empty {
+            border-bottom-style: dashed;
+            border-bottom-color: var(--sb-border);
+        }
+
+        .sb-slots {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: clamp(8px, 1.8vw, 20px);
+        }
+        .sb-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(68px, 15vw, 112px);
+            height: clamp(68px, 15vw, 112px);
+            min-width: 68px;
+            min-height: 68px;
+            border-radius: 22px;
+            border: 3px solid var(--sb-border);
+            background: var(--sb-surface);
+            color: var(--sb-text);
+            font-family: 'Fredoka', cursive;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color 120ms ease, background-color 120ms ease,
+                box-shadow 120ms ease, transform 120ms ease;
+        }
+        .sb-slot[hidden] { display: none; }
+        .sb-slot:hover { border-color: var(--sb-accent); }
+        .sb-slot:active { transform: scale(0.96); }
+        .sb-slot.is-filled { background: var(--sb-accent-soft); }
+        .sb-slot.is-selected {
+            border-color: var(--sb-accent);
+            box-shadow: 0 0 0 4px var(--sb-accent-soft);
+        }
+
+        .sb-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .sb-counts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-right: 4px;
+        }
+        .sb-counts-label {
+            align-self: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--sb-muted);
+        }
+
+        .sb-keyboard-wrap {
+            margin-top: auto;
+            padding-top: 4px;
+            display: flex;
+            justify-content: center;
+        }
+        .sb-keyboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+            gap: 6px;
+            width: 100%;
+            max-width: 760px;
+        }
+        .sb-key {
+            min-width: 48px;
+            min-height: 48px;
+            border-radius: 12px;
+            border: 2px solid var(--sb-border);
+            background: var(--sb-surface);
+            color: var(--sb-text);
+            font-family: 'Fredoka', cursive;
+            font-size: clamp(1rem, 2.4vw, 1.35rem);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 100ms ease, border-color 100ms ease, transform 100ms ease;
+        }
+        .sb-key:hover { border-color: var(--sb-accent); background: var(--sb-accent-soft); }
+        .sb-key:active { transform: scale(0.94); }
+
+        .sb-sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .sb-confetti {
+            position: fixed;
+            inset: 0;
+            z-index: 70;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .sb-confetti-piece {
+            position: absolute;
+            top: 18%;
+            left: calc(50% + var(--x));
+            width: 10px;
+            height: 15px;
+            border-radius: 3px;
+            background: var(--c);
+            transform: translate(-50%, 0) rotate(var(--r));
+            animation: sb-confetti-fall 950ms cubic-bezier(0.2, 0.6, 0.35, 1) var(--delay) forwards;
+        }
+        @keyframes sb-confetti-fall {
+            to {
+                transform: translate(calc(-50% + var(--dx)), 58vh) rotate(calc(var(--r) + 320deg));
+                opacity: 0;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .sb-confetti-piece { animation: none; }
+            .sb-slot, .sb-chip, .sb-key { transition: none; }
+        }
+
+        @media (max-height: 620px) {
+            .sb-construction { min-height: 60px; }
+            .sb-display-slot { font-size: clamp(1.9rem, 7vh, 3.4rem); }
+            .sb-slot {
+                width: 64px;
+                height: 64px;
+                min-width: 64px;
+                min-height: 64px;
+                border-radius: 16px;
+                font-size: 1.75rem;
+            }
+            .sb-shell { gap: 6px; }
+            .sb-keyboard { gap: 5px; }
         }
     </style>
 </head>
@@ -205,7 +478,61 @@
             </div>
         </div>
 
+        <div class="text-center mt-8">
+            <button id="soundBuilderEntryBtn" type="button" onclick="openSoundBuilder()"
+                style="min-height: 48px"
+                class="inline-flex items-center justify-center gap-2 min-h-12 px-5 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-sm sm:text-base font-bold shadow-lg shadow-orange-500/25 transition-all active:scale-95 focus:outline-none focus:ring-4 focus:ring-orange-300">
+                <i data-lucide="blocks" class="w-5 h-5" aria-hidden="true"></i>
+                Sound Builder
+            </button>
+            <p class="mt-2 text-xs font-medium text-stone-500">Build a word one sound at a time.</p>
+        </div>
+
     </main>
+
+    <!-- Sound Builder activity: hidden until the player opens it. -->
+    <section id="soundBuilderPanel" hidden role="dialog" aria-modal="true" aria-labelledby="sbTitle">
+        <div class="sb-shell">
+            <header class="sb-header">
+                <div>
+                    <h2 id="sbTitle" class="sb-title">Sound Builder</h2>
+                    <p class="sb-subtitle">Pick a slot, then tap a letter sound.</p>
+                </div>
+                <div class="sb-header-actions">
+                    <button id="sbMute" type="button" class="sb-chip" aria-pressed="false"
+                        aria-label="Mute Sound Builder audio">Mute</button>
+                    <button id="sbBack" type="button" class="sb-chip">Back to Spellicious</button>
+                </div>
+            </header>
+
+            <div id="sbConstruction" class="sb-construction" role="img"
+                aria-label="Build: slot 1 empty, slot 2 empty, slot 3 empty"></div>
+
+            <div id="sbSlots" class="sb-slots" role="group" aria-label="Build slots">
+                <button type="button" class="sb-slot" data-slot="0" aria-pressed="false" aria-label="Slot 1, empty, selected">1</button>
+                <button type="button" class="sb-slot" data-slot="1" aria-pressed="false" aria-label="Slot 2, empty">2</button>
+                <button type="button" class="sb-slot" data-slot="2" aria-pressed="false" aria-label="Slot 3, empty">3</button>
+                <button type="button" class="sb-slot" data-slot="3" aria-pressed="false" aria-label="Slot 4, empty">4</button>
+            </div>
+
+            <div class="sb-controls">
+                <div class="sb-counts" role="group" aria-label="Number of slots">
+                    <span class="sb-counts-label">Slots:</span>
+                    <button type="button" class="sb-chip" data-count="2" aria-pressed="false" aria-label="2 slots">2</button>
+                    <button type="button" class="sb-chip" data-count="3" aria-pressed="true" aria-label="3 slots">3</button>
+                    <button type="button" class="sb-chip" data-count="4" aria-pressed="false" aria-label="4 slots">4</button>
+                </div>
+                <button id="sbClear" type="button" class="sb-chip">Clear</button>
+                <button id="sbReplay" type="button" class="sb-chip" aria-disabled="true">Replay Sound</button>
+            </div>
+
+            <div class="sb-keyboard-wrap">
+                <div id="sbKeyboard" class="sb-keyboard" role="group" aria-label="Letter sounds"></div>
+            </div>
+
+            <div id="sbStatus" class="sb-sr-only" aria-live="polite"></div>
+        </div>
+    </section>
 
     <!-- Footer Status -->
     <footer class="w-full max-w-6xl lg:max-w-7xl mx-auto mt-auto text-center text-xs text-stone-400 pt-4">
@@ -234,6 +561,8 @@
         let letterHighlightTimers = [];
         let speakingWatchdogId = null;
         let lastAnnouncedMicState = null;
+        let soundBuilderSession = null;
+        let soundBuilderActive = false;
 
         const voiceStyles = {
             default: { rate: 1.0, pitch: 1.05, volume: 1.0 },
@@ -332,7 +661,10 @@
             initTranslateDirection();
             renderSampleWords();
             updateDisplay();
-            setTimeout(() => speakCurrentText(), 300);
+            setTimeout(() => {
+                // A player may open Sound Builder during the startup delay.
+                if (!soundBuilderActive) speakCurrentText();
+            }, 300);
         });
 
         function populateTranslateDirectionOptions() {
@@ -696,6 +1028,8 @@
         function initKeyboardControls() {
             document.addEventListener('keydown', (event) => {
                 if (event.code !== 'Space' || event.repeat) return;
+                // Sound Builder owns the keyboard while it is open.
+                if (soundBuilderActive) return;
 
                 if (event.target?.isContentEditable) return;
 
@@ -1024,6 +1358,7 @@
         }
 
         function toggleListening() {
+            if (soundBuilderActive) return;
             if (!recognition) {
                 alert("Speech recognition is not supported on this browser.");
                 return;
@@ -1051,6 +1386,7 @@
         }
 
         function speakCurrentText() {
+            if (soundBuilderActive) return;
             if (!('speechSynthesis' in window)) return;
 
             window.speechSynthesis.cancel();
@@ -1244,7 +1580,10 @@
         }
 
         function queueUtterance(utterance, runId = speechRunId) {
-            if (runId !== speechRunId) return;
+            // Sound Builder owns audio while it is open.  Old app callbacks
+            // (including startup speech and late translation results) may
+            // still fire; none of them may talk over the activity.
+            if (soundBuilderActive || runId !== speechRunId) return;
             const originalOnEnd = utterance.onend;
             utterance.onend = (event) => {
                 if (typeof originalOnEnd === 'function') originalOnEnd(event);
@@ -1495,6 +1834,64 @@
 
         function updateStatus(msg) {
             document.getElementById('statusText').textContent = msg;
+        }
+
+        /* ── Sound Builder entry/exit ───────────────────────────────────
+           The activity owns its own audio adapter.  On entry the existing
+           Spellicious hooks stop speech (and invalidate every queued speech
+           callback) and stop microphone capture; on exit nothing is started
+           again automatically. */
+
+        function ensureSoundBuilderSession() {
+            if (soundBuilderSession) return soundBuilderSession;
+
+            const view = window.SoundBuilderUI.createDomView({ onExit: closeSoundBuilder });
+            const audio = window.SoundBuilderAudio.createAudio();
+            const controller = window.SoundBuilderUI.createController({
+                logic: window.SoundBuilderLogic,
+                audio,
+                view
+            });
+            view.attach(controller);
+            soundBuilderSession = { view, audio, controller };
+            return soundBuilderSession;
+        }
+
+        function prepareSpelliciousForSoundBuilder() {
+            stopSpeaking();
+            if (recognition) {
+                try {
+                    if (typeof recognition.abort === 'function') recognition.abort();
+                    else recognition.stop();
+                } catch (error) {
+                    /* already stopped */
+                }
+            }
+            stopListeningUI();
+        }
+
+        function openSoundBuilder() {
+            if (soundBuilderActive) return;
+            if (!window.SoundBuilderUI || !window.SoundBuilderLogic || !window.SoundBuilderAudio) {
+                updateStatus("Sound Builder is unavailable on this browser.");
+                return;
+            }
+
+            const session = ensureSoundBuilderSession();
+            soundBuilderActive = true;
+            prepareSpelliciousForSoundBuilder();
+            session.controller.enter();
+        }
+
+        function closeSoundBuilder() {
+            if (!soundBuilderActive) return;
+            soundBuilderActive = false;
+            if (soundBuilderSession) soundBuilderSession.controller.leave();
+
+            // Restore the existing interface without starting speech or the mic.
+            updateStatus("Microphone ready. Tap mic, letters, or word to hear again.");
+            const entry = document.getElementById('soundBuilderEntryBtn');
+            if (entry) entry.focus();
         }
 
         window.addEventListener('resize', () => fitWordDisplay(getFormattedText()));

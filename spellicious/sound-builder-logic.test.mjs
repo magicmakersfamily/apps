@@ -104,7 +104,11 @@ test('replacing a filled slot keeps that slot selected', () => {
 });
 
 test('entering the same letter again is a no-op', () => {
-    const state = enterLetter(createState(), 'p');
+    // After P, selection has advanced to empty slot 1. Select the filled
+    // slot explicitly so the next letter targets the slot that holds P.
+    const state = selectSlot(enterLetter(createState(), 'p'), 0);
+    assert.deepEqual(state, { slots: ['P', null, null], selectedIndex: 0 });
+
     assert.equal(enterLetter(state, 'P'), state);
     assert.equal(enterLetter(state, 'p'), state);
 });

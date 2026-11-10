@@ -29,6 +29,9 @@
  *    English voice is available.  Remote voices (`localService === false`) are
  *    never selected.  A voice list that is empty or arrives late is waited
  *    for at most `voiceTimeoutMs`, then the plan falls back to synthesis.
+ *  - The speech object must also implement `cancel`.  Without it the adapter
+ *    cannot honour stop, mute or replacement, so a partial speech API is
+ *    treated as unavailable and the plan uses synthesis instead.
  *  - Partial plans (kind 'sequence') never use browser speech.  They always
  *    render their phoneme/blend descriptors with Web Audio.
  *  - Speech errors and stalls fall back to the plan's explicit phoneme
@@ -54,13 +57,22 @@
  *      voiceTimeoutMs       bounded wait for a late voice list (default 700)
  *      speechTimeoutMs      bounded wait for a stalled utterance (default 4000)
  *      audioReadyTimeoutMs  bounded wait for a resumed context (default 1000)
+ *      synthStallTimeoutMs  bounded wait for a paused synthesis clock, reset
+ *                           whenever the context clock advances (default 3000)
  *      blends               S1 blend table, defaulting to sound-builder-logic.js
  *
  *  ── Synthesis approximation limits ──────────────────────────────────────
  *
  *  The Web Audio renderer is a small, deterministic stand-in, not a phonetic
  *  model.  It uses fixed formant pairs, filtered deterministic noise and
- *  short envelopes from the data in `SYNTH_DATA`.  It does not model
+ *  short envelopes from the data in `SYNTH_DATA`.  A synthesized word is
+ *  finished when the AudioContext clock reaches the scheduled end time, not
+ *  when a wall-clock timer happens to expire: a suspended/interrupted context
+ *  pauses that clock, and reporting the word complete at that point would
+ *  truncate it (and could start the celebration tone over unfinished
+ *  phonemes).  If the clock does not reach the end within
+ *  `synthStallTimeoutMs` of no progress, playback resolves `unavailable` and
+ *  releases its nodes instead of lying.  The renderer does not model
  *  coarticulation beyond simple overlaps, prosody, stress, syllable timing,
  *  consonant release variation, or a speaker's vocal tract.  Stops are short
  *  releases with no invented trailing vowel; fricatives are filtered noise;
@@ -222,6 +234,12 @@
     });
 
     const SEQUENCE_GAP = 0.02;
+
+    // How often synthesis checks the AudioContext clock, and how far ahead of
+    // an existing sound the celebration tone is placed.  Polling (rather than
+    // a single wall-clock deadline) is what makes a paused context visible.
+    const SYNTH_POLL_MS = 25;
+    const TONE_GAP = 0.03;
 
     const POSITIVE_TONE = Object.freeze({
         frequency: 660,
@@ -392,6 +410,9 @@
         const audioReadyTimeoutMs = Number.isFinite(settings.audioReadyTimeoutMs)
             ? Math.max(0, settings.audioReadyTimeoutMs)
             : 1000;
+        const synthStallTimeoutMs = Number.isFinite(settings.synthStallTimeoutMs)
+            ? Math.max(0, settings.synthStallTimeoutMs)
+            : 3000;
         const blends = settings.blends || (logic && logic.BLENDS) || null;
 
         let muted = false;
@@ -850,8 +871,13 @@
             }
         }
 
-        function renderTone(context, operation) {
-            const at = Math.max(0, Number(context.currentTime) || 0) + 0.01;
+        function renderTone(context, operation, notBefore) {
+            // Never place the tone before `notBefore` (a synthesized word's
+            // scheduled end).  A paused context keeps `currentTime` behind
+            // that end, so this also protects a tone scheduled right after a
+            // resume.
+            const now = Math.max(0, Number(context.currentTime) || 0);
+            const at = Math.max(now, Number(notBefore) || 0) + TONE_GAP;
             const output = ownNode(operation, context.createGain(), false);
             output.connect(context.destination);
             output.gain.setValueAtTime(0, at);
@@ -982,7 +1008,11 @@
         // ── Playback paths ───────────────────────────────────────────────
 
         function startWord(operation) {
+            // `cancel` is part of the contract, not an optional nicety: without
+            // it stop, mute and replacement cannot clear a queued utterance,
+            // and a late utterance could overlap the synthesized fallback.
             if (!speech || typeof speech.speak !== 'function' ||
+                typeof speech.cancel !== 'function' ||
                 typeof speech.getVoices !== 'function' ||
                 typeof createUtterance !== 'function') {
                 startSynth(operation);
@@ -1118,12 +1148,12 @@
                     return;
                 }
 
-                const totalMs = Math.ceil((timeline.duration + 0.06) * 1000);
-                later(operation, function () {
-                    if (!isCurrent(operation) || operation.stage !== 'synth') return;
-                    if (operation.celebrate) playPositiveTone(operation);
-                    else finish(operation, RESULT.COMPLETED);
-                }, totalMs);
+                // Completion is judged on the AudioContext clock.  A wall
+                // clock timer would still fire while the context is
+                // suspended/interrupted, while `currentTime` is frozen and
+                // the phonemes are still queued.
+                operation.synthEndTime = lead + timeline.duration;
+                waitForSynthCompletion(operation, context, operation.synthEndTime);
             }
 
             const state = context.state;
@@ -1142,7 +1172,82 @@
             });
         }
 
-        function playPositiveTone(operation) {
+        // Watches the AudioContext clock until the scheduled word has really
+        // finished.  `currentTime` stops advancing when the context is
+        // suspended or interrupted, so a wall-clock deadline is not evidence
+        // of completion.  Polls are short and bounded; the stall timer is
+        // re-armed whenever the clock makes progress and fires only after a
+        // full `synthStallTimeoutMs` with no progress, at which point the word
+        // is reported `unavailable` (never silently truncated to `completed`).
+        function waitForSynthCompletion(operation, context, endTime) {
+            let lastProgress = Number(context.currentTime) || 0;
+            let stallTimer = null;
+            let stallArmed = false;
+
+            function clearStall() {
+                if (stallTimer === null) return;
+                const id = stallTimer;
+                stallTimer = null;
+                try { scheduler.clearTimeout(id); } catch (error) { /* ignore */ }
+                operation.timers.delete(id);
+            }
+
+            function armStall() {
+                clearStall();
+                stallArmed = true;
+                function stalled() {
+                    stallTimer = null;
+                    stallArmed = false;
+                    if (!isCurrent(operation) || operation.stage !== 'synth') return;
+                    const now = Number(context.currentTime) || 0;
+                    if (now >= endTime) {
+                        synthComplete(operation);
+                        return;
+                    }
+                    // The audio clock is not reaching the end.  Release the
+                    // nodes and say so rather than pretending the word played.
+                    finish(operation, RESULT.UNAVAILABLE);
+                }
+                const id = later(operation, stalled, synthStallTimeoutMs);
+                if (id !== null && stallArmed) stallTimer = id;
+            }
+
+            function poll() {
+                if (!isCurrent(operation) || operation.stage !== 'synth') return;
+                const now = Number(context.currentTime) || 0;
+                if (now >= endTime) {
+                    synthComplete(operation);
+                    return;
+                }
+                if (context.state === 'closed') {
+                    finish(operation, RESULT.UNAVAILABLE);
+                    return;
+                }
+                if (now > lastProgress + 1e-6) {
+                    lastProgress = now;
+                    armStall();
+                }
+                // A synchronous scheduler could have finished the operation
+                // while arming the stall timer; never leave a poll behind.
+                if (!isCurrent(operation) || operation.stage !== 'synth') return;
+                later(operation, poll, SYNTH_POLL_MS);
+            }
+
+            armStall();
+            poll();
+        }
+
+        function synthComplete(operation) {
+            if (!isCurrent(operation) || operation.stage !== 'synth') return;
+            operation.stage = 'synth-done';
+            if (operation.celebrate) {
+                playPositiveTone(operation, operation.synthEndTime);
+            } else {
+                finish(operation, RESULT.COMPLETED);
+            }
+        }
+
+        function playPositiveTone(operation, notBefore) {
             if (!isCurrent(operation)) return;
             operation.stage = 'tone';
 
@@ -1165,7 +1270,7 @@
                 }
 
                 try {
-                    renderTone(context, operation);
+                    renderTone(context, operation, notBefore);
                 } catch (error) {
                     finish(operation, RESULT.COMPLETED);
                     return;

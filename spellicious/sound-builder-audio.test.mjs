@@ -1,7 +1,10 @@
 /*  Sound Builder — audio adapter tests
  *
  *  Deterministic fakes only: a fake speech synthesiser, fake AudioContext and
- *  nodes, fake utterances and a fake timer scheduler.  Fake contexts can also
+ *  nodes, fake utterances and a fake timer scheduler.  The fake AudioContext
+ *  clock follows wall time only while the context is running, so suspending it
+ *  mid-synthesis models a browser interruption and proves completion is judged
+ *  on `currentTime` rather than a wall-clock timer.  Fake contexts can also
  *  start suspended and resume late, reject, or never settle, so the adapter's
  *  bounded readiness handling is exercised without real audio hardware.  These
  *  tests never use the network, `ps`, `sudo` or loopback sockets, so no test
@@ -37,7 +40,7 @@ function planFor(text) {
 
 // ── Fakes ────────────────────────────────────────────────────────────────
 
-function createScheduler() {
+function createScheduler(options = {}) {
     let now = 0;
     let nextId = 1;
     const tasks = new Map();
@@ -68,7 +71,11 @@ function createScheduler() {
             tasks.delete(id);
         },
         advance(milliseconds) {
-            now += Math.max(0, Number(milliseconds) || 0);
+            const delta = Math.max(0, Number(milliseconds) || 0);
+            now += delta;
+            // Let the fake AudioContext clock follow wall time (its owner
+            // decides whether the context is actually running).
+            if (delta > 0 && typeof options.onTime === 'function') options.onTime(delta);
             let steps = 0;
             let due = nextDue();
             while (due && steps < 1000) {
@@ -104,7 +111,17 @@ function createSpeech(initialVoices) {
     let voices = Array.isArray(initialVoices) ? initialVoices.slice() : [];
     const listeners = new Set();
     const spoken = [];
+    // Like a real synthesiser: utterances stay active/queued until they end
+    // or `cancel` empties the queue.  Tests assert this is empty after every
+    // cleanup path, which is what proves stop/mute/replacement really stops
+    // speech rather than merely detaching handlers.
+    const queue = [];
     const calls = { speak: 0, cancel: 0 };
+
+    function dequeue(utterance) {
+        const index = queue.indexOf(utterance);
+        if (index !== -1) queue.splice(index, 1);
+    }
 
     const speech = {
         getVoices() {
@@ -113,9 +130,18 @@ function createSpeech(initialVoices) {
         speak(utterance) {
             calls.speak += 1;
             spoken.push(utterance);
+            queue.push(utterance);
+            // A manual onend() call finishes the utterance in the fake too.
+            const end = utterance.onend;
+            utterance.onend = function (...args) {
+                dequeue(utterance);
+                if (typeof end === 'function') return end.apply(this, args);
+                return undefined;
+            };
         },
         cancel() {
             calls.cancel += 1;
+            queue.length = 0;
         },
         addEventListener(type, handler) {
             if (type === 'voiceschanged') listeners.add(handler);
@@ -131,6 +157,9 @@ function createSpeech(initialVoices) {
         calls,
         listenerCount() {
             return listeners.size;
+        },
+        activeCount() {
+            return queue.length;
         },
         setVoices(next) {
             voices = Array.isArray(next) ? next.slice() : [];
@@ -318,12 +347,24 @@ function flush() {
 }
 
 function makeAudio(options = {}) {
-    const scheduler = options.scheduler || createScheduler();
     const context = options.context || createFakeContext();
-    const speechKit = options.speechKit || createSpeech(options.voices);
+    const scheduler = options.scheduler || createScheduler({
+        // The AudioContext clock advances with wall time only while the
+        // context is actually running.  Suspending it freezes `currentTime`,
+        // which is exactly the interruption the adapter must notice.
+        onTime(deltaMs) {
+            const state = context.state;
+            if (state === 'running' || typeof state === 'undefined') {
+                context.currentTime += deltaMs / 1000;
+            }
+        }
+    });
+    const speechKit = Object.prototype.hasOwnProperty.call(options, 'speechKit')
+        ? options.speechKit
+        : createSpeech(options.voices);
     const speech = Object.prototype.hasOwnProperty.call(options, 'speech')
         ? options.speech
-        : speechKit.speech;
+        : (speechKit ? speechKit.speech : null);
 
     const audio = createAudio({
         speech,
@@ -338,7 +379,10 @@ function makeAudio(options = {}) {
             : 100,
         audioReadyTimeoutMs: Object.prototype.hasOwnProperty.call(options, 'audioReadyTimeoutMs')
             ? options.audioReadyTimeoutMs
-            : 1000
+            : 1000,
+        synthStallTimeoutMs: Object.prototype.hasOwnProperty.call(options, 'synthStallTimeoutMs')
+            ? options.synthStallTimeoutMs
+            : 3000
     });
 
     return { audio, scheduler, context, speechKit, speech };
@@ -354,6 +398,11 @@ function assertClean({ context, scheduler, speechKit }) {
     }
     if (speechKit) {
         assert.equal(speechKit.listenerCount(), 0, 'no voiceschanged listeners remain');
+        assert.equal(
+            speechKit.activeCount(),
+            0,
+            'no active or queued utterances remain (cancel/end emptied the queue)'
+        );
         for (const utterance of speechKit.spoken) {
             assert.equal(utterance.onend, null, 'no late onend handler remains');
             assert.equal(utterance.onerror, null, 'no late onerror handler remains');
@@ -405,6 +454,35 @@ test('a remote-only English voice is not deliberately selected; synthesis is use
     scheduler.advance(1000);
     assert.equal(await result, RESULT.COMPLETED);
     assertClean({ context, scheduler, speechKit });
+});
+
+test('a speech API without cancel is never selected; synthesis plays instead', async () => {
+    // A partially available speech API (speak + getVoices but no cancel)
+    // cannot honour stop, mute or replacement.  Choosing it would let a late
+    // utterance overlap the synthesized fallback, so the adapter must ignore
+    // it entirely.
+    const spoken = [];
+    const partialSpeech = {
+        getVoices() {
+            return [LOCAL_EN];
+        },
+        speak(utterance) {
+            spoken.push(utterance);
+        }
+    };
+    const { audio, context, scheduler } = makeAudio({
+        speech: partialSpeech,
+        speechKit: null
+    });
+
+    const result = audio.play(planFor('pan'));
+
+    assert.equal(spoken.length, 0, 'partial speech is not used');
+    assert.ok(context.created.bufferSources.length >= 1, 'synthesis fallback started');
+
+    scheduler.advance(1000);
+    assert.equal(await result, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit: null });
 });
 
 test('an English voice with unknown locality is still eligible', async () => {
@@ -698,7 +776,11 @@ test('a delayed AudioContext resume is awaited before synthesis', async () => {
     await flush();
 
     assert.ok(context.created.bufferSources.length >= 1, 'synthesis starts once running');
-    assert.equal(scheduler.pending(), 1, 'readiness timer replaced by the completion timer');
+    assert.equal(
+        scheduler.pending(),
+        2,
+        'readiness timer replaced by the completion poll and its stall bound'
+    );
 
     scheduler.advance(1000);
     assert.equal(await result, RESULT.COMPLETED);
@@ -782,6 +864,99 @@ test('cancelling during AudioContext readiness ignores a late resume', async () 
     assert.equal(context.created.bufferSources.length, 0, 'late resume schedules nothing');
     assert.equal(scheduler.pending(), 0);
     assertClean({ context, scheduler, speechKit });
+});
+
+test('interrupting the audio clock mid-word never reports a truncated word as completed', async () => {
+    // Wall time keeps passing while a suspended/interrupted AudioContext
+    // freezes `currentTime`.  A wall-clock completion timer would fire here
+    // and claim the word finished (and could then put the celebration tone
+    // over phonemes that have not played).  Completion must follow the audio
+    // clock, with a bounded stall fallback.
+    const context = createFakeContext({ state: 'running' });
+    const { audio, scheduler } = makeAudio({
+        speech: null,
+        context,
+        synthStallTimeoutMs: 200
+    });
+
+    const plan = planFor('pan');
+    assert.equal(plan.kind, 'word');
+    const timeline = planRender(plan.units, { connected: true });
+    const endTime = 0.02 + timeline.duration;
+
+    const result = audio.play(plan, { celebrate: true });
+    let settled = false;
+    result.then(() => { settled = true; });
+
+    scheduler.advance(60);
+    assert.ok(context.currentTime > 0, 'the word started on the running clock');
+    assert.ok(context.currentTime < endTime, 'interrupted before the word ended');
+    const wordSources = context.created.bufferSources.length + context.created.oscillators.length;
+
+    context.setState('suspended');
+
+    // Almost the whole stall allowance passes with the clock frozen.
+    scheduler.advance(199);
+    await flush();
+    assert.equal(settled, false, 'still not completed while the audio clock is paused');
+    assert.equal(
+        context.created.oscillators.filter(node => node.type === 'sine').length,
+        0,
+        'no celebration tone over unfinished phonemes'
+    );
+
+    scheduler.advance(1); // the bounded stall deadline
+    assert.equal(await result, RESULT.UNAVAILABLE, 'interruption is reported honestly');
+
+    assert.equal(
+        context.created.bufferSources.length + context.created.oscillators.length,
+        wordSources,
+        'a bounded interruption schedules no extra sound'
+    );
+    assert.equal(
+        context.created.oscillators.filter(node => node.type === 'sine').length,
+        0,
+        'still no tone after giving up'
+    );
+    assertClean({ context, scheduler, speechKit: null });
+});
+
+test('resuming before the stall bound completes the word and tones only after it', async () => {
+    const context = createFakeContext({ state: 'running' });
+    const { audio, scheduler } = makeAudio({
+        speech: null,
+        context,
+        synthStallTimeoutMs: 1000
+    });
+
+    const plan = planFor('pan');
+    const timeline = planRender(plan.units, { connected: true });
+    const endTime = 0.02 + timeline.duration;
+
+    const result = audio.play(plan, { celebrate: true });
+
+    scheduler.advance(80);
+    context.setState('suspended');
+    scheduler.advance(150); // well inside the stall bound
+    context.setState('running');
+    scheduler.advance(1000); // the clock resumes and reaches the word's end
+    await flush();
+    scheduler.advance(500); // let the positive tone finish
+
+    assert.equal(await result, RESULT.COMPLETED);
+
+    const tones = context.created.oscillators.filter(node => node.type === 'sine');
+    assert.equal(tones.length, 1, 'exactly one positive tone');
+    assert.ok(
+        tones[0].startedAt >= endTime,
+        'the tone is scheduled at or after the synthesized word end'
+    );
+    assert.equal(
+        context.created.oscillators.filter(node => node.type === 'sawtooth').length,
+        timeline.entries.filter(entry => entry.kind !== 'stop').length,
+        'only the word voices were synthesized'
+    );
+    assertClean({ context, scheduler, speechKit: null });
 });
 
 test('a speech-error fallback reuses the gesture-time context without creating or resuming again', async () => {
@@ -958,6 +1133,7 @@ test('rapid P -> PA -> PAN changes leave only the newest operation and clean up'
 
     assert.equal(speechKit.spoken.length, 1, 'only the newest whole word is queued');
     assert.equal(speechKit.spoken[0].text, 'pan');
+    assert.equal(speechKit.activeCount(), 1, 'only the newest whole word is in the speech queue');
 
     speechKit.spoken[0].onend();
     assert.equal(await third, RESULT.COMPLETED);
@@ -977,6 +1153,7 @@ test('replaying the same word cancels the first utterance and replaces it', asyn
     assert.equal(firstUtterance.onerror, null);
     assert.equal(await first, RESULT.CANCELLED);
     assert.equal(speechKit.spoken.length, 2);
+    assert.equal(speechKit.activeCount(), 1, 'the replaced utterance left the queue');
 
     speechKit.spoken[1].onend();
     assert.equal(await second, RESULT.COMPLETED);

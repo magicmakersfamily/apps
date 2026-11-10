@@ -485,16 +485,22 @@ test('a speech API without cancel is never selected; synthesis plays instead', a
     assertClean({ context, scheduler, speechKit: null });
 });
 
-test('an English voice with unknown locality is still eligible', async () => {
+test('an English voice with unknown locality is not selected; synthesis is used', async () => {
+    // `localService` missing means locality is unknown, not local.  Choosing
+    // it would not establish installed local speech, so the whole-word plan
+    // must fall back to its declared phoneme sequence instead.
     const unknown = { name: 'English', lang: 'en-AU' };
     const kit = createSpeech([unknown]);
-    const { audio, speechKit } = makeAudio({ speechKit: kit });
+    const { audio, context, scheduler, speechKit } = makeAudio({ speechKit: kit });
 
     const result = audio.play(planFor('cat'));
-    assert.equal(speechKit.spoken.length, 1);
-    assert.equal(speechKit.spoken[0].voice, unknown);
-    speechKit.spoken[0].onend();
+    assert.equal(speechKit.spoken.length, 0, 'no unknown-locality utterance');
+    assert.ok(context.created.bufferSources.length >= 1, 'synthesis fallback started');
+    assert.equal(speechKit.listenerCount(), 0, 'no voice listener was needed');
+
+    scheduler.advance(1000);
     assert.equal(await result, RESULT.COMPLETED);
+    assertClean({ context, scheduler, speechKit });
 });
 
 // ── Voice lists ──────────────────────────────────────────────────────────

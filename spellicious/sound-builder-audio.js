@@ -26,8 +26,10 @@
  *
  *  Browser speech policy:
  *  - A whole-word plan may use browser speech only when an installed local
- *    English voice is available.  Remote voices (`localService === false`) are
- *    never selected.  A voice list that is empty or arrives late is waited
+ *    English voice is available (`localService === true`).  Remote voices
+ *    (`localService === false`) and voices whose locality is unknown (the
+ *    property is missing or not `true`) are never selected; the plan falls
+ *    back to synthesis.  A voice list that is empty or arrives late is waited
  *    for at most `voiceTimeoutMs`, then the plan falls back to synthesis.
  *  - The speech object must also implement `cancel`.  Without it the adapter
  *    cannot honour stop, mute or replacement, so a partial speech API is
@@ -912,16 +914,14 @@
                 /^en(?:$|[-_])/i.test(voice.lang.trim());
         }
 
-        // Prefer an explicitly local English voice.  If a browser omits
-        // `localService`, an English voice is still eligible because it is not
-        // known to be remote.  An explicit remote voice is never chosen.
+        // Only an explicitly local English voice is chosen.  A browser that
+        // omits `localService` leaves locality unknown, which does not
+        // establish installed local speech, so such voices are skipped and
+        // the plan falls back to synthesizing its declared descriptors.
         function chooseVoice(voices) {
             const english = (voices || []).filter(isEnglish);
             for (const voice of english) {
                 if (voice.localService === true) return voice;
-            }
-            for (const voice of english) {
-                if (voice.localService !== false) return voice;
             }
             return null;
         }

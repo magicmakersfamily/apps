@@ -10,6 +10,12 @@
 <meta property="og:description" content="Build a routine from timed steps, rest breaks and repeating sections, then run it one step at a time with a big countdown. Save sequences on your device.">
 <meta property="og:image" content="https://magicmakersfamily.github.io/apps/sequence-flow/cover.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f46e5'/%3E%3Cpath d='M24 18v28l22-14z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flow">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
@@ -548,6 +554,14 @@ img { max-width: 100%; }
           <i class="fa-solid fa-pen-to-square"></i>
           <span>Finish & Edit</span>
         </button>
+      </div>
+      <div id="install-hint" class="hidden w-full max-w-xs p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2">
+        <p>Add Sequence Flow to your Home Screen to use it offline.</p>
+        <p id="install-safari" class="text-slate-400">In Safari: Share, then Add to Home Screen.</p>
+        <div class="flex items-center justify-center gap-3">
+          <button id="install-btn" onclick="installApp()" class="hidden px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition">Install</button>
+          <button onclick="dismissInstallHint()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition border border-slate-700">Not now</button>
+        </div>
       </div>
     </div>
 
@@ -2520,6 +2534,7 @@ img { max-width: 100%; }
         document.getElementById('run-view').classList.add('hidden');
         renderCompletionStats();
         document.getElementById('complete-view').classList.remove('hidden');
+        showInstallHint();
         clearActiveRun();
         playChimeSound();
         return;
@@ -3024,6 +3039,38 @@ img { max-width: 100%; }
       const url = 'https://magicmakersfamily.github.io/apps/sequence-flow/', text = 'Sequence Flow: build a routine and run it step by step with timers';
       try { if (navigator.share) { await navigator.share({ title: 'Sequence Flow', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
       try { await navigator.clipboard.writeText(url); alert('Link copied'); } catch (e) { prompt('Copy this link:', url); }
+    });
+  </script>
+  <script>
+    // ---------- Installable + offline (PLAN 6a) ----------
+    const INSTALL_HINT_KEY = 'sequence_flow_install_hint_v1';
+    let deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; });
+    function isInstalled() {
+      try { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; } catch (e) { return false; }
+    }
+    function showInstallHint() {
+      try { if (localStorage.getItem(INSTALL_HINT_KEY)) return; } catch (e) {}
+      if (isInstalled()) return;
+      document.getElementById('install-btn').classList.toggle('hidden', !deferredInstall);
+      document.getElementById('install-safari').classList.toggle('hidden', !!deferredInstall);
+      document.getElementById('install-hint').classList.remove('hidden');
+    }
+    function dismissInstallHint() {
+      try { localStorage.setItem(INSTALL_HINT_KEY, '1'); } catch (e) {}
+      document.getElementById('install-hint').classList.add('hidden');
+    }
+    async function installApp() {
+      const p = deferredInstall; deferredInstall = null;
+      try { if (p) { p.prompt(); await p.userChoice; } } catch (e) {}
+      dismissInstallHint();
+    }
+    window.addEventListener('load', () => {
+      try {
+        if (SeqLogic.shouldRegisterSW(location.pathname, 'serviceWorker' in navigator)) {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+      } catch (e) {}
     });
   </script>
 </body>

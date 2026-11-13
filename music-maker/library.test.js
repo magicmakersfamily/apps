@@ -99,3 +99,43 @@ test('the little picture of a tune fits in the box', () => {
   assert.ok(th.every(([a, b, p]) => a >= 0 && b <= 1.0001 && a <= b && p >= 0 && p <= 1));
   assert.deepEqual(L.thumb([], 3), []);
 });
+
+test('the backup zip is a real zip that comes back byte for byte', () => {
+  assert.equal(L.crc32(new TextEncoder().encode('hello')), 0x3610a686);
+  const a = new Uint8Array(5000).map((_, i) => (i * 7) & 255), files = [{ name: 'Songs/01 Dragon söng.webm', data: a }, { name: 'x.txt', data: new Uint8Array(0) }];
+  const z = L.zip(files, Date.UTC(2026, 10, 13, 12));
+  assert.deepEqual([z[0], z[1], z[2], z[3]], [0x50, 0x4b, 3, 4]);
+  const back = L.unzip(z);
+  assert.equal(back.length, 2); assert.equal(back[0].name, 'Songs/01 Dragon söng.webm'); assert.deepEqual([...back[0].data], [...a]); assert.equal(back[1].data.length, 0);
+  assert.equal(L.unzip(new Uint8Array([1, 2, 3])), null, 'not a zip');
+  const bad = z.slice(); bad[200] ^= 255;                               // a damaged recording is skipped, not trusted
+  assert.equal(L.unzip(bad).length, 1);
+});
+
+test('save all my songs, then bring them back into an empty browser', () => {
+  const st = three(), [c, b, a] = L.view(st, 'all'), f = L.addFolder(st, 'Bedtime', 5);
+  L.setFolder(st, b.id, f.id); L.star(st, a.id); L.rename(st, c.id, 'Dragon: song?'); L.update(st, a.id, { style: 'rock' }, 9);
+  L.remove(st, b.id, 10); L.undo(st, b.id);
+  const audio = {}; for (const [s, t] of [[c, 'audio/webm;codecs=opus'], [b, 'audio/mp4'], [a, 'audio/wav']]) audio[s.id] = { type: t, data: new Uint8Array([1, 2, s.name.length]) };
+  const files = L.backupFiles(st, audio, 99);
+  assert.deepEqual(files.map((x) => x.name), ['my-songs.json', 'Songs/01 Dragon- song-.webm', 'Songs/02 B.m4a', 'Songs/03 A.wav']);
+  const fresh = L.empty(), got = L.restore(fresh, L.unzip(L.zip(files)));
+  assert.equal(got.length, 3); assert.deepEqual(names(fresh), ['Dragon: song?', 'B', 'A']);
+  assert.equal(got[1].type, 'audio/mp4'); assert.deepEqual([...got[2].data], [...audio[a.id].data]);
+  assert.equal(fresh.folders[0].name, 'Bedtime'); assert.deepEqual(names(fresh, f.id), ['B']); assert.deepEqual(names(fresh, 'star'), ['A']);
+  assert.equal(L.find(fresh, a.id).style, 'rock');
+  assert.deepEqual(L.restore(fresh, L.unzip(L.zip(files))), [], 'bringing back twice makes no copies');
+  assert.equal(L.add(fresh, {}, 200).name, 'My song 4', 'new songs keep counting up');
+});
+
+test('bringing back adds to the songs already here, and ignores other files', () => {
+  const old = three(), audio = {}; for (const s of old.songs) audio[s.id] = { type: 'audio/webm', data: new Uint8Array([9]) };
+  const files = L.backupFiles(old, audio);
+  const here = L.empty(); L.add(here, { name: 'New one' }, 50);
+  assert.equal(L.restore(here, files).length, 3);
+  assert.deepEqual(names(here), ['New one', 'C', 'B', 'A']);
+  assert.equal(L.restore(here, [{ name: 'my-songs.json', data: new TextEncoder().encode('{"app":"other"}') }]), null);
+  assert.equal(L.restore(here, [{ name: 'photo.jpg', data: new Uint8Array(3) }]), null);
+  const noAudio = L.backupFiles(old, { [old.songs[0].id]: audio[old.songs[0].id] });
+  assert.equal(noAudio.length, 2, 'a song whose recording is missing is left out');
+});

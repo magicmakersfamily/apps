@@ -161,6 +161,9 @@
   .fchip.drop { outline: 2px dashed var(--gold); outline-offset: 2px; background: rgba(253, 224, 71, .2); color: #fff; }
   .fchip input, .folder-tools input, .rename-in { font: inherit; color: #fff; background: rgba(2, 6, 23, .7); border: 1px solid var(--pink); border-radius: 8px; padding: 4px 8px; min-width: 0; }
   .fchip input { width: 10em; font-size: .85rem; }
+  .songs-tools { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: .9rem; margin-top: 12px; }
+  .songs-tools .linkish { cursor: pointer; }
+  .songs-tools [hidden] { display: none; }
   .folder-tools { font-size: .85rem; color: var(--dim); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .songlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   .song { position: relative; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 8px 10px 8px 6px; border-radius: 16px; background: var(--well); border: 1px solid rgba(255, 255, 255, .06); transition: transform .15s ease; }
@@ -248,7 +251,11 @@
         <div class="folder-tools" id="folderTools" hidden></div>
         <ol class="songlist" id="songList"></ol>
         <p class="small" id="songsEmpty">Your songs will be kept here, on this device, after you record.</p>
-        <p class="small" id="songsNote">Songs stay in this browser on this device. Use the save button on a song to keep a copy.</p>
+        <div class="songs-tools">
+          <button class="linkish" type="button" id="saveAll">💾 Save all my songs</button>
+          <label class="linkish upload" id="bringBack">📂 Bring back saved songs<input id="backupFile" type="file" accept=".zip,application/zip" aria-label="Bring back songs from a saved file"></label>
+        </div>
+        <p class="small" id="songsNote">Songs stay in this browser on this device. “Save all my songs” makes one file you can keep somewhere safe, and “Bring back” puts them back.</p>
       </div>
     </section>
 
@@ -322,7 +329,7 @@
   <div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button id="toastUndo" type="button">Undo</button></div>
 
   <footer class="shelf-foot">
-    <p><b>Version 1.2 (beta)</b> · Launched <time datetime="2026-11-13">November 13, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=music-maker&amp;v=1.2">Share your thoughts</a> · <a href="../feedback/?game=music-maker&amp;v=1.2&amp;kind=bug">Report a bug</a></p>
+    <p><b>Version 1.3 (beta)</b> · Launched <time datetime="2026-11-13">November 13, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=music-maker&amp;v=1.3">Share your thoughts</a> · <a href="../feedback/?game=music-maker&amp;v=1.3&amp;kind=bug">Report a bug</a></p>
     <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
     <p>These apps don’t collect any information. Saved progress, including My songs, stays in your own browser.</p>
     <p>The microphone is only used while you record. Your recording and your song never leave this device, and all the band’s sounds are made on it.</p>
@@ -712,6 +719,7 @@ function drawSongs() {
   const fin = $('folderIn'); if (fin) { fin.focus(); if (folderEdit === 'rename') fin.select(); }
   const view = L.view(lib, libFilter);
   $('songsEmpty').hidden = view.length > 0;
+  $('saveAll').hidden = !c.all;
   $('songsEmpty').textContent = !c.all ? 'Your songs will be kept here, on this device, after you record.' : libFilter === 'star' ? 'No starred songs yet. Tap a star to add one.' : 'This folder is empty. Drag a song by its dots onto the folder name to put it here.';
   $('songList').innerHTML = view.map((s, i) => {
     const st = E.STYLES.find((x) => x.id === s.style) || E.STYLES[0], f = s.folder && lib.folders.find((x) => x.id === s.folder), n = esc(s.name);
@@ -849,7 +857,42 @@ function dragEnd(e, cancel) {
 }
 list.addEventListener('pointerup', (e) => dragEnd(e, false));
 list.addEventListener('pointercancel', (e) => dragEnd(e, true));
-$('say3').onclick = () => say('These are your songs. Tap a pink play button to hear one again and change it. Tap a star for your favourites. To move a song, hold its dots and drag it up or down, or onto a folder.');
+$('say3').onclick = () => say('These are your songs. Tap a pink play button to hear one again and change it. Tap a star for your favourites. To move a song, hold its dots and drag it up or down, or onto a folder. Tap save all my songs to keep a copy of every song in one file.');
+// ask the browser not to clear My songs when space runs low or after weeks away (it may say no; only asked when saving or bringing back)
+function keepSafe() { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {} }
+// "Save all my songs": one .zip with every recording (playable on any computer) plus the list, and "Bring back" to put them back
+$('saveAll').onclick = async () => {
+  finishDeletes();
+  const songs = L.view(lib, 'all'); if (!songs.length) { toast('Record a song first, then you can save it.'); return; }
+  $('saveAll').disabled = true; setStatus('Getting your songs ready to save.'); keepSafe();
+  try {
+    const got = {};
+    for (const s of songs) { const b = await store.getAudio(s.id).catch(() => null); if (b) got[s.id] = { type: b.type, data: new Uint8Array(await b.arrayBuffer()) }; }
+    const files = L.backupFiles(lib, got, Date.now()), n = files.length - 1;
+    if (!n) throw new Error('none');
+    const d = new Date(), stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const url = URL.createObjectURL(new Blob([L.zip(files, Date.now())], { type: 'application/zip' })), a = document.createElement('a');
+    a.href = url; a.download = 'my-magic-songs-' + stamp + '.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+    toast(n === songs.length ? 'Saved all ' + n + (n === 1 ? ' song' : ' songs') + ' in one file. Keep it somewhere safe.' : 'Saved ' + n + ' of ' + songs.length + ' songs. Some could not be read on this device.');
+  } catch (e) { toast('Your songs could not be saved on this device.'); }
+  $('saveAll').disabled = false; setStatus('Tap the big button to start.');
+};
+$('backupFile').onchange = async (e) => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  setStatus('Bringing back your songs.');
+  try {
+    const files = L.unzip(new Uint8Array(await f.arrayBuffer())), back = files && L.restore(lib, files);
+    if (!back) { toast('That file is not a “Save all my songs” file.'); return; }
+    if (!back.length) { toast('Those songs are already here.'); return; }
+    let lost = 0;
+    for (const r of back) await store.putAudio(r.song.id, new Blob([r.data], { type: r.type })).catch(() => { lost++; L.remove(lib, r.song.id, 1); });
+    if (lost) L.purge(lib, 1);
+    libFilter = 'all'; saveLib(); drawSongs(); keepSafe();
+    const n = back.length - lost;
+    toast(!n ? 'This browser could not keep those songs.' : 'Brought back ' + n + (n === 1 ? ' song.' : ' songs.'));
+  } catch (err) { toast('That file could not be read.'); }
+  finally { setStatus('Tap the big button to start.'); }
+};
 store.loadList().then((st) => { lib = st; const gone = L.purge(lib); if (gone.length) { store.dropAudio(gone).catch(() => {}); saveLib(); } drawSongs(); }).catch(() => { libFail(); drawSongs(); });
 
 /* ---------- Tell a friend ---------- */

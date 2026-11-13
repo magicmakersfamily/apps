@@ -14,7 +14,7 @@ for (const browser of list) {
     const p = await launch({ browser, url: (await baseUrl()) + 'music-maker/', w, h, seed: 5, mobile: label !== 'laptop' });
     if (!(await p.ready('!!window.MME && document.getElementById("recBtn")'))) fail(label, 'page did not boot');
     const body = await p.eval('document.body.innerText');
-    if (!/Version 1\.2 \(beta\)/.test(body)) fail(label, 'version line missing');
+    if (!/Version 1\.3 \(beta\)/.test(body)) fail(label, 'version line missing');
     if (!/Ko-fi/.test(body) || !/Tell a friend/.test(body)) fail(label, 'shelf footer incomplete');
     if (await p.eval('document.documentElement.scrollWidth > innerWidth + 1')) fail(label, 'page scrolls sideways at step 1');
     if (!(await p.eval('document.getElementById("tab2").disabled'))) fail(label, 'step 2 should be locked before recording');

@@ -1,7 +1,8 @@
 /* Magic Music Maker: "My songs", the list of recordings kept on this device.
    The model (ordering, folders, stars, names, delete with undo) is pure and tested with node (library.test.js).
-   L.Store keeps it in IndexedDB in the browser: the list as one record, each recording as a Blob.
-   Nothing here ever leaves the device. */
+   L.Store keeps it in IndexedDB in the browser: the list as one record, each recording as bytes plus its type.
+   L.zip / L.backupFiles / L.restore make and read the "Save all my songs" file (a plain .zip), so songs can live somewhere safe.
+   Nothing here ever leaves the device unless someone saves that file. */
 (function (root) {
 'use strict';
 const L = {};
@@ -117,6 +118,90 @@ L.thumb = function (notes, dur) {
   let lo = Infinity, hi = -Infinity; for (const n of notes) { lo = Math.min(lo, n.q); hi = Math.max(hi, n.q); }
   const span = Math.max(4, hi - lo), t0 = notes[0].s, t1 = Math.max(notes[notes.length - 1].e, t0 + .1), step = Math.max(1, Math.ceil(notes.length / 48)), out = [];
   for (let i = 0; i < notes.length; i += step) { const n = notes[i]; out.push([+((n.s - t0) / (t1 - t0)).toFixed(3), +((n.e - t0) / (t1 - t0)).toFixed(3), +((n.q - lo) / span).toFixed(3)]); }
+  return out;
+};
+
+/* ---------- "Save all my songs": one .zip file with every recording plus the list ---------- */
+// a plain zip (stored, not squeezed: recordings are already compressed), so any computer can open it and play the songs
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+L.crc32 = function (u8) { let c = 0xffffffff; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+const utf8 = (s) => new TextEncoder().encode(s), unutf8 = (u8) => new TextDecoder().decode(u8);
+
+L.zip = function (files, now) {
+  const d = new Date(now || Date.now()), time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const date = ((Math.max(1980, d.getFullYear()) - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  const parts = [], central = []; let off = 0;
+  for (const f of files) {
+    const name = utf8(f.name), data = f.data, crc = L.crc32(data), h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, time, true); h.setUint16(12, date, true); h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+    h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, time, true); c.setUint16(14, date, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true);
+    c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    parts.push(new Uint8Array(h.buffer), name, data); central.push(new Uint8Array(c.buffer), name);
+    off += 30 + name.length + data.length;
+  }
+  const csize = central.reduce((a, p) => a + p.length, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, csize, true); e.setUint32(16, off, true);
+  const all = parts.concat(central, [new Uint8Array(e.buffer)]), out = new Uint8Array(off + csize + 22); let p = 0;
+  for (const a of all) { out.set(a, p); p += a.length; }
+  return out;
+};
+// reads the zips L.zip makes (and any other zip whose files are stored); damaged or squeezed files are skipped
+L.unzip = function (u8) {
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), out = [];
+  let e = -1; for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) return null;
+  let p = dv.getUint32(e + 16, true); const n = dv.getUint16(e + 10, true);
+  for (let k = 0; k < n && p + 46 <= u8.length && dv.getUint32(p, true) === 0x02014b50; k++) {
+    const method = dv.getUint16(p + 10, true), crc = dv.getUint32(p + 16, true), size = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true);
+    const name = unutf8(u8.subarray(p + 46, p + 46 + nl)), lo = dv.getUint32(p + 42, true);
+    p += 46 + nl + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+    if (method !== 0 || lo + 30 > u8.length || dv.getUint32(lo, true) !== 0x04034b50) continue;
+    const start = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true), data = u8.subarray(start, start + size);
+    if (data.length === size && L.crc32(data) === crc) out.push({ name, data });
+  }
+  return out;
+};
+
+const EXT = { 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/wave': 'wav' };
+L.ext = function (type) { return EXT[String(type || '').split(';')[0].trim().toLowerCase()] || 'audio'; };
+L.BACKUP = 'my-songs.json';
+// audio: { [song id]: { type, data: Uint8Array } }; songs without a recording are left out
+L.backupFiles = function (st, audio, now) {
+  const songs = L.view(st, 'all').filter((s) => audio[s.id]), files = [], map = {}, used = new Set();
+  songs.forEach((s, i) => {
+    const base = String(i + 1).padStart(2, '0') + ' ' + (s.name.replace(/[\\/:*?"<>|.]+/g, '-').trim() || 'My song');
+    let name = 'Songs/' + base + '.' + L.ext(audio[s.id].type);
+    for (let k = 2; used.has(name); k++) name = 'Songs/' + base + ' (' + k + ').' + L.ext(audio[s.id].type);
+    used.add(name); map[s.id] = { file: name, type: audio[s.id].type || '' }; files.push({ name, data: audio[s.id].data });
+  });
+  const keep = new Set(songs.map((s) => s.id)), list = JSON.parse(JSON.stringify(st));
+  list.songs = list.songs.filter((s) => keep.has(s.id));
+  const man = { app: 'magic-music-maker', backup: 1, saved: now || Date.now(), list, files: map };
+  files.unshift({ name: L.BACKUP, data: utf8(JSON.stringify(man)) });
+  return files;
+};
+// bring songs back from a backup into the list: songs already here are skipped, new ones go after the others, folders come too
+// returns [{ song, data, type }] for the recordings to keep; the caller stores them, then the list
+L.restore = function (st, files) {
+  const byName = new Map((files || []).map((f) => [f.name, f.data])), raw = byName.get(L.BACKUP);
+  if (!raw) return null;
+  let man; try { man = JSON.parse(unutf8(raw)); } catch (e) { return null; }
+  if (!man || man.app !== 'magic-music-maker' || !man.files) return null;
+  const back = L.load(man.list), have = new Set(st.songs.map((s) => s.id)), out = [];
+  for (const f of back.folders) if (!st.folders.some((x) => x.id === f.id)) st.folders.push(f);
+  let order = st.songs.length;
+  for (const s of L.view(back, 'all')) {
+    const m = man.files[s.id], data = m && byName.get(m.file);
+    if (have.has(s.id) || !data) continue;
+    s.order = order++; st.songs.push(s); have.add(s.id);
+    out.push({ song: s, data, type: typeof m.type === 'string' ? m.type : '' });
+  }
+  st.seq = Math.max(st.seq, back.seq, st.songs.length); st.fseq = Math.max(st.fseq, back.fseq, st.folders.length);
+  renumber(st);
   return out;
 };
 

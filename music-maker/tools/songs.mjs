@@ -1,5 +1,5 @@
 // "My songs" check: two recordings are kept, then star, rename, new folder, drag onto a folder, drag to reorder,
-// re-open keeps the band, delete with Undo, delete for good, and everything survives a page reload.
+// re-open keeps the band, delete with Undo, delete for good, "Save all my songs" + "Bring back", and everything survives a page reload.
 // Recordings go in through "Use a recording" (a made-up hum as a WAV), the same path as the microphone's saved Blob.
 // Usage: node music-maker/tools/songs.mjs [--browser chromium|firefox|webkit|all]
 import { launch, baseUrl, record, outDir } from '../../tools/play/harness.mjs';
@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const require = createRequire(import.meta.url);
 const { hum } = require('../demo.js');
+const MML = require('../library.js');
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const which = arg('--browser', 'chromium');
 const list = which === 'all' ? ['chromium', 'firefox', 'webkit'] : which.split(',');
@@ -93,6 +94,18 @@ for (const browser of list) {
       if (JSON.stringify(await names()) !== '["Dragon song","My song 1"]') fail(label, 'after reload: ' + JSON.stringify(await names()));
       if ((await p.eval('lib.songs.filter((s) => s.star).length')) !== 1 || !(await p.eval('lib.folders.length === 1 && lib.songs.some((s) => s.folder === lib.folders[0].id)'))) fail(label, 'star or folder lost after reload');
 
+      // "Save all my songs" downloads one zip holding the list and both recordings
+      let zipFile = null;
+      if (await p.eval('document.getElementById("saveAll").hidden')) fail(label, 'Save all my songs is hidden');
+      try {
+        const [dl] = await Promise.all([pg.waitForEvent('download', { timeout: 15000 }), pg.click('#saveAll')]);
+        zipFile = path.join(outDir(), `mm-backup-${browser}-${label}.zip`); await dl.saveAs(zipFile);
+        if (!/^my-magic-songs-\d{4}-\d\d-\d\d\.zip$/.test(dl.suggestedFilename())) fail(label, 'backup file name: ' + dl.suggestedFilename());
+        const files = MML.unzip(new Uint8Array(fs.readFileSync(zipFile))) || [];
+        const songsIn = files.filter((f) => /^Songs\/0[12] .+\.wav$/.test(f.name) && f.data.length > 1000).length;
+        if (files.length !== 3 || files[0].name !== 'my-songs.json' || songsIn !== 2) fail(label, 'backup zip holds: ' + files.map((f) => f.name + ':' + f.data.length).join(', '));
+      } catch (e) { zipFile = null; fail(label, 'Save all my songs did not download: ' + String(e.message || e).split('\n')[0]); }
+
       // delete, Undo, then delete for good
       await pg.click('#songList .song:nth-child(2) .smore'); await pg.click('#songList .smenu [data-act=delete]');
       if ((await count()) !== 1 || (await p.eval('document.getElementById("toast").hidden'))) fail(label, 'delete did not hide the song or show Undo');
@@ -103,6 +116,19 @@ for (const browser of list) {
       await pg.reload(); await p.ready('!!window.MML && document.querySelectorAll("#songList .song").length >= 1', 10000); await p.sleep(300);
       if ((await count()) !== 1) fail(label, 'deleted song came back after reload');
       if ((await p.eval('store.getAudio(lib.songs[0].id).then((b) => !!b && b.size > 1000)')) !== true) fail(label, 'the kept recording is missing');
+
+      // the deleted song comes back from the "Save all my songs" file made before deleting it; bringing it back twice makes no copy
+      if (zipFile) {
+        await pg.setInputFiles('#backupFile', zipFile);
+        await p.ready('document.querySelectorAll("#songList .song").length === 2', 8000); await p.sleep(400);
+        if ((await count()) !== 2) fail(label, 'Bring back did not bring the deleted song back');
+        if (!/Brought back 1 song/.test(await p.eval('document.getElementById("toastText").textContent'))) fail(label, 'Bring back message: ' + (await p.eval('document.getElementById("toastText").textContent')));
+        if ((await p.eval('Promise.all(lib.songs.map((s) => store.getAudio(s.id))).then((bs) => bs.every((b) => b && b.size > 1000))')) !== true) fail(label, 'a brought-back recording is missing');
+        await pg.setInputFiles('#backupFile', zipFile); await p.sleep(600);
+        if ((await count()) !== 2 || !/already here/.test(await p.eval('document.getElementById("toastText").textContent'))) fail(label, 'bringing back twice made copies');
+        await p.sleep(400); await pg.reload(); await p.ready('!!window.MML && document.querySelectorAll("#songList .song").length === 2', 10000);
+        if ((await count()) !== 2) fail(label, 'brought-back song lost after reload');
+      }
       await p.shot(path.join(outDir(), `music-maker-songs-${browser}-${label}.png`));
     } catch (e) { fail(label, 'crashed: ' + String(e.message || e).split('\n')[0]); }
     for (const e of p.errors) fail(label, e.kind + ': ' + e.text);

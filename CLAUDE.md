@@ -80,7 +80,7 @@ Audio API, started only from a button press. Exception, at the family's request:
   Shelf" in `versions/index.html`. Frozen copies are never edited.
 - Rolling the shelf back: take `versions/shelf/<X.Y>/index.html`, remove the `../../../` link prefixes, the noindex
   meta and the old-version strip, put it at the repo root, and release it as a new shelf version (never reuse a number).
-- Shelf versions so far: **1.0** (Sep 25, 2026, one long page of cards, frozen), **2.0** (Oct 18, 2026, tabs and icon tiles, frozen), **2.1** (Nov 4, 2026, Touch Tone added, frozen), **2.2** (Nov 4, 2026, James’s Marble Run added, frozen), **2.3** (Nov 4, 2026, Marble Run tile through 1.3, frozen), **2.4** (Nov 5, 2026, Ultimate Train Studio added), frozen), **2.5** (Nov 12, 2026, The Great Robot Journey added).
+- Shelf versions so far: **1.0** (Sep 25, 2026, one long page of cards, frozen), **2.0** (Oct 18, 2026, tabs and icon tiles, frozen), **2.1** (Nov 4, 2026, Touch Tone added, frozen), **2.2** (Nov 4, 2026, James’s Marble Run added, frozen), **2.3** (Nov 4, 2026, Marble Run tile through 1.3, frozen), **2.4** (Nov 5, 2026, Ultimate Train Studio added), frozen), **2.5** (Nov 12, 2026, The Great Robot Journey added, frozen), **2.6** (Nov 13, 2026, Magic Music Maker added).
 
 ## Versions: every release stays playable
 

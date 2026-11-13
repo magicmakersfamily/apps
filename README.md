@@ -10,7 +10,7 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf itself (version 2.5): Games and Utilities tabs, one icon tile per app
+index.html          the shelf itself (version 2.6): Games and Utilities tabs, one icon tile per app
 TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
@@ -96,6 +96,13 @@ robot-journey/      The Great Robot Journey 機器人大冒險 (beta): a platfor
                     features.mjs (coach, ghost-route help, drag launch, results screen),
                     render-music.mjs (songs to WAV for listening), measure.mjs (jump guide numbers)
   cover.png         1200×744 card image (render with index.html#cover)
+music-maker/        Magic Music Maker 魔法音樂工坊 (beta): sing, hum or tap a tune and a band plays along; all on the device
+  index.html        the whole page (record, band picker, piano roll, sound and WAV save)
+  engine.js         the music model, no audio inside: finds notes, tuning, key and pulse, plans the band
+  demo.js           a made-up hum and taps for tests, the "pretend hum" buttons and the cover
+  engine.test.js    model tests (node --test)
+  tools/            smoke.mjs (laptop and phone, hum and taps, every render has sound)
+  cover.png         1200×744 card image (render with index.html#cover)
 versions/           past releases, still playable (versions/<game>/<X.Y>/), see versions/index.html
 tools/              freeze-version.sh: freeze a tagged release into versions/
 .nojekyll           serve files as-is
@@ -119,8 +126,10 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.4 | 2026-11-04 |
 | Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
 | The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.2 | 2026-11-12 |
+| Magic Music Maker 魔法音樂工坊 (beta) | `music-maker/` | 1.0 | 2026-11-13 |
 
-The shelf is versioned too: **The App Shelf 2.5** (2026-11-12). Version 2.4, the shelf before The Great Robot Journey
+The shelf is versioned too: **The App Shelf 2.6** (2026-11-13). Version 2.5, the shelf before Magic Music Maker joined, is
+frozen at `versions/shelf/2.5/`. Version 2.4, the shelf before The Great Robot Journey
 joined, is frozen at `versions/shelf/2.4/`. Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at
 `versions/shelf/2.3/`. Version 2.2, the shelf when Marble Run 1.0 joined, is frozen at
 `versions/shelf/2.2/`. Version 2.1 is frozen at `versions/shelf/2.1/`. Version 2.0 is frozen at `versions/shelf/2.0/`.

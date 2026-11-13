@@ -1,0 +1,5 @@
+{
+  "about": "Browser checks for tools/check.mjs. quick = before every push; full = before a release.",
+  "quick": [["music-maker/tools/smoke.mjs", "--browser", "chromium"]],
+  "full": [["music-maker/tools/smoke.mjs", "--browser", "all"]]
+}

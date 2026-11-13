@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<script>/* Frozen copy: keep this version's saved games separate. */
+(function(){try{var P='music-maker@1.0:',S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;
+S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};
+S.removeItem=function(k){return r.call(this,P+k)}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Magic Music Maker 魔法音樂工坊 · The App Shelf</title>
+<meta name="description" content="Sing, hum or tap any tune, any way you like. A band listens, learns it and plays along with you. Everything stays on this device.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Magic Music Maker 魔法音樂工坊 · The App Shelf">
+<meta property="og:description" content="Sing, hum or tap any tune. A band listens, learns it and plays along with you.">
+<meta property="og:image" content="https://magicmakersfamily.github.io/apps/music-maker/cover.png">
+<meta name="theme-color" content="#312e81">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234338ca'/%3E%3Cstop offset='1' stop-color='%23be185d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M26 44V20l18-4v24' fill='none' stroke='%23fde047' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='21' cy='44' r='6' fill='%23fde047'/%3E%3Ccircle cx='39' cy='40' r='6' fill='%23fde047'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap">
+<script>if (location.hash === '#cover') document.documentElement.classList.add('cover-mode');</script>
+<style>
+  /* One dark "night sky" world on purpose (indigo to pink), like the first Magic Music Maker.
+     Layout: header, a two-step bar, one glass card. Step 1 is one big button; step 2 is the song and the band choices. */
+  :root {
+    --sky-a: #312e81; --sky-b: #581c87; --sky-c: #831843;
+    --card: rgba(15, 23, 42, 0.82); --well: rgba(2, 6, 23, 0.45); --well-2: rgba(15, 23, 42, 0.6);
+    --text: #f1f5f9; --muted: #cbd5e1; --dim: #94a3b8; --line: rgba(255, 255, 255, 0.12);
+    --pink: #ec4899; --pink-soft: #f9a8d4; --purple: #9333ea; --lilac: #d8b4fe; --gold: #fde047; --amber: #eab308; --done: #10b981; --rec: #dc2626;
+    --fun: 'Fredoka', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+    --body: 'Inter', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { background: var(--sky-b); }
+  body { margin: 0; min-height: 100vh; color: var(--text); font-family: var(--body); line-height: 1.5; overflow-x: hidden;
+    background: linear-gradient(135deg, var(--sky-a), var(--sky-b) 50%, var(--sky-c)) fixed; }
+  img { max-width: 100%; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+  p { margin: 0; }
+  button:focus-visible, input:focus-visible, canvas:focus-visible, a:focus-visible, .upload:focus-within { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  .sky { position: fixed; inset: 0; pointer-events: none; overflow: hidden; opacity: .2; z-index: 0; }
+  .sky span { position: absolute; animation: float 4s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-10px) rotate(3deg); } }
+
+  .wrap { position: relative; z-index: 1; width: min(100%, 760px); margin: 0 auto; padding: calc(14px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; }
+  .back-link { align-self: flex-start; color: var(--muted); text-decoration: none; font-size: .95rem; }
+  .back-link:hover { color: #fff; }
+  header { text-align: center; margin: 14px 0 22px; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .1); color: var(--pink-soft); font-weight: 500; font-size: .875rem; margin-bottom: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, .15); }
+  .badge svg { width: 16px; height: 16px; color: var(--gold); animation: spin 6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-family: var(--fun); font-weight: 700; font-size: clamp(2.3rem, 9vw, 3.75rem); line-height: 1.05; letter-spacing: -.01em; margin: 0; text-wrap: balance;
+    background: linear-gradient(90deg, #f472b6, #d8b4fe 50%, #fde047); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+  .zh { display: block; font-size: .5em; letter-spacing: .08em; margin-top: 4px; font-family: "Noto Serif TC", "Songti TC", "PMingLiU", serif; }
+  .lede { color: var(--muted); font-size: 1.05rem; max-width: 36rem; margin: 10px auto 0; }
+
+  .stepper { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; margin-bottom: 20px; }
+  .stepper .pill { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 16px; font-weight: 600; background: rgba(255, 255, 255, .1); color: var(--dim); border: 1px solid rgba(255, 255, 255, .05); transition: all .3s; }
+  .stepper .pill .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: .875rem; background: rgba(255, 255, 255, .1); }
+  .stepper .pill.on { background: linear-gradient(90deg, var(--pink), #9333ea); color: #fff; border-color: transparent; box-shadow: 0 8px 20px rgba(0, 0, 0, .25); }
+  .stepper .pill.on .n { background: rgba(255, 255, 255, .2); }
+  .stepper .pill.done { background: var(--done); color: #fff; border-color: transparent; }
+  .stepper .pill:disabled { cursor: default; }
+  .stepper .bar { width: 48px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .2); overflow: hidden; }
+  .stepper .bar i { display: block; height: 100%; width: 0; background: var(--pink); transition: width .5s; }
+  .stepper .bar.full i { width: 100%; }
+
+  .card { width: 100%; background: var(--card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--line); border-radius: 24px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(59, 7, 100, .55); }
+  .card section { display: flex; flex-direction: column; gap: 22px; }
+  h2 { font-family: var(--fun); font-weight: 700; font-size: clamp(1.5rem, 5vw, 1.9rem); margin: 0 0 6px; text-align: center; color: #fff; }
+  h3 { font-family: var(--fun); font-weight: 600; font-size: 1.15rem; margin: 0; color: #fff; }
+  .sub { color: var(--muted); text-align: center; font-size: .95rem; }
+
+  .well { background: var(--well); border: 1px solid rgba(255, 255, 255, .05); border-radius: 16px; }
+  #stage { display: flex; flex-direction: column; align-items: center; padding: 30px 16px; gap: 18px; }
+  #wave { width: 100%; max-width: 28rem; height: 96px; border-radius: 12px; background: rgba(15, 23, 42, .6); border: 1px solid rgba(255, 255, 255, .05); }
+  #timer { font-family: var(--fun); font-weight: 700; font-size: 1.9rem; letter-spacing: .06em; color: #f472b6; font-variant-numeric: tabular-nums; }
+  .recwrap { position: relative; }
+  .ping { position: absolute; inset: -16px; border-radius: 50%; background: rgba(236, 72, 153, .3); opacity: 0; pointer-events: none; }
+  .on .ping { animation: ping 1.3s cubic-bezier(0, 0, .2, 1) infinite; }
+  @keyframes ping { 0% { transform: scale(.85); opacity: .7; } 80%, 100% { transform: scale(1.25); opacity: 0; } }
+  #recBtn { position: relative; z-index: 1; width: 112px; height: 112px; border-radius: 50%; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    background: linear-gradient(45deg, #db2777, #9333ea 50%, var(--amber)); transition: transform .3s; animation: glow 2.5s infinite; }
+  #recBtn:hover { transform: scale(1.05); } #recBtn:active { transform: scale(.95); }
+  #recBtn.rec { background: linear-gradient(45deg, #dc2626, #ef4444); }
+  #recBtn svg { width: 40px; height: 40px; }
+  #recBtn b { font-family: var(--fun); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+  @keyframes glow { 0%, 100% { box-shadow: 0 0 15px rgba(236, 72, 153, .6), 0 0 30px rgba(168, 85, 247, .4); } 50% { box-shadow: 0 0 30px rgba(236, 72, 153, .9), 0 0 60px rgba(234, 179, 8, .6); } }
+  #status { color: var(--muted); font-size: .9rem; text-align: center; min-height: 1.4em; max-width: 30rem; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: rgba(255, 255, 255, .1); color: #fff; font-weight: 600; font-size: .95rem; transition: background .2s; }
+  .btn:hover { background: rgba(255, 255, 255, .2); }
+  .btn svg { width: 18px; height: 18px; flex: none; }
+  .btn.hot { background: linear-gradient(90deg, #db2777, #9333ea); box-shadow: 0 8px 20px rgba(0, 0, 0, .25); }
+  .btn.hot:hover { opacity: .9; background: linear-gradient(90deg, #db2777, #9333ea); }
+  .upload { position: relative; overflow: hidden; }
+  .upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .small { font-size: .85rem; color: var(--dim); text-align: center; }
+
+  .done-tag { display: inline-flex; align-items: center; gap: 6px; align-self: center; background: rgba(236, 72, 153, .2); border: 1px solid rgba(236, 72, 153, .3); color: var(--pink-soft); font-weight: 600; font-size: .75rem; padding: 4px 12px; border-radius: 999px; }
+  .done-tag svg { width: 14px; height: 14px; }
+  #heard { color: var(--muted); text-align: center; font-size: .95rem; }
+
+  .player { position: relative; overflow: hidden; background: linear-gradient(45deg, #020617, #3b0764 50%, #0f172a); border: 1px solid var(--line); border-radius: 16px; padding: 18px 14px 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .orb { position: absolute; top: 14px; left: 50%; width: 176px; height: 176px; margin-left: -88px; border-radius: 50%; background: linear-gradient(45deg, #db2777, #9333ea 50%, var(--amber)); opacity: .3; filter: blur(40px); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .15; } }
+  .disc { position: relative; width: 104px; height: 104px; border-radius: 50%; background: #020617; border: 4px solid rgba(255, 255, 255, .2); box-shadow: 0 20px 40px rgba(0, 0, 0, .5); display: grid; place-items: center; transition: transform .3s; }
+  .disc.spin { animation: spin 3s linear infinite; }
+  .disc::before, .disc::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .1); }
+  .disc::before { inset: 11px; } .disc::after { inset: 24px; }
+  .disc i { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(45deg, var(--pink), #facc15); display: grid; place-items: center; }
+  .disc svg { width: 20px; height: 20px; color: #fff; }
+  #roll { position: relative; width: 100%; height: 170px; border-radius: 12px; background: rgba(2, 6, 23, .5); display: block; touch-action: none; cursor: pointer; }
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; color: var(--dim); font-size: .8rem; position: relative; }
+  .legend i { display: inline-block; width: 14px; height: 9px; border-radius: 4px; margin-right: 6px; }
+
+  .controls { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .controls .times { display: flex; justify-content: space-between; color: var(--dim); font-size: .75rem; font-variant-numeric: tabular-nums; }
+  .transport { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .round { width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, .1); display: grid; place-items: center; transition: background .2s; }
+  .round:hover { background: rgba(255, 255, 255, .2); }
+  .round svg { width: 20px; height: 20px; }
+  #playBtn { width: 68px; height: 68px; background: linear-gradient(45deg, var(--pink), #9333ea); box-shadow: 0 0 15px rgba(236, 72, 153, .6), 0 0 30px rgba(168, 85, 247, .4); transition: transform .2s; }
+  #playBtn:hover { transform: scale(1.05); background: linear-gradient(45deg, var(--pink), #9333ea); }
+  #playBtn svg { width: 30px; height: 30px; }
+  #busy { text-align: center; color: var(--pink-soft); font-size: .85rem; min-height: 1.2em; }
+
+  .label { font-weight: 600; color: #e2e8f0; font-size: .9rem; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; }
+  .chip { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line); color: var(--muted); font-weight: 500; font-size: .875rem; transition: all .2s; }
+  .chip:hover { background: rgba(236, 72, 153, .2); color: #fff; }
+  .chip[aria-pressed="true"] { background: rgba(236, 72, 153, .3); border-color: var(--pink); color: #fff; }
+  .chip .pic { font-size: 1.15rem; }
+  .chips.few { grid-template-columns: repeat(3, 1fr); }
+  #words { width: 100%; font: inherit; font-size: .95rem; color: #fff; background: rgba(2, 6, 23, .6); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+  #words::placeholder { color: #64748b; }
+  #understood { color: var(--dim); font-size: .85rem; min-height: 1.3em; margin-top: 6px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .setting { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .setting .head { display: flex; justify-content: space-between; font-size: .875rem; }
+  .setting .head b { font-weight: 600; color: #cbd5e1; }
+  #energyVal { font-weight: 700; color: var(--gold); }
+  input[type=range] { width: 100%; accent-color: var(--amber); cursor: pointer; }
+  .check { display: inline-flex; gap: 10px; align-items: center; font-weight: 500; color: var(--muted); font-size: .95rem; }
+  .check input { width: 20px; height: 20px; accent-color: var(--pink); }
+
+  .shelf-foot { color: var(--dim); font-size: .8rem; text-align: center; margin-top: 26px; display: flex; flex-direction: column; gap: 6px; }
+  .shelf-foot p { margin: 0; }
+  .shelf-foot a, .linkish { color: var(--muted); }
+  .linkish { text-decoration: underline; padding: 0; font-size: inherit; }
+  @media (max-width: 480px) { .card { padding: 18px 14px; } .stepper { gap: 8px; } .stepper .pill { padding: 8px 12px; } .stepper .bar { width: 24px; } #stage { padding: 22px 10px; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+  html.cover-mode .back-link, html.cover-mode .shelf-foot { display: none; }
+  html.cover-mode body { height: 744px; overflow: hidden; }
+</style>
+</head>
+<body>
+<div style="font:13px/1.4 system-ui,sans-serif;background:#2b2140;color:#f3eefc;padding:6px 12px;text-align:center">Old version 1.0, kept so we can compare. Saved games here are separate. <a style="color:#d9c8ff" href="../../../music-maker/">Play the current version</a> · <a style="color:#d9c8ff" href="../../">All versions</a></div>
+<div class="sky" aria-hidden="true">
+  <span style="top:40px;left:40px;font-size:3.5rem">🎵</span>
+  <span style="top:25%;right:64px;font-size:3rem;animation-delay:1s">✨</span>
+  <span style="bottom:80px;left:25%;font-size:3.5rem;animation-delay:2s">🎧</span>
+  <span style="bottom:33%;right:25%;font-size:3rem;animation-delay:1.5s">🌟</span>
+  <span style="top:50%;left:40px;font-size:2.4rem;animation-delay:2.5s">🎸</span>
+</div>
+
+<div class="wrap">
+  <a class="back-link" href="../../../">← All apps</a>
+
+  <header>
+    <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg><span>Your tune, a whole band</span></div>
+    <h1>Magic Music Maker<span class="zh" lang="zh-TW">魔法音樂工坊</span></h1>
+    <p class="lede">Hum, sing or tap a tune any way you like, and a band that listens will learn it and play along!</p>
+  </header>
+
+  <nav class="stepper" aria-label="Steps">
+    <button class="pill on" id="tab1" aria-current="step" type="button"><span class="n">1</span><span>Sing It</span></button>
+    <div class="bar" id="bar1"><i></i></div>
+    <button class="pill" id="tab2" type="button" disabled><span class="n">2</span><span>Magic Song</span></button>
+  </nav>
+
+  <main class="card">
+    <!-- ========== STEP 1 ========== -->
+    <section id="step1" aria-labelledby="h-step1">
+      <div>
+        <h2 id="h-step1">Step 1: Sing It</h2>
+        <p class="sub">Tap the big button and hum your tune, sing words, or tap a rhythm. Any speed is fine. Tap it again when you are done.</p>
+      </div>
+      <div class="well" id="stage">
+        <div id="timer" hidden>0:00</div>
+        <canvas id="wave" aria-hidden="true"></canvas>
+        <div class="recwrap" id="recwrap">
+          <div class="ping"></div>
+          <button id="recBtn" type="button" aria-label="Start recording">
+            <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>
+            <svg id="stopIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>
+            <b id="recText">Record</b>
+          </button>
+        </div>
+        <p id="status" role="status">Tap the big button to start.</p>
+      </div>
+      <div class="row">
+        <button class="btn" id="say1" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9a4 4 0 0 1 0 6"/></svg>Tell me what to do</button>
+        <label class="btn upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Use a recording<input id="file" type="file" accept="audio/*,.m4a,.mp3,.wav,.webm,.ogg" aria-label="Use a recording from this device"></label>
+      </div>
+      <p class="small">No microphone? Try an example: <button class="linkish" id="demoHum" type="button">a pretend hum</button> or <button class="linkish" id="demoTap" type="button">pretend taps</button>.</p>
+    </section>
+
+    <!-- ========== STEP 2 ========== -->
+    <section id="step2" aria-labelledby="h-step2" hidden>
+      <div>
+        <div class="done-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>Your tune is ready!</div>
+        <h2 id="h-step2" style="margin-top:8px">Step 2: Magic Song</h2>
+        <p id="heard"></p>
+      </div>
+
+      <div class="player">
+        <div class="orb" aria-hidden="true"></div>
+        <div class="disc" id="disc" aria-hidden="true"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></i></div>
+        <canvas id="roll" tabindex="0" role="slider" aria-label="Song position, use the left and right arrow keys" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></canvas>
+        <div class="legend"><span><i style="background:#ff8a4c"></i>You</span><span><i style="background:#42d1c5"></i>The band plays your tune</span><span id="tapLegend" hidden><i style="background:var(--gold)"></i>Your taps</span></div>
+      </div>
+
+      <div class="well controls">
+        <div class="times"><span id="cur">0:00</span><span id="tot">0:00</span></div>
+        <div class="transport">
+          <button class="round" id="restart" type="button" aria-label="Start again"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></button>
+          <button class="round" id="playBtn" type="button" aria-label="Play">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-left:3px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>
+            <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><rect x="5" y="4" width="5" height="16" rx="1.5"/><rect x="14" y="4" width="5" height="16" rx="1.5"/></svg>
+          </button>
+          <button class="round" id="save" type="button" aria-label="Save my song" title="Save my song"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg></button>
+        </div>
+        <p id="busy" role="status"></p>
+      </div>
+
+      <div>
+        <div class="label">✨ Pick your band</div>
+        <div class="chips" id="styles"></div>
+      </div>
+
+      <div>
+        <label class="label" for="words">🪄 Magic words <span class="small" style="font-weight:400">(a grown-up can type)</span></label>
+        <input id="words" type="text" autocomplete="off" placeholder="a sleepy dragon in space">
+        <p id="understood"></p>
+      </div>
+
+      <div class="grid2">
+        <div class="well setting">
+          <div class="head"><b>⚡ Energy</b><span id="energyVal">Bouncy</span></div>
+          <input type="range" id="energy" min="1" max="3" value="2" aria-label="Energy: calm, bouncy or wild">
+        </div>
+        <div class="well setting">
+          <div class="head"><b>🎤 Your voice</b></div>
+          <div class="chips few" id="voice">
+            <button class="chip" type="button" data-v="natural" aria-pressed="true">Just me</button>
+            <button class="chip" type="button" data-v="echo" aria-pressed="false">Echo</button>
+            <button class="chip" type="button" data-v="robot" aria-pressed="false">Robot</button>
+          </div>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="playback" checked>The band plays my tune back after me</label>
+
+      <div class="row" style="justify-content:space-between">
+        <button class="btn" id="again" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>Sing a new one</button>
+        <span class="row">
+          <button class="btn" id="say2" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9a4 4 0 0 1 0 6"/></svg>Tell me what to do</button>
+          <button class="btn hot" id="dice" type="button">🎲 Surprise me</button>
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shelf-foot">
+    <p><b>Version 1.0 (beta)</b> · Launched <time datetime="2026-11-13">November 13, 2026</time> · Made for James and friends · <a href="../../../">The App Shelf</a> · <a href="../../../feedback/?game=music-maker&amp;v=1.0">Share your thoughts</a> · <a href="../../../feedback/?game=music-maker&amp;v=1.0&amp;kind=bug">Report a bug</a></p>
+    <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+    <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
+    <p>The microphone is only used while you record. Your recording and your song never leave this device, and all the band’s sounds are made on it.</p>
+    <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/music-maker/" data-text="Sing a tune and a band learns it and plays along: Magic Music Maker">Tell a friend</button></p>
+  </footer>
+</div>
+
+<script src="engine.js"></script>
+<script src="demo.js"></script>
+<script>
+'use strict';
+const E = MME, $ = (id) => document.getElementById(id);
+const COVER = location.hash === '#cover', SELFTEST = location.hash === '#selftest';
+const S = { rec: null, plan: null, style: 'pop', energy: 2, voice: 'natural', playback: true, w: null, song: null, arr: null, playing: false, startAt: 0, offset: 0 };
+let ac = null, playNode = null, renderToken = 0, stream = null, mr = null, recAn = null, recTimer = null, recStart = 0;
+const MAX_REC = 40, ENERGY = ['Calm', 'Bouncy', 'Wild'];
+const fmt = (s) => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+
+function audio() {
+  if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (ac.state === 'suspended') ac.resume().catch(() => {});
+  return ac;
+}
+function say(text) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = .95; speechSynthesis.speak(u); } catch (e) {} }
+
+/* ---------- step 1: capture ---------- */
+function setStatus(t) { $('status').textContent = t; }
+function drawWave() {
+  const cv = $('wave'), dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w) return;
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  g.strokeStyle = '#ec4899'; g.lineWidth = 3; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath();
+  if (recAn && mr && mr.state === 'recording') {
+    const d = new Float32Array(recAn.fftSize); recAn.getFloatTimeDomainData(d);
+    for (let i = 0; i < d.length; i += 4) { const x = i / d.length * w, y = h / 2 + Math.max(-.48, Math.min(.48, d[i] * 1.6)) * h; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke(); requestAnimationFrame(drawWave);
+  } else { g.globalAlpha = .45; for (let x = 0; x <= w; x += 5) { const y = h / 2 + Math.sin(x * .05) * 5; x ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); g.globalAlpha = 1; }
+}
+function recUI(on) {
+  $('recBtn').classList.toggle('rec', on); $('recwrap').classList.toggle('on', on);
+  $('micIcon').hidden = on; $('stopIcon').hidden = !on; $('recText').textContent = on ? 'Stop' : 'Record';
+  $('recBtn').setAttribute('aria-label', on ? 'Stop recording' : 'Start recording'); $('timer').hidden = !on;
+}
+async function startRec() {
+  const c = audio(); try { speechSynthesis.cancel(); } catch (e) {}
+  try {
+    if (!navigator.mediaDevices || !window.MediaRecorder) throw new Error('none');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+  } catch (e) { setStatus('The microphone is not available. Tap “Use a recording”, or try an example below.'); return; }
+  const chunks = []; mr = new MediaRecorder(stream);
+  mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+  mr.onstop = async () => {
+    stream.getTracks().forEach((t) => t.stop()); clearInterval(recTimer); recUI(false); drawWave();
+    try { useBuffer(await c.decodeAudioData(await new Blob(chunks, { type: mr.mimeType }).arrayBuffer())); }
+    catch (e) { setStatus('That recording did not work. Please try again.'); }
+  };
+  const src = c.createMediaStreamSource(stream); recAn = c.createAnalyser(); recAn.fftSize = 1024; src.connect(recAn);
+  mr.start(); recStart = performance.now(); recUI(true); setStatus('Listening. Sing, hum or tap your tune!');
+  recTimer = setInterval(() => { const s = (performance.now() - recStart) / 1000; $('timer').textContent = fmt(s); if (s >= MAX_REC) mr.stop(); }, 200);
+  drawWave();
+}
+$('recBtn').onclick = () => { if (mr && mr.state === 'recording') mr.stop(); else startRec(); };
+$('file').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return; const c = audio(); setStatus('Opening your recording.');
+  try { useBuffer(await c.decodeAudioData(await f.arrayBuffer())); } catch (err) { setStatus('That file could not be opened as sound. Try an m4a, mp3 or wav.'); }
+  e.target.value = '';
+};
+function fromSamples(x, sr) { const c = audio(), b = c.createBuffer(1, x.length, sr); b.getChannelData(0).set(x); return b; }
+$('demoHum').onclick = () => { audio(); useBuffer(fromSamples(demoHum(22050).x, 22050)); };
+$('demoTap').onclick = () => { audio(); useBuffer(fromSamples(demoTaps(22050).x, 22050)); };
+$('say1').onclick = () => say('Tap the big round button. Then sing, hum, or tap your tune. Tap the button again when you are done.');
+
+function useBuffer(buf, quiet) {
+  stopPlay();
+  if (buf.duration > MAX_REC) { const c = audio(), n = Math.floor(MAX_REC * buf.sampleRate), b = c.createBuffer(buf.numberOfChannels, n, buf.sampleRate); for (let ch = 0; ch < buf.numberOfChannels; ch++) b.getChannelData(ch).set(buf.getChannelData(ch).subarray(0, n)); buf = b; }
+  setStatus('Listening back to your tune.');
+  return new Promise((res) => setTimeout(() => {
+    const chs = []; for (let ch = 0; ch < buf.numberOfChannels; ch++) chs.push(buf.getChannelData(ch));
+    const plan = E.analyze(E.toMono16k(chs, buf.sampleRate));
+    if (plan.mode === 'empty') { setStatus('I could not hear a tune. Try again, a little louder or closer.'); res(false); return; }
+    S.rec = buf; S.plan = plan; S.offset = 0; S.w = null; $('words').value = ''; $('understood').textContent = '';
+    setStatus('Tap the big button to sing a new one.');
+    $('tab2').disabled = false; show(2); describe();
+    render(!quiet).then(() => res(true));
+  }, 30));
+}
+
+/* ---------- step 2: the band ---------- */
+function show(n) {
+  $('step1').hidden = n !== 1; $('step2').hidden = n !== 2;
+  const t1 = $('tab1'), t2 = $('tab2');
+  t1.className = 'pill ' + (n === 1 ? 'on' : 'done'); t2.className = 'pill ' + (n === 2 ? 'on' : '');
+  t1.toggleAttribute('aria-current', n === 1); t2.toggleAttribute('aria-current', n === 2);
+  if (n === 1) t1.setAttribute('aria-current', 'step'); else t2.setAttribute('aria-current', 'step');
+  $('bar1').classList.toggle('full', n === 2);
+  if (n === 1) { stopPlay(); drawWave(); } else drawRoll();
+  if (!COVER) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$('tab1').onclick = () => show(1); $('tab2').onclick = () => { if (S.plan) show(2); };
+$('again').onclick = () => { show(1); $('timer').textContent = '0:00'; };
+function describe() {
+  const p = S.plan; let t;
+  if (p.mode === 'melody') {
+    t = 'I heard ' + p.notes.length + ' notes in ' + p.keyName + ', at about ' + p.bpm + ' beats a minute.';
+    if (Math.abs(p.tune) > .12) t += ' You sang a little ' + (p.tune > 0 ? 'higher' : 'lower') + ' than a piano, so the band tuned itself to you.';
+  } else t = 'I heard ' + p.onsets.length + ' taps at about ' + p.bpm + ' beats a minute. The band grew a tune from your rhythm.';
+  $('heard').textContent = t; $('tapLegend').hidden = p.mode !== 'rhythm'; $('tot').textContent = '0:00';
+}
+const stylesEl = $('styles');
+for (const st of E.STYLES) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.id = st.id; b.setAttribute('aria-pressed', st.id === S.style);
+  b.innerHTML = '<span class="pic" aria-hidden="true">' + st.icon + '</span>' + st.name;
+  b.onclick = () => { S.style = st.id; syncUI(); render(true); };
+  stylesEl.appendChild(b);
+}
+$('voice').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; S.voice = b.dataset.v; syncUI(); render(true); };
+$('energy').oninput = (e) => { $('energyVal').textContent = ENERGY[e.target.value - 1]; };
+$('energy').onchange = (e) => { S.energy = Number(e.target.value); render(true); };
+$('playback').onchange = (e) => { S.playback = e.target.checked; render(true); };
+let wordTimer = 0;
+$('words').oninput = () => { clearTimeout(wordTimer); wordTimer = setTimeout(applyWords, 600); };
+function applyWords() {
+  const w = E.readWords($('words').value); S.w = w;
+  if (w.style) S.style = w.style; if (w.energy) S.energy = w.energy; if (w.voice) S.voice = w.voice;
+  $('understood').textContent = !$('words').value.trim() ? '' : w.heard.length ? 'I understood: ' + w.heard.join(', ') + '.' : 'I did not find a word I know yet. Try words like space, dragon, sleepy, robot, train or fast.';
+  syncUI(); render(true);
+}
+$('dice').onclick = () => {
+  const r = Math.random; S.style = E.STYLES[Math.floor(r() * E.STYLES.length)].id; S.energy = 1 + Math.floor(r() * 3); S.voice = ['natural', 'natural', 'echo', 'robot'][Math.floor(r() * 4)];
+  S.w = { sparkle: r() < .5, octave: [-1, 0, 0, 1][Math.floor(r() * 4)], rev: r() < .3 ? .35 : 0 }; $('words').value = ''; $('understood').textContent = ''; syncUI(); render(true);
+};
+$('say2').onclick = () => { stopPlay(); say('This is your song. Tap the round button to hear it. Tap a picture to pick a different band.'); };
+function syncUI() {
+  for (const b of stylesEl.children) b.setAttribute('aria-pressed', b.dataset.id === S.style);
+  for (const b of $('voice').children) b.setAttribute('aria-pressed', b.dataset.v === S.voice);
+  $('energy').value = S.energy; $('energyVal').textContent = ENERGY[S.energy - 1];
+}
+
+/* ---------- sound ---------- */
+const P = {
+  synthbass: { w: 'sawtooth', w2: 'square', o2: -12, m2: .6, lp: 520, a: .005, d: .15, s: .6, r: .05, g: .42 },
+  soft: { w: 'sine', w2: 'triangle', m2: .3, a: .01, d: .4, s: .7, r: .1, g: .7 },
+  saw: { w: 'sawtooth', lp: 700, a: .005, d: .12, s: .7, r: .05, g: .45 },
+  pizz: { w: 'triangle', a: .003, d: .12, s: 0, r: .1, g: .8 },
+  square: { w: 'square', lp: 900, a: .003, d: .1, s: .6, r: .03, g: .3 },
+  pluck: { w: 'sawtooth', w2: 'triangle', m2: .6, lpk: 5, a: .004, d: .14, s: .15, r: .12, g: .16 },
+  bell: { w: 'sine', w2: 'sine', o2: 19.02, m2: .25, a: .003, d: .5, s: 0, r: .6, g: .3 },
+  power: { w: 'sawtooth', w2: 'sawtooth', det: 9, m2: 1, dist: 6, lp: 2600, a: .004, d: .2, s: .7, r: .05, g: .085, power: true },
+  epiano: { w: 'sine', w2: 'sine', o2: 12, m2: .2, lp: 1800, a: .01, d: .8, s: .3, r: .3, g: .2, trem: 4.5 },
+  strings: { w: 'sawtooth', w2: 'sawtooth', det: 11, m2: 1, lp: 1700, a: .25, d: .5, s: .85, r: .4, g: .07 },
+  harp: { w: 'triangle', a: .003, d: .3, s: 0, r: .4, g: .22 },
+  clav: { w: 'square', hp: 500, lp: 3000, a: .002, d: .07, s: .1, r: .04, g: .13 },
+  chip: { w: 'square', a: .002, d: .05, s: .5, r: .02, g: .07 },
+  banjo: { w: 'sawtooth', hp: 400, lpk: 8, a: .002, d: .1, s: 0, r: .12, g: .18 },
+  synth: { w: 'sawtooth', w2: 'square', det: 7, m2: .5, lp: 3200, a: .01, d: .2, s: .75, r: .1, g: .2, vib: [5.5, 12] },
+  guitar: { w: 'sawtooth', w2: 'sawtooth', det: 8, m2: 1, dist: 8, lp: 3000, a: .008, d: .3, s: .8, r: .12, g: .13, vib: [5, 10] },
+  mellow: { w: 'triangle', w2: 'sine', m2: .5, lp: 2000, a: .03, d: .3, s: .8, r: .15, g: .3, vib: [5, 10] },
+  flute: { w: 'sine', w2: 'triangle', m2: .15, a: .05, d: .3, s: .85, r: .15, g: .32, vib: [5, 14], breath: .04 },
+  brass: { w: 'sawtooth', lpk: 5, sweep: true, a: .03, d: .15, s: .8, r: .1, g: .22 },
+  chiplead: { w: 'square', a: .004, d: .1, s: .7, r: .04, g: .14, vib: [6, 8] },
+  whistle: { w: 'sine', a: .05, d: .2, s: .9, r: .12, g: .3, vib: [5.5, 18], breath: .05 },
+  steam: { w: 'triangle', a: .08, d: .2, s: 1, r: .3, g: .22, breath: .12, trem: 9 }
+};
+function build(c, arr, st, o) {
+  const plan = S.plan, tf = Math.pow(2, plan.tune / 12), hz = (m) => 440 * Math.pow(2, (m - 69) / 12) * tf;
+  const master = c.createGain(); master.gain.value = .9;
+  const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = .005; comp.release.value = .2;
+  master.connect(comp); comp.connect(c.destination);
+  const irLen = Math.floor(2.4 * c.sampleRate), ir = c.createBuffer(2, irLen, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); let lp = 0; for (let i = 0; i < irLen; i++) { lp += ((Math.random() * 2 - 1) - lp) * .35; d[i] = lp * Math.exp(-i / (c.sampleRate * .45)); } }
+  const conv = c.createConvolver(); conv.buffer = ir; const wet = c.createGain(); wet.gain.value = .9; conv.connect(wet); wet.connect(master);
+  const rev = Math.min(.8, st.rev + (o.rev || 0));
+  const bus = (lvl, send) => { const g = c.createGain(); g.gain.value = lvl; g.connect(master); if (send > 0) { const s = c.createGain(); s.gain.value = send; g.connect(s); s.connect(conv); } return g; };
+  const drums = bus(.55, rev * .25), bass = bus(.5, 0), compB = bus(.5, rev * .7), lead = bus(.55, rev * .8), spark = bus(.5, .6), voiceB = bus(1, .25 + rev * .4);
+  const nLen = 2 * c.sampleRate, nb = c.createBuffer(1, nLen, c.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nLen; i++) nd[i] = Math.random() * 2 - 1;
+  const curve = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = Math.tanh(x * 3); }
+  const noise = (t, dur, type, freq, q, vel, attack) => {
+    const s = c.createBufferSource(); s.buffer = nb; s.loop = true; const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q || .7;
+    const g = c.createGain(); g.gain.setValueAtTime(attack ? 0 : vel, t); if (attack) g.gain.linearRampToValueAtTime(vel, t + attack); g.gain.setTargetAtTime(0, t + (attack || 0), dur / 3);
+    s.connect(f); f.connect(g); g.connect(drums); s.start(t, Math.random()); s.stop(t + dur * 2 + .1);
+  };
+  const thump = (t, f0, f1, vel, dec) => { const os = c.createOscillator(), g = c.createGain(); os.frequency.setValueAtTime(f0, t); os.frequency.exponentialRampToValueAtTime(f1, t + .11); g.gain.setValueAtTime(vel, t); g.gain.setTargetAtTime(0, t + .02, dec / 3); os.connect(g); g.connect(drums); os.start(t); os.stop(t + dec * 2); };
+  const tone = (dest, p, f, t, dur, vel) => {
+    t = Math.max(c.currentTime, t); const g = c.createGain(), pk = vel * p.g, tEnd = Math.max(t + dur, t + p.a + .01), stop = tEnd + p.r * 2 + .05;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pk, t + p.a);
+    if (p.s < 1) g.gain.setTargetAtTime(pk * p.s, t + p.a, p.d);
+    g.gain.setTargetAtTime(0, tEnd, p.r / 3);
+    const mix = c.createGain(), oscs = [];
+    const mk = (type, semi, det, lvl) => { const os = c.createOscillator(); os.type = type; os.frequency.value = f * Math.pow(2, semi / 12); os.detune.value = det; const og = c.createGain(); og.gain.value = lvl; os.connect(og); og.connect(mix); os.start(t); os.stop(stop); oscs.push(os); };
+    mk(p.w, 0, 0, 1); if (p.w2) mk(p.w2, p.o2 || 0, p.det || 0, p.m2 == null ? 1 : p.m2);
+    if (p.vib && dur > .25) { const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = p.vib[0]; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(p.vib[1], t + .3); l.connect(lg); for (const os of oscs) lg.connect(os.detune); l.start(t); l.stop(stop); }
+    if (p.breath) { const s = c.createBufferSource(); s.buffer = nb; s.loop = true; const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = Math.min(9000, f * 2); bf.Q.value = 1.5; const bg = c.createGain(); bg.gain.value = p.breath * 8; s.connect(bf); bf.connect(bg); bg.connect(mix); s.start(t, Math.random()); s.stop(stop); }
+    let out = mix;
+    if (p.dist) { const pre = c.createGain(); pre.gain.value = p.dist * .25; const ws = c.createWaveShaper(); ws.curve = curve; out.connect(pre); pre.connect(ws); out = ws; }
+    if (p.hp) { const h = c.createBiquadFilter(); h.type = 'highpass'; h.frequency.value = p.hp; out.connect(h); out = h; }
+    if (p.lp || p.lpk) { const l = c.createBiquadFilter(); l.type = 'lowpass'; const fc = Math.min(12000, p.lp || f * p.lpk); if (p.sweep) { l.frequency.setValueAtTime(f, t); l.frequency.linearRampToValueAtTime(fc, t + .09); } else l.frequency.value = fc; out.connect(l); out = l; }
+    if (p.trem) { const tg = c.createGain(); tg.gain.value = .8; const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = p.trem; lg.gain.value = .2; l.connect(lg); lg.connect(tg.gain); l.start(t); l.stop(stop); out.connect(tg); out = tg; }
+    out.connect(g); g.connect(dest);
+  };
+  const emit = (e) => {
+    const t = Math.max(c.currentTime, e.t);
+    switch (e.k) {
+      case 'kick': thump(t, 160, 48, e.v * .95, .3); break;
+      case 'snare': noise(t, .16, 'bandpass', 1900, .8, e.v * .55); thump(t, 220, 170, e.v * .2, .09); break;
+      case 'hat': noise(t, .04, 'highpass', 7500, .7, e.v * .2); break;
+      case 'shaker': noise(t, .08, 'bandpass', 5200, 1, e.v * .14, .02); break;
+      case 'chug': noise(t, .07, 'bandpass', 1100, 1.2, e.v * .34); break;
+      case 'timp': thump(t, 96, 70, e.v * .8, .7); noise(t, .08, 'lowpass', 300, .7, e.v * .3); break;
+      case 'crash': noise(t, 1.1, 'highpass', 5000, .7, e.v * .28); break;
+      case 'bass': tone(bass, P[e.snd], hz(e.n), t, e.d, e.v); break;
+      case 'chord': { const p = P[e.snd], ns = p.power ? [e.n[0] - 12, e.n[0] - 5, e.n[0]] : e.n; for (const m of ns) tone(compB, p, hz(m), t, e.d, e.v); break; }
+      case 'lead': tone(lead, P[e.snd], hz(e.n), t, e.d, e.v); break;
+      case 'spark': tone(spark, P.bell, hz(e.n), t, e.d, e.v * .8); break;
+      case 'whistle': tone(lead, P.steam, hz(e.n), t, e.d, e.v); break;
+    }
+  };
+  if (st.crackle) { const cb = c.createBuffer(1, 4 * c.sampleRate, c.sampleRate), cd = cb.getChannelData(0); for (let i = 0; i < cd.length; i++) cd[i] = Math.random() < .0007 ? (Math.random() * 2 - 1) : (Math.random() * 2 - 1) * .015; const s = c.createBufferSource(); s.buffer = cb; s.loop = true; const g = c.createGain(); g.gain.value = .12; s.connect(g); g.connect(master); s.start(0); }
+  // the singer, exactly as recorded, placed where the band expects them
+  const src = c.createBufferSource(); src.buffer = S.rec;
+  const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 100;
+  const vg = c.createGain(), norm = Math.min(8, .2 / Math.max(.01, plan.peak)), you = arr.sections[1];
+  vg.gain.setValueAtTime(norm, 0); vg.gain.setValueAtTime(norm, you.t1 + .15); vg.gain.linearRampToValueAtTime(0, you.t1 + .9);
+  src.connect(hp); hp.connect(vg); let v = vg;
+  if (o.voice === 'robot') { const ring = c.createGain(); ring.gain.value = 0; const os = c.createOscillator(); os.frequency.value = 58; const og = c.createGain(); og.gain.value = 1.3; os.connect(og); og.connect(ring.gain); os.start(0); const dry = c.createGain(); dry.gain.value = .25; const sum = c.createGain(); v.connect(ring); v.connect(dry); ring.connect(sum); dry.connect(sum); v = sum; }
+  v.connect(voiceB);
+  if (o.voice === 'echo') { const d = c.createDelay(2); d.delayTime.value = Math.min(1.9, arr.beat * .75); const fb = c.createGain(); fb.gain.value = .38; const w = c.createGain(); w.gain.value = .4; v.connect(d); d.connect(fb); fb.connect(d); d.connect(w); w.connect(voiceB); }
+  if (arr.voiceAt >= 0) src.start(arr.voiceAt); else src.start(0, -arr.voiceAt);
+  // make each second of the band just before it is needed, so the render stays quick
+  const ev = arr.events; let i = 0; const upTo = (T) => { while (i < ev.length && ev[i].t < T) emit(ev[i++]); };
+  if (typeof c.suspend === 'function' && typeof c.resume === 'function') {
+    upTo(1.05);
+    for (let T = 1; T < arr.len - .05; T += 1) c.suspend(T).then(() => { upTo(T + 1.05); c.resume(); }, () => {});
+  } else upTo(Infinity);
+}
+function options() { const w = S.w || {}; return { energy: S.energy, playback: S.playback, voice: S.voice, sparkle: !!w.sparkle, octave: w.octave || 0, rev: w.rev || 0, whistle: !!w.whistle }; }
+async function render(autoplay) {
+  if (!S.plan) return; const token = ++renderToken, was = S.playing, at = was ? position() : S.offset;
+  $('busy').textContent = 'The band is practising…';
+  const st = E.STYLES.find((s) => s.id === S.style), o = options(), arr = E.arrange(S.plan, st, o), sr = 44100;
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OC(2, Math.ceil(arr.len * sr), sr);
+  build(oc, arr, st, o);
+  const buf = await oc.startRendering(); if (token !== renderToken) return;
+  let pk = 0; for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i += 3) { const a = Math.abs(d[i]); if (a > pk) pk = a; } }
+  if (pk > 0) { const k = Math.min(3, .92 / pk); for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) d[i] *= k; } }
+  S.song = buf; S.arr = arr; S.peak = pk; $('busy').textContent = ''; $('tot').textContent = fmt(arr.len);
+  S.offset = Math.min(at, Math.max(0, arr.len - 1)); drawRoll();
+  if (was || autoplay) play(was ? S.offset : 0);
+}
+function position() { return S.playing ? Math.min(S.song.duration, ac.currentTime - S.startAt) : S.offset; }
+function play(from) {
+  stopPlay(); if (!S.song) return; const c = audio();
+  playNode = c.createBufferSource(); playNode.buffer = S.song; playNode.connect(c.destination);
+  try { playNode.start(0, from); } catch (e) { return; }
+  S.startAt = c.currentTime - from; S.playing = true; $('playIcon').hidden = true; $('pauseIcon').hidden = false; $('playBtn').setAttribute('aria-label', 'Pause'); $('disc').classList.add('spin'); tick();
+}
+function stopPlay() {
+  if (S.playing) S.offset = position();
+  if (playNode) { try { playNode.stop(); } catch (e) {} playNode = null; }
+  S.playing = false; $('playIcon').hidden = false; $('pauseIcon').hidden = true; $('playBtn').setAttribute('aria-label', 'Play'); $('disc').classList.remove('spin');
+}
+function tick() { if (!S.playing) return; if (position() >= S.song.duration - .02) { stopPlay(); S.offset = 0; } drawRoll(); if (S.playing) requestAnimationFrame(tick); }
+$('playBtn').onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} if (S.playing) { stopPlay(); drawRoll(); } else play(S.offset >= (S.song ? S.song.duration - .1 : 0) ? 0 : S.offset); };
+$('restart').onclick = () => { if (S.song) play(0); };
+
+/* ---------- the picture of the song ---------- */
+function drawRoll() {
+  const cv = $('roll'); if (!S.arr || $('step2').hidden) return;
+  const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const arr = S.arr, plan = S.plan, len = arr.len, X = (t) => 8 + t / len * (w - 16), now = position();
+  const you = '#ff8a4c', band = '#42d1c5', gold = '#fde047', line = 'rgba(255,255,255,.1)', muted = '#94a3b8';
+  g.font = '600 12px Inter, system-ui, sans-serif'; g.textBaseline = 'top';
+  arr.bars.forEach((b, i) => { g.fillStyle = line; g.fillRect(X(b.t), 20, 1, h - 26); if ((i > 0 && X(arr.bars[Math.min(arr.bars.length - 1, i + 1)].t) - X(b.t) > 22) || i === arr.bars.length - 1) { g.fillStyle = muted; g.fillText(E.NOTE_NAMES[b.chord.root] + (b.chord.q === 'm' ? 'm' : ''), X(b.t) + 3, 4); } });
+  const mel = plan.mode === 'melody' ? plan.notes : plan.gen, off = plan.mode === 'melody' ? plan.tune : 0;
+  let lo = 1e9, hi = -1e9; for (const n of mel) { lo = Math.min(lo, n.q, (n.p || n.q) - off); hi = Math.max(hi, n.q, (n.p || n.q) - off); }
+  lo -= 1.5; hi += 1.5; const Y = (m) => 24 + (1 - (m - lo) / (hi - lo)) * (h - 40), nh = Math.max(5, Math.min(12, (h - 40) / (hi - lo)));
+  const bar = (t, d, m, col, live) => { const x = X(t), ww = Math.max(4, X(t + d) - x - 1); g.fillStyle = col; g.globalAlpha = live ? 1 : .8; g.beginPath(); g.roundRect(x, Y(m) - nh / 2 - (live ? 2 : 0), ww, nh + (live ? 4 : 0), 4); g.fill(); g.globalAlpha = 1; };
+  if (plan.mode === 'melody') for (const n of mel) { const t = n.s + arr.voiceAt; bar(t, n.e - n.s, n.p - off, you, now >= t && now < t + (n.e - n.s)); }
+  else { for (const o of plan.onsets) { const t = o.t + arr.voiceAt; g.fillStyle = gold; g.beginPath(); g.arc(X(t), h - 12, 3 + o.s, 0, 7); g.fill(); } for (const n of mel) { const t = n.s + arr.voiceAt; bar(t, n.e - n.s, n.q, band, now >= t && now < t + (n.e - n.s)); } }
+  if (arr.sections.some((s) => s.id === 'band')) for (const n of mel) { const t = n.s + arr.voiceAt + arr.lenA, d = Math.max(.12, n.e - n.s); bar(t, d, n.q, band, now >= t && now < t + d); }
+  g.fillStyle = '#fff'; g.fillRect(X(now) - 1, 2, 3, h - 4);
+  $('cur').textContent = fmt(now); cv.setAttribute('aria-valuenow', Math.round(now / len * 100));
+}
+function seekTo(t) { t = Math.max(0, Math.min(S.arr.len - .2, t)); if (S.playing) play(t); else { S.offset = t; drawRoll(); } }
+$('roll').addEventListener('pointerdown', (e) => { if (!S.arr) return; $('roll').setPointerCapture(e.pointerId); const r = $('roll').getBoundingClientRect(); seekTo((e.clientX - r.left - 8) / (r.width - 16) * S.arr.len); });
+$('roll').addEventListener('pointermove', (e) => { if (!S.arr || !e.buttons || S.playing) return; const r = $('roll').getBoundingClientRect(); seekTo((e.clientX - r.left - 8) / (r.width - 16) * S.arr.len); });
+$('roll').addEventListener('keydown', (e) => { if (!S.arr) return; const d = e.key === 'ArrowRight' ? 2 : e.key === 'ArrowLeft' ? -2 : 0; if (d) { e.preventDefault(); seekTo(position() + d); } });
+window.addEventListener('resize', () => { drawRoll(); drawWave(); });
+
+/* ---------- saving a song as a sound file ---------- */
+$('save').onclick = () => {
+  const b = S.song; if (!b) return; const n = b.length, dv = new DataView(new ArrayBuffer(44 + n * 4)), str = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, b.sampleRate, true); dv.setUint32(28, b.sampleRate * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); str(36, 'data'); dv.setUint32(40, n * 4, true);
+  const L = b.getChannelData(0), R = b.getChannelData(1); for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i])) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i])) * 32767, true); }
+  const url = URL.createObjectURL(new Blob([dv], { type: 'audio/wav' })), a = document.createElement('a'); a.href = url; a.download = 'my-magic-song.wav'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+};
+
+/* ---------- Tell a friend ---------- */
+document.querySelectorAll('[data-tell]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const url = btn.getAttribute('data-tell'), text = btn.getAttribute('data-text') || document.title, old = btn.textContent;
+    try {
+      if (navigator.share) { await navigator.share({ title: document.title, text, url }); return; }
+      await navigator.clipboard.writeText(text + ' ' + url);
+      btn.textContent = 'Link copied. Paste it in a message.'; setTimeout(() => { btn.textContent = old; }, 2500);
+    } catch (e) { /* cancelled share */ }
+  });
+});
+
+drawWave();
+if (COVER) (async () => { await useBuffer(fromSamples(demoHum(22050).x, 22050), true); S.offset = 7.4; drawRoll(); document.title = 'COVER READY'; })();
+if (SELFTEST) (async () => {
+  const out = {};
+  try {
+    for (const [name, x] of [['hum', demoHum(22050).x], ['taps', demoTaps(22050).x]]) {
+      await useBuffer(fromSamples(x, 22050), true);
+      for (const st of E.STYLES) { S.style = st.id; await render(false); let e = 0; const d = S.song.getChannelData(0); for (let i = 0; i < d.length; i += 7) e += d[i] * d[i]; out[name + ':' + st.id] = [S.plan.mode, +S.song.duration.toFixed(1), +Math.sqrt(e / (d.length / 7)).toFixed(3), +S.peak.toFixed(2)]; }
+    }
+    S.voice = 'robot'; await render(false); S.voice = 'echo'; await render(false); out.fx = 'ok';
+  } catch (err) { out.error = String(err && err.stack || err); }
+  const pre = document.createElement('pre'); pre.id = 'selftest'; pre.hidden = true; pre.textContent = JSON.stringify(out); document.body.appendChild(pre); document.title = 'SELFTEST DONE';
+})();
+</script>
+</body>
+</html>

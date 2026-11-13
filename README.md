@@ -10,7 +10,7 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf itself (version 2.4): Games and Utilities tabs, one icon tile per app
+index.html          the shelf itself (version 2.5): Games and Utilities tabs, one icon tile per app
 TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
@@ -89,6 +89,12 @@ ultimate-train-studio/  Ultimate Train Studio 火車工作室 (beta): paint the 
   sim.js            the track model (board camera, loop, boarding)
   sim.test.js       track tests (node --test)
   cover.png         1200×744 card image (render with index.html#cover)
+robot-journey/      The Great Robot Journey 機器人大冒險 (beta): a platformer James designed, with Turn mode for AI helpers
+  index.html        the whole game (level, physics, original soundtrack, Turn mode and its text view)
+  tw.css            Tailwind styles compiled once (tools/build-css.sh), so the page loads no CDN
+  tools/            ai-bot.mjs and ai-taps.mjs (the level can be finished with Turn-mode moves), smoke.mjs,
+                    render-music.mjs (songs to WAV for listening), measure.mjs (jump guide numbers)
+  cover.png         1200×744 card image (render with index.html#cover)
 versions/           past releases, still playable (versions/<game>/<X.Y>/), see versions/index.html
 tools/              freeze-version.sh: freeze a tagged release into versions/
 .nojekyll           serve files as-is
@@ -111,8 +117,10 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
 | James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.4 | 2026-11-04 |
 | Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
+| The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.0 | 2026-11-12 |
 
-The shelf is versioned too: **The App Shelf 2.4** (2026-11-05). Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at
+The shelf is versioned too: **The App Shelf 2.5** (2026-11-12). Version 2.4, the shelf before The Great Robot Journey
+joined, is frozen at `versions/shelf/2.4/`. Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at
 `versions/shelf/2.3/`. Version 2.2, the shelf when Marble Run 1.0 joined, is frozen at
 `versions/shelf/2.2/`. Version 2.1 is frozen at `versions/shelf/2.1/`. Version 2.0 is frozen at `versions/shelf/2.0/`.
 Version 1.0, the long page of cards, is frozen at `versions/shelf/1.0/` (`tools/freeze-shelf.sh`) in case we want to roll back.

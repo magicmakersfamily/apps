@@ -67,11 +67,16 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | marble-run-B1 | bug | marble-run | Not yet tried on a phone or tablet: placing pieces with a finger, booster sound, and replay | P1 | testing | self | | Check Safari on iPhone and iPad. The track should stay put after a refresh. |
 | ultimate-train-studio-B1 | bug | ultimate-train-studio | Not yet tried on a real phone or tablet: finger track placement, horn, and the silent switch | P1 | testing | self | | Check Safari on iPhone and iPad. Kid Mode should speak the first steps without reading. 2.0 passed headless Chrome at 1024×768, 768×1024, and 820×1180, with the board clear of panels. A real device is still open. |
 | ultimate-train-studio-F3 | feature | ultimate-train-studio | A Detroit Q-Line streetcar route | P3 | idea | playtest | | Deferred past 2.0. The first drive is the small tabletop loop to the lantern festival. |
+| robot-journey-B1 | bug | robot-journey | Not yet tried on a real phone or tablet, or by James: hold buttons, drag-to-launch, music volume next to the sound effects | P1 | testing | self | | Bots and smoke checks pass in Chrome, Firefox and WebKit at laptop, phone and phone-on-its-side sizes. |
+| robot-journey-B2 | bug | robot-journey | Turn mode not yet tried by a real AI helper (ChatGPT agent, Claude in Chrome, Gemini) | P2 | testing | self | | `tools/ai-taps.mjs` copies how they act (taps with only e.key, clicks, reading #ai-panel) and finishes by following the Hint line. |
 
 ## Closed
 
 | ID | Type | Game | Title | Priority | Status | Found | Fixed in | Notes |
 |---|---|---|---|---|---|---|---|---|
+| robot-journey-F3 | feature | robot-journey | Original soundtrack: a song per zone, a finale fanfare, a victory song, and power-up layers | P1 | done | family | 1.0 | Synthesized on the device by a look-ahead scheduler; `tools/render-music.mjs` renders the songs for listening. |
+| robot-journey-F2 | feature | robot-journey | Turn mode for AI helpers: the world waits for each move, a text view of the scene, a Hint line, and key taps without e.code | P1 | done | family | 1.0 | Also `?ai=1`, the T key, and `window.RobotJourney.ai`. Checked by `tools/ai-bot.mjs` and `tools/ai-taps.mjs`. |
+| robot-journey-F1 | feature | robot-journey | Put James's Great Robot Journey on the shelf: no Tailwind CDN, version line, footer, cover, and short screens scaled to fit | P0 | done | family | 1.0 | Also fixed: a fall during a Turn-mode move kept walking back off the ledge. |
 | marble-run-B3 | bug | marble-run | Giant status, replay title and camera, Try again, Show me where, and a gap a marble could jump | P0 | done | playtest | 1.4 | Toast and counter share one phrase. An open gap drops the marble. Watch mode names the recorded track and hides the live counter. Back to build restores the view. |
 | marble-run-B2 | bug | marble-run | Orchestra chimes trap marbles, and Run it never fires the lower tube | P0 | done | playtest | 1.4 | A chime was a closed V. Play rolls through, fires both tubes, and the giant finishes on a low gong. The song meter matches that launch. |
 | marble-run-F15 | feature | marble-run | Short spoken first steps for a player who cannot read yet | P1 | done | playtest | 1.4 | Gap, drop, first bell, and the orchestra cue. The browser speaks them until recorded clips exist. Skipped when sound or voice is off. |

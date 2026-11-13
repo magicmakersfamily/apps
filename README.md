@@ -118,7 +118,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
 | James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.4 | 2026-11-04 |
 | Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
-| The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.1 | 2026-11-12 |
+| The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.2 | 2026-11-12 |
 
 The shelf is versioned too: **The App Shelf 2.5** (2026-11-12). Version 2.4, the shelf before The Great Robot Journey
 joined, is frozen at `versions/shelf/2.4/`. Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at

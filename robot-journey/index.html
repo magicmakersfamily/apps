@@ -100,7 +100,7 @@
         </div>
 
         <!-- Stats & Controls -->
-        <div class="flex flex-wrap justify-end items-center gap-1.5 sm:gap-2 md:gap-3 pointer-events-auto">
+        <div class="flex flex-wrap justify-end items-center gap-1 sm:gap-2 md:gap-3 pointer-events-auto">
             <div class="flex items-center gap-3 bg-slate-900/85 backdrop-blur-md border border-cyan-500/40 px-3.5 py-2 rounded-2xl shadow-lg">
                 <div class="flex items-center gap-1.5">
                     <span class="text-sm">⚙️</span>
@@ -115,7 +115,7 @@
 
             <label class="flex items-center gap-1 bg-slate-900/85 border border-cyan-500/40 pl-2.5 pr-1 py-1 rounded-2xl text-cyan-300 shadow-lg text-xs font-bold" title="Music">
                 <span id="music-icon" aria-hidden="true" class="inline-block transition-transform duration-75">🎵</span>
-                <select id="music-select" aria-label="Music" class="bg-transparent text-cyan-200 text-xs font-bold py-1.5 pr-1 max-w-[5.2rem] sm:max-w-none focus:outline-none cursor-pointer">
+                <select id="music-select" aria-label="Music" class="bg-transparent text-cyan-200 text-xs font-bold py-1.5 pr-1 max-w-[4rem] sm:max-w-none focus:outline-none cursor-pointer">
                     <option value="zones" class="bg-slate-900">Zone songs</option>
                     <option value="james" class="bg-slate-900">James’s Theme</option>
                     <option value="scrapyard" class="bg-slate-900">Scrapyard Shuffle</option>
@@ -125,10 +125,10 @@
             <button id="sound-btn" type="button" onclick="toggleSound()" aria-pressed="true" class="tbtn bg-slate-900/85 hover:bg-slate-800 border border-cyan-500/40 px-2.5 py-2 rounded-2xl text-cyan-400 transition transform active:scale-95 shadow-lg text-xs font-bold whitespace-nowrap" title="Sound effects are on. Tap to turn them off.">
                 🔊 <span class="hidden sm:inline">Sounds</span> On
             </button>
-            <button id="restart-btn" type="button" onclick="restartRun()" aria-label="Restart from the beginning (R)" title="Restart (R)" class="bg-slate-900/85 hover:bg-slate-800 border border-cyan-500/40 px-3 py-2 rounded-2xl text-cyan-300 transition transform active:scale-95 shadow-lg text-xs font-bold whitespace-nowrap">
+            <button id="restart-btn" type="button" onclick="restartRun()" aria-label="Restart from the beginning (R)" title="Restart (R)" class="bg-slate-900/85 hover:bg-slate-800 border border-cyan-500/40 px-2.5 sm:px-3 py-2 rounded-2xl text-cyan-300 transition transform active:scale-95 shadow-lg text-xs font-bold whitespace-nowrap">
                 ↺ <span class="hidden md:inline">Restart</span>
             </button>
-            <button id="pause-btn" type="button" onclick="togglePause()" aria-label="Pause" class="bg-slate-900/85 hover:bg-slate-800 border border-cyan-500/40 px-3.5 py-2.5 rounded-2xl font-arcade text-xs font-bold text-cyan-400 transition transform active:scale-95 shadow-lg">
+            <button id="pause-btn" type="button" onclick="togglePause()" aria-label="Pause" class="bg-slate-900/85 hover:bg-slate-800 border border-cyan-500/40 px-2.5 sm:px-3.5 py-2.5 rounded-2xl font-arcade text-xs font-bold text-cyan-400 transition transform active:scale-95 shadow-lg">
                 ❚❚
             </button>
         </div>
@@ -276,7 +276,7 @@
             </button>
 
             <footer class="shelf-foot">
-                <p><b>Version 1.1 (beta)</b> · Launched <time datetime="2026-11-12">November 12, 2026</time> · Designed by James · <a href="../">The App Shelf</a> · <a href="../feedback/?game=robot-journey&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=robot-journey&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
+                <p><b>Version 1.2 (beta)</b> · Launched <time datetime="2026-11-12">November 12, 2026</time> · Designed by James · <a href="../">The App Shelf</a> · <a href="../feedback/?game=robot-journey&amp;v=1.2">Share your thoughts</a> · <a href="../feedback/?game=robot-journey&amp;v=1.2&amp;kind=bug">Report a bug</a></p>
                 <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
                 <p>These apps don’t collect any information. Your music and sound choices stay in your own browser.</p>
                 <p>The soundtrack (the Scrapyard Shuffle and James’s Theme, which James sang and we arranged as chiptune) and every sound effect are generated on this device.</p>
@@ -345,7 +345,7 @@
             <footer class="shelf-foot">
                 <p>Grown-ups: like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
                 <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/robot-journey/" data-text="Jump and rocket-boost to the Bright Spot: The Great Robot Journey">Tell a friend</button></p>
-                <p>Version 1.1 (beta) · <a href="../feedback/?game=robot-journey&amp;v=1.1">Share your thoughts</a></p>
+                <p>Version 1.2 (beta) · <a href="../feedback/?game=robot-journey&amp;v=1.2">Share your thoughts</a></p>
             </footer>
         </div>
     </div>
@@ -366,7 +366,7 @@
                 </button>
                 <a href="../" class="block w-full py-3 text-cyan-300 text-sm underline">← All apps</a>
             </div>
-            <p class="shelf-foot">Version 1.1 (beta) · Launched November 12, 2026 · <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
+            <p class="shelf-foot">Version 1.2 (beta) · Launched November 12, 2026 · <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
         </div>
     </div>
 
@@ -1387,7 +1387,7 @@
             const sortX = (o) => (o.x1 != null ? o.x1 : o.x);
             items.sort((a, b) => sortX(a) - sortX(b));
             return {
-                game: 'The Great Robot Journey', version: '1.1',
+                game: 'The Great Robot Journey', version: '1.2',
                 state: gameState, turnMode, turn: turnCount, busy: !!aiRun,
                 zone: ZONE_NAMES[currentZone() - 1],
                 progress: Math.round(Math.min(100, Math.max(0, (player.x / portal.centerX) * 100))),
@@ -2351,6 +2351,243 @@
         }
 
         // =========================================================================
+        // 8a. THE BACKDROP: a deep, slowly moving world behind the level (drawn in screen space, back to front)
+        //     sky + aurora → nebulae → stars + shooting stars → ringed planet → the Bright Spot on the horizon
+        //     → far and near mountain ridges in haze → lit skyline with beacons → light rays → ground fog → drifting sparks.
+        //     Each layer slides at its own speed (parallax), and every colour blends from zone to zone.
+        // =========================================================================
+        const ZONE_LOOK = [
+            { top: [4, 8, 24], mid: [10, 34, 62], hor: [14, 116, 144], nebA: [34, 211, 238], nebB: [217, 70, 239], aur: [45, 212, 191],
+              far: [12, 42, 64], near: [8, 26, 42], tower: [9, 20, 36], win: [103, 232, 249], spark: [94, 234, 212] },
+            { top: [14, 6, 22], mid: [52, 18, 52], hor: [234, 88, 12], nebA: [251, 146, 60], nebB: [190, 24, 93], aur: [251, 191, 36],
+              far: [56, 22, 40], near: [34, 14, 28], tower: [26, 12, 22], win: [253, 186, 116], spark: [253, 224, 71] },
+            { top: [8, 6, 34], mid: [46, 16, 101], hor: [232, 121, 249], nebA: [192, 132, 252], nebB: [253, 224, 71], aur: [196, 181, 253],
+              far: [40, 24, 84], near: [26, 14, 58], tower: [22, 14, 48], win: [233, 213, 255], spark: [254, 240, 138] }
+        ];
+        const reducedMotion = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+        let backdrop = null;
+        function buildBackdrop() {
+            let a = 20261112;   // fixed seed: the same sky every visit
+            const rnd = () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+            const stars = (n, span) => Array.from({ length: n }, () => ({ x: rnd() * span, y: rnd() * 0.72, r: rnd() * 1.4 + 0.4, tw: rnd() * 6.28, sp: 0.6 + rnd() * 1.8, hue: rnd() }));
+            const towers = [];
+            for (let x = 0; x < 4600; ) {
+                const w = 26 + rnd() * 54, h = 0.16 + rnd() * 0.34;
+                towers.push({ x, w, h, spire: rnd() < 0.35, blink: rnd() * 6.28, cols: 2 + Math.floor(rnd() * 3), lit: rnd() });
+                x += w + 6 + rnd() * 40;
+            }
+            const ridge = () => [0, 1, 2, 3].map(() => ({ f: 0.002 + rnd() * 0.006, p: rnd() * 6.28, a: 0.25 + rnd() * 0.75 }));
+            return {
+                far: stars(170, 2600), near: stars(70, 3400), towers, ridgeFar: ridge(), ridgeNear: ridge(),
+                motes: Array.from({ length: 46 }, () => ({ x: rnd(), y: rnd(), r: 0.8 + rnd() * 2.2, sp: 0.2 + rnd() * 0.8, ph: rnd() * 6.28 })),
+                shoot: { t: -1, x: 0, y: 0, next: 3 }
+            };
+        }
+        const mixC = (c1, c2, k) => c1.map((v, i) => Math.round(v + (c2[i] - v) * k));
+        const rgba = (c, al) => `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${al})`;
+        function zoneLookAt(x) {
+            // blend across 500 px around each zone border
+            const k1 = Math.min(1, Math.max(0, (x - 1950) / 500)), k2 = Math.min(1, Math.max(0, (x - 4050) / 500));
+            const L = {};
+            for (const key in ZONE_LOOK[0]) L[key] = mixC(mixC(ZONE_LOOK[0][key], ZONE_LOOK[1][key], k1), ZONE_LOOK[2][key], k2);
+            return L;
+        }
+        function ridgeY(r, x) { let v = 0; r.forEach((o) => { v += Math.abs(Math.sin(x * o.f + o.p)) * o.a; }); return v / r.length; }
+
+        function renderBackdrop(W, H, progress) {
+            if (!backdrop) backdrop = buildBackdrop();
+            const B = backdrop, cam = camera.x;
+            const t = (reducedMotion ? 0.15 : 1) * performance.now() / 1000;
+            const L = zoneLookAt(player.x);
+            const horizon = H * 0.64;
+
+            // sky
+            const sky = ctx.createLinearGradient(0, 0, 0, H);
+            sky.addColorStop(0, rgba(L.top, 1));
+            sky.addColorStop(0.45, rgba(L.mid, 1));
+            sky.addColorStop(0.78, rgba(mixC(L.mid, L.hor, 0.55), 1));
+            sky.addColorStop(1, rgba(L.hor, 1));
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, W, H);
+
+            // nebulae: big soft clouds that breathe and drift very slowly
+            [[0.22, 0.26, 0.55, L.nebA, 0.16, 0.0], [0.78, 0.2, 0.62, L.nebB, 0.14, 2.1], [0.52, 0.42, 0.45, mixC(L.nebA, L.nebB, 0.5), 0.1, 4.2]].forEach(([fx, fy, fr, c, al, ph]) => {
+                const x = ((fx * W - cam * 0.015 + Math.sin(t * 0.05 + ph) * 40) % (W * 1.4) + W * 1.4) % (W * 1.4) - W * 0.2;
+                const y = fy * H + Math.cos(t * 0.07 + ph) * 18;
+                const r = fr * Math.max(W, H) * (1 + Math.sin(t * 0.2 + ph) * 0.06);
+                const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                g.addColorStop(0, rgba(c, al)); g.addColorStop(0.5, rgba(c, al * 0.35)); g.addColorStop(1, rgba(c, 0));
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, W, H);
+            });
+
+            // aurora: two slow ribbons of light across the upper sky
+            for (let k = 0; k < 2; k++) {
+                const base = H * (0.16 + k * 0.1), amp = 22 + k * 10;
+                const g = ctx.createLinearGradient(0, base - amp, 0, base + 90);
+                g.addColorStop(0, rgba(L.aur, 0));
+                g.addColorStop(0.35, rgba(L.aur, 0.10 - k * 0.03));
+                g.addColorStop(1, rgba(L.aur, 0));
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                for (let x = 0; x <= W + 20; x += 20) {
+                    const y = base + Math.sin(x * 0.006 + t * (0.35 + k * 0.15) + k * 2 - cam * 0.0004) * amp + Math.sin(x * 0.017 - t * 0.5) * 8;
+                    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                for (let x = W + 20; x >= 0; x -= 20) {
+                    const y = base + 90 + Math.sin(x * 0.005 + t * 0.3 + k) * 14;
+                    ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // stars, two depths, twinkling
+            [[B.far, 0.02, 1], [B.near, 0.05, 1.5]].forEach(([list, f, size]) => {
+                const span = f === 0.02 ? 2600 : 3400;
+                list.forEach((s) => {
+                    const x = ((s.x - cam * f) % span + span) % span;
+                    if (x > W) return;
+                    const y = s.y * horizon;
+                    const al = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.sp + s.tw));
+                    ctx.fillStyle = s.hue > 0.85 ? `rgba(253, 230, 138, ${al})` : s.hue > 0.7 ? `rgba(165, 243, 252, ${al})` : `rgba(255, 255, 255, ${al})`;
+                    ctx.fillRect(x, y, s.r * size, s.r * size);
+                });
+            });
+
+            // a shooting star every few seconds
+            const sh = B.shoot;
+            if (!reducedMotion) {
+                if (sh.t < 0 && t > sh.next) { sh.t = 0; sh.x = W * (0.3 + Math.random() * 0.6); sh.y = H * (0.05 + Math.random() * 0.2); }
+                if (sh.t >= 0) {
+                    sh.t += 1 / 60;
+                    const px = sh.x - sh.t * 520, py = sh.y + sh.t * 220;
+                    const g = ctx.createLinearGradient(px, py, px + 90, py - 38);
+                    g.addColorStop(0, 'rgba(255, 255, 255, 0.9)'); g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.strokeStyle = g; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 90, py - 38); ctx.stroke();
+                    if (sh.t > 0.9) { sh.t = -1; sh.next = t + 4 + Math.random() * 6; }
+                }
+            }
+
+            // ringed planet, very far away
+            const pr = Math.min(W, H) * 0.09;
+            const px = W * 0.16 - cam * 0.012 % (W * 2), py = H * 0.2;
+            if (px > -pr * 3) {
+                ctx.save();
+                const pg = ctx.createRadialGradient(px - pr * 0.4, py - pr * 0.4, pr * 0.1, px, py, pr);
+                pg.addColorStop(0, rgba(mixC(L.nebA, [255, 255, 255], 0.5), 0.9));
+                pg.addColorStop(0.6, rgba(mixC(L.nebA, L.top, 0.45), 0.85));
+                pg.addColorStop(1, rgba(L.top, 0.9));
+                ctx.fillStyle = pg;
+                ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = rgba(mixC(L.nebB, [255, 255, 255], 0.4), 0.55);
+                ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.ellipse(px, py, pr * 1.9, pr * 0.42, -0.35, 0, Math.PI * 2); ctx.stroke();
+                ctx.restore();
+            }
+
+            // THE BRIGHT SPOT on the horizon: always visible, drifting toward the middle and growing as you get closer
+            const bx = W * 0.5 + (portal ? portal.centerX : 7300) * 0.06 - cam * 0.06;
+            const by = horizon - H * 0.05;
+            const br = 22 + progress * 110;
+            const pulse = 1 + Math.sin(t * 1.6) * 0.06;
+            // its beam into the sky, and slow light rays fanning out
+            const beam = ctx.createLinearGradient(bx - br * 0.6, 0, bx + br * 0.6, 0);
+            beam.addColorStop(0, 'rgba(254, 240, 138, 0)'); beam.addColorStop(0.5, `rgba(255, 252, 230, ${0.16 + progress * 0.2})`); beam.addColorStop(1, 'rgba(254, 240, 138, 0)');
+            ctx.fillStyle = beam;
+            ctx.fillRect(bx - br * 0.6, 0, br * 1.2, by);
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < 9; i++) {
+                const ang = -Math.PI + (i + 0.5) * (Math.PI / 9) + Math.sin(t * 0.15 + i) * 0.05;
+                ctx.rotate(0);
+                ctx.fillStyle = `rgba(254, 243, 199, ${0.025 + progress * 0.025})`;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(ang - 0.05) * W, Math.sin(ang - 0.05) * W);
+                ctx.lineTo(Math.cos(ang + 0.05) * W, Math.sin(ang + 0.05) * W);
+                ctx.closePath();
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // mountain ridges in haze (far, then near)
+            [[B.ridgeFar, 0.08, L.far, 0.16, 0.85], [B.ridgeNear, 0.16, L.near, 0.24, 0.95]].forEach(([r, f, col, hgtK, al]) => {
+                ctx.fillStyle = rgba(col, al);
+                ctx.beginPath();
+                ctx.moveTo(0, H);
+                for (let x = 0; x <= W + 12; x += 12) ctx.lineTo(x, horizon - ridgeY(r, x + cam * f) * H * hgtK);
+                ctx.lineTo(W + 12, H);
+                ctx.closePath();
+                ctx.fill();
+            });
+            // the Bright Spot's core shines over the ridges (added light, so the mountain tops glow around it)
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            const bg = ctx.createRadialGradient(bx, by, 0, bx, by, br * 3 * pulse);
+            bg.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+            bg.addColorStop(0.1, 'rgba(254, 240, 138, 0.6)');
+            bg.addColorStop(0.35, rgba(L.hor, 0.22));
+            bg.addColorStop(1, rgba(L.hor, 0));
+            ctx.fillStyle = bg;
+            ctx.fillRect(bx - br * 3.2, by - br * 3.2, br * 6.4, br * 6.4);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.beginPath(); ctx.arc(bx, by, Math.max(3, br * 0.12) * pulse, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+
+            // haze where the mountains meet the sky
+            const hz = ctx.createLinearGradient(0, horizon - H * 0.2, 0, horizon + 10);
+            hz.addColorStop(0, rgba(L.hor, 0)); hz.addColorStop(1, rgba(L.hor, 0.22));
+            ctx.fillStyle = hz;
+            ctx.fillRect(0, horizon - H * 0.2, W, H * 0.2 + 10);
+
+            // skyline: towers with lit windows and blinking beacons (Gemini's city, deeper)
+            const tf = 0.3, span = 4600, groundLine = worldH - 95 + (viewH - worldH);
+            B.towers.forEach((tw) => {
+                const x = ((tw.x - cam * tf) % span + span) % span - 80;
+                if (x > W || x + tw.w < 0) return;
+                const h = tw.h * H, top = groundLine - h;
+                ctx.fillStyle = rgba(L.tower, 0.92);
+                ctx.fillRect(x, top, tw.w, h);
+                ctx.fillStyle = rgba(mixC(L.tower, L.win, 0.25), 0.6);
+                ctx.fillRect(x, top, tw.w, 2);
+                if (tw.spire) { ctx.fillStyle = rgba(L.tower, 0.92); ctx.fillRect(x + tw.w / 2 - 1.5, top - 26, 3, 26); }
+                // windows
+                const cw = (tw.w - 10) / tw.cols;
+                for (let wy = top + 10, row = 0; wy < groundLine - 8; wy += 13, row++) {
+                    for (let c = 0; c < tw.cols; c++) {
+                        const on = Math.sin(row * 12.9 + c * 78.2 + tw.lit * 50) > 0.1;
+                        if (!on) continue;
+                        const flick = 0.45 + 0.25 * Math.sin(t * 0.8 + row + c + tw.lit * 9);
+                        ctx.fillStyle = rgba(L.win, flick * 0.55);
+                        ctx.fillRect(x + 5 + c * cw + 2, wy, cw - 4, 4);
+                    }
+                }
+                // red beacon on top
+                const bl = 0.5 + 0.5 * Math.sin(t * 2.2 + tw.blink);
+                ctx.fillStyle = `rgba(248, 113, 113, ${0.25 + bl * 0.75})`;
+                ctx.beginPath(); ctx.arc(x + tw.w / 2, top - (tw.spire ? 28 : 3), 2.2, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // ground fog, glowing in the zone colour
+            const fog = ctx.createLinearGradient(0, groundLine - H * 0.22, 0, groundLine);
+            fog.addColorStop(0, rgba(L.hor, 0)); fog.addColorStop(1, rgba(mixC(L.hor, [255, 255, 255], 0.15), 0.28));
+            ctx.fillStyle = fog;
+            ctx.fillRect(0, groundLine - H * 0.22, W, H * 0.22);
+
+            // drifting sparks rising slowly (they move a little faster than the city, for depth)
+            B.motes.forEach((m) => {
+                const x = ((m.x * (W + 200) - cam * 0.6 + Math.sin(t * 0.6 + m.ph) * 20) % (W + 200) + W + 200) % (W + 200) - 100;
+                const y = ((m.y * H - t * 14 * m.sp) % H + H) % H;
+                const al = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + m.ph));
+                ctx.fillStyle = rgba(L.spark, al);
+                ctx.beginPath(); ctx.arc(x, y, m.r, 0, Math.PI * 2); ctx.fill();
+            });
+        }
+
+        // =========================================================================
         // 8. RENDER ENGINE (PARALLAX ZONES, EXPRESSIVE ROBOT, BRIGHT SPOT VORTEX)
         // =========================================================================
         function render() {
@@ -2359,14 +2596,9 @@
             ctx.setTransform(dpr * viewScale, 0, 0, dpr * viewScale, 0, 0);
             ctx.clearRect(0, 0, W, H);
 
-            // Dynamic Sky Gradient shifting seamlessly across the 3 zones into golden starlight!
+            // The backdrop: sky, nebulae, stars, planet, the Bright Spot on the horizon, mountains, skyline, fog
             const progress = Math.min(1, Math.max(0, player.x / levelLength));
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-            skyGrad.addColorStop(0, `rgb(${8 + progress * 45}, ${12 + progress * 35}, ${28 + progress * 65})`);
-            skyGrad.addColorStop(0.6, `rgb(${15 + progress * 75}, ${23 + progress * 55}, ${48 + progress * 55})`);
-            skyGrad.addColorStop(1, `rgb(${22 + progress * 120}, ${32 + progress * 85}, ${58 + progress * 30})`);
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, W, H);
+            renderBackdrop(W, H, progress);
 
             ctx.save();
 
@@ -2381,18 +2613,8 @@
             }
             ctx.translate(-camera.x + shakeX, shakeY + (viewH - worldH));   // keep the floor at the bottom if the window changed size
 
-            // 1. Twinkling Background Stars (Parallax 0.3x)
-            bgStars.forEach(st => {
-                const sx = st.x + camera.x * 0.7;
-                const alpha = 0.4 + Math.sin(Date.now() * 0.004 + st.twinkle) * 0.4;
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.beginPath();
-                ctx.arc(sx, st.y, st.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
             // 2. Distant Parallax Silhouettes (Giant Gears & Spire Towers)
-            ctx.strokeStyle = `rgba(56, 189, 248, ${0.09 + progress * 0.08})`;
+            ctx.strokeStyle = `rgba(186, 230, 253, ${0.035 + progress * 0.025})`;
             ctx.lineWidth = 2;
             for (let gx = 200; gx < levelLength; gx += 650) {
                 const px = gx + camera.x * 0.45;
@@ -2400,22 +2622,21 @@
                 drawWireframeGear(px, H * 0.45, 75, 10, Date.now() * 0.0004 * (gx % 1300 === 0 ? 1 : -1));
             }
 
-            // 3. Flying Distant Cargo Ships with Blinking Beacons
+            // 3. Distant airships drifting across the sky (small and hazy, so they never look like something to stand on)
             bgShips.forEach(s => {
                 if (s.x < camera.x - 150 || s.x > camera.x + W + 150) return;
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-                ctx.strokeStyle = s.color;
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.roundRect(s.x, s.y, s.width, 18, [9]);
-                ctx.fill();
-                ctx.stroke();
-
-                // Thruster glow
+                const dir = s.vx > 0 ? 1 : -1, w = s.width * 0.55, cx = s.x + w / 2, cy = s.y + 6;
+                ctx.save();
+                ctx.globalAlpha = 0.55;
+                ctx.fillStyle = 'rgba(8, 12, 28, 0.85)';
+                ctx.beginPath(); ctx.ellipse(cx, cy, w / 2, 6, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillRect(cx - w * 0.15, cy + 4, w * 0.3, 4);
                 ctx.fillStyle = s.color;
-                ctx.beginPath();
-                ctx.arc(s.vx > 0 ? s.x - 4 : s.x + s.width + 4, s.y + 9, 4, 0, Math.PI * 2);
-                ctx.fill();
+                for (let k = -2; k <= 2; k++) ctx.fillRect(cx + k * w * 0.14 - 1, cy - 1, 2, 2);
+                const blink = 0.5 + 0.5 * Math.sin(performance.now() / 300 + s.x);
+                ctx.globalAlpha = 0.4 + blink * 0.6;
+                ctx.beginPath(); ctx.arc(cx - dir * (w / 2 + 3), cy, 2.5, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
             });
 
             // 4. Platforms (Zone-themed neon trims)
@@ -2995,7 +3216,7 @@
 
         // For AI helpers and test tools: the same moves and information as the Turn mode buttons and text box
         window.RobotJourney = {
-            version: '1.1',
+            version: '1.2',
             start: (opts = {}) => startGame(!!opts.remix, opts.turn === true ? true : undefined),
             setTurnMode,
             ai: {

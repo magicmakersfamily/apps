@@ -14,7 +14,7 @@ for (const browser of list) {
     const p = await launch({ browser, url: (await baseUrl()) + 'robot-journey/', w, h, seed: 5, mobile: label !== 'laptop' });
     if (!(await p.ready('!!window.RobotJourney'))) fail(label, 'page did not boot');
     const body = await p.eval('document.body.innerText');
-    if (!/Version 1\.1 \(beta\)/.test(body)) fail(label, 'version line missing');
+    if (!/Version 1\.2 \(beta\)/.test(body)) fail(label, 'version line missing');
     const over = await p.eval('document.documentElement.scrollWidth > innerWidth + 1');
     if (over) fail(label, 'page scrolls sideways');
     const startFits = await p.eval("(() => { const b = document.getElementById('launch-btn').getBoundingClientRect(); return b.width > 0; })()");

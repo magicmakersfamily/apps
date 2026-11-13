@@ -14,7 +14,7 @@ for (const browser of list) {
     const p = await launch({ browser, url: (await baseUrl()) + 'robot-journey/', w, h, seed: 5, mobile: label !== 'laptop' });
     if (!(await p.ready('!!window.RobotJourney'))) fail(label, 'page did not boot');
     const body = await p.eval('document.body.innerText');
-    if (!/Version 1\.0 \(beta\)/.test(body)) fail(label, 'version line missing');
+    if (!/Version 1\.1 \(beta\)/.test(body)) fail(label, 'version line missing');
     const over = await p.eval('document.documentElement.scrollWidth > innerWidth + 1');
     if (over) fail(label, 'page scrolls sideways');
     const startFits = await p.eval("(() => { const b = document.getElementById('launch-btn').getBoundingClientRect(); return b.width > 0; })()");
@@ -29,9 +29,13 @@ for (const browser of list) {
     await p.shot(path.join(outDir(), `robot-journey-${browser}-${label}-play.png`));
     const music = await p.eval("typeof audioCtx !== 'undefined' && audioCtx ? { state: audioCtx.state, song: Music.songId } : null");
     if (!music || music.song !== 'scrapyard') fail(label, 'Zone 1 song is not playing: ' + JSON.stringify(music));
-    await p.page.click('#music-btn');
-    const mb = await p.eval("document.getElementById('music-btn').getAttribute('aria-pressed') + '|' + document.getElementById('music-btn').innerText");
-    if (!/^false\|.*Off/.test(mb)) fail(label, 'music button does not show Off after a click: ' + mb);
+    await p.page.selectOption('#music-select', 'james'); await p.sleep(2600);
+    const js = await p.eval('Music.songId');
+    if (js !== 'james') fail(label, "choosing James's Theme did not switch the song: " + js);
+    await p.page.selectOption('#music-select', 'off');
+    const mb = await p.eval("document.getElementById('music-select').value + '|' + document.getElementById('music-icon').textContent + '|' + musicEnabled");
+    if (mb !== 'off|🔇|false') fail(label, 'music picker does not show Off: ' + mb);
+    if (!(await p.eval("!document.getElementById('coach').hidden || localStorage.getItem('robot-journey:coached') === '1'"))) fail(label, 'the first-jump coach tip did not show');
     await p.page.click('#pause-btn');
     if ((await p.eval('RobotJourney.debug.gameState')) !== 'PAUSED') fail(label, 'pause button did not pause');
     await p.page.click('#turn-toggle');

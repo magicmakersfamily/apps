@@ -1,19 +1,72 @@
 {
   "about": "Browser checks for tools/check.mjs. quick = before every push; full = before a release.",
   "quick": [
-    ["robot-journey/tools/smoke.mjs", "--browser", "chromium"],
-    ["robot-journey/tools/ai-bot.mjs"],
-    ["robot-journey/tools/ai-bot.mjs", "--w", "844", "--h", "390"],
-    ["robot-journey/tools/ai-taps.mjs"]
+    [
+      "robot-journey/tools/smoke.mjs",
+      "--browser",
+      "chromium"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs",
+      "--w",
+      "844",
+      "--h",
+      "390"
+    ],
+    [
+      "robot-journey/tools/ai-taps.mjs"
+    ],
+    [
+      "robot-journey/tools/features.mjs"
+    ]
   ],
   "full": [
-    ["robot-journey/tools/smoke.mjs", "--browser", "all"],
-    ["robot-journey/tools/ai-bot.mjs"],
-    ["robot-journey/tools/ai-bot.mjs", "--w", "844", "--h", "390"],
-    ["robot-journey/tools/ai-bot.mjs", "--w", "390", "--h", "844"],
-    ["robot-journey/tools/ai-bot.mjs", "--remix"],
-    ["robot-journey/tools/ai-bot.mjs", "env:BROWSER=webkit"],
-    ["robot-journey/tools/ai-taps.mjs"],
-    ["robot-journey/tools/ai-taps.mjs", "env:BROWSER=firefox"]
+    [
+      "robot-journey/tools/smoke.mjs",
+      "--browser",
+      "all"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs",
+      "--w",
+      "844",
+      "--h",
+      "390"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs",
+      "--w",
+      "390",
+      "--h",
+      "844"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs",
+      "--remix"
+    ],
+    [
+      "robot-journey/tools/ai-bot.mjs",
+      "env:BROWSER=webkit"
+    ],
+    [
+      "robot-journey/tools/ai-taps.mjs"
+    ],
+    [
+      "robot-journey/tools/ai-taps.mjs",
+      "env:BROWSER=firefox"
+    ],
+    [
+      "robot-journey/tools/features.mjs"
+    ],
+    [
+      "robot-journey/tools/features.mjs",
+      "env:BROWSER=webkit"
+    ]
   ]
 }

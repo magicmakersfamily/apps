@@ -7,7 +7,7 @@ const out = process.argv[2] || 'robot-journey-music';
 fs.mkdirSync(out, { recursive: true });
 const p = await launch({ url: (await baseUrl()) + 'robot-journey/', w: 800, h: 600, seed: 11 });
 await p.ready('!!window.RobotJourney');
-const jobs = [['1-scrapyard-shuffle', 'scrapyard', 2], ['2-foundry-drive', 'foundry', 2], ['3-starlight-spire', 'spire', 2], ['4-bright-spot-fanfare', 'fanfare', 0], ['5-home-in-the-light', 'victory', 3]];
+const jobs = [['1-zone1-scrapyard-shuffle', 'scrapyard', 2], ['2-zone2-james-theme', 'james', 1], ['3-zone3-medley-in-d', 'spire', 1], ['4-bright-spot-fanfare', 'fanfare', 0], ['5-win-screen-james-theme-slow', 'victory', 1]];
 for (const [name, id, loops] of jobs) {
   const b64 = await p.page.evaluate(async ([id, loops]) => {
     const rate = 44100;

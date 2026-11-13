@@ -93,6 +93,7 @@ robot-journey/      The Great Robot Journey 機器人大冒險 (beta): a platfor
   index.html        the whole game (level, physics, original soundtrack, Turn mode and its text view)
   tw.css            Tailwind styles compiled once (tools/build-css.sh), so the page loads no CDN
   tools/            ai-bot.mjs and ai-taps.mjs (the level can be finished with Turn-mode moves), smoke.mjs,
+                    features.mjs (coach, ghost-route help, drag launch, results screen),
                     render-music.mjs (songs to WAV for listening), measure.mjs (jump guide numbers)
   cover.png         1200×744 card image (render with index.html#cover)
 versions/           past releases, still playable (versions/<game>/<X.Y>/), see versions/index.html
@@ -117,7 +118,7 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
 | James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.4 | 2026-11-04 |
 | Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
-| The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.0 | 2026-11-12 |
+| The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.1 | 2026-11-12 |
 
 The shelf is versioned too: **The App Shelf 2.5** (2026-11-12). Version 2.4, the shelf before The Great Robot Journey
 joined, is frozen at `versions/shelf/2.4/`. Version 2.3, the shelf when Marble Run 1.3 was current, is frozen at

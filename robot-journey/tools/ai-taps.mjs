@@ -33,6 +33,15 @@ await p.goto((await baseUrl()) + 'robot-journey/'); await p.ready('!!window.Robo
 const guide = await p.eval("document.getElementById('ai-guide').innerText");
 if (!/Turn mode/.test(guide) || !/jump right/i.test(guide)) fail('guide', 'the hidden how-to-play text for AI helpers is missing');
 await click('#launch-turn-btn'); await p.sleep(800);
+const short = await p.eval("document.getElementById('ai-short').innerText");
+console.log('short hint:', short);
+if (!/^💡 (Try|Take|Wait)/.test(short)) fail('text view', 'no short kid-friendly hint: ' + short);
+await click('#show-me'); await p.sleep(300);
+if (!(await p.eval("document.querySelectorAll('#turn-pad .pulse-hl').length >= 1"))) fail('show me', 'Show me did not light up a move button');
+const ghost = await p.eval('RobotJourney.debug.guide');
+if (!ghost || !(ghost.trace > 10)) fail('show me', 'Show me did not draw a ghost route: ' + JSON.stringify(ghost));
+// an AI helper opens the full readout with "Show details"
+await click('#ai-hide'); await p.sleep(300);
 let text = await p.eval("document.getElementById('ai-panel').innerText");
 console.log('--- first text view ---\n' + text + '\n---');
 for (const want of ['Robot: x', 'standing on the floor', 'hover-drone', 'Hint', 'Bright Spot portal', 'Moves:']) if (!text.includes(want)) fail('text view', 'the text view does not mention "' + want + '"');

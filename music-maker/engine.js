@@ -113,7 +113,7 @@ E.analyze = function (x) {
 
   const dur = nF * DT;
   const voiced = notes.reduce((a, n) => a + n.e - n.s, 0);
-  const res = { dur, peak, onsets: onsets.map(o => ({ t: o.f * DT, s: o.s })) };
+  const res = { dur, peak, nF, sm, onsets: onsets.map(o => ({ t: o.f * DT, s: o.s })) };
   if (notes.length >= 3 && voiced > 0.25 * active * DT) res.mode = 'melody';
   else if (onsets.length >= 3) res.mode = 'rhythm';
   else if (notes.length >= 1) res.mode = 'melody';
@@ -259,6 +259,81 @@ E.posFn = function (B) {
   };
 };
 
+/* ---------- tuning the voice (pitch correction, like a pop record) ---------- */
+// all the pitches of the key, so a harmony can step "two notes up the scale"
+E.scaleStep = function (q, steps, key) {
+  const pcs = SCALE[key.mode].map(v => (v + key.tonic) % 12), all = [];
+  for (let m = 0; m < 128; m++) if (pcs.includes(m % 12)) all.push(m);
+  let i = all.indexOf(q);
+  if (i < 0) { i = 0; for (let k = 0; k < all.length; k++) if (Math.abs(all[k] - q) < Math.abs(all[i] - q)) i = k; }
+  return all[Math.max(0, Math.min(all.length - 1, i + steps))];
+};
+E.mixDown = function (chs) {
+  const n = chs[0].length, m = new Float32Array(n);
+  for (const c of chs) for (let i = 0; i < n; i++) m[i] += c[i] / chs.length;
+  return m;
+};
+// how many semitones to move the voice at each analysis frame:
+// amount 1 = every sung note lands exactly on the band's note, wobble gone; 0 = untouched.
+// speed = seconds the voice takes to slide to a new note (short = the hard "pop" sound).
+// steps = 0 for the lead, +2 / -2 for a harmony a third above / below.
+E.shiftTrack = function (plan, o) {
+  o = o || {};
+  const nF = plan.nF || 0, sh = new Float32Array(nF), amount = o.amount == null ? 1 : o.amount, steps = o.steps || 0;
+  if (plan.mode !== 'melody' || !nF) return sh;
+  for (const n of plan.notes) {
+    const f0 = Math.max(0, Math.round(n.s / DT)), f1 = Math.min(nF, Math.round(n.e / DT));
+    const target = (steps ? E.scaleStep(n.q, steps, plan.key) : n.q) + plan.tune;
+    for (let t = f0; t < f1; t++) {
+      const m = plan.sm[t], cur = (isNaN(m) || Math.abs(m - n.p) > 0.8) ? n.p : m;
+      const lim = steps ? 6 : 2.2; // a pitch-tracker slip must never turn into a chipmunk
+      sh[t] = Math.max(-lim, Math.min(lim, target - cur)) * amount;
+    }
+  }
+  const a = 1 - Math.exp(-DT / Math.max(.004, o.speed == null ? .03 : o.speed));
+  const y = new Float32Array(sh);
+  for (let t = 1; t < nF; t++) y[t] = y[t - 1] + a * (sh[t] - y[t - 1]);
+  for (let t = nF - 2; t >= 0; t--) y[t] = y[t + 1] + a * (y[t] - y[t + 1]);
+  return y;
+};
+// time-domain pitch-synchronous overlap-add: the voice keeps its length and its vowel colour
+E.pitchShift = function (x, sr, plan, shiftFr) {
+  const n = x.length, out = new Float32Array(n), nF = plan.nF, sm = plan.sm;
+  if (!nF) { out.set(x); return out; }
+  const fAt = (i) => (i / sr - WIN / 2 / FR) / DT;
+  const voicedAt = (i) => { const f = Math.round(fAt(i)); if (f < 0 || f >= nF || isNaN(sm[f])) return 0; return sr / (440 * Math.pow(2, (sm[f] - 69) / 12)); };
+  const shiftAt = (i) => { const f = fAt(i), f0 = Math.max(0, Math.min(nF - 1, Math.floor(f))), f1 = Math.min(nF - 1, f0 + 1), w = Math.max(0, Math.min(1, f - f0)); return shiftFr[f0] * (1 - w) + shiftFr[f1] * w; };
+  const U = Math.round(.01 * sr), marks = [];
+  let pos = U;
+  while (pos < n) {
+    let P = voicedAt(pos);
+    if (P) {
+      P = Math.max(sr / 1000, Math.min(sr / 60, P));
+      const a = Math.max(0, Math.round(pos - P / 4)), b = Math.min(n - 1, Math.round(pos + P / 4)); let bi = Math.round(pos), bv = -1e9;
+      for (let i = a; i <= b; i++) if (x[i] > bv) { bv = x[i]; bi = i; }
+      pos = bi; marks.push({ pos, P, v: 1 }); pos += P;
+    } else { marks.push({ pos, P: U, v: 0 }); pos += U; }
+  }
+  if (!marks.length) { out.set(x); return out; }
+  let ts = 0, j = 0;
+  while (ts < n) {
+    while (j + 1 < marks.length && Math.abs(marks[j + 1].pos - ts) <= Math.abs(marks[j].pos - ts)) j++;
+    const mk = marks[j], P = mk.P, r = mk.v ? Math.pow(2, shiftAt(ts) / 12) : 1, L = Math.max(2, Math.round(P)), c = Math.round(mk.pos), s0 = Math.round(ts);
+    for (let k = -L; k <= L; k++) {
+      const a = c + k, b = s0 + k; if (a < 0 || a >= n || b < 0 || b >= n) continue;
+      out[b] += x[a] * (.5 + .5 * Math.cos(Math.PI * k / L)) / r;
+    }
+    ts += P / r;
+  }
+  return out;
+};
+// the whole job: a mono voice in, the same voice moved onto the band's notes out
+E.tuneVoice = function (mono, sr, plan, o) {
+  o = o || {};
+  if (plan.mode !== 'melody') return mono;
+  return E.pitchShift(mono, sr, plan, E.shiftTrack(plan, o));
+};
+
 /* ---------- the bands ---------- */
 E.STYLES = [
   { id: 'pop', name: 'Pop Party', icon: '🌟', kick: 'x...x...x...x...', snare: '....x.......x...', hat: '..x...x...x...x.', swing: 0,
@@ -290,6 +365,7 @@ const WORDS = [
   [/pop|party|happy|birthday|sunny/, { style: 'pop' }, 'pop party'],
   [/space|cosmic|star|galaxy|planet|rocket|underwater|ocean|cave|canyon/, { rev: .35 }, 'big echoing room'],
   [/magic|fairy|sparkl|twinkl|glitter|unicorn|wizard/, { sparkle: true }, 'sparkles'],
+  [/pop ?star|auto-?tune|superstar|idol|diva|concert|singer|record/, { voice: 'pop' }, 'pop star voice'],
   [/robot|alien/, { voice: 'robot' }, 'robot voice'],
   [/echo|cave|canyon|mountain/, { voice: 'echo' }, 'echo voice'],
   [/fast|zoom|race|speedy|wild|crazy|loud|energy|excit/, { energy: 3 }, 'high energy'],
@@ -323,6 +399,9 @@ E.arrange = function (plan, style, o) {
   const sw = (style.swing || 0) * .167;
   const stepT = (b, s) => gT(b * 4 + s / 4 + (s % 4 === 2 ? sw : s % 2 === 1 ? sw * .5 : 0));
   const ev = [], push = (k, t, d, n, v, snd) => ev.push({ k, t, d, n, v, snd });
+  // a drummer is never exactly on the grid: tiny, repeatable timing and loudness wobble
+  const hr = rng(Math.round((plan.dur || 1) * 1000) + nA * 7919);
+  const voice2 = plan.mode === 'melody' && playback && o.voice === 'pop';
   const sc = SCALE[plan.key.mode].map(v => (v + plan.key.tonic) % 12);
   const voicing = (ch, seventh) => {
     let r = 48 + ch.root; if (r < 50) r += 12; if (r > 60) r -= 12;
@@ -332,7 +411,7 @@ E.arrange = function (plan, style, o) {
   };
   const drum = (kind, pat, b, scale) => {
     if (!pat) return;
-    for (let s = 0; s < 16; s++) { const c = pat[s]; if (c === '.' || !c) continue; if (c === 'o' && energy === 1 && kind !== 'shaker' && kind !== 'timp') continue; push(kind, stepT(b, s), .1, 0, (c === 'x' ? 1 : .5) * vE * (scale || 1)); }
+    for (let s = 0; s < 16; s++) { const c = pat[s]; if (c === '.' || !c) continue; if (c === 'o' && energy === 1 && kind !== 'shaker' && kind !== 'timp') continue; const lift = (playback && b > nA && b <= 2 * nA) ? 1.12 : 1; push(kind, Math.max(0, stepT(b, s) + (b === 0 && s === 0 ? 0 : (hr() - .5) * (kind === 'kick' ? .008 : .014))), .1, 0, (c === 'x' ? 1 : .5) * vE * (scale || 1) * lift * (.9 + hr() * .2)); }
   };
   for (let b = 0; b < nBars; b++) {
     const ch = chordOf(b), isA = b >= 1 && b <= nA, lvl = isA ? .8 : 1;
@@ -351,6 +430,7 @@ E.arrange = function (plan, style, o) {
     const lastOfSection = (b === nA) || (playback && b === 2 * nA);
     if (lastOfSection && energy >= 2 && style.snare) for (let s = 12; s < 16; s++) push('snare', stepT(b, s), .1, 0, (.4 + .15 * (s - 12)) * vE);
     if (playback && b === nA + 1) push('crash', stepT(b, 0), 1.5, 0, .6 * vE);
+    if (energy >= 2 && ((playback && b === nA) || (b === outro - 1 && b > 1))) push('riser', stepT(b, 0), gT(b * 4 + 4) - gT(b * 4), 0, .55 * vE);
     const br = 36 + ch.root % 12 + (ch.root % 12 > 7 ? -12 : 0);
     for (let s = 0; s < 16; s++) {
       const c = style.bass[s]; if (c === '.') continue;
@@ -370,7 +450,11 @@ E.arrange = function (plan, style, o) {
   const shift = Math.round(((style.center || 74) - med) / 12) * 12 + (o.octave || 0) * 12;
   const melT = (t) => t - t0;
   if (plan.mode === 'rhythm') for (const n of mel) push('lead', melT(n.s), n.e - n.s, n.q + shift, .55, style.lead);
-  if (playback) for (const n of mel) push('lead', melT(n.s) + lenA, Math.max(.12, n.e - n.s), n.q + shift, .9, style.lead);
+  if (playback) for (const n of mel) {
+    const d = Math.max(.12, n.e - n.s);
+    push('lead', melT(n.s) + lenA, d, n.q + shift, voice2 ? .5 : .9, style.lead);
+    if (energy >= 2 && plan.mode === 'melody' && n.q + shift + 12 <= 92) push('lead', melT(n.s) + lenA, d, n.q + shift + 12, voice2 ? .2 : .3, style.lead);
+  }
   // little answers from the band when the singer takes a breath
   if (plan.mode === 'melody') {
     const pos = E.posFn(B);
@@ -386,7 +470,7 @@ E.arrange = function (plan, style, o) {
   const sections = [{ id: 'intro', t0: 0, t1: G[4] }, { id: 'you', t0: G[4], t1: G[4 + nAb] }];
   if (playback) sections.push({ id: 'band', t0: G[4 + nAb], t1: G[4 + 2 * nAb] });
   sections.push({ id: 'end', t0: sections[sections.length - 1].t1, t1: G[G.length - 1] });
-  return { events: ev, len: G[G.length - 1] + 1.6, voiceAt: -t0, G, sections, lenA, shift, beat: lastIv,
+  return { events: ev, len: G[G.length - 1] + 1.6, voiceAt: -t0, voice2, G, sections, lenA, shift, beat: lastIv,
     bars: Array.from({ length: nBars }, (_, b) => ({ t: gT(b * 4), chord: chordOf(b) })) };
 };
 

@@ -149,6 +149,42 @@
   .shelf-foot p { margin: 0; }
   .shelf-foot a, .linkish { color: var(--muted); }
   .linkish { text-decoration: underline; padding: 0; font-size: inherit; }
+  /* My songs: the list under the recorder */
+  .songs { margin-top: 28px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+  .songs-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .songs-head h3 { font-family: var(--fun); font-size: 1.3rem; margin: 0; }
+  .songs-head .btn { padding: 8px 12px; font-size: .85rem; }
+  .folders { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fchip { padding: 7px 12px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); color: var(--muted); font-size: .85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .fchip .n { color: var(--dim); font-weight: 500; }
+  .fchip[aria-pressed="true"] { background: rgba(236, 72, 153, .3); border-color: var(--pink); color: #fff; }
+  .fchip.drop { outline: 2px dashed var(--gold); outline-offset: 2px; background: rgba(253, 224, 71, .2); color: #fff; }
+  .fchip input, .folder-tools input, .rename-in { font: inherit; color: #fff; background: rgba(2, 6, 23, .7); border: 1px solid var(--pink); border-radius: 8px; padding: 4px 8px; min-width: 0; }
+  .fchip input { width: 10em; font-size: .85rem; }
+  .folder-tools { font-size: .85rem; color: var(--dim); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .songlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .song { position: relative; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 8px 10px 8px 6px; border-radius: 16px; background: var(--well); border: 1px solid rgba(255, 255, 255, .06); transition: transform .15s ease; }
+  .song.current { border-color: rgba(236, 72, 153, .55); }
+  .song.dragging { z-index: 5; transition: none; box-shadow: 0 12px 30px rgba(0, 0, 0, .5); border-color: var(--pink); background: #261a54; }
+  .grip { width: 32px; height: 46px; border-radius: 10px; color: var(--dim); font-size: 1.35rem; line-height: 1; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+  .grip:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+  .splay { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(45deg, var(--pink), #9333ea); display: grid; place-items: center; box-shadow: 0 0 12px rgba(236, 72, 153, .4); }
+  .splay svg { width: 20px; height: 20px; margin-left: 2px; }
+  .sname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sthumb { display: block; width: 100%; max-width: 240px; height: 16px; margin: 4px 0 2px; }
+  .smeta { font-size: .78rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sstar, .smore { width: 40px; height: 46px; border-radius: 10px; font-size: 1.35rem; color: var(--dim); }
+  .sstar:hover, .smore:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+  .sstar[aria-pressed="true"] { color: var(--gold); }
+  .smenu { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 2px 2px; border-top: 1px solid var(--line); }
+  .smenu button, .smenu label { padding: 7px 11px; border-radius: 10px; background: rgba(255, 255, 255, .08); font-size: .85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+  .smenu select { font: inherit; color: #fff; background: rgba(2, 6, 23, .7); border: 1px solid var(--line); border-radius: 8px; padding: 2px 4px; max-width: 11em; }
+  .smenu .danger { color: #fca5a5; }
+  .rename-in { width: 100%; }
+  #songNow { color: var(--pink-soft); font-size: .85rem; margin-top: 6px; }
+  .toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); background: #261a54; border: 1px solid var(--pink); border-radius: 999px; padding: 10px 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); display: flex; gap: 14px; align-items: center; font-size: .9rem; }
+  .toast button { color: var(--gold); font-weight: 700; text-decoration: underline; }
+  @media (max-width: 480px) { .song { gap: 5px; padding: 8px 6px 8px 2px; } .grip { width: 26px; } .sstar, .smore { width: 34px; } .splay { width: 42px; height: 42px; } }
   @media (max-width: 480px) { .card { padding: 18px 14px; } .stepper { gap: 8px; } .stepper .pill { padding: 8px 12px; } .stepper .bar { width: 24px; } #stage { padding: 22px 10px; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
@@ -205,6 +241,15 @@
         <label class="btn upload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Use a recording<input id="file" type="file" accept="audio/*,.m4a,.mp3,.wav,.webm,.ogg" aria-label="Use a recording from this device"></label>
       </div>
       <p class="small">No microphone? Try an example: <button class="linkish" id="demoHum" type="button">a pretend hum</button> or <button class="linkish" id="demoTap" type="button">pretend taps</button>.</p>
+
+      <div class="songs" id="songs" aria-labelledby="h-songs">
+        <div class="songs-head"><h3 id="h-songs">🎵 My songs</h3><button class="btn" id="say3" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9a4 4 0 0 1 0 6"/></svg>Tell me</button></div>
+        <div class="folders" id="folders" role="group" aria-label="Show songs"></div>
+        <div class="folder-tools" id="folderTools" hidden></div>
+        <ol class="songlist" id="songList"></ol>
+        <p class="small" id="songsEmpty">Your songs will be kept here, on this device, after you record.</p>
+        <p class="small" id="songsNote">Songs stay in this browser on this device. Use the save button on a song to keep a copy.</p>
+      </div>
     </section>
 
     <!-- ========== STEP 2 ========== -->
@@ -213,6 +258,7 @@
         <div class="done-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>Your tune is ready!</div>
         <h2 id="h-step2" style="margin-top:8px">Step 2: Magic Song</h2>
         <p id="heard"></p>
+        <p id="songNow"></p>
       </div>
 
       <div class="player">
@@ -273,11 +319,12 @@
       </div>
     </section>
   </main>
+  <div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button id="toastUndo" type="button">Undo</button></div>
 
   <footer class="shelf-foot">
-    <p><b>Version 1.1 (beta)</b> · Launched <time datetime="2026-11-13">November 13, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=music-maker&amp;v=1.1">Share your thoughts</a> · <a href="../feedback/?game=music-maker&amp;v=1.1&amp;kind=bug">Report a bug</a></p>
+    <p><b>Version 1.2 (beta)</b> · Launched <time datetime="2026-11-13">November 13, 2026</time> · Made for James and friends · <a href="../">The App Shelf</a> · <a href="../feedback/?game=music-maker&amp;v=1.2">Share your thoughts</a> · <a href="../feedback/?game=music-maker&amp;v=1.2&amp;kind=bug">Report a bug</a></p>
     <p>Made by Magic Makers. More apps are on the way. Like this? Buy us a mooncake: <a href="https://ko-fi.com/magicmakers" target="_blank" rel="noopener">Ko-fi</a></p>
-    <p>These apps don’t collect any information. Saved progress stays in your own browser.</p>
+    <p>These apps don’t collect any information. Saved progress, including My songs, stays in your own browser.</p>
     <p>The microphone is only used while you record. Your recording and your song never leave this device, and all the band’s sounds are made on it.</p>
     <p>Know someone who might like this? <button class="linkish" type="button" data-tell="https://magicmakersfamily.github.io/apps/music-maker/" data-text="Sing a tune and a band learns it and plays along: Magic Music Maker">Tell a friend</button></p>
   </footer>
@@ -285,11 +332,12 @@
 
 <script src="engine.js"></script>
 <script src="demo.js"></script>
+<script src="library.js"></script>
 <script>
 'use strict';
 const E = MME, $ = (id) => document.getElementById(id);
 const COVER = location.hash === '#cover', SELFTEST = location.hash === '#selftest';
-const S = { rec: null, plan: null, style: 'pop', energy: 2, voice: 'pop', tuned: null, playback: true, w: null, song: null, arr: null, playing: false, startAt: 0, offset: 0 };
+const S = { rec: null, plan: null, style: 'pop', energy: 2, voice: 'pop', tuned: null, cur: null, playback: true, w: null, song: null, arr: null, playing: false, startAt: 0, offset: 0 };
 let ac = null, playNode = null, renderToken = 0, stream = null, mr = null, recAn = null, recTimer = null, recStart = 0;
 const MAX_REC = 40, ENERGY = ['Calm', 'Bouncy', 'Wild'];
 const VOICE_NOTE = { pop: 'Your voice, tuned to the band, with backing singers.', natural: 'Your voice, just as you sang it.', echo: 'Your voice bounces back.', robot: 'A robot sings along.' };
@@ -331,7 +379,7 @@ async function startRec() {
   mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
   mr.onstop = async () => {
     stream.getTracks().forEach((t) => t.stop()); clearInterval(recTimer); recUI(false); drawWave();
-    try { useBuffer(await c.decodeAudioData(await new Blob(chunks, { type: mr.mimeType }).arrayBuffer())); }
+    try { const blob = new Blob(chunks, { type: mr.mimeType }); useBuffer(await c.decodeAudioData(await blob.arrayBuffer()), false, { blob }); }
     catch (e) { setStatus('That recording did not work. Please try again.'); }
   };
   const src = c.createMediaStreamSource(stream); recAn = c.createAnalyser(); recAn.fftSize = 1024; src.connect(recAn);
@@ -342,15 +390,15 @@ async function startRec() {
 $('recBtn').onclick = () => { if (mr && mr.state === 'recording') mr.stop(); else startRec(); };
 $('file').onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return; const c = audio(); setStatus('Opening your recording.');
-  try { useBuffer(await c.decodeAudioData(await f.arrayBuffer())); } catch (err) { setStatus('That file could not be opened as sound. Try an m4a, mp3 or wav.'); }
+  try { useBuffer(await c.decodeAudioData(await f.arrayBuffer()), false, { blob: f }); } catch (err) { setStatus('That file could not be opened as sound. Try an m4a, mp3 or wav.'); }
   e.target.value = '';
 };
 function fromSamples(x, sr) { const c = audio(), b = c.createBuffer(1, x.length, sr); b.getChannelData(0).set(x); return b; }
 $('demoHum').onclick = () => { audio(); useBuffer(fromSamples(demoHum(22050).x, 22050)); };
 $('demoTap').onclick = () => { audio(); useBuffer(fromSamples(demoTaps(22050).x, 22050)); };
-$('say1').onclick = () => say('Tap the big round button. Then sing, hum, or tap your tune. Tap the button again when you are done.');
+$('say1').onclick = () => say('Tap the big round button. Then sing, hum, or tap your tune. Tap the button again when you are done. Your songs are kept in My songs, below.');
 
-function useBuffer(buf, quiet) {
+function useBuffer(buf, quiet, opt) {
   stopPlay();
   if (buf.duration > MAX_REC) { const c = audio(), n = Math.floor(MAX_REC * buf.sampleRate), b = c.createBuffer(buf.numberOfChannels, n, buf.sampleRate); for (let ch = 0; ch < buf.numberOfChannels; ch++) b.getChannelData(ch).set(buf.getChannelData(ch).subarray(0, n)); buf = b; }
   setStatus('Listening back to your tune.');
@@ -359,6 +407,8 @@ function useBuffer(buf, quiet) {
     const plan = E.analyze(E.toMono16k(chs, buf.sampleRate));
     if (plan.mode === 'empty') { setStatus('I could not hear a tune. Try again, a little louder or closer.'); res(false); return; }
     S.rec = buf; S.plan = plan; S.tuned = null; S.offset = 0; S.w = null; $('words').value = ''; $('understood').textContent = '';
+    if (opt && opt.song) restoreSong(opt.song); else if (opt && opt.blob) keepNew(opt.blob, plan, buf); else S.cur = null;
+    syncUI(); songNow();
     setStatus('Tap the big button to sing a new one.');
     $('tab2').disabled = false; show(2); describe();
     render(!quiet).then(() => res(true));
@@ -373,7 +423,7 @@ function show(n) {
   t1.toggleAttribute('aria-current', n === 1); t2.toggleAttribute('aria-current', n === 2);
   if (n === 1) t1.setAttribute('aria-current', 'step'); else t2.setAttribute('aria-current', 'step');
   $('bar1').classList.toggle('full', n === 2);
-  if (n === 1) { stopPlay(); drawWave(); } else drawRoll();
+  if (n === 1) { stopPlay(); drawWave(); drawSongs(); } else drawRoll();
   if (!COVER) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 $('tab1').onclick = () => show(1); $('tab2').onclick = () => { if (S.plan) show(2); };
@@ -555,6 +605,7 @@ async function render(autoplay) {
   const buf = await oc.startRendering(); if (token !== renderToken) return;
   let pk = 0; for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i += 3) { const a = Math.abs(d[i]); if (a > pk) pk = a; } }
   if (pk > 0) { const k = Math.min(3, .92 / pk); for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); for (let i = 0; i < d.length; i++) d[i] *= k; } }
+  if (S.cur && L.find(lib, S.cur)) { L.update(lib, S.cur, settingsNow(), Date.now()); saveLib(); }
   S.song = buf; S.arr = arr; S.peak = pk; $('busy').textContent = ''; $('tot').textContent = fmt(arr.len);
   S.offset = Math.min(at, Math.max(0, arr.len - 1)); drawRoll();
   if (was || autoplay) play(was ? S.offset : 0);
@@ -608,6 +659,198 @@ $('save').onclick = () => {
   const L = b.getChannelData(0), R = b.getChannelData(1); for (let i = 0; i < n; i++) { dv.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i])) * 32767, true); dv.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i])) * 32767, true); }
   const url = URL.createObjectURL(new Blob([dv], { type: 'audio/wav' })), a = document.createElement('a'); a.href = url; a.download = 'my-magic-song.wav'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
 };
+
+/* ---------- My songs: kept in this browser, on this device ---------- */
+const L = MML, store = L.Store(L.dbName(location.pathname));
+let lib = L.empty(), libOk = true, libFilter = 'all', saveT = 0, toastT = 0, lastDeleted = null, openMenu = null, renaming = null, folderEdit = null, drag = null;
+const esc = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function saveLib() { clearTimeout(saveT); saveT = setTimeout(() => { store.saveList(lib).catch(libFail); }, 120); }
+function libFail() { if (!libOk) return; libOk = false; $('songsNote').textContent = 'This browser is not keeping songs (maybe a private window), so they stay only until you close the page.'; }
+function settingsNow() { return { style: S.style, energy: S.energy, voice: S.voice, playback: S.playback, words: $('words').value, w: S.w || null }; }
+function keepNew(blob, plan, buf) {
+  if (blob.size > 25e6) { S.cur = null; return; }
+  const mel = plan.mode === 'melody' ? plan.notes : plan.gen, inFolder = libFilter !== 'all' && libFilter !== 'star' ? libFilter : null;
+  const song = L.add(lib, Object.assign({ dur: buf.duration, mode: plan.mode, thumb: L.thumb(mel, buf.duration), folder: inFolder }, settingsNow()), Date.now());
+  if (libFilter === 'star') L.star(lib, song.id, true);
+  S.cur = song.id; store.putAudio(song.id, blob).then(saveLib, libFail);
+}
+function restoreSong(s) {
+  S.cur = s.id;
+  if (E.STYLES.some((x) => x.id === s.style)) S.style = s.style;
+  if ([1, 2, 3].includes(s.energy)) S.energy = s.energy;
+  if (VOICE_NOTE[s.voice]) S.voice = s.voice;
+  if (typeof s.playback === 'boolean') { S.playback = s.playback; $('playback').checked = s.playback; }
+  S.w = s.w && typeof s.w === 'object' ? s.w : null; $('words').value = s.words || '';
+  $('understood').textContent = s.words && S.w && S.w.heard && S.w.heard.length ? 'I understood: ' + S.w.heard.join(', ') + '.' : '';
+}
+function songNow() {
+  const s = S.cur && L.find(lib, S.cur);
+  $('songNow').textContent = s ? 'Kept in My songs as “' + s.name + '”. Your changes are kept too.' : S.plan ? 'This is an example, so it is not kept in My songs.' : '';
+}
+function fmtWhen(t) {
+  const d = new Date(t), now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return d.toDateString() === now.toDateString() ? 'Today ' + time : d.toDateString() === y.toDateString() ? 'Yesterday ' + time : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+function thumbSvg(th) {
+  return '<svg class="sthumb" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">' + (th || []).map(([a, b, p]) => '<rect x="' + (a * 98 + 1).toFixed(1) + '" y="' + (15 - p * 13).toFixed(1) + '" width="' + Math.max(1.4, (b - a) * 98 - .6).toFixed(1) + '" height="4" rx="2" fill="#ff8a4c"/>').join('') + '</svg>';
+}
+const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>';
+function drawSongs() {
+  if (!$('songList')) return;
+  const isFolder = (f) => lib.folders.some((x) => x.id === f);
+  if (libFilter !== 'all' && libFilter !== 'star' && !isFolder(libFilter)) libFilter = 'all';
+  const c = L.counts(lib);
+  const chips = [['all', '🎵 All', c.all], ['star', '⭐ Starred', c.star]].concat(lib.folders.map((f) => [f.id, '📁 ' + f.name, c[f.id]]));
+  $('folders').innerHTML = chips.map(([id, label, n]) => '<button class="fchip" type="button" data-f="' + esc(id) + '" aria-pressed="' + (libFilter === id) + '">' + esc(label) + ' <span class="n">' + n + '</span></button>').join('')
+    + (folderEdit === 'new' ? '<span class="fchip"><input id="folderIn" maxlength="24" placeholder="Folder name" aria-label="New folder name"></span>' : '<button class="fchip" type="button" id="newFolder">＋ New folder</button>');
+  const ft = $('folderTools');
+  if (isFolder(libFilter)) {
+    const f = lib.folders.find((x) => x.id === libFilter); ft.hidden = false;
+    ft.innerHTML = folderEdit === 'rename' ? '<input id="folderIn" maxlength="24" value="' + esc(f.name) + '" aria-label="Folder name">' : '<button class="linkish" type="button" id="folderRename">Rename folder</button><button class="linkish" type="button" id="folderDelete">Delete folder (keeps its songs)</button>';
+  } else { ft.hidden = true; ft.innerHTML = ''; }
+  const fin = $('folderIn'); if (fin) { fin.focus(); if (folderEdit === 'rename') fin.select(); }
+  const view = L.view(lib, libFilter);
+  $('songsEmpty').hidden = view.length > 0;
+  $('songsEmpty').textContent = !c.all ? 'Your songs will be kept here, on this device, after you record.' : libFilter === 'star' ? 'No starred songs yet. Tap a star to add one.' : 'This folder is empty. Drag a song by its dots onto the folder name to put it here.';
+  $('songList').innerHTML = view.map((s, i) => {
+    const st = E.STYLES.find((x) => x.id === s.style) || E.STYLES[0], f = s.folder && lib.folders.find((x) => x.id === s.folder), n = esc(s.name);
+    const meta = [fmtWhen(s.created), fmt(s.dur)].concat(f && libFilter !== f.id ? ['📁 ' + esc(f.name)] : []).join(' · ');
+    const name = renaming === s.id ? '<input class="rename-in" data-id="' + s.id + '" maxlength="40" value="' + n + '" aria-label="Song name">' : '<div class="sname"><span aria-hidden="true">' + st.icon + '</span> ' + n + '</div>';
+    const menu = openMenu !== s.id ? '' : '<div class="smenu"><button type="button" data-act="rename">✏️ Rename</button>'
+      + '<label>📁 Folder <select data-act="folder" aria-label="Folder for ' + n + '"><option value="">No folder</option>' + lib.folders.map((x) => '<option value="' + esc(x.id) + '"' + (x.id === s.folder ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('') + '</select></label>'
+      + (i > 0 ? '<button type="button" data-act="up">⬆️ Up</button>' : '') + (i < view.length - 1 ? '<button type="button" data-act="down">⬇️ Down</button>' : '')
+      + '<button type="button" data-act="delete" class="danger">🗑️ Delete</button></div>';
+    return '<li class="song' + (s.id === S.cur ? ' current' : '') + '" data-id="' + s.id + '">'
+      + '<button class="grip" type="button" aria-label="Move ' + n + ': drag, or use the up and down arrow keys" title="Drag to move">⠿</button>'
+      + '<button class="splay" type="button" aria-label="Play and change ' + n + '">' + PLAY_SVG + '</button>'
+      + '<div class="sbody">' + name + thumbSvg(s.thumb) + '<div class="smeta">' + meta + '</div></div>'
+      + '<button class="sstar" type="button" aria-pressed="' + s.star + '" aria-label="Star ' + n + '">' + (s.star ? '★' : '☆') + '</button>'
+      + '<button class="smore" type="button" aria-expanded="' + (openMenu === s.id) + '" aria-label="More for ' + n + '">⋯</button>' + menu + '</li>';
+  }).join('');
+  const rin = document.querySelector('.rename-in'); if (rin) { rin.focus(); rin.select(); }
+}
+function toast(text, undo) {
+  $('toastText').textContent = text; $('toastUndo').hidden = !undo; $('toast').hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { $('toast').hidden = true; finishDeletes(); }, undo ? 6000 : 2500);
+}
+function finishDeletes() {
+  const gone = L.purge(lib); lastDeleted = null;
+  if (!gone.length) return;
+  if (gone.includes(S.cur)) { S.cur = null; songNow(); }
+  store.dropAudio(gone).catch(() => {}); saveLib();
+}
+$('toastUndo').onclick = () => { clearTimeout(toastT); $('toast').hidden = true; if (lastDeleted && L.undo(lib, lastDeleted)) { lastDeleted = null; saveLib(); } finishDeletes(); drawSongs(); };
+async function openSong(id) {
+  const s = L.find(lib, id); if (!s) return;
+  audio(); setStatus('Opening ' + s.name + '.');
+  try {
+    const blob = await store.getAudio(id); if (!blob) throw new Error('missing');
+    const ok = await useBuffer(await audio().decodeAudioData(await blob.arrayBuffer()), false, { song: s });
+    if (!ok) throw new Error('empty');
+  } catch (e) { setStatus('Tap the big button to start.'); toast('That song could not be opened on this device.'); }
+}
+function commitRename(input, keep) {
+  const id = input.dataset.id; renaming = null;
+  if (keep && L.rename(lib, id, input.value)) { saveLib(); songNow(); }
+  drawSongs();
+}
+const list = $('songList');
+list.addEventListener('click', (e) => {
+  const li = e.target.closest('.song'); if (!li || drag) return; const id = li.dataset.id, b = e.target.closest('button');
+  if (!b) return;
+  if (b.classList.contains('splay')) { openMenu = null; openSong(id); return; }
+  if (b.classList.contains('sstar')) { L.star(lib, id); saveLib(); drawSongs(); return; }
+  if (b.classList.contains('smore')) { openMenu = openMenu === id ? null : id; renaming = null; drawSongs(); return; }
+  const act = b.dataset.act, view = L.view(lib, libFilter), i = view.findIndex((x) => x.id === id);
+  if (act === 'rename') { renaming = id; openMenu = null; drawSongs(); }
+  else if (act === 'up' || act === 'down') { if (L.move(lib, id, i + (act === 'up' ? -1 : 1), libFilter)) { saveLib(); drawSongs(); } }
+  else if (act === 'delete') { finishDeletes(); const s = L.find(lib, id); L.remove(lib, id, Date.now()); lastDeleted = id; openMenu = null; saveLib(); drawSongs(); toast('“' + s.name + '” deleted.', true); }
+});
+list.addEventListener('change', (e) => {
+  const sel = e.target.closest('select[data-act="folder"]'); if (!sel) return;
+  const id = sel.closest('.song').dataset.id;
+  if (L.setFolder(lib, id, sel.value || null)) { saveLib(); drawSongs(); toast(sel.value ? 'Moved to ' + lib.folders.find((x) => x.id === sel.value).name + '.' : 'Taken out of its folder.'); }
+});
+list.addEventListener('keydown', (e) => {
+  const rin = e.target.closest('.rename-in');
+  if (rin) { if (e.key === 'Enter') commitRename(rin, true); else if (e.key === 'Escape') commitRename(rin, false); return; }
+  const g = e.target.closest('.grip'); if (!g || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  e.preventDefault(); const id = g.closest('.song').dataset.id, view = L.view(lib, libFilter), i = view.findIndex((x) => x.id === id);
+  if (L.move(lib, id, i + (e.key === 'ArrowUp' ? -1 : 1), libFilter)) { saveLib(); drawSongs(); const ng = list.querySelector('.song[data-id="' + id + '"] .grip'); if (ng) ng.focus(); }
+});
+list.addEventListener('focusout', (e) => { const rin = e.target.closest && e.target.closest('.rename-in'); if (rin && renaming) commitRename(rin, true); });
+
+// folders: pick a view, make, rename and delete folders
+$('folders').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'newFolder') { folderEdit = 'new'; drawSongs(); return; }
+  if (b.dataset.f) { libFilter = b.dataset.f; openMenu = null; renaming = null; folderEdit = null; drawSongs(); }
+});
+$('folderTools').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'folderRename') { folderEdit = 'rename'; drawSongs(); }
+  if (b.id === 'folderDelete') { const f = lib.folders.find((x) => x.id === libFilter); if (f && L.removeFolder(lib, f.id)) { libFilter = 'all'; saveLib(); drawSongs(); toast('Folder “' + f.name + '” deleted. Its songs are still in All.'); } }
+});
+function commitFolder(input, keep) {
+  const mode = folderEdit; folderEdit = null;
+  if (keep && input.value.trim()) {
+    if (mode === 'new') L.addFolder(lib, input.value, Date.now()); else L.renameFolder(lib, libFilter, input.value);
+    saveLib();
+  }
+  drawSongs();
+}
+for (const box of [$('folders'), $('folderTools')]) {
+  box.addEventListener('keydown', (e) => { if (e.target.id !== 'folderIn') return; if (e.key === 'Enter') commitFolder(e.target, true); else if (e.key === 'Escape') commitFolder(e.target, false); });
+  box.addEventListener('focusout', (e) => { if (e.target.id === 'folderIn' && folderEdit) commitFolder(e.target, true); });
+}
+
+// drag by the dots: up and down to reorder, or onto a folder (or the star) to file it
+list.addEventListener('pointerdown', (e) => {
+  const g = e.target.closest('.grip'); if (!g || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  e.preventDefault(); openMenu = null;
+  const li = g.closest('.song'), items = [].slice.call(list.children), sy = window.scrollY;
+  const rects = items.map((el) => { const r = el.getBoundingClientRect(); return { top: r.top + sy, h: r.height }; });
+  try { g.setPointerCapture(e.pointerId); } catch (err) {}
+  drag = { id: li.dataset.id, li, items, rects, from: items.indexOf(li), to: items.indexOf(li), y0: e.clientY + sy, x: e.clientX, y: e.clientY, chip: null, pid: e.pointerId, moved: false,
+    gap: rects.length > 1 ? Math.max(0, rects[1].top - rects[0].top - rects[0].h) : 8, raf: 0 };
+  li.classList.add('dragging'); li.style.pointerEvents = 'none';
+  const loop = () => { if (!drag) return; if (drag.y < 70) window.scrollBy(0, -12); else if (drag.y > window.innerHeight - 70) window.scrollBy(0, 12); dragAt(); drag.raf = requestAnimationFrame(loop); };
+  drag.raf = requestAnimationFrame(loop);
+});
+function dragAt() {
+  const d = drag, sy = window.scrollY, dy = d.y + sy - d.y0, r = d.rects[d.from];
+  if (Math.abs(dy) > 4) d.moved = true;
+  d.li.style.transform = 'translateY(' + dy + 'px)';
+  const mid = r.top + dy + r.h / 2; let to = 0;
+  d.rects.forEach((q, i) => { if (i !== d.from && q.top + q.h / 2 < mid) to++; });
+  d.to = to; const sh = r.h + d.gap;
+  d.items.forEach((el, i) => { if (i === d.from) return; const t = d.from < to && i > d.from && i <= to ? -sh : d.from > to && i >= to && i < d.from ? sh : 0; el.style.transform = t ? 'translateY(' + t + 'px)' : ''; });
+  const el = document.elementFromPoint(d.x, d.y), chip = el && el.closest ? el.closest('.fchip[data-f]') : null;
+  if (d.chip && d.chip !== chip) d.chip.classList.remove('drop');
+  d.chip = chip; if (chip) chip.classList.add('drop');
+}
+list.addEventListener('pointermove', (e) => { if (!drag || e.pointerId !== drag.pid) return; drag.x = e.clientX; drag.y = e.clientY; dragAt(); });
+function dragEnd(e, cancel) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null; cancelAnimationFrame(d.raf);
+  d.items.forEach((el) => { el.style.transform = ''; }); d.li.classList.remove('dragging'); d.li.style.pointerEvents = '';
+  if (d.chip) d.chip.classList.remove('drop');
+  if (cancel || !d.moved) { drawSongs(); return; }
+  let changed = false, msg = '';
+  if (d.chip) {
+    const f = d.chip.dataset.f;
+    if (f === 'star') { changed = L.star(lib, d.id, true); msg = 'Starred.'; }
+    else if (f === 'all') { changed = L.setFolder(lib, d.id, null); msg = 'Taken out of its folder.'; }
+    else { changed = L.setFolder(lib, d.id, f); msg = 'Moved to ' + (lib.folders.find((x) => x.id === f) || {}).name + '.'; }
+  } else changed = L.move(lib, d.id, d.to, libFilter);
+  if (changed) saveLib();
+  drawSongs(); if (changed && msg) toast(msg);
+}
+list.addEventListener('pointerup', (e) => dragEnd(e, false));
+list.addEventListener('pointercancel', (e) => dragEnd(e, true));
+$('say3').onclick = () => say('These are your songs. Tap a pink play button to hear one again and change it. Tap a star for your favourites. To move a song, hold its dots and drag it up or down, or onto a folder.');
+store.loadList().then((st) => { lib = st; const gone = L.purge(lib); if (gone.length) { store.dropAudio(gone).catch(() => {}); saveLib(); } drawSongs(); }).catch(() => { libFail(); drawSongs(); });
 
 /* ---------- Tell a friend ---------- */
 document.querySelectorAll('[data-tell]').forEach((btn) => {

@@ -275,6 +275,53 @@ toolbox and stickers · customise Pip · more chapters (playground transition, c
 preferred-tool discovery · visual narration for Deaf pre-readers · switch/keyboard pass · more
 languages · other family structures and caregivers.
 
+## External feedback (ChatGPT playtest review, 2026-09-28)
+
+A ChatGPT review of a playthrough (full text: ask the user, or see chat log 2026-09-28) largely
+converges with Phase D / DECISIONS D1–D13 — its "north-star sentence" (notice → choose → predict →
+result → lesson, with a stayed-with-you adult and a fix-it step) is D2's guided loop and D9's ending
+panels already. Cross-referenced below; only the genuinely new bits are new backlog items.
+
+**Already covered by existing plan/decisions (no new task needed):**
+- Three suggested cards + full "more ideas" drawer during normal play → D2 ("At most 3 child
+  choices on screen", free play stays as a start-screen choice per D3).
+- Recovery shows only its own tools, not the full card wall → D5.
+- Event-driven day with chapter breaks, "Next: Lunch →" → D3.
+- Child-readable bucket states + instant `+/− drops` feedback → D2's Predict/Watch steps; the
+  fuller/emptier language is already in C6.
+- Selective/contextual prediction, not every card → D2 ("Familiar events skip Notice/Predict after
+  the second time").
+- Full-screen five-stage recovery with one instruction + a few actions per stage → D5 (stage list is
+  Storm/Cool/Reconnect/Repair/Grow — same shape, different labels; worth a naming pass against the
+  feedback's "Storm / Help the body / Ready to talk / Make it right / Practise for next time" when D5
+  is built).
+- Body signals as active, tappable gameplay before overflow → D1.
+- Picture-panel child ending, plain-language grown-up summary, numbers behind a toggle → D6, D9, D10.
+- Small child header, grown-up stuff tucked away → D7, D11.
+- Report mismatch (bucket vs. receipt numbers, ambiguous labels) → tracked in KNOWN-BUGS B6, partly
+  fixed in C6 ("Day log" / "PIP'S DAY" renames); the specific 20/86-vs-45 discrepancy and "Total
+  pressure" / "Tools that helped: 1" wording should be re-checked when D6 lands.
+
+**New backlog items (not currently in D1–D8 or the P2/P3 backlog):**
+- **Body Detective reward.** A small sticker/skill nudge for successfully noticing a body clue
+  before overflow, on top of D1's tappable clues — makes noticing itself rewarded, not just
+  narrated.
+- **Named day-length/mode picker.** Rename the speed controls to something like Story Day / Quick
+  Day / Sandbox (roughly 8–10 min full narrative, 4–5 min key scenes, free play) instead of turtle/1×/2×
+  or an unlabeled guided/free toggle. Overlaps D3's chapters — decide whether this is a chapter-count
+  variant or a separate pacing control when D3 is scoped.
+- **"Storms weathered" / non-shaming scorekeeping language.** Audit remaining receipt and grown-up
+  copy for count-style phrasing ("Blow-ups: 2") and reword to match D6/D9's non-shaming tone.
+- **Real-world transfer moment.** After the ending panels, a 30-second "pick your tool for tomorrow"
+  step where the child chooses ~2 tools from a short list, rendered as a simple take-home plan line
+  ("When my body feels tight, I can ask for a quiet spot."). Natural add-on to D6, not currently
+  scoped there.
+- **Bilingual/Chinese language modes.** Offer English / English+Chinese words / bilingual narration
+  as a setting, and reserve Chinese for emotionally-loaded moments (colors, feelings, "together",
+  "choice") rather than pinyin on every dashboard element. Not mentioned anywhere in the current
+  plan — needs a decision (DECISIONS.md) before scoping, since it touches content.js structure and
+  the voice pipeline (A3).
+
 ## Risks
 
 - **The split breaks something subtle** (load order, `#cover`, globals clashing with `content.js` /

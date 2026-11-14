@@ -14,7 +14,7 @@ for (const browser of list) {
     const p = await launch({ browser, url: (await baseUrl()) + 'robot-journey/', w, h, seed: 5, mobile: label !== 'laptop' });
     if (!(await p.ready('!!window.RobotJourney'))) fail(label, 'page did not boot');
     const body = await p.eval('document.body.innerText');
-    if (!/Version 1\.2 \(beta\)/.test(body)) fail(label, 'version line missing');
+    if (!/Version 1\.3 \(beta\)/.test(body)) fail(label, 'version line missing');
     const over = await p.eval('document.documentElement.scrollWidth > innerWidth + 1');
     if (over) fail(label, 'page scrolls sideways');
     const startFits = await p.eval("(() => { const b = document.getElementById('launch-btn').getBoundingClientRect(); return b.width > 0; })()");
@@ -32,6 +32,12 @@ for (const browser of list) {
     await p.page.selectOption('#music-select', 'james'); await p.sleep(2600);
     const js = await p.eval('Music.songId');
     if (js !== 'james') fail(label, "choosing James's Theme did not switch the song: " + js);
+    await p.page.selectOption('#music-select', 'robojam'); await p.sleep(2600);
+    const rj = await p.eval('Music.songId');
+    if (rj !== 'robojam') fail(label, 'choosing Robo Jam did not switch the song: ' + rj);
+    // Robo Jam is well-formed: one chord and one lead row per bar, every note inside its bar, the intro has no lead
+    const shape = await p.eval("(() => { const s = SONGS.robojam; const bad = []; s.lead.notes.forEach((r, b) => r.forEach(([st, n, len]) => { if (st < 0 || st + len > 16 || n < 40 || n > 100) bad.push(b + ':' + st + ':' + n); })); return { bars: s.bars, chords: s.chords.length, lead: s.lead.notes.length, bad, intro: s.lead.notes.slice(0, 4).flat().length }; })()");
+    if (shape.chords !== shape.bars || shape.lead !== shape.bars || shape.bad.length || shape.intro) fail(label, 'Robo Jam is malformed: ' + JSON.stringify(shape));
     await p.page.selectOption('#music-select', 'off');
     const mb = await p.eval("document.getElementById('music-select').value + '|' + document.getElementById('music-icon').textContent + '|' + musicEnabled");
     if (mb !== 'off|🔇|false') fail(label, 'music picker does not show Off: ' + mb);

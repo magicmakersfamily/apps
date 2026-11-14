@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Musical Marble Run</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            950: '#030712',
+                            900: '#0b0f19',
+                            800: '#111827',
+                            700: '#1f2937',
+                            600: '#374151',
+                            accent: '#06b6d4',
+                            pink: '#ec4899',
+                            purple: '#8b5cf6',
+                            green: '#10b981',
+                            yellow: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Orbitron & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .arcade-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+        .glow-pink {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+        canvas {
+            touch-action: none;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-cyber-950 text-gray-100">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-cyber-900 border-b border-cyber-800 px-4 py-3 flex flex-wrap items-center justify-between shadow-xl z-20">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-pink-500 flex items-center justify-center glow-cyan">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="arcade-font text-base sm:text-xl font-bold tracking-wider bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                    MAGICAL MUSICAL MARBLE RUN
+                </h1>
+                <p class="text-xs text-gray-400">Version 1.0 (beta) · Master Demo Edition</p>
+            </div>
+        </div>
+
+        <!-- Simulation Controls & Demos Dropdown -->
+        <div class="flex flex-wrap items-center gap-2 my-2 sm:my-0">
+            <!-- Demos Dropdown -->
+            <select id="demoSelect" onchange="loadSelectedDemo(this.value)" class="bg-cyber-800 border border-cyber-700 hover:border-cyan-500 text-cyan-300 text-xs rounded-lg px-3.5 py-2 focus:outline-none transition font-semibold cursor-pointer shadow-md">
+                <option value="" disabled selected>✨ Select Master Demo...</option>
+                <option value="neon">🌟 Neon Cascade (Arpeggio Fountain)</option>
+                <option value="jingle">🎄 Upbeat Jingle (Festive Melody)</option>
+                <option value="pop">🎸 Cyber Pop Groove (Driving Rhythm)</option>
+                <option value="vivaldi">🎻 Vivaldi's Spring (Baroque Masterpiece)</option>
+                <option value="experiential">🌀 Wild Experiential (Cosmic Soundscape)</option>
+            </select>
+
+            <button id="btnPlay" onclick="togglePlay()" class="px-3.5 py-2 bg-cyber-accent hover:bg-cyan-400 text-gray-950 font-semibold rounded-lg flex items-center space-x-2 transition shadow-lg glow-cyan text-sm cursor-pointer">
+                <i id="playIcon" class="fa-solid fa-pause"></i>
+                <span id="playText">Pause</span>
+            </button>
+            <button onclick="resetSimulation()" class="px-3 py-2 bg-cyber-800 hover:bg-cyber-700 text-gray-200 rounded-lg flex items-center space-x-1.5 transition border border-cyber-700 text-sm cursor-pointer" title="Clear Active Marbles">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span class="hidden md:inline">Reset Marbles</span>
+            </button>
+            <button onclick="clearBoard()" class="px-3 py-2 bg-red-950/50 hover:bg-red-900/60 text-red-300 rounded-lg flex items-center space-x-1.5 transition border border-red-800/50 text-sm cursor-pointer" title="Clear All Tiles">
+                <i class="fa-solid fa-trash-can"></i>
+                <span class="hidden md:inline">Clear Board</span>
+            </button>
+        </div>
+
+        <!-- Quick Stats & Info -->
+        <div class="flex items-center space-x-3 text-xs text-gray-400">
+            <div class="bg-cyber-800/80 px-3 py-1.5 rounded-lg border border-cyber-700" title="Max 25 active marbles for stability">
+                <span>Marbles: </span><span id="statMarbles" class="text-cyan-400 font-bold">0</span><span class="text-gray-500 text-[10px]">/25</span>
+            </div>
+            <button onclick="toggleInstructions()" class="px-3 py-1.5 bg-cyber-800 hover:bg-cyber-700 rounded-lg border border-cyber-700 text-gray-300 transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-circle-question text-pink-400"></i>
+                <span>Guide</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex flex-col lg:flex-row relative overflow-hidden">
+        
+        <!-- Sidebar Toolbar & Controls -->
+        <aside class="w-full lg:w-80 bg-cyber-900 border-b lg:border-b-0 lg:border-r border-cyber-800 p-4 flex flex-col space-y-4 overflow-y-auto z-10 max-h-[45vh] lg:max-h-none">
+            
+            <!-- Tool Selection -->
+            <div>
+                <h3 class="arcade-font text-xs uppercase tracking-wider text-gray-400 mb-2.5 flex items-center justify-between">
+                    <span>Tile Toolbox</span>
+                    <span class="text-cyan-400 text-[10px] lowercase">draw or drag tiles</span>
+                </h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setTool('tone')" id="tool-tone" class="p-2.5 bg-cyan-950/60 border-2 border-cyan-500 rounded-xl flex flex-col items-center justify-center space-y-1 transition hover:bg-cyan-900/40 text-cyan-300 shadow-md cursor-pointer">
+                        <i class="fa-solid fa-music text-base"></i>
+                        <span class="text-xs font-semibold">Tone Tile</span>
+                    </button>
+                    <button onclick="setTool('bounce')" id="tool-bounce" class="p-2.5 bg-cyber-800 border-2 border-cyber-700 rounded-xl flex flex-col items-center justify-center space-y-1 transition hover:bg-cyber-700 text-emerald-400 cursor-pointer">
+                        <i class="fa-solid fa-angles-up text-base"></i>
+                        <span class="text-xs font-semibold">Super Bounce</span>
+                    </button>
+                    <button onclick="setTool('ricochet')" id="tool-ricochet" class="p-2.5 bg-cyber-800 border-2 border-cyber-700 rounded-xl flex flex-col items-center justify-center space-y-1 transition hover:bg-cyber-700 text-pink-400 cursor-pointer">
+                        <i class="fa-solid fa-bolt text-base"></i>
+                        <span class="text-xs font-semibold">Ricochet</span>
+                    </button>
+                    <button onclick="setTool('wall')" id="tool-wall" class="p-2.5 bg-cyber-800 border-2 border-cyber-700 rounded-xl flex flex-col items-center justify-center space-y-1 transition hover:bg-cyber-700 text-gray-300 cursor-pointer">
+                        <i class="fa-solid fa-cube text-base"></i>
+                        <span class="text-xs font-semibold">Solid Wall</span>
+                    </button>
+                </div>
+                <div class="mt-2 flex space-x-2">
+                    <button onclick="setTool('select')" id="tool-select" class="flex-1 py-2 bg-cyber-800 border border-cyber-700 rounded-lg text-xs font-medium text-gray-300 hover:bg-cyber-700 transition flex items-center justify-center space-x-1.5 cursor-pointer">
+                        <i class="fa-solid fa-up-down-left-right text-purple-400"></i>
+                        <span>Move / Resize Only</span>
+                    </button>
+                    <button onclick="deleteSelectedTile()" id="btnDeleteSelected" class="px-3 py-2 bg-red-950/40 border border-red-900/60 rounded-lg text-xs font-medium text-red-300 hover:bg-red-900/40 transition disabled:opacity-40 cursor-pointer" title="Delete Selected Tile">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Selected Tile Inspector (Dynamic Sound, Note Selector, Geometry & Mute Controls) -->
+            <div id="tileInspector" class="hidden bg-cyber-950/90 p-3.5 rounded-xl border border-cyan-500/50 space-y-3 shadow-lg glow-cyan">
+                <div class="flex items-center justify-between border-b border-cyber-800 pb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <h3 class="arcade-font text-xs uppercase tracking-wider text-cyan-300">Tile Inspector</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="previewSelectedTileSound()" id="btnPreviewNote" class="px-2 py-0.5 bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-500/40 rounded text-[10px] text-cyan-300 font-semibold transition cursor-pointer" title="Test Sound">
+                            <i class="fa-solid fa-volume-high mr-1"></i>Test
+                        </button>
+                        <button onclick="deselectTile()" class="text-gray-400 hover:text-white text-xs cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+
+                <div class="text-xs space-y-3 text-gray-300">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Type & Note:</span>
+                        <span id="inspType" class="capitalize font-semibold text-cyan-300">Tone Tile (C5)</span>
+                    </div>
+
+                    <!-- Direct Musical Note Selector -->
+                    <div id="noteSelectorContainer" class="space-y-1 pt-1 border-t border-cyber-800/80">
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-gray-300 font-medium">Musical Note</span>
+                            <span id="inspNoteName" class="font-mono text-cyan-400 font-bold">C5</span>
+                        </div>
+                        <select id="inspNoteSelect" onchange="updateSelectedTileNote(this.value)" class="w-full bg-cyber-900 border border-cyber-700 rounded-lg px-2 py-1.5 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 transition cursor-pointer font-mono">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Mute Toggle for Tile -->
+                    <div class="flex justify-between items-center pt-1 border-t border-cyber-800/80">
+                        <span class="text-gray-300 font-medium">Audio Status</span>
+                        <button onclick="toggleSelectedTileMute()" id="btnInspMute" class="px-2.5 py-1 bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 rounded-lg text-xs font-semibold text-gray-200 transition flex items-center space-x-1.5 cursor-pointer">
+                            <i class="fa-solid fa-volume-high text-cyan-400" id="inspMuteIcon"></i>
+                            <span id="inspMuteText">Active (Unmuted)</span>
+                        </button>
+                    </div>
+
+                    <!-- Location (X / Y) -->
+                    <div class="space-y-2 pt-1 border-t border-cyber-800/80">
+                        <div class="flex justify-between text-[11px] font-semibold text-gray-400">
+                            <span>Location</span>
+                            <span id="inspCoordsLabel" class="font-mono text-cyan-400">X: 0, Y: 0</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <div class="flex justify-between text-[10px] text-gray-400 mb-0.5">
+                                    <span>Left → Right (X)</span>
+                                    <span id="inspXVal" class="font-mono text-gray-300">0</span>
+                                </div>
+                                <input type="range" id="inspXRange" min="0" max="1200" step="2" oninput="updateSelectedTileX(this.value)" class="w-full accent-cyan-400 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-gray-400 mb-0.5">
+                                    <span>Height Pos (Y)</span>
+                                    <span id="inspYVal" class="font-mono text-pink-400">0</span>
+                                </div>
+                                <input type="range" id="inspYRange" min="20" max="800" step="2" oninput="updateSelectedTileY(this.value)" class="w-full accent-pink-500 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thickness & Width -->
+                    <div class="space-y-2 pt-2 border-t border-cyber-800/80">
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] mb-0.5">
+                                <span class="text-gray-300 font-medium">Thickness / Height</span>
+                                <span id="inspHeightVal" class="font-mono text-pink-400">30px</span>
+                            </div>
+                            <input type="range" id="inspHeightRange" min="12" max="90" step="2" oninput="resizeSelectedTileHeight(this.value)" class="w-full accent-pink-500 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                        </div>
+
+                        <div class="pt-1">
+                            <div class="flex justify-between items-center text-[11px] mb-0.5">
+                                <span class="text-gray-300 font-medium">Width <span class="text-purple-400 text-[10px]">(Sustain)</span></span>
+                                <span id="inspWidthVal" class="font-mono text-purple-400">70px</span>
+                            </div>
+                            <input type="range" id="inspWidthRange" min="25" max="320" step="5" oninput="resizeSelectedTileWidth(this.value)" class="w-full accent-purple-500 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marble Spawner Settings -->
+            <div class="bg-cyber-950/50 p-3.5 rounded-xl border border-cyber-800 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="arcade-font text-xs uppercase tracking-wider text-gray-400">Marble Emitter</h3>
+                    <span class="text-[10px] text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800">Auto Stream</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-300">Drop Mode</span>
+                    <div class="flex space-x-1 bg-cyber-900 p-1 rounded-lg border border-cyber-800">
+                        <button onclick="setDropMode('continuous')" id="mode-continuous" class="px-2.5 py-1 text-xs rounded-md bg-cyan-500 text-gray-950 font-semibold transition cursor-pointer">Auto Loop</button>
+                        <button onclick="setDropMode('single')" id="mode-single" class="px-2.5 py-1 text-xs rounded-md text-gray-400 hover:text-white transition cursor-pointer">Manual</button>
+                    </div>
+                </div>
+
+                <div id="spawnIntervalContainer" class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Spawn Interval</span>
+                        <span id="valSpawnInterval" class="text-cyan-400 font-mono">1.0s</span>
+                    </div>
+                    <input type="range" min="0.3" max="3.0" step="0.1" value="1.0" oninput="updateSpawnInterval(this.value)" class="w-full accent-cyan-400 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                </div>
+
+                <button onclick="spawnSingleMarble()" class="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-300 rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-circle-dot"></i>
+                    <span>Drop Marble Now</span>
+                </button>
+            </div>
+
+            <!-- Environment & Audio Settings -->
+            <div class="bg-cyber-950/50 p-3.5 rounded-xl border border-cyber-800 space-y-3">
+                <h3 class="arcade-font text-xs uppercase tracking-wider text-gray-400">Physics & Synthesizer</h3>
+                
+                <!-- Gravity Slider -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Gravity</span>
+                        <span id="valGravity" class="text-pink-400 font-mono">0.32</span>
+                    </div>
+                    <input type="range" min="0.05" max="0.8" step="0.05" value="0.32" oninput="updateGravity(this.value)" class="w-full accent-pink-500 bg-cyber-800 rounded-lg h-1.5 cursor-pointer">
+                </div>
+
+                <!-- Sound Mode Selector -->
+                <div class="space-y-1">
+                    <label class="text-xs text-gray-400 block">Instrument Timbre</label>
+                    <select id="soundModeSelect" onchange="changeSoundMode(this.value)" class="w-full bg-cyber-900 border border-cyber-700 rounded-lg px-3 py-2 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 transition cursor-pointer">
+                        <option value="marimba">Warm Wooden Marimba</option>
+                        <option value="synth">Cyber Sawtooth Synth</option>
+                        <option value="chime">Ethereal Crystal Bell</option>
+                        <option value="retro">8-Bit Arcade Square</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Quick Tips Footer in Sidebar -->
+            <div class="mt-auto pt-3 border-t border-cyber-800 text-[11px] text-gray-400 space-y-1">
+                <p><i class="fa-solid fa-wand-magic-sparkles text-cyan-400 mr-1.5"></i> Select any Demo preset above for instantly magical melodies!</p>
+                <p><i class="fa-solid fa-shield-halved text-emerald-400 mr-1.5"></i> Dual polyphony & delay reverb active for rich harmony.</p>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="flex-1 relative bg-cyber-950 flex items-center justify-center overflow-hidden min-h-[55vh]">
+            <!-- Canvas Container -->
+            <div id="canvasContainer" class="w-full h-full relative cursor-crosshair">
+                <canvas id="simCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+            </div>
+
+            <!-- Audio Activation Overlay -->
+            <div id="audioOverlay" class="absolute inset-0 bg-cyber-950/90 backdrop-blur-md flex flex-col items-center justify-center z-30 transition-opacity duration-500 p-4">
+                <div class="bg-cyber-900 border border-cyan-500/60 p-8 rounded-3xl max-w-md text-center space-y-5 glow-cyan shadow-2xl">
+                    <div class="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-pink-500 text-white rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-lg glow-pink">
+                        <i class="fa-solid fa-music animate-bounce"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="arcade-font text-xl font-bold text-white tracking-wide">ENTER THE MUSICAL UNIVERSE</h2>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Click below to activate rich polyphonic audio and experience 5 master-crafted musical marble demos instantly!
+                        </p>
+                    </div>
+                    <button onclick="initAudioAndStart()" class="w-full py-4 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 hover:opacity-95 text-gray-950 font-extrabold rounded-2xl transition shadow-xl glow-cyan text-sm tracking-wider cursor-pointer">
+                        <i class="fa-solid fa-play mr-2"></i> START MARBLE SYMPHONY
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Instructions / Guide Modal -->
+    <div id="instructionsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-cyber-900 border border-cyber-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="toggleInstructions()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/50 text-pink-400 flex items-center justify-center">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div>
+                    <h2 class="arcade-font text-lg font-bold text-white">MASTER GUIDE</h2>
+                    <p class="text-xs text-gray-400">Magical Musical Marble Run</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs text-gray-300">
+                <div class="bg-cyber-950 p-3 rounded-xl border border-cyber-800 space-y-1">
+                    <h4 class="font-bold text-cyan-400 flex items-center"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i> 5 Precision Demos</h4>
+                    <p>Each demo preset is meticulously programmed with custom tile notes and trajectory angles to play recognizable melodies (Vivaldi's Spring, Jingle Bells, Arpeggio Cascades, Cyber Grooves).</p>
+                </div>
+
+                <div class="bg-cyber-950 p-3 rounded-xl border border-cyber-800 space-y-1">
+                    <h4 class="font-bold text-pink-400 flex items-center"><i class="fa-solid fa-sliders mr-2"></i> Tile Note Inspector</h4>
+                    <p>Click any tile to open the Inspector. You can change its exact musical note from 3 full octaves, toggle audio mute, resize width for sustain, or adjust position.</p>
+                </div>
+
+                <div class="bg-cyber-950 p-3 rounded-xl border border-cyber-800 space-y-1">
+                    <h4 class="font-bold text-purple-400 flex items-center"><i class="fa-solid fa-volume-high mr-2"></i> Rich Reverb Synthesis</h4>
+                    <p>Built with dual-oscillator synthesis and feedback delay network emulation for rich acoustic resonance and professional spatial depth.</p>
+                </div>
+            </div>
+
+            <button onclick="toggleInstructions()" class="w-full py-2.5 bg-cyber-800 hover:bg-cyber-700 border border-cyber-600 rounded-xl font-semibold text-xs transition cursor-pointer">
+                Got It, Let's Play!
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // --- Canvas & Simulation State ---
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+
+        let isPlaying = true;
+        let gravity = 0.32;
+        let soundMode = 'marimba';
+        let dropMode = 'continuous';
+        let spawnInterval = 1.0;
+        let spawnTimer = 0;
+
+        let selectedTool = 'tone';
+        let selectedTile = null;
+
+        let marbles = [];
+        let tiles = [];
+        let particles = [];
+        let floatingNotes = [];
+
+        // Drawing state
+        let isDrawing = false;
+        let drawStart = { x: 0, y: 0 };
+        let currentMouse = { x: 0, y: 0 };
+
+        // Dragging & Resizing existing tiles
+        let isDraggingTile = false;
+        let activeResizeHandle = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        // Audio Context & Polyphony
+        let audioCtx = null;
+        let isAudioInitialized = false;
+        let recentSoundTimes = [];
+
+        // Comprehensive 3-Octave Musical Scale (C3 to C6)
+        const scaleNotes = [
+            { note: 'C6',  freq: 1046.50 },
+            { note: 'B5',  freq: 987.77  },
+            { note: 'A5',  freq: 880.00  },
+            { note: 'G5',  freq: 783.99  },
+            { note: 'F5',  freq: 698.46  },
+            { note: 'E5',  freq: 659.25  },
+            { note: 'D5',  freq: 587.33  },
+            { note: 'C5',  freq: 523.25  },
+            { note: 'B4',  freq: 493.88  },
+            { note: 'A4',  freq: 440.00  },
+            { note: 'G4',  freq: 392.00  },
+            { note: 'F4',  freq: 349.23  },
+            { note: 'E4',  freq: 329.63  },
+            { note: 'D4',  freq: 293.66  },
+            { note: 'C4',  freq: 261.63  },
+            { note: 'B3',  freq: 246.94  },
+            { note: 'A3',  freq: 220.00  },
+            { note: 'G3',  freq: 196.00  },
+            { note: 'F3',  freq: 174.61  },
+            { note: 'E3',  freq: 164.81  },
+            { note: 'D3',  freq: 146.83  },
+            { note: 'C3',  freq: 130.81  }
+        ];
+
+        // Populate Note Selector in Inspector
+        function populateNoteSelector() {
+            const select = document.getElementById('inspNoteSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            scaleNotes.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${item.note} (${Math.round(item.freq)} Hz)`;
+                select.appendChild(opt);
+            });
+        }
+
+        function getTileAcousticProps(tile) {
+            let pitchIndex = tile.noteIndex !== undefined ? tile.noteIndex : 10;
+            if (tile.noteIndex === undefined) {
+                const canvasH = Math.max(canvas.height, 400);
+                const yRatio = Math.max(0, Math.min(1, tile.y / canvasH));
+                pitchIndex = Math.min(scaleNotes.length - 1, Math.floor(yRatio * scaleNotes.length));
+            }
+            const scaleEntry = scaleNotes[pitchIndex] || scaleNotes[10];
+
+            const widthRatio = Math.max(0, Math.min(1, (tile.w - 25) / (320 - 25)));
+            const duration = 0.22 + widthRatio * 0.95;
+
+            return {
+                pitchIndex,
+                noteName: scaleEntry.note,
+                freq: scaleEntry.freq,
+                duration
+            };
+        }
+
+        // --- Initialization & Resize ---
+        function resizeCanvas() {
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const inspXRange = document.getElementById('inspXRange');
+            const inspYRange = document.getElementById('inspYRange');
+            if (inspXRange) inspXRange.max = Math.max(400, Math.floor(canvas.width));
+            if (inspYRange) inspYRange.max = Math.max(300, Math.floor(canvas.height));
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            populateNoteSelector();
+            loadSelectedDemo('neon');
+            requestAnimationFrame(gameLoop);
+        });
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            isAudioInitialized = true;
+        }
+
+        function initAudioAndStart() {
+            try {
+                ensureAudioContext();
+                const overlay = document.getElementById('audioOverlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 400);
+                }
+                playTone(7, 0.4, 0.6); // C5
+                setTimeout(() => playTone(10, 0.4, 0.6), 120); // G4
+                setTimeout(() => playTone(14, 0.5, 0.7), 240); // C4
+                if (marbles.length === 0) {
+                    spawnSingleMarble();
+                }
+            } catch (e) {
+                console.error("Web Audio error:", e);
+            }
+        }
+
+        // --- Advanced Rich Polyphonic Synth with Delay Reverb ---
+        function playTone(pitchIndex, duration = 0.35, intensity = 1.0) {
+            if (!isAudioInitialized || !audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            recentSoundTimes = recentSoundTimes.filter(t => now - t < 0.05);
+            if (recentSoundTimes.length >= 6) return;
+            recentSoundTimes.push(now);
+
+            const entry = scaleNotes[Math.max(0, Math.min(pitchIndex, scaleNotes.length - 1))] || scaleNotes[7];
+            const freq = entry.freq;
+
+            const osc = audioCtx.createOscillator();
+            const subOsc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            const delay = audioCtx.createDelay();
+            const feedback = audioCtx.createGain();
+
+            delay.delayTime.value = 0.18;
+            feedback.gain.value = 0.32;
+
+            subOsc.frequency.setValueAtTime(freq * 0.5, now);
+
+            if (soundMode === 'marimba') {
+                osc.type = 'sine';
+                subOsc.type = 'triangle';
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(freq * 3.2, now);
+                gainNode.gain.setValueAtTime(0.001, now);
+                gainNode.gain.linearRampToValueAtTime(0.6 * intensity, now + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration * 1.5);
+            } else if (soundMode === 'synth') {
+                osc.type = 'sawtooth';
+                subOsc.type = 'sine';
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(freq * 4.0, now);
+                filter.frequency.exponentialRampToValueAtTime(freq * 1.2, now + duration);
+                gainNode.gain.setValueAtTime(0.001, now);
+                gainNode.gain.linearRampToValueAtTime(0.38 * intensity, now + 0.03);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration * 1.4);
+            } else if (soundMode === 'chime') {
+                osc.type = 'sine';
+                subOsc.type = 'sine';
+                subOsc.frequency.setValueAtTime(freq * 2.0, now);
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(freq * 1.5, now);
+                gainNode.gain.setValueAtTime(0.001, now);
+                gainNode.gain.linearRampToValueAtTime(0.5 * intensity, now + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration * 2.2);
+            } else if (soundMode === 'retro') {
+                osc.type = 'square';
+                subOsc.type = 'square';
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(freq * 2.5, now);
+                gainNode.gain.setValueAtTime(0.001, now);
+                gainNode.gain.linearRampToValueAtTime(0.28 * intensity, now + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0.0001, now + duration);
+            }
+
+            osc.connect(filter);
+            subOsc.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            gainNode.connect(delay);
+            delay.connect(feedback);
+            feedback.connect(delay);
+            delay.connect(audioCtx.destination);
+
+            osc.frequency.setValueAtTime(freq, now);
+            osc.start(now);
+            subOsc.start(now);
+            osc.stop(now + duration * 2.2);
+            subOsc.stop(now + duration * 2.2);
+        }
+
+        function playBouncePercussion(intensity = 1.0) {
+            if (!isAudioInitialized || !audioCtx) return;
+            const now = audioCtx.currentTime;
+            recentSoundTimes = recentSoundTimes.filter(t => now - t < 0.05);
+            if (recentSoundTimes.length >= 6) return;
+            recentSoundTimes.push(now);
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(587.33, now); // D5
+            osc.frequency.exponentialRampToValueAtTime(146.83, now + 0.15);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(0.45 * intensity, now + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+
+        // --- UI & Controls ---
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('playIcon');
+            const text = document.getElementById('playText');
+            if (isPlaying) {
+                icon.className = "fa-solid fa-pause";
+                text.innerText = "Pause";
+            } else {
+                icon.className = "fa-solid fa-play";
+                text.innerText = "Resume";
+            }
+        }
+
+        function resetSimulation() {
+            marbles = [];
+            particles = [];
+            floatingNotes = [];
+        }
+
+        function clearBoard() {
+            marbles = [];
+            tiles = [];
+            particles = [];
+            floatingNotes = [];
+            deselectTile();
+        }
+
+        function setTool(tool) {
+            selectedTool = tool;
+            ['tone', 'bounce', 'ricochet', 'wall', 'select'].forEach(t => {
+                const btn = document.getElementById(`tool-${t}`);
+                if (btn) {
+                    if (t === tool) {
+                        btn.classList.add('border-cyan-500', 'bg-cyan-950/60', 'text-cyan-300');
+                        btn.classList.remove('border-cyber-700', 'bg-cyber-800', 'text-gray-300');
+                    } else {
+                        btn.classList.remove('border-cyan-500', 'bg-cyan-950/60', 'text-cyan-300');
+                        btn.classList.add('border-cyber-700', 'bg-cyber-800', 'text-gray-300');
+                    }
+                }
+            });
+        }
+
+        function setDropMode(mode) {
+            dropMode = mode;
+            const cBtn = document.getElementById('mode-continuous');
+            const sBtn = document.getElementById('mode-single');
+            const intervalContainer = document.getElementById('spawnIntervalContainer');
+            if (mode === 'continuous') {
+                cBtn.className = "px-2.5 py-1 text-xs rounded-md bg-cyan-500 text-gray-950 font-semibold transition cursor-pointer";
+                sBtn.className = "px-2.5 py-1 text-xs rounded-md text-gray-400 hover:text-white transition cursor-pointer";
+                intervalContainer.style.display = 'block';
+            } else {
+                sBtn.className = "px-2.5 py-1 text-xs rounded-md bg-cyan-500 text-gray-950 font-semibold transition";
+                cBtn.className = "px-2.5 py-1 text-xs rounded-md text-gray-400 hover:text-white transition cursor-pointer";
+                intervalContainer.style.display = 'none';
+            }
+        }
+
+        function updateSpawnInterval(val) {
+            spawnInterval = parseFloat(val);
+            document.getElementById('valSpawnInterval').innerText = spawnInterval.toFixed(1) + 's';
+        }
+
+        function updateGravity(val) {
+            gravity = parseFloat(val);
+            document.getElementById('valGravity').innerText = gravity.toFixed(2);
+        }
+
+        function changeSoundMode(mode) {
+            soundMode = mode;
+            if (selectedTile && selectedTile.type === 'tone' && !selectedTile.muted) {
+                previewSelectedTileSound();
+            }
+        }
+
+        function toggleInstructions() {
+            const modal = document.getElementById('instructionsModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function deselectTile() {
+            selectedTile = null;
+            document.getElementById('tileInspector').classList.add('hidden');
+        }
+
+        function syncInspectorUI(tile) {
+            if (!tile) return;
+            const inspector = document.getElementById('tileInspector');
+            inspector.classList.remove('hidden');
+
+            const props = getTileAcousticProps(tile);
+            const typeLabel = tile.type === 'tone' 
+                ? `Tone Tile (${props.noteName})` 
+                : `${tile.type} Tile`;
+            document.getElementById('inspType').innerText = typeLabel;
+
+            const noteSelect = document.getElementById('inspNoteSelect');
+            const noteContainer = document.getElementById('noteSelectorContainer');
+            if (tile.type === 'tone') {
+                noteContainer.style.display = 'block';
+                noteSelect.value = props.pitchIndex;
+                document.getElementById('inspNoteName').innerText = props.noteName;
+            } else {
+                noteContainer.style.display = 'none';
+            }
+
+            const muteIcon = document.getElementById('inspMuteIcon');
+            const muteText = document.getElementById('inspMuteText');
+            const muteBtn = document.getElementById('btnInspMute');
+            if (tile.muted) {
+                muteIcon.className = "fa-solid fa-volume-xmark text-red-400";
+                muteText.innerText = "Muted";
+                muteBtn.className = "px-2.5 py-1 bg-red-950/40 hover:bg-red-900/40 border border-red-800/60 rounded-lg text-xs font-semibold text-red-300 transition flex items-center space-x-1.5 cursor-pointer";
+            } else {
+                muteIcon.className = "fa-solid fa-volume-high text-cyan-400";
+                muteText.innerText = "Active (Unmuted)";
+                muteBtn.className = "px-2.5 py-1 bg-cyber-800 hover:bg-cyber-700 border border-cyber-700 rounded-lg text-xs font-semibold text-gray-200 transition flex items-center space-x-1.5 cursor-pointer";
+            }
+
+            document.getElementById('inspCoordsLabel').innerText = `X: ${Math.round(tile.x)}, Y: ${Math.round(tile.y)}`;
+            document.getElementById('inspXVal').innerText = Math.round(tile.x) + 'px';
+            document.getElementById('inspXRange').value = Math.round(tile.x);
+            document.getElementById('inspYVal').innerText = Math.round(tile.y) + 'px';
+            document.getElementById('inspYRange').value = Math.round(tile.y);
+
+            document.getElementById('inspHeightVal').innerText = Math.round(tile.h) + 'px';
+            document.getElementById('inspHeightRange').value = Math.round(tile.h);
+            document.getElementById('inspWidthVal').innerText = Math.round(tile.w) + 'px';
+            document.getElementById('inspWidthRange').value = Math.round(tile.w);
+
+            const previewBtn = document.getElementById('btnPreviewNote');
+            previewBtn.style.display = (tile.type === 'tone' && !tile.muted) ? 'inline-flex' : 'none';
+        }
+
+        function selectTile(tile) {
+            selectedTile = tile;
+            syncInspectorUI(tile);
+        }
+
+        function toggleSelectedTileMute() {
+            if (selectedTile) {
+                selectedTile.muted = !selectedTile.muted;
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function updateSelectedTileNote(val) {
+            if (selectedTile && selectedTile.type === 'tone') {
+                selectedTile.noteIndex = parseInt(val);
+                syncInspectorUI(selectedTile);
+                if (!selectedTile.muted) {
+                    previewSelectedTileSound();
+                }
+            }
+        }
+
+        function previewSelectedTileSound() {
+            if (!selectedTile || selectedTile.type !== 'tone' || selectedTile.muted) return;
+            ensureAudioContext();
+            const props = getTileAcousticProps(selectedTile);
+            playTone(props.pitchIndex, props.duration, 0.85);
+            createRipple(selectedTile.x + selectedTile.w / 2, selectedTile.y + selectedTile.h / 2, selectedTile.color);
+            selectedTile.glowTimer = 1.0;
+        }
+
+        function updateSelectedTileX(val) {
+            if (selectedTile) {
+                selectedTile.x = parseFloat(val);
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function updateSelectedTileY(val) {
+            if (selectedTile) {
+                selectedTile.y = parseFloat(val);
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function resizeSelectedTileHeight(val) {
+            if (selectedTile) {
+                selectedTile.h = parseFloat(val);
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function resizeSelectedTileWidth(val) {
+            if (selectedTile) {
+                selectedTile.w = parseFloat(val);
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function deleteSelectedTile() {
+            if (selectedTile) {
+                tiles = tiles.filter(t => t !== selectedTile);
+                deselectTile();
+            }
+        }
+
+        // --- 5 Master-Crafted Musical Demos with Precise Notes & Trajectories ---
+        function loadSelectedDemo(demoType) {
+            clearBoard();
+            const w = Math.max(canvas.width, 600);
+            const h = Math.max(canvas.height, 450);
+            const startX = Math.max(80, w * 0.15);
+            const startY = h * 0.18;
+
+            if (demoType === 'neon') {
+                // 🌟 Neon Cascade (Arpeggio Waterfall with bounce return loop)
+                const arpeggioNotes = [7, 9, 11, 13, 14, 16, 17, 19]; // C5 to C6 major arpeggio cascade
+                arpeggioNotes.forEach((nIndex, i) => {
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + i * 70,
+                        y: startY + i * 42,
+                        w: 62,
+                        h: 22,
+                        type: 'tone',
+                        color: '#06b6d4',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 500,
+                    y: startY + 360,
+                    w: 130,
+                    h: 24,
+                    type: 'bounce',
+                    color: '#10b981',
+                    muted: false,
+                    glowTimer: 0
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 260,
+                    y: startY + 180,
+                    w: 90,
+                    h: 20,
+                    type: 'ricochet',
+                    color: '#ec4899',
+                    muted: false,
+                    glowTimer: 0
+                });
+            } else if (demoType === 'jingle') {
+                // 🎄 Upbeat Jingle (Recognizable Jingle Bells chorus motif)
+                const jingleNotes = [5, 5, 5, 5, 5, 5, 5, 3, 7, 6, 5];
+                jingleNotes.forEach((nIndex, i) => {
+                    const row = Math.floor(i / 6);
+                    const col = i % 6;
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + col * 75 + (row * 35),
+                        y: startY + row * 85 + (col % 2 === 0 ? 0 : 35),
+                        w: 64,
+                        h: 24,
+                        type: 'tone',
+                        color: '#f59e0b',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 220,
+                    y: startY + 220,
+                    w: 140,
+                    h: 24,
+                    type: 'bounce',
+                    color: '#10b981',
+                    muted: false,
+                    glowTimer: 0
+                });
+            } else if (demoType === 'pop') {
+                // 🎸 Cyber Pop Groove (Driving syncopated bass & melodic lead)
+                const bassNotes = [17, 14, 12, 14]; // C3, A3, F3, A3
+                bassNotes.forEach((nIndex, i) => {
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + i * 85,
+                        y: startY + 250 + (i % 2) * 40,
+                        w: 75,
+                        h: 26,
+                        type: 'tone',
+                        color: '#8b5cf6',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                const leadNotes = [7, 9, 10, 12, 14]; // C5 scale lead
+                leadNotes.forEach((nIndex, i) => {
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + 60 + i * 75,
+                        y: startY + 80 + i * 32,
+                        w: 68,
+                        h: 22,
+                        type: 'tone',
+                        color: '#06b6d4',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 380,
+                    y: startY + 180,
+                    w: 110,
+                    h: 24,
+                    type: 'bounce',
+                    color: '#10b981',
+                    muted: false,
+                    glowTimer: 0
+                });
+            } else if (demoType === 'vivaldi') {
+                // 🎻 Vivaldi's Spring (Soaring baroque motif)
+                const springNotes = [3, 1, 3, 7, 10, 7, 3, 5, 7];
+                springNotes.forEach((nIndex, i) => {
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + i * 62,
+                        y: startY + Math.sin(i * 0.8) * 50 + 60,
+                        w: 56,
+                        h: 22,
+                        type: 'tone',
+                        color: '#06b6d4',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 280,
+                    y: startY + 230,
+                    w: 130,
+                    h: 24,
+                    type: 'bounce',
+                    color: '#10b981',
+                    muted: false,
+                    glowTimer: 0
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 120,
+                    y: startY + 160,
+                    w: 85,
+                    h: 20,
+                    type: 'ricochet',
+                    color: '#ec4899',
+                    muted: false,
+                    glowTimer: 0
+                });
+            } else if (demoType === 'experiential') {
+                // 🌀 Wild Experiential (Psychedelic multi-tier harmonic soundscape)
+                const cosmicNotes = [0, 3, 5, 7, 10, 12, 14, 17];
+                cosmicNotes.forEach((nIndex, i) => {
+                    tiles.push({
+                        id: Math.random(),
+                        x: startX + (i % 4) * 105,
+                        y: startY + Math.floor(i / 4) * 110 + (i % 2 === 0 ? 30 : 90),
+                        w: 80,
+                        h: 26,
+                        type: 'tone',
+                        color: i % 2 === 0 ? '#ec4899' : '#8b5cf6',
+                        noteIndex: nIndex,
+                        muted: false,
+                        glowTimer: 0
+                    });
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 160,
+                    y: startY + 140,
+                    w: 90,
+                    h: 22,
+                    type: 'ricochet',
+                    color: '#ec4899',
+                    muted: false,
+                    glowTimer: 0
+                });
+                tiles.push({
+                    id: Math.random(),
+                    x: startX + 300,
+                    y: startY + 240,
+                    w: 140,
+                    h: 24,
+                    type: 'bounce',
+                    color: '#10b981',
+                    muted: false,
+                    glowTimer: 0
+                });
+            }
+
+            spawnSingleMarble();
+        }
+
+        // --- Canvas Interaction (Move, Resize, Draw) ---
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function getHandleAtCoords(tile, x, y) {
+            if (!tile) return null;
+            const handleRadius = 12;
+
+            if (Math.hypot(x - (tile.x + tile.w), y - (tile.y + tile.h)) <= handleRadius) {
+                return 'se';
+            }
+            if (Math.hypot(x - (tile.x + tile.w), y - (tile.y + tile.h / 2)) <= handleRadius) {
+                return 'e';
+            }
+            if (Math.hypot(x - (tile.x + tile.w / 2), y - (tile.y + tile.h)) <= handleRadius) {
+                return 's';
+            }
+            return null;
+        }
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        canvas.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); onPointerDown(e); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); onPointerMove(e); }, { passive: false });
+        window.addEventListener('touchend', (e) => { onPointerUp(e); });
+
+        function onPointerDown(e) {
+            const coords = getCanvasCoords(e);
+            currentMouse = coords;
+
+            if (selectedTile) {
+                const handle = getHandleAtCoords(selectedTile, coords.x, coords.y);
+                if (handle) {
+                    activeResizeHandle = handle;
+                    return;
+                }
+            }
+
+            const clickedTile = tiles.slice().reverse().find(t =>
+                coords.x >= t.x - 4 && coords.x <= t.x + t.w + 4 &&
+                coords.y >= t.y - 4 && coords.y <= t.y + t.h + 4
+            );
+
+            if (clickedTile) {
+                selectTile(clickedTile);
+                isDraggingTile = true;
+                dragOffset = { x: coords.x - clickedTile.x, y: coords.y - clickedTile.y };
+                return;
+            }
+
+            if (selectedTool === 'select') {
+                deselectTile();
+            } else {
+                deselectTile();
+                isDrawing = true;
+                drawStart = coords;
+            }
+        }
+
+        function onPointerMove(e) {
+            const coords = getCanvasCoords(e);
+            currentMouse = coords;
+
+            if (!isDraggingTile && !activeResizeHandle && !isDrawing) {
+                const handle = getHandleAtCoords(selectedTile, coords.x, coords.y);
+                if (handle === 'se') {
+                    container.style.cursor = 'nwse-resize';
+                } else if (handle === 'e') {
+                    container.style.cursor = 'ew-resize';
+                } else if (handle === 's') {
+                    container.style.cursor = 'ns-resize';
+                } else {
+                    const hoverTile = tiles.some(t =>
+                        coords.x >= t.x && coords.x <= t.x + t.w &&
+                        coords.y >= t.y && coords.y <= t.y + t.h
+                    );
+                    container.style.cursor = hoverTile ? 'grab' : (selectedTool === 'select' ? 'default' : 'crosshair');
+                }
+            }
+
+            if (activeResizeHandle && selectedTile) {
+                if (activeResizeHandle === 'e' || activeResizeHandle === 'se') {
+                    selectedTile.w = Math.max(25, Math.min(340, coords.x - selectedTile.x));
+                }
+                if (activeResizeHandle === 's' || activeResizeHandle === 'se') {
+                    selectedTile.h = Math.max(12, Math.min(100, coords.y - selectedTile.y));
+                }
+                syncInspectorUI(selectedTile);
+                return;
+            }
+
+            if (isDraggingTile && selectedTile) {
+                container.style.cursor = 'grabbing';
+                selectedTile.x = Math.max(0, Math.min(canvas.width - selectedTile.w, coords.x - dragOffset.x));
+                selectedTile.y = Math.max(10, Math.min(canvas.height - selectedTile.h, coords.y - dragOffset.y));
+                syncInspectorUI(selectedTile);
+            }
+        }
+
+        function onPointerUp() {
+            if (activeResizeHandle && selectedTile && selectedTile.type === 'tone' && !selectedTile.muted) {
+                previewSelectedTileSound();
+            }
+            activeResizeHandle = null;
+
+            if (isDrawing) {
+                isDrawing = false;
+                const w = Math.abs(currentMouse.x - drawStart.x);
+                const h = Math.abs(currentMouse.y - drawStart.y);
+                const x = Math.min(currentMouse.x, drawStart.x);
+                const y = Math.min(currentMouse.y, drawStart.y);
+
+                if (w > 18 && h > 10) {
+                    let color = '#06b6d4';
+                    if (selectedTool === 'bounce') color = '#10b981';
+                    if (selectedTool === 'ricochet') color = '#ec4899';
+                    if (selectedTool === 'wall') color = '#6b7280';
+
+                    const newTile = {
+                        id: Math.random(),
+                        x: x,
+                        y: y,
+                        w: Math.min(340, w),
+                        h: Math.min(100, h),
+                        type: selectedTool,
+                        color: color,
+                        muted: false,
+                        glowTimer: 0
+                    };
+                    tiles.push(newTile);
+                    selectTile(newTile);
+                    if (newTile.type === 'tone' && !newTile.muted) {
+                        previewSelectedTileSound();
+                    }
+                }
+            }
+            isDraggingTile = false;
+        }
+
+        // --- Marble Spawning with 25-Marble Cap (Crash Prevention) ---
+        function getEmitterPosition() {
+            return {
+                x: Math.max(70, Math.min(canvas.width * 0.15, 160)),
+                y: 35
+            };
+        }
+
+        function spawnSingleMarble() {
+            if (marbles.length >= 25) {
+                marbles.shift();
+            }
+
+            const emitter = getEmitterPosition();
+            marbles.push({
+                x: emitter.x + (Math.random() * 14 - 7),
+                y: emitter.y + 12,
+                vx: 1.4 + Math.random() * 0.6,
+                vy: 0.3,
+                radius: 8,
+                color: ['#06b6d4', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b'][Math.floor(Math.random() * 5)],
+                trail: []
+            });
+        }
+
+        // --- Physics & Game Loop ---
+        function updatePhysics() {
+            if (!isPlaying) return;
+
+            if (dropMode === 'continuous') {
+                spawnTimer += 1 / 60;
+                if (spawnTimer >= spawnInterval) {
+                    spawnTimer = 0;
+                    spawnSingleMarble();
+                }
+            }
+
+            for (let t of tiles) {
+                if (t.glowTimer > 0) {
+                    t.glowTimer = Math.max(0, t.glowTimer - 0.04);
+                }
+            }
+
+            for (let i = marbles.length - 1; i >= 0; i--) {
+                let m = marbles[i];
+
+                m.trail.push({ x: m.x, y: m.y });
+                if (m.trail.length > 14) m.trail.shift();
+
+                m.vy += gravity;
+                m.vx *= 0.996;
+
+                m.x += m.vx;
+                m.y += m.vy;
+
+                if (m.x - m.radius < 0) {
+                    m.x = m.radius;
+                    m.vx *= -0.8;
+                }
+                if (m.x + m.radius > canvas.width) {
+                    m.x = canvas.width - m.radius;
+                    m.vx *= -0.8;
+                }
+                if (m.y + m.radius > canvas.height) {
+                    marbles.splice(i, 1);
+                    continue;
+                }
+                if (m.y - m.radius < 0) {
+                    m.y = m.radius;
+                    m.vy *= -0.8;
+                }
+
+                for (let t of tiles) {
+                    const closestX = Math.max(t.x, Math.min(m.x, t.x + t.w));
+                    const closestY = Math.max(t.y, Math.min(m.y, t.y + t.h));
+
+                    const distX = m.x - closestX;
+                    const distY = m.y - closestY;
+                    const distance = Math.sqrt(distX * distX + distY * distY);
+
+                    if (distance < m.radius) {
+                        const overlap = m.radius - distance;
+                        let nx = distX / (distance || 1);
+                        let ny = distY / (distance || 1);
+
+                        if (distance === 0) {
+                            nx = 0;
+                            ny = -1;
+                        }
+
+                        m.x += nx * overlap;
+                        m.y += ny * overlap;
+
+                        const velDotNormal = m.vx * nx + m.vy * ny;
+                        
+                        if (velDotNormal < 0) {
+                            let restitution = 0.72;
+
+                            if (t.type === 'tone') {
+                                restitution = 0.76;
+                                t.glowTimer = 1.0;
+
+                                if (!t.muted) {
+                                    const acoustic = getTileAcousticProps(t);
+                                    const intensity = Math.min(1.4, Math.max(0.45, Math.hypot(m.vx, m.vy) / 9));
+                                    playTone(acoustic.pitchIndex, acoustic.duration, intensity);
+
+                                    floatingNotes.push({
+                                        text: acoustic.noteName,
+                                        x: closestX,
+                                        y: closestY - 10,
+                                        alpha: 1.0,
+                                        color: t.color
+                                    });
+                                }
+
+                                createRipple(closestX, closestY, t.color);
+
+                                if (Math.abs(m.vx) < 0.6 && ny < -0.5) {
+                                    m.vx += 0.9;
+                                }
+                            } else if (t.type === 'bounce') {
+                                restitution = 1.4;
+                                t.glowTimer = 1.0;
+                                
+                                if (!t.muted) {
+                                    const intensity = Math.min(1.3, Math.max(0.5, Math.hypot(m.vx, m.vy) / 9));
+                                    playBouncePercussion(intensity);
+                                }
+                                createRipple(closestX, closestY, '#10b981');
+                            } else if (t.type === 'ricochet') {
+                                restitution = 1.55;
+                                t.glowTimer = 1.0;
+                                m.vx += (Math.random() - 0.35) * 7.5;
+                                createRipple(closestX, closestY, '#ec4899');
+                            } else if (t.type === 'wall') {
+                                restitution = 0.65;
+                            }
+
+                            m.vx = (m.vx - (1 + restitution) * velDotNormal * nx);
+                            m.vy = (m.vy - (1 + restitution) * velDotNormal * ny);
+                        }
+                    }
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.radius += p.growRate;
+                p.alpha -= 0.035;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            for (let i = floatingNotes.length - 1; i >= 0; i--) {
+                let fn = floatingNotes[i];
+                fn.y -= 0.8;
+                fn.alpha -= 0.025;
+                if (fn.alpha <= 0) {
+                    floatingNotes.splice(i, 1);
+                }
+            }
+
+            document.getElementById('statMarbles').innerText = marbles.length;
+        }
+
+        function createRipple(x, y, color) {
+            particles.push({
+                x: x,
+                y: y,
+                radius: 5,
+                growRate: 1.7,
+                alpha: 0.85,
+                color: color
+            });
+        }
+
+        // --- Rendering ---
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(17, 24, 39, 0.65)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.06)';
+            ctx.font = 'bold 12px Orbitron';
+            ctx.textAlign = 'left';
+            ctx.fillText('DEMO HARMONIC MATRIX', 24, canvas.height - 20);
+            ctx.restore();
+
+            const emitter = getEmitterPosition();
+            ctx.save();
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 14;
+            ctx.fillStyle = 'rgba(6, 182, 212, 0.22)';
+            ctx.strokeStyle = '#06b6d4';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(emitter.x - 24, 6, 48, 28, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#67e8f9';
+            ctx.font = 'bold 10px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('DROP ↘', emitter.x, 24);
+            ctx.restore();
+
+            for (let t of tiles) {
+                const isSelected = (t === selectedTile);
+                const hitGlow = t.glowTimer || 0;
+
+                ctx.save();
+                ctx.shadowColor = t.color;
+                ctx.shadowBlur = isSelected ? 22 : (8 + hitGlow * 18);
+
+                ctx.fillStyle = t.muted 
+                    ? 'rgba(55, 65, 81, 0.35)' 
+                    : (hitGlow > 0.1 ? t.color + '66' : t.color + '33');
+                ctx.strokeStyle = isSelected ? '#ffffff' : (t.muted ? '#4b5563' : t.color);
+                ctx.lineWidth = isSelected ? 2.5 : 2;
+
+                ctx.beginPath();
+                ctx.roundRect(t.x, t.y, t.w, t.h, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                if (isSelected) {
+                    ctx.strokeStyle = t.color;
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(t.x + 2, t.y + 2, t.w - 4, t.h - 4);
+                }
+
+                ctx.fillStyle = t.muted ? '#9ca3af' : '#f3f4f6';
+                ctx.font = 'bold 10px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                if (t.type === 'tone') {
+                    const props = getTileAcousticProps(t);
+                    const label = t.muted ? `🔇 ${props.noteName}` : (t.w >= 48 ? `♪ ${props.noteName}` : props.noteName);
+                    ctx.fillText(label, t.x + t.w / 2, t.y + t.h / 2);
+                } else if (t.type === 'bounce') {
+                    ctx.fillStyle = t.muted ? '#9ca3af' : '#34d399';
+                    ctx.fillText(t.muted ? '🔇 BOUNCE' : '▲ BOUNCE ▲', t.x + t.w / 2, t.y + t.h / 2);
+                } else if (t.type === 'ricochet') {
+                    ctx.fillStyle = '#f472b6';
+                    ctx.fillText('⚡', t.x + t.w / 2, t.y + t.h / 2);
+                }
+
+                if (isSelected) {
+                    drawHandle(t.x + t.w, t.y + t.h / 2, '#a855f7');
+                    drawHandle(t.x + t.w / 2, t.y + t.h, '#ec4899');
+                    drawHandle(t.x + t.w, t.y + t.h, '#06b6d4');
+                }
+
+                ctx.restore();
+            }
+
+            for (let p of particles) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            for (let fn of floatingNotes) {
+                ctx.save();
+                ctx.font = 'bold 12px Orbitron';
+                ctx.fillStyle = fn.color;
+                ctx.globalAlpha = fn.alpha;
+                ctx.textAlign = 'center';
+                ctx.fillText(fn.text, fn.x, fn.y);
+                ctx.restore();
+            }
+
+            for (let m of marbles) {
+                for (let i = 0; i < m.trail.length; i++) {
+                    let pt = m.trail[i];
+                    let ratio = i / m.trail.length;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(pt.x, pt.y, m.radius * ratio * 0.8, 0, Math.PI * 2);
+                    ctx.fillStyle = m.color;
+                    ctx.globalAlpha = ratio * 0.35;
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                ctx.save();
+                ctx.shadowColor = m.color;
+                ctx.shadowBlur = 14;
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
+                ctx.fillStyle = m.color;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(m.x - 2.5, m.y - 2.5, m.radius * 0.35, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            if (isDrawing) {
+                ctx.save();
+                const w = currentMouse.x - drawStart.x;
+                const h = currentMouse.y - drawStart.y;
+                const x = w < 0 ? currentMouse.x : drawStart.x;
+                const y = h < 0 ? currentMouse.y : drawStart.y;
+                const absW = Math.abs(w);
+                const absH = Math.abs(h);
+
+                let previewColor = '#06b6d4';
+                if (selectedTool === 'bounce') previewColor = '#10b981';
+                if (selectedTool === 'ricochet') previewColor = '#ec4899';
+                if (selectedTool === 'wall') previewColor = '#6b7280';
+
+                ctx.strokeStyle = previewColor;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.fillStyle = previewColor + '22';
+                ctx.beginPath();
+                ctx.roundRect(x, y, absW, absH, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                if (selectedTool === 'tone' && absW > 15 && absH > 10) {
+                    const previewProps = getTileAcousticProps({ x, y, w: absW, h: absH });
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 11px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${previewProps.noteName} (${Math.round(absW)}×${Math.round(absH)})`, x + absW / 2, y - 8);
+                }
+                ctx.restore();
+            }
+        }
+
+        function drawHandle(hx, hy, color) {
+            ctx.save();
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#030712';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(hx, hy, 5.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            updatePhysics();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>

@@ -41,7 +41,7 @@ Check and list it with `node tools/tracker.mjs` (see "How to use" below).
 | shelf-F5 | feature | shelf | "Continue where you left off" strip (needs each game to record what was last played) | P3 | idea | AI review | | Every app shares one origin, so a small shared key could work. |
 | shelf-F6 | feature | shelf | A detail page per app (screenshots, what kids learn, privacy and storage) | P3 | idea | AI review | | Today the About panel holds this. |
 | shelf-F7 | feature | shelf | Make the shelf installable (Add to Home Screen) | P3 | idea | AI review | | Same work as sequence-flow-F5. |
-| shelf-F8 | feature | shelf | Back Space: show overall percent complete and estimated time remaining | P2 | planned | feedback form | | FEAT-088. Blocked: this checkout has only `tools/backspace/index.html` (download page) and `version.txt`; the Mac app source is needed to implement and test progress across the backup process. |
+| shelf-F8 | feature | shelf | Back Space: show overall percent complete and estimated time remaining | P2 | planned | feedback form | | FEAT-088 is blocked/needs-source, not implemented. `tools/backspace/` contains only the download page and version file. Provide the Mac app source, including its backup workflow and build/test setup, to implement and test overall progress and time remaining. |
 
 ## Closed
 

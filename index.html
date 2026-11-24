@@ -167,6 +167,35 @@ footer { border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-
     <p class="trust"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.8v5.4c0 4.7 3.1 8.6 7.5 10.3 4.4-1.7 7.5-5.6 7.5-10.3V5.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m8.6 12.2 2.4 2.4 4.4-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>No accounts. No ads. No tracking. Progress stays on your device.</p>
   </header>
 
+  <!-- Family-only: James's Beta Lab (private, Cloudflare sign-in). Hidden unless this device was opened once with
+       ?family=1 (?family=0 hides it again). Strangers never see it; the lab itself needs a family sign-in anyway. -->
+  <a class="family-lab" id="family-lab" href="https://lab.jennyandalex.com/" hidden>
+    <span class="fl-emoji" aria-hidden="true">🧪</span>
+    <span class="fl-copy"><b>James's Beta Lab</b><span>Games we are still making together. Family only.</span></span>
+    <span class="fl-go" aria-hidden="true">Open →</span>
+  </a>
+  <style>
+    .family-lab { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; padding: 14px 18px; border-radius: 20px;
+      background: linear-gradient(120deg, #3b2a66, #6C4B8C); color: #fff; text-decoration: none; box-shadow: 0 6px 0 #241a3e; }
+    .family-lab[hidden] { display: none; }
+    .family-lab:active { transform: translateY(3px); box-shadow: 0 3px 0 #241a3e; }
+    .fl-emoji { font-size: 40px; line-height: 1; }
+    .fl-copy { display: grid; gap: 2px; flex: 1; font-size: 14px; opacity: .95; }
+    .fl-copy b { font-size: 19px; }
+    .fl-go { font-weight: 700; background: #ffcc33; color: #1b1430; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+  </style>
+  <script>
+  (function () {
+    var q = new URLSearchParams(location.search).get('family');
+    try {
+      if (q === '1') localStorage.setItem('shelf-family', '1');
+      if (q === '0') localStorage.removeItem('shelf-family');
+      if (localStorage.getItem('shelf-family') === '1') document.getElementById('family-lab').hidden = false;
+    } catch (e) {}
+    if (q !== null) { try { var u = new URL(location.href); u.searchParams.delete('family'); history.replaceState(null, '', u); } catch (e) {} }
+  })();
+  </script>
+
   <div class="tabs-bar">
     <div class="tabs" role="tablist" aria-label="The App Shelf">
       <button class="tab" role="tab" id="tab-games" aria-controls="panel-games" aria-selected="true" type="button">Games <span class="count">14</span></button>

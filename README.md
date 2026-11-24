@@ -10,7 +10,7 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf itself (version 2.7): Games and Utilities tabs, one icon tile per app, family-only Beta Lab card (?family=1)
+index.html          the shelf itself (version 2.8): Games and Utilities tabs, one icon tile per app, family-only Beta Lab card (?family=1)
 TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
@@ -125,8 +125,8 @@ tools/              freeze-version.sh: freeze a tagged release into versions/
 | Sequence Flow (beta; a utility) | `sequence-flow/` | 2.0 | 2026-10-16 |
 | GUTS 大肚仔歷險 (beta) | `guts/` | 1.8 | 2026-10-26 |
 | Touch Tone 筆音 (beta) | `touch-tone/` | 1.0 | 2026-11-04 |
-| James’s Marble Run 彈珠軌道 (beta) | `marble-run/` | 1.4 | 2026-11-04 |
-| Ultimate Train Studio 火車工作室 (beta) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
+| James’s Marble Run 彈珠軌道 (beta; moved to the family Beta Lab 2026-11-24, unlisted here) | `marble-run/` | 1.4 | 2026-11-04 |
+| Ultimate Train Studio 火車工作室 (beta; moved to the family Beta Lab 2026-11-24, unlisted here) | `ultimate-train-studio/` | 2.0 | 2026-11-05 |
 | The Great Robot Journey 機器人大冒險 (beta) | `robot-journey/` | 1.3 | 2026-11-12 |
 | Magic Music Maker 魔法音樂工坊 (beta) | `music-maker/` | 1.3 | 2026-11-13 |
 

@@ -10,7 +10,7 @@ server, no build step and no tracking. Progress is saved in each player's own br
 ## Layout
 
 ```
-index.html          the shelf itself (version 2.6): Games and Utilities tabs, one icon tile per app
+index.html          the shelf itself (version 2.7): Games and Utilities tabs, one icon tile per app, family-only Beta Lab card (?family=1)
 TRACKER.md          features and bugs for every game (check with node tools/tracker.mjs)
 aquarium/           James's Nature Aquarium
   index.html        page, graphics, sound and interface
